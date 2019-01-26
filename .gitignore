@@ -34,3 +34,25 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+[Ee]xported[Oo]bj/
+*.unityproj
+
+
+# Unity generated
+# ===============
+[Oo]bj/
+[Bb]uild
+sysinfo.txt
+*.stackdump
+
+# OS Generated
+# ============
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+Icon?
+ehthumbs.db
+[Tt]humbs.db
+[Dd]esktop.ini
