@@ -1,5 +1,17 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &6954180233292849759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 505898389170465675}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -146154839, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &9015815410751262734
 GameObject:
   m_ObjectHideFlags: 0
@@ -98,7 +110,7 @@ MonoBehaviour:
   m_Elasticity: 0.1
   m_Inertia: 0
   m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 1
+  m_ScrollSensitivity: 10
   m_Viewport: {fileID: 7725056495120241054}
   m_HorizontalScrollbar: {fileID: 0}
   m_VerticalScrollbar: {fileID: 8975592622985898134}
@@ -262,6 +274,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 014aaf97446bcff42a2a92203c16e73b, type: 3}
+--- !u!1 &505898389170465675 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3706573398821905202, guid: 014aaf97446bcff42a2a92203c16e73b,
+    type: 3}
+  m_PrefabInstance: {fileID: 3779974988749310137}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &7725056495120241054 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6863981495585134887, guid: 014aaf97446bcff42a2a92203c16e73b,

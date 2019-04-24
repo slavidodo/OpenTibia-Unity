@@ -7,9 +7,9 @@ namespace OpenTibiaUnity.Core.Network
 {
     public abstract class Protocol
     {
-        public Connection m_Connection;
+        protected Connection m_Connection;
 
-        public uint[] m_XteaKey;
+        protected uint[] m_XteaKey;
         
         public UnityEvent onDisconnect = new UnityEvent();
 
@@ -41,14 +41,13 @@ namespace OpenTibiaUnity.Core.Network
         }
 
         public void WriteToOutput(OutputMessage message, bool raw = false) {
-            // TODO: move this to the message pool
             if (!raw) {
                 if (XteaEnabled)
                     XteaEncrypt(message);
 
                 if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameProtocolChecksum))
                     AddChecksum(message);
-                 else if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameProtocolSequenceNumber))
+                else if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameProtocolSequenceNumber))
                     AddSequenceNumber(message);
 
                 AddMessageLength(message);
@@ -56,7 +55,7 @@ namespace OpenTibiaUnity.Core.Network
 
             m_Connection?.Send(message);
         }
-        
+
         void AddChecksum(OutputMessage message) {
             if (ChecksumEnabled) {
                 uint checksum = Adler32(message.GetBuffer().ToArray(), (uint)message.GetBufferLength());

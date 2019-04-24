@@ -8,13 +8,21 @@ namespace OpenTibiaUnity.Core.Network
     public sealed partial class ProtocolGame
     {
         private AppearanceInstance ReadCreatureOutfit(InputMessage message, AppearanceInstance instance = null) {
-            int lookType = message.GetU16();
+            int lookType;
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameLooktypeU16))
+                lookType = message.GetU16();
+            else
+                lookType = message.GetU8();
+
             if (lookType != 0) {
                 int head = message.GetU8();
                 int body = message.GetU8();
                 int legs = message.GetU8();
                 int feet = message.GetU8();
-                int addons = message.GetU8();
+
+                int addons = 0;
+                if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GamePlayerAddons))
+                    addons = message.GetU8();
 
                 OutfitInstance outfitInstance = instance as OutfitInstance;
                 if (!!outfitInstance) {
@@ -42,9 +50,8 @@ namespace OpenTibiaUnity.Core.Network
             uint lookType = message.GetU16();
 
             OutfitInstance outfitInstance = instance as OutfitInstance;
-            if (!!outfitInstance && outfitInstance.ID == lookType) {
+            if (!!outfitInstance && outfitInstance.ID == lookType)
                 return outfitInstance;
-            }
 
             if (lookType != 0)
                 return m_AppearanceStorage.CreateOutfitInstance(lookType, 0, 0, 0, 0, 0);
@@ -104,7 +111,8 @@ namespace OpenTibiaUnity.Core.Network
                     creature.SetSkill(SkillTypes.HealthPercent, message.GetU8());
                     creature.Direction = (Directions)message.GetU8();
                     creature.Outfit = ReadCreatureOutfit(message, creature.Outfit);
-                    creature.MountOutfit = ReadMountOutfit(message, creature.MountOutfit);
+                    if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GamePlayerMounts))
+                        creature.MountOutfit = ReadMountOutfit(message, creature.MountOutfit);
                     creature.Brightness = message.GetU8();
                     creature.LightColor = Colors.ColorFrom8Bit(message.GetU8());
                     creature.SetSkill(SkillTypes.Speed, message.GetU16());
@@ -128,7 +136,7 @@ namespace OpenTibiaUnity.Core.Network
                         creature.SetSpeechCategory((SpeechCategories)message.GetU8());
 
                     if (gameManager.GetFeature(GameFeatures.GameThingMarks)) {
-                        creature.Marks.SetMark(Appearances.Marks.MarkType_Permenant, message.GetU8());
+                        creature.Marks.SetMark(MarkTypes.Permenant, message.GetU8());
 
                         // TODO insspection state
                         //message.GetU8(); // inspection state
@@ -138,6 +146,8 @@ namespace OpenTibiaUnity.Core.Network
 
                     if (gameManager.ClientVersion >= 854)
                         creature.Unpassable = message.GetU8() != 0;
+                    else
+                        creature.Unpassable = true;
                     break;
                 case AppearanceInstance.Creature:
                     creature = m_CreatureStorage.GetCreature(message.GetU32());
@@ -148,6 +158,8 @@ namespace OpenTibiaUnity.Core.Network
 
                     if (gameManager.ClientVersion >= 953)
                         creature.Unpassable = message.GetU8() != 0;
+                    else
+                        creature.Unpassable = true;
                     break;
 
                 default:
@@ -175,14 +187,17 @@ namespace OpenTibiaUnity.Core.Network
             if (!instance)
                 throw new System.Exception("ProtocolGameUtility.ReadObjectInstance: Invalid instance with id " + id);
 
-            instance.Marks.SetMark(Appearances.Marks.MarkType_Permenant, message.GetU8());
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameThingMarks))
+                instance.Marks.SetMark(MarkTypes.Permenant, message.GetU8());
 
-            if (instance.Type.IsStackable || instance.Type.IsLiquidContainer || instance.Type.IsSplash)
+            if (instance.Type.IsStackable || instance.Type.IsFluidContainer || instance.Type.IsSplash)
                 instance.Data = message.GetU8();
 
-            if (instance.Type.FrameGroups[(int)Proto.Appearances001.FrameGroupType.Idle].IsAnimation) {
-                int phase = message.GetU8();
-                instance.Phase = phase == 0 ? Appearances.AppearanceAnimator.PhaseAutomatic : phase;
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameItemAnimationPhase)) {
+                if (instance.Type.FrameGroups[(int)Proto.Appearances.FrameGroupType.Idle].IsAnimation) {
+                    int phase = message.GetU8();
+                    instance.Phase = phase == 0 ? Constants.PhaseAutomatic : phase;
+                }
             }
 
             return instance;
@@ -206,7 +221,7 @@ namespace OpenTibiaUnity.Core.Network
                 if (typeOrId >= 65280)
                     break;
 
-                if (!effect) {
+                if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameEnvironmentEffect) && !effect) {
                     ObjectInstance tmpInstance = m_AppearanceStorage.CreateEnvironmentalEffect((uint)typeOrId);
                     m_WorldMapStorage.SetEnvironmentalEffect(position, tmpInstance);
                     effect = true;

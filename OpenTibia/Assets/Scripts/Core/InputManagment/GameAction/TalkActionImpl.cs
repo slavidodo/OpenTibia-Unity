@@ -1,14 +1,14 @@
 ﻿namespace OpenTibiaUnity.Core.InputManagment.GameAction
 {
-    class TalkActionImpl : IActionImpl
+    public class TalkActionImpl : IActionImpl
     {
         protected bool m_AutoSend;
         private int m_ChannelID;
         protected string m_Text;
 
-        public TalkActionImpl(bool autoSend, string text, int channelID = -1) {
-            m_AutoSend = autoSend;
+        public TalkActionImpl(string text, bool autoSend, int channelID = -1) {
             m_Text = text;
+            m_AutoSend = autoSend;
             m_ChannelID = channelID;
         }
 

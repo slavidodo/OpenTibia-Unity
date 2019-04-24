@@ -1,7 +1,7 @@
 ﻿
 namespace OpenTibiaUnity.Core.Network
 {
-    public sealed class ClientLoginOpCodes {
+    public sealed class LoginClientOpCodes {
         public const byte EnterAccount = 1;
         public const byte GamePending = 2;
         public const byte EnterGame = 15;
@@ -10,7 +10,7 @@ namespace OpenTibiaUnity.Core.Network
         public const byte PingBack = 30;
     }
 
-    public sealed class ClientServerOpCodes
+    public sealed class GameClientOpCodes
     {
         public const byte EnterAccount = 1;
         public const byte PendingGame = 10;
@@ -33,13 +33,18 @@ namespace OpenTibiaUnity.Core.Network
         public const byte TurnEast = 112;
         public const byte TurnSouth = 113;
         public const byte TurnWest = 114;
-        
-        public const byte UseObject = 130;
-        public const byte UseTwoObject = 131;
-        public const byte UseOnCreature = 132;
 
+        public const byte MoveObject = 120;
+
+        public const byte UseObject = 130;
+        public const byte UseTwoObjects = 131;
+        public const byte UseOnCreature = 132;
+        public const byte TurnObject = 133;
+
+        public const byte ToggleWrapState = 139;
         public const byte Look = 140;
         public const byte LookAtCreature = 141;
+        public const byte JoinAggression = 142;
 
         public const byte Talk = 150;
         public const byte GetChannels = 151;
@@ -50,19 +55,33 @@ namespace OpenTibiaUnity.Core.Network
         public const byte SetTactics = 160;
         public const byte Attack = 161;
         public const byte Follow = 162;
+        public const byte InviteToParty = 163;
+        public const byte JoinParty = 164;
+        public const byte RevokeInvitation = 165;
+        public const byte PassLeadership = 166;
+        public const byte LeaveParty = 167;
+        public const byte ShareExperience = 168;
 
         public const byte InviteToChannel = 171;
         public const byte ExcludeFromChannel = 171;
 
         public const byte Cancel = 190;
 
+        public const byte BrowseField = 203;
+
+        public const byte GetOutfit = 210;
+
         public const byte Mount = 212;
+
+        public const byte GetQuestLog = 240;
     }
 
     public sealed class LoginServerOpCodes
     {
-        public const byte LoginRetry = 10;
-        public const byte LoginError = 11;
+        public const byte Login_1076_Retry = 10;
+        public const byte Login_1076_Error = 11;
+
+        public const byte LoginError = 10;
         public const byte LoginTokenSuccess = 12;
         public const byte LoginTokenError = 13;
         public const byte LoginMotd = 20;
@@ -87,7 +106,10 @@ namespace OpenTibiaUnity.Core.Network
         public const byte Ping									= 30;
         public const byte Challenge								= 31;
         public const byte Death									= 40;
-        public const byte OTClientOpcode                        = 50;
+        
+        public const byte GameServerFirstGameOpcode             = 50;
+
+        public const byte OTClientExtendedOpcode                = 50;
 
         public const byte FullMap                               = 100;
         public const byte MapTopRow								= 101;
@@ -112,6 +134,8 @@ namespace OpenTibiaUnity.Core.Network
         public const byte GraphicalEffect                       = 131;
         public const byte TextEffect                            = 132;
         public const byte MissleEffect                          = 133;
+        public const byte CreatureMark                          = 134;
+        public const byte Trappers                              = 135;
 
         public const byte CreatureHealth                        = 140;
         public const byte CreatureLight                         = 141;

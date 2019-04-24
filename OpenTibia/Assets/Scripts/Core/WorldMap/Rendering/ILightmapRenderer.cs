@@ -5,9 +5,6 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 {
     public abstract class ILightmapRenderer
     {
-        public static Color32 ColorAboveGround = new Color32(200, 200, 255, 255);
-        public static Color32 ColorBelowGround = new Color32(255, 255, 255, 255);
-
         protected List<bool>[] m_CachedLayerBrightnessInfo = new List<bool>[Constants.MapSizeZ];
 
         public abstract Color32 this[int index] { get; set; }

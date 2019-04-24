@@ -252,29 +252,42 @@ namespace OpenTibiaUnity.Core.Creatures
             Appearances.Marks marks = creature.Marks;
             if (creature == Aim) {
                 if (creature == AttackTarget) {
-                    marks.SetMark(Appearances.Marks.MarkType_ClientMapWindow, Appearances.Marks.MarkAimAttack);
-                    marks.SetMark(Appearances.Marks.MarkType_ClientBattleList, Appearances.Marks.MarkAimAttack);
+                    marks.SetMark(MarkTypes.ClientMapWindow, Appearances.Marks.MarkAimAttack);
+                    marks.SetMark(MarkTypes.ClientBattleList, Appearances.Marks.MarkAimAttack);
                 } else if (creature == FollowTarget) {
-                    marks.SetMark(Appearances.Marks.MarkType_ClientMapWindow, Appearances.Marks.MarkAimFollow);
-                    marks.SetMark(Appearances.Marks.MarkType_ClientBattleList, Appearances.Marks.MarkAimFollow);
+                    marks.SetMark(MarkTypes.ClientMapWindow, Appearances.Marks.MarkAimFollow);
+                    marks.SetMark(MarkTypes.ClientBattleList, Appearances.Marks.MarkAimFollow);
                 } else {
-                    marks.SetMark(Appearances.Marks.MarkType_ClientMapWindow, Appearances.Marks.MarkAim);
-                    marks.SetMark(Appearances.Marks.MarkType_ClientBattleList, Appearances.Marks.MarkAim);
+                    marks.SetMark(MarkTypes.ClientMapWindow, Appearances.Marks.MarkAim);
+                    marks.SetMark(MarkTypes.ClientBattleList, Appearances.Marks.MarkAim);
                 }
             } else if (creature == AttackTarget) {
-                marks.SetMark(Appearances.Marks.MarkType_ClientMapWindow, Appearances.Marks.MarkAttack);
-                marks.SetMark(Appearances.Marks.MarkType_ClientBattleList, Appearances.Marks.MarkAttack);
+                marks.SetMark(MarkTypes.ClientMapWindow, Appearances.Marks.MarkAttack);
+                marks.SetMark(MarkTypes.ClientBattleList, Appearances.Marks.MarkAttack);
             } else if (creature == FollowTarget) {
-                marks.SetMark(Appearances.Marks.MarkType_ClientMapWindow, Appearances.Marks.MarkFollow);
-                marks.SetMark(Appearances.Marks.MarkType_ClientBattleList, Appearances.Marks.MarkFollow);
+                marks.SetMark(MarkTypes.ClientMapWindow, Appearances.Marks.MarkFollow);
+                marks.SetMark(MarkTypes.ClientBattleList, Appearances.Marks.MarkFollow);
             } else {
-                marks.SetMark(Appearances.Marks.MarkType_ClientMapWindow, Appearances.Marks.MarkUnmarked);
-                marks.SetMark(Appearances.Marks.MarkType_ClientBattleList, Appearances.Marks.MarkUnmarked);
+                marks.SetMark(MarkTypes.ClientMapWindow, Appearances.Marks.MarkUnmarked);
+                marks.SetMark(MarkTypes.ClientBattleList, Appearances.Marks.MarkUnmarked);
             }
         }
 
         public void SetTrappers(List<Creature> trappers) {
-            // TODO
+            int index = Trappers != null ? Trappers.Count : -1;
+            while (index >= 0) {
+                if (Trappers[index] != null)
+                    Trappers[index].Trapper = false;
+                index--;
+            }
+
+            Trappers = trappers;
+            index = Trappers != null ? Trappers.Count : -1;
+            while (index >= 0) {
+                if (Trappers[index] != null)
+                    Trappers[index].Trapper = true;
+                index--;
+            }
         }
 
         public Creature GetCreature(uint id) {
@@ -443,10 +456,10 @@ namespace OpenTibiaUnity.Core.Creatures
 
         public void ToggleAttackTarget(Creature attack, bool send) {
             if (attack == Player) {
-                throw new System.ArgumentException("CreatureStorage.ToggleFollowTarget: Cannot follow player.");
+                throw new System.ArgumentException("CreatureStorage.ToggleAttackTarget: Cannot attack player.");
             }
 
-            var creature = FollowTarget;
+            var creature = AttackTarget;
             if (creature != attack)
                 AttackTarget = attack;
             else
@@ -483,7 +496,7 @@ namespace OpenTibiaUnity.Core.Creatures
 
         public void SetAttackTarget(Creature attack, bool send) {
             if (attack == Player)
-                throw new System.ArgumentException("CreatureStorage.ToggleFollowTarget: Cannot follow player.");
+                throw new System.ArgumentException("CreatureStorage.SetAttackTarget: Cannot follow player.");
 
             var creature = AttackTarget;
             if (creature != attack) {

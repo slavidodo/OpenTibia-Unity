@@ -26,7 +26,7 @@ namespace OpenTibiaUnity.Core.Appearances
         }
 
         public bool HasMark {
-            get { return !!Marks && Marks.IsMarkSet(Marks.MarkType_Permenant); }
+            get { return !!Marks && Marks.IsMarkSet(MarkTypes.Permenant); }
         }
 
         public bool IsCreature {
@@ -38,30 +38,27 @@ namespace OpenTibiaUnity.Core.Appearances
             UpdateSpecialPattern();
         }
 
-        public override int GetSpriteIndex(int _, int patternX, int patternY, int patternZ) {
+        public override int GetSpriteIndex(int layer, int patternX, int patternY, int patternZ) {
             patternX = m_SpecialPatternX > 0 ? m_SpecialPatternX : patternX;
             patternY = m_SpecialPatternY > 0 ? m_SpecialPatternY : patternY;
-            return base.GetSpriteIndex(_, patternX, patternY, patternZ);
+            return base.GetSpriteIndex(layer, patternX, patternY, patternZ);
         }
 
-        public override void DrawTo(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ) {
-            int tmpPatternX = patternX;
-            int tmpPatternY = patternY;
+        public override void DrawTo(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
             if (m_HasSpecialPattern) {
-                tmpPatternX = -1;
-                tmpPatternY = -1;
+                patternX = -1;
+                patternY = -1;
             }
-
-            var cachedInformation = GetSprite(-1, tmpPatternX, tmpPatternY, patternZ, m_Type.FrameGroups[m_ActiveFrameGroup].IsAnimation);
-            InternalDrawTo(screenPosition.x, screenPosition.y, zoom, cachedInformation);
+            
+            base.DrawTo(screenPosition, zoom, patternX, patternY, patternZ, highlighted, highlightOpacity);
         }
 
         protected void UpdateSpecialPattern() {
             m_HasSpecialPattern = false;
-            if (!m_Type || m_ID == AppearanceInstance.Creature)
+            if (!m_Type || m_Type.IsCreature)
                 return;
 
-            if (m_Type.IsCulmative) {
+            if (m_Type.IsStackable) {
                 m_HasSpecialPattern = true;
                 if (m_Data < 2) {
                     m_SpecialPatternX = 0;
@@ -89,9 +86,9 @@ namespace OpenTibiaUnity.Core.Appearances
                     m_SpecialPatternY = 1;
                 }
 
-                m_SpecialPatternX = m_SpecialPatternX % (int)m_Type.FrameGroups[(int)Proto.Appearances001.FrameGroupType.Idle].PatternWidth;
-                m_SpecialPatternY = m_SpecialPatternY % (int)m_Type.FrameGroups[(int)Proto.Appearances001.FrameGroupType.Idle].PatternHeight;
-            } else if (m_Type.IsLiquidPool || m_Type.IsLiquidContainer) {
+                m_SpecialPatternX = m_SpecialPatternX % (int)m_Type.FrameGroups[(int)Proto.Appearances.FrameGroupType.Idle].PatternWidth;
+                m_SpecialPatternY = m_SpecialPatternY % (int)m_Type.FrameGroups[(int)Proto.Appearances.FrameGroupType.Idle].PatternHeight;
+            } else if (m_Type.IsSplash || m_Type.IsFluidContainer) {
                 m_HasSpecialPattern = true;
                 int color = 0;
                 switch (m_Data) {
@@ -154,15 +151,15 @@ namespace OpenTibiaUnity.Core.Appearances
                         break;
                 }
 
-                m_SpecialPatternX = (color & 3) % (int)m_Type.FrameGroups[(int)Proto.Appearances001.FrameGroupType.Idle].PatternWidth;
-                m_SpecialPatternY = (color >> 2) % (int)m_Type.FrameGroups[(int)Proto.Appearances001.FrameGroupType.Idle].PatternHeight;
+                m_SpecialPatternX = (color & 3) % (int)m_Type.FrameGroups[(int)Proto.Appearances.FrameGroupType.Idle].PatternWidth;
+                m_SpecialPatternY = (color >> 2) % (int)m_Type.FrameGroups[(int)Proto.Appearances.FrameGroupType.Idle].PatternHeight;
             } else if (m_Type.IsHangable) {
                 m_HasSpecialPattern = true;
                 if (m_Hang == AppearanceInstance.HookSouth) {
-                    m_SpecialPatternX = m_Type.FrameGroups[(int)Proto.Appearances001.FrameGroupType.Idle].PatternWidth >= 2 ? 1 : 0;
+                    m_SpecialPatternX = m_Type.FrameGroups[(int)Proto.Appearances.FrameGroupType.Idle].PatternWidth >= 2 ? 1 : 0;
                     m_SpecialPatternY = 0;
                 } else if (m_Hang == AppearanceInstance.HookEast) {
-                    m_SpecialPatternX = m_Type.FrameGroups[(int)Proto.Appearances001.FrameGroupType.Idle].PatternWidth >= 3 ? 2 : 0;
+                    m_SpecialPatternX = m_Type.FrameGroups[(int)Proto.Appearances.FrameGroupType.Idle].PatternWidth >= 3 ? 2 : 0;
                     m_SpecialPatternY = 0;
                 } else {
                     m_SpecialPatternX = 0;
@@ -170,7 +167,5 @@ namespace OpenTibiaUnity.Core.Appearances
                 }
             }
         }
-
-
     }
 }

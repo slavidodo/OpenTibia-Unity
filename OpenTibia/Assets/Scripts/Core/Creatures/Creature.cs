@@ -88,7 +88,7 @@ namespace OpenTibiaUnity.Core.Creatures
 
         protected Directions m_Direction = Directions.North;
         public Directions Direction {
-            get { return m_Direction; }
+            get { return m_MovementRunning ? m_AnimationDirection : m_Direction; }
             set { if (m_Direction != value) { var old = m_Direction; m_Direction = value; onDirectionChange.Invoke(this, m_Direction, old); } }
         }
 
@@ -198,6 +198,38 @@ namespace OpenTibiaUnity.Core.Creatures
         public bool IsSummon {
             get { return m_Type == CreatureTypes.Summon; }
         }
+        public bool IsConfirmedPartyMember {
+            get => m_PartyFlag == PartyFlags.Leader_SharedXP_Active
+                || m_PartyFlag == PartyFlags.Leader_SharedXP_Inactive_Guilty
+                || m_PartyFlag == PartyFlags.Leader_SharedXP_Inactive_Innocent
+                || m_PartyFlag == PartyFlags.Leader_SharedXP_Off
+                || m_PartyFlag == PartyFlags.Member_SharedXP_Active
+                || m_PartyFlag == PartyFlags.Member_SharedXP_Inactive_Guilty
+                || m_PartyFlag == PartyFlags.Member_SharedXP_Inactive_Innocent
+                || m_PartyFlag == PartyFlags.Member_SharedXP_Off;
+        }
+        public bool IsPartySharedExperienceActive {
+            get => m_PartyFlag == PartyFlags.Leader_SharedXP_Active
+                || m_PartyFlag == PartyFlags.Leader_SharedXP_Inactive_Guilty
+                || m_PartyFlag == PartyFlags.Leader_SharedXP_Inactive_Innocent
+                || m_PartyFlag == PartyFlags.Member_SharedXP_Active
+                || m_PartyFlag == PartyFlags.Member_SharedXP_Inactive_Guilty
+                || m_PartyFlag == PartyFlags.Member_SharedXP_Inactive_Innocent;
+        }
+        public bool IsPartyLeader {
+            get => m_PartyFlag == PartyFlags.Leader
+                || m_PartyFlag == PartyFlags.Leader_SharedXP_Active
+                || m_PartyFlag == PartyFlags.Leader_SharedXP_Inactive_Guilty
+                || m_PartyFlag == PartyFlags.Leader_SharedXP_Inactive_Innocent
+                || m_PartyFlag == PartyFlags.Leader_SharedXP_Off;
+        }
+        public bool IsPartyMember {
+            get => m_PartyFlag == PartyFlags.Member
+                || m_PartyFlag == PartyFlags.Member_SharedXP_Active
+                || m_PartyFlag == PartyFlags.Member_SharedXP_Inactive_Guilty
+                || m_PartyFlag == PartyFlags.Member_SharedXP_Inactive_Innocent
+                || m_PartyFlag == PartyFlags.Member_SharedXP_Off;
+        }
 
         public UnityEngine.Vector3Int AnimationDelta {
             get { return m_AnimationDelta; }
@@ -255,7 +287,7 @@ namespace OpenTibiaUnity.Core.Creatures
             m_Skills = new SkillStruct[(int)SkillTypes.Speed + 1];
         }
 
-        public void SetSkill(SkillTypes skillType, int level, int baseLevel = 0, int percentage = 0) {
+        public virtual void SetSkill(SkillTypes skillType, int level, int baseLevel = 0, int percentage = 0) {
             int skill = (int)skillType;
             if (skill >= m_Skills.Length)
                 return;
@@ -264,6 +296,17 @@ namespace OpenTibiaUnity.Core.Creatures
             m_Skills[skill].baseLevel = baseLevel;
             m_Skills[skill].percentage = percentage;
             onSkillChange.Invoke(this, skillType, m_Skills[skill]);
+        }
+
+        public virtual void SetSkillValue(SkillTypes skillType, int level) {
+            int skill = (int)skillType;
+            if (skill >= m_Skills.Length)
+                return;
+
+            if (m_Skills[skill].level != level) {
+                m_Skills[skill].level = level;
+                onSkillChange.Invoke(this, skillType, m_Skills[skill]);
+            }
         }
 
         public int GetSkillValue(SkillTypes skill) {
@@ -306,19 +349,24 @@ namespace OpenTibiaUnity.Core.Creatures
             int beatDuration = OpenTibiaUnity.ProtocolGame.BeatDuration;
 
             int movementSpeed = System.Math.Max(1, GetMovementSpeed());
-            int ticks = (int)System.Math.Floor(1000 * movementCost / (float)movementSpeed);
-            ticks = (int)System.Math.Ceiling(ticks / (double)beatDuration) * beatDuration;
+            int interval = (int)System.Math.Floor(1000 * movementCost / (float)movementSpeed);
+
+            if (OpenTibiaUnity.GameManager.ClientVersion >= 910)
+                interval = (int)System.Math.Ceiling(interval / (double)beatDuration) * beatDuration;
 
             m_AnimationSpeed.x = m_AnimationDelta.x;
             m_AnimationSpeed.y = m_AnimationDelta.y;
-            m_AnimationSpeed.z = ticks;
-            m_AnimationEnd = OpenTibiaUnity.TicksMillis + ticks;
+            m_AnimationSpeed.z = interval;
+            m_AnimationEnd = OpenTibiaUnity.TicksMillis + interval;
 
-            if (deltaX != 0 && deltaY != 0) {
-                ticks = (int)System.Math.Floor(1000 * movementCost * 3 / (float)movementSpeed);
-            }
+            float diagonalFactor = 3f;
+            if (OpenTibiaUnity.GameManager.ClientVersion <= 810)
+                diagonalFactor = 2f;
 
-            m_MovementEnd = OpenTibiaUnity.TicksMillis + ticks;
+            if (deltaX != 0 && deltaY != 0)
+                interval = (int)System.Math.Floor(1000 * movementCost * diagonalFactor / (float)movementSpeed);
+
+            m_MovementEnd = OpenTibiaUnity.TicksMillis + interval;
             m_MovementRunning = true;
         }
 
@@ -353,18 +401,21 @@ namespace OpenTibiaUnity.Core.Creatures
         public void AnimateOutfit(int ticks) {
             bool isIdle = !m_MovementRunning || m_MovementEnd != m_AnimationEnd && ticks >= m_AnimationEnd;
             if (!!m_Outfit && !!m_Outfit.Type) {
-                m_Outfit.SwitchFrameGroup(ticks, isIdle ? (int)Proto.Appearances001.FrameGroupType.Idle : (int)Proto.Appearances001.FrameGroupType.Walking);
+                m_Outfit.SwitchFrameGroup(ticks, isIdle ? (int)Proto.Appearances.FrameGroupType.Idle : (int)Proto.Appearances.FrameGroupType.Walking);
                 m_Outfit.Animate(ticks, isIdle ? 0 : m_AnimationSpeed.z);
             }
 
             if (!!m_MountOutfit && !!m_MountOutfit.Type) {
-                m_MountOutfit.SwitchFrameGroup(ticks, isIdle ? (int)Proto.Appearances001.FrameGroupType.Idle : (int)Proto.Appearances001.FrameGroupType.Walking);
+                m_MountOutfit.SwitchFrameGroup(ticks, isIdle ? (int)Proto.Appearances.FrameGroupType.Idle : (int)Proto.Appearances.FrameGroupType.Walking);
                 m_MountOutfit.Animate(ticks, isIdle ? 0 : m_AnimationSpeed.z);
             }
         }
 
         public int GetMovementSpeed() {
             int speed = GetSkillValue(SkillTypes.Speed);
+            if (!OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameNewSpeedLaw))
+                return speed;
+
             if (speed <= -SpeedB)
                 return 0;
 
@@ -372,29 +423,31 @@ namespace OpenTibiaUnity.Core.Creatures
         }
 
         public void SetPartyFlag(PartyFlags partyFlag) {
-            if (partyFlag < PartyFlags.None || partyFlag > PartyFlags.Other)
-                throw new System.ArgumentException("Creature.SetPartyFlag: Invalid flag.");
+            if (partyFlag < PartyFlags.First || partyFlag > PartyFlags.Last)
+                throw new System.ArgumentException("Creature.SetPartyFlag: Invalid party flag (" + (int)partyFlag + ").");
 
             PartyFlag = partyFlag;
         }
 
         public void SetPKFlag(PKFlags pkFlag) {
-            if (pkFlag < PKFlags.First || pkFlag > PKFlags.First)
-                throw new System.ArgumentException("Creature.SetPKFlag: Invalid flag.");
+            if (pkFlag < PKFlags.First || pkFlag > PKFlags.Last)
+                throw new System.ArgumentException("Creature.SetPKFlag: Invalid pkFlag (" + (int)pkFlag + ")");
 
             PKFlag = pkFlag;
         }
 
-        public void SetSpeechCategory(SpeechCategories category) {
-            if (category < SpeechCategories.None || category > SpeechCategories.Travel)
-                throw new System.Exception("Creature.SetSpeechCategory: Invalid category.");
+        public void SetSpeechCategory(SpeechCategories speechCategory) {
+            if (speechCategory < SpeechCategories.First || speechCategory > SpeechCategories.Last)
+                throw new System.Exception("Creature.SetSpeechCategory: Invalid speechCategory (" + (int)speechCategory + ")");
+
+            SpeechCategory = speechCategory;
         }
 
-        public void SetGuildFlag(GuildFlags emblem) {
-            if (emblem < GuildFlags.None || emblem > GuildFlags.Other)
-                throw new System.ArgumentException("Creature.SetGuildFlag: Invalid flag.");
+        public void SetGuildFlag(GuildFlags guildFlag) {
+            if (guildFlag < GuildFlags.First || guildFlag > GuildFlags.Last)
+                throw new System.ArgumentException("Creature.SetGuildFlag: Invalid guildFlag (" + (int)guildFlag + ")");
 
-            GuildFlag = emblem;
+            GuildFlag = guildFlag;
         }
 
         public void SetSummonerID(uint summonerID) {
@@ -408,6 +461,10 @@ namespace OpenTibiaUnity.Core.Creatures
             SummonerID = summonerID;
         }
         
+        public bool IsReportTypeAllowed(ReportTypes reportType) {
+            return IsHuman && (reportType == ReportTypes.Name || reportType == ReportTypes.Bot);
+        }
+
         public static bool operator !(Creature creature) {
             return creature == null;
         }

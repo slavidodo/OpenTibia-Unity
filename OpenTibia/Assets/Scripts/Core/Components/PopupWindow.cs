@@ -8,11 +8,6 @@ namespace OpenTibiaUnity.Core.Components
     [RequireComponent(typeof(VerticalLayoutGroup))]
     public class PopupWindow : Base.Window, IPointerClickHandler
     {
-        private bool m_Selected = true;
-        public bool selected {
-            get { return m_Selected; }
-        }
-
 #pragma warning disable CS0649 // never assigned to
         [SerializeField] private VerticalLayoutGroup m_VerticalLayoutGroup;
         [SerializeField] private TMPro.TextMeshProUGUI m_TitleLabel;
@@ -40,11 +35,9 @@ namespace OpenTibiaUnity.Core.Components
                     if (value == PopupMenuType.NoButtons) {
                         m_SeparatorPanel.gameObject.SetActive(false);
                         m_ButtonsPanel.gameObject.SetActive(false);
-                        //m_VerticalLayoutGroup.padding.bottom = 20;
                     } else {
                         m_SeparatorPanel.gameObject.SetActive(true);
                         m_ButtonsPanel.gameObject.SetActive(true);
-                        //m_VerticalLayoutGroup.padding.bottom = 10;
                     }
                 }
             }
@@ -58,20 +51,22 @@ namespace OpenTibiaUnity.Core.Components
             m_OKButton.onClick.AddListener(TriggerOk);
             m_CancelButton.onClick.AddListener(TriggerCancel);
 
-            OpenTibiaUnity.InputHandler.AddKeyUpListener((Event e, bool repeat) => {
+            OpenTibiaUnity.InputHandler.AddKeyUpListener(Utility.EventImplPriority.Default, (Event e, bool repeat) => {
                 if (!InputHandler.IsHighlighted(this))
                     return;
 
                 switch (e.keyCode) {
                     case KeyCode.Return:
                     case KeyCode.KeypadEnter:
-                        HideWindow(true);
+                        TriggerHideWindow(true);
                         break;
 
                     case KeyCode.Escape:
-                        HideWindow(false);
+                        TriggerHideWindow(false);
                         break;
                 }
+
+                e.Use();
             });
         }
 
@@ -116,27 +111,30 @@ namespace OpenTibiaUnity.Core.Components
             m_MessagesLabel.alignment = alignment;
         }
 
-        public void Show() {
-            gameObject.SetActive(true);
-            Select();
-        }
-        public void HideWindow(bool enter) {
+        protected void TriggerHideWindow(bool enter) {
             UnlockFromOverlay();
+            Hide();
 
             if (enter && (m_PopupMenuType & PopupMenuType.OK) != 0)
                 TriggerOk();
             else if (!enter && (m_PopupMenuType & PopupMenuType.Cancel) != 0)
                 TriggerCancel();
-            else
-                gameObject.SetActive(false);
-            
         }
+
+        public void Show() {
+            gameObject.SetActive(true);
+            Select();
+        }
+        public void Hide() {
+            gameObject.SetActive(false);
+        }
+        
 
         public void Select() {
             if (EventSystem.current.alreadySelecting)
                 return;
 
-            EventSystem.current.SetSelectedGameObject(gameObject);
+            OpenTibiaUnity.EventSystem.SetSelectedGameObject(gameObject);
         }
 
         public void OnPointerClick(PointerEventData eventData) {

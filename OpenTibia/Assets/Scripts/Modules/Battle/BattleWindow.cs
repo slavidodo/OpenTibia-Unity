@@ -46,7 +46,7 @@ namespace OpenTibiaUnity.Modules.Battle
             for (int i = 0; i < m_BattleList.childCount; i++) {
                 var child = m_BattleList.GetChild(i).GetComponent<BattleCreature>();
 
-                var index = opponents.IndexOf(child.Creature);
+                int index = opponents.IndexOf(child.Creature);
                 if (index == -1) {
                     Destroy(child.gameObject);
                     continue;
@@ -92,16 +92,17 @@ namespace OpenTibiaUnity.Modules.Battle
             OpenTibiaUnity.CreatureStorage.RefreshOpponents();
         }
 
-        public ObjectInstance GetMoveObjectUnderPoint(Vector2 point) {
-            return GetUseObjectUnderPoint(point);
+        public int GetMoveObjectUnderPoint(Vector3 mousePosition, out ObjectInstance obj) {
+            return GetUseObjectUnderPoint(mousePosition, out obj);
         }
 
-        public ObjectInstance GetUseObjectUnderPoint(Vector2 point) {
-            return null;
+        public int GetUseObjectUnderPoint(Vector3 mousePosition, out ObjectInstance obj) {
+            obj = null;
+            return -1;
         }
 
-        public ObjectInstance GetMultiUseObjectUnderPoint(Vector2 point) {
-            return GetUseObjectUnderPoint(point);
+        public int GetMultiUseObjectUnderPoint(Vector3 mousePosition, out ObjectInstance obj) {
+            return GetUseObjectUnderPoint(mousePosition, out obj);
         }
     }
 }

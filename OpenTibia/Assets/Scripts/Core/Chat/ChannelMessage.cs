@@ -70,14 +70,18 @@
                     text += string.Format(" {0}", m_Speaker);
             }
 
-            if (text.Length > 0)
-                text += ":";
+            if (text.Length > 0) {
+                if (m_Mode == MessageModes.BarkLoud)
+                    text += " ";
+                else
+                    text += ": ";
+            }
 
             var rawText = StringHelper.RichTextSpecialChars(m_RawText);
             if (m_Mode == MessageModes.NpcFrom || m_Mode == MessageModes.NpcFromStartBlock)
                 rawText = StringHelper.HighlightNpcTalk(rawText, highlightARGB & 16777215);
 
-            m_RichText = string.Format("<color=#{0:X6}>{1} {2}</color>", textARGB, text, rawText);
+            m_RichText = string.Format("<color=#{0:X6}>{1}{2}</color>", textARGB, text, rawText);
 
             rawText = m_RawText;
             if (m_Mode == MessageModes.NpcFrom || m_Mode == MessageModes.NpcFromStartBlock)

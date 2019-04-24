@@ -115,7 +115,7 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
                     };
 
                     sector.ApplyPixelChanges();
-                    Graphics.DrawTexture(screenRect, sector.Texture2D, OpenTibiaUnity.GameManager.DefaultMaterial);
+                    Graphics.DrawTexture(screenRect, sector.Texture2D);
                 }
             }
 

@@ -6,19 +6,25 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.BodyContainerView_Combat
 {
-    public class BodyContainer_CombatView : Core.Components.Base.AbstractComponent, IBodyContainerViewWidget, ICombatViewWidget, IUseWidget, IMoveWidget
+    public class BodyContainer_CombatView : Core.Components.Base.AbstractComponent,
+        IBodyContainerViewWidget, ICombatViewWidget, IUseWidget, IMoveWidget,
+        IWidgetContainerWidget
     {
+        private const int ModernWindowSize = 158;
+        private const int LegacyWindowSize = ModernWindowSize + 26;
+        
+
 #pragma warning disable CS0649 // never assigned to
-        [SerializeField] private RawImage m_HeadImageComponent;
-        [SerializeField] private RawImage m_TorsoImageComponent;
-        [SerializeField] private RawImage m_LegsImageComponent;
-        [SerializeField] private RawImage m_FeetImageComponent;
-        [SerializeField] private RawImage m_NeckImageComponent;
-        [SerializeField] private RawImage m_LeftHandImageComponent;
-        [SerializeField] private RawImage m_FingerImageComponent;
-        [SerializeField] private RawImage m_BackpackImageComponent;
-        [SerializeField] private RawImage m_RightHandImageComponent;
-        [SerializeField] private RawImage m_HipImageComponent;
+        [SerializeField] private Core.Components.ItemView m_HeadItemView;
+        [SerializeField] private Core.Components.ItemView m_TorsoItemView;
+        [SerializeField] private Core.Components.ItemView m_LegsItemView;
+        [SerializeField] private Core.Components.ItemView m_FeetItemView;
+        [SerializeField] private Core.Components.ItemView m_NeckItemView;
+        [SerializeField] private Core.Components.ItemView m_LeftHandItemView;
+        [SerializeField] private Core.Components.ItemView m_FingerItemView;
+        [SerializeField] private Core.Components.ItemView m_BackItemView;
+        [SerializeField] private Core.Components.ItemView m_RightHandItemView;
+        [SerializeField] private Core.Components.ItemView m_HipItemView;
 
         [SerializeField] private Texture2D m_HeadDefaultTexture;
         [SerializeField] private Texture2D m_TorsoDefaultTexture;
@@ -30,10 +36,10 @@ namespace OpenTibiaUnity.Modules.BodyContainerView_Combat
         [SerializeField] private Texture2D m_BackpackDefaultTexture;
         [SerializeField] private Texture2D m_RightHandDefaultTexture;
         [SerializeField] private Texture2D m_HipDefaultTexture;
-
+        
         [SerializeField] private ToggleGroup m_ChaseModeToggleGroup;
         [SerializeField] private ToggleGroup m_AttackModeToggleGroup;
-        [SerializeField] private ToggleGroup m_PvPModeToggleGroup;
+        [SerializeField] private ToggleGroup m_PvpModeToggleGroup;
 
         [SerializeField] private TMPro.TextMeshProUGUI m_CapacityLabel;
         [SerializeField] private TMPro.TextMeshProUGUI m_SoulPointsLabel;
@@ -53,9 +59,32 @@ namespace OpenTibiaUnity.Modules.BodyContainerView_Combat
         [SerializeField] private Toggle m_AttackDefensiveToggle;
 
         [SerializeField] private Toggle m_SecureModeToggle;
+        [SerializeField] private Toggle m_SecureModeLegacyToggle;
+
+        [SerializeField] private Button m_StopButton;
+        [SerializeField] private Button m_ToggleStyleButton;
+
+        [SerializeField] private Button m_StopLegacyButton;
+        [SerializeField] private Button m_QuestsLegacyButton;
+        [SerializeField] private Button m_OptionsLegacyButton;
+        [SerializeField] private Button m_HelpLegacyButton;
+        [SerializeField] private Button m_LogoutLegacyButton;
+
+        [SerializeField] private Toggle m_SkillsLegacyToggle;
+        [SerializeField] private Toggle m_BattleLegacyToggle;
+        [SerializeField] private Toggle m_VIPLegacyToggle;
+
+        [SerializeField] private Sprite m_MinimizeSpriteNormal;
+        [SerializeField] private Sprite m_MinimizeSpritePressed;
+        [SerializeField] private Sprite m_MaximizeSpriteNormal;
+        [SerializeField] private Sprite m_MaximizeSpritePressed;
 #pragma warning restore CS0649 // never assigned to
-        
+
+        private int m_MouseOverSlot = -1;
+
         private RenderTexture m_SlotsRenderTexture;
+
+        private ObjectDragImpl<BodyContainer_CombatView> m_DragHandler;
 
         private Core.Container.BodyContainerView m_BodyContainerView { get { return OpenTibiaUnity.ContainerStorage.BodyContainerView; } }
         private Core.Options.OptionStorage m_OptionStorage { get { return OpenTibiaUnity.OptionStorage; } }
@@ -65,11 +94,33 @@ namespace OpenTibiaUnity.Modules.BodyContainerView_Combat
             m_BodyContainerView.onSlotChange.AddListener(OnInventorySlotChange);
             Creature.onSkillChange.AddListener(OnSkillChange);
 
-            m_SlotsRenderTexture = new RenderTexture(32 * (int)ClothSlots.Hip, 32, 16, RenderTextureFormat.ARGB32);
+            m_SlotsRenderTexture = new RenderTexture(Constants.FieldSize * (int)ClothSlots.Hip, Constants.FieldSize, 16, RenderTextureFormat.ARGB32);
+            m_DragHandler = new ObjectDragImpl<BodyContainer_CombatView>(this);
         }
 
         protected override void Start() {
             base.Start();
+
+            m_HeadItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            m_HeadItemView.onPointerExit.AddListener(OnItemPointerExit);
+            m_NeckItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            m_NeckItemView.onPointerExit.AddListener(OnItemPointerExit);
+            m_BackItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            m_BackItemView.onPointerExit.AddListener(OnItemPointerExit);
+            m_TorsoItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            m_TorsoItemView.onPointerExit.AddListener(OnItemPointerExit);
+            m_RightHandItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            m_RightHandItemView.onPointerExit.AddListener(OnItemPointerExit);
+            m_LeftHandItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            m_LeftHandItemView.onPointerExit.AddListener(OnItemPointerExit);
+            m_LegsItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            m_LegsItemView.onPointerExit.AddListener(OnItemPointerExit);
+            m_FeetItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            m_FeetItemView.onPointerExit.AddListener(OnItemPointerExit);
+            m_FingerItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            m_FingerItemView.onPointerExit.AddListener(OnItemPointerExit);
+            m_HipItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            m_HipItemView.onPointerExit.AddListener(OnItemPointerExit);
 
             OpenTibiaUnity.GameManager.OnTacticsChangeEvent.AddListener((attackMode, chaseMode, secureMode, pvpMode) => {
                 SetAttackMode(attackMode, false, true);
@@ -91,16 +142,22 @@ namespace OpenTibiaUnity.Modules.BodyContainerView_Combat
             m_PvpRedFistToggle.onValueChanged.AddListener((value) => { if (value) SetPvPMode(CombatPvPModes.RedFist, true, false); });
 
             m_SecureModeToggle.onValueChanged.AddListener((value) => { SetSecureMode(!value, true, false); });
+            m_SecureModeLegacyToggle.onValueChanged.AddListener((value) => { SetSecureMode(!value, true, false); });
 
             m_ExpertModeToggle.onValueChanged.AddListener((value) => {
                 SetPvPMode(CombatPvPModes.Dove, true, true);
             });
+
+            m_StopButton.onClick.AddListener(() => OpenTibiaUnity.Player?.StopAutowalk(false));
+            m_StopLegacyButton.onClick.AddListener(() => OpenTibiaUnity.Player?.StopAutowalk(false));
+
+            m_ToggleStyleButton.onClick.AddListener(ToggleStyle);
         }
 
         private void OnGUI() {
             if (Event.current.type != EventType.Repaint)
                 return;
-            
+
             Vector2 zoom = new Vector2(Screen.width / (float)m_SlotsRenderTexture.width, Screen.height / (float)m_SlotsRenderTexture.height);
 
             m_SlotsRenderTexture.Release();
@@ -111,7 +168,7 @@ namespace OpenTibiaUnity.Modules.BodyContainerView_Combat
                     continue;
                 
                 obj.Animate(OpenTibiaUnity.TicksMillis);
-                obj.DrawTo(new Vector2(32 * i, 0), zoom, 0, 0, 0);
+                obj.DrawTo(new Vector2(Constants.FieldSize * i, 0), zoom, 0, 0, 0);
             }
 
             RenderTexture.active = null;
@@ -126,7 +183,7 @@ namespace OpenTibiaUnity.Modules.BodyContainerView_Combat
                 if (skill.level <= -1)
                     m_CapacityLabel.text = "Cap:\n<color=#00EB00>infinity</color>";
                 else
-                    m_CapacityLabel.text = string.Format("Cap:\n{0}", skill.level);
+                    m_CapacityLabel.text = string.Format("Cap:\n{0}", skill.level / 1000);
             } else if (skillType == SkillTypes.SoulPoints) {
                 m_SoulPointsLabel.text = string.Format("Soul:\n{0}", skill.level);
             }
@@ -134,30 +191,31 @@ namespace OpenTibiaUnity.Modules.BodyContainerView_Combat
 
         public void OnInventorySlotChange(ClothSlots slot, ObjectInstance obj) {
             switch (slot) {
-                case ClothSlots.Head: InitialiseObjectImage(slot, m_HeadImageComponent, m_HeadDefaultTexture, obj); break;
-                case ClothSlots.Neck: InitialiseObjectImage(slot, m_NeckImageComponent, m_NeckDefaultTexture, obj); break;
-                case ClothSlots.Backpack: InitialiseObjectImage(slot, m_BackpackImageComponent, m_BackpackDefaultTexture, obj); break;
-                case ClothSlots.Torso: InitialiseObjectImage(slot, m_TorsoImageComponent, m_TorsoDefaultTexture, obj); break;
-                case ClothSlots.RightHand: InitialiseObjectImage(slot, m_RightHandImageComponent, m_RightHandDefaultTexture, obj); break;
-                case ClothSlots.LeftHand: InitialiseObjectImage(slot, m_LeftHandImageComponent, m_LeftHandDefaultTexture, obj); break;
-                case ClothSlots.Legs: InitialiseObjectImage(slot, m_LegsImageComponent, m_LegsDefaultTexture, obj); break;
-                case ClothSlots.Feet: InitialiseObjectImage(slot, m_FeetImageComponent, m_FeetDefaultTexture, obj); break;
-                case ClothSlots.Finger: InitialiseObjectImage(slot, m_FingerImageComponent, m_FingerDefaultTexture, obj); break;
-                case ClothSlots.Hip: InitialiseObjectImage(slot, m_HipImageComponent, m_HipDefaultTexture, obj); break;
+                case ClothSlots.Head: InitialiseObjectImage(slot, m_HeadItemView, m_HeadDefaultTexture, obj); break;
+                case ClothSlots.Neck: InitialiseObjectImage(slot, m_NeckItemView, m_NeckDefaultTexture, obj); break;
+                case ClothSlots.Backpack: InitialiseObjectImage(slot, m_BackItemView, m_BackpackDefaultTexture, obj); break;
+                case ClothSlots.Torso: InitialiseObjectImage(slot, m_TorsoItemView, m_TorsoDefaultTexture, obj); break;
+                case ClothSlots.RightHand: InitialiseObjectImage(slot, m_RightHandItemView, m_RightHandDefaultTexture, obj); break;
+                case ClothSlots.LeftHand: InitialiseObjectImage(slot, m_LeftHandItemView, m_LeftHandDefaultTexture, obj); break;
+                case ClothSlots.Legs: InitialiseObjectImage(slot, m_LegsItemView, m_LegsDefaultTexture, obj); break;
+                case ClothSlots.Feet: InitialiseObjectImage(slot, m_FeetItemView, m_FeetDefaultTexture, obj); break;
+                case ClothSlots.Finger: InitialiseObjectImage(slot, m_FingerItemView, m_FingerDefaultTexture, obj); break;
+                case ClothSlots.Hip: InitialiseObjectImage(slot, m_HipItemView, m_HipDefaultTexture, obj); break;
             }
         }
 
-        private void InitialiseObjectImage(ClothSlots slot, RawImage imageComponent, Texture2D defaultTexture, ObjectInstance obj) {
+        private void InitialiseObjectImage(ClothSlots slot, Core.Components.ItemView itemView, Texture2D defaultTexture, ObjectInstance obj) {
             if (slot > ClothSlots.Hip)
                 return;
 
+            itemView.objectInstance = obj;
             if (!!obj) {
-                imageComponent.texture = m_SlotsRenderTexture;
-                float w = 32f / m_SlotsRenderTexture.width;
-                imageComponent.uvRect = new Rect(w * ((int)slot - 1), 0, w, 1);
+                itemView.itemImage.texture = m_SlotsRenderTexture;
+                float w = (float)Constants.FieldSize / m_SlotsRenderTexture.width;
+                itemView.itemImage.uvRect = new Rect(w * ((int)slot - 1), 0, w, 1);
             } else {
-                imageComponent.texture = defaultTexture;
-                imageComponent.uvRect = new Rect(0, 0, 1, 1);
+                itemView.itemImage.texture = defaultTexture;
+                itemView.itemImage.uvRect = new Rect(0, 0, 1, 1);
             }
         }
 
@@ -230,8 +288,7 @@ namespace OpenTibiaUnity.Modules.BodyContainerView_Combat
             if (toggle)
                 m_SecureModeToggle.isOn = !secureMode;
         }
-
-
+        
         public void SetPvPMode(CombatPvPModes pvpMode, bool send, bool toggle) {
             if (pvpMode == m_OptionStorage.CombatPvPMode)
                 return;
@@ -264,24 +321,50 @@ namespace OpenTibiaUnity.Modules.BodyContainerView_Combat
             }
         }
 
-        public void MinimizeStyle() {
+        public void ToggleStyle() {
+
+        }
+
+        private void MinimizeStyle() {
             // TODO
         }
 
-        public void MaximizeStyle() {
+        private void MaximizeStyle() {
             // TODO
         }
 
-        public ObjectInstance GetUseObjectUnderPoint(Vector2 point) {
-            return GetUseObjectUnderPoint(point);
+        public ObjectInstance GetObjectUnderMouse() {
+            if (m_MouseOverSlot == -1)
+                return null;
+
+            return m_BodyContainerView.GetObject((ClothSlots)m_MouseOverSlot);
+        }
+        
+        public int GetUseObjectUnderPoint(Vector3 mousePosition, out ObjectInstance obj) {
+            return GetMultiUseObjectUnderPoint(mousePosition, out obj);
         }
 
-        public ObjectInstance GetMultiUseObjectUnderPoint(Vector2 point) {
+        public int GetMultiUseObjectUnderPoint(Vector3 mousePosition, out ObjectInstance obj) {
+            obj = GetObjectUnderMouse();
+            return m_MouseOverSlot;
+        }
+
+        public int GetMoveObjectUnderPoint(Vector3 mousePosition, out ObjectInstance obj) {
+            return GetUseObjectUnderPoint(mousePosition, out obj);
+        }
+
+        public Vector3Int? PointToAbsolute(Vector3 mousePosition) {
+            if (m_MouseOverSlot == -1)
+                return null;
+
+            return new Vector3Int(65535, m_MouseOverSlot, 0);
+        }
+
+        public Vector3Int? PointToMap(Vector3 mousePosition) {
             return null;
         }
 
-        public ObjectInstance GetMoveObjectUnderPoint(Vector2 point) {
-            return GetUseObjectUnderPoint(point);
-        }
+        public void OnItemPointerEnter(ClothSlots slot) => m_MouseOverSlot = (int)slot;
+        public void OnItemPointerExit(ClothSlots _) => m_MouseOverSlot = -1;
     }
 }

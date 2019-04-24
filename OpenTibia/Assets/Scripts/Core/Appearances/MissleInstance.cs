@@ -1,30 +1,37 @@
-﻿namespace OpenTibiaUnity.Core.Appearances
+﻿using UnityEngine;
+
+namespace OpenTibiaUnity.Core.Appearances
 {
     public sealed class MissileInstance : AppearanceInstance
     {
-        private int m_PatternX;
-        private int m_PatternY;
-        private int m_AnimationEnd = 0;
-        private UnityEngine.Vector3Int m_Target;
-        private UnityEngine.Vector3Int m_Position;
-        private UnityEngine.Vector3Int m_AnimationDelta;
-        private UnityEngine.Vector3Int m_AnimationSpeed;
+        private static int s_UniqueCounter = 0;
 
-        public int AnimationDirection { get; }
+        private readonly int m_UniqueID;
+        private readonly int m_PatternX;
+        private readonly int m_PatternY;
+        private readonly int m_AnimationEnd = 0;
+        private Vector3Int m_Target;
+        private Vector3Int m_Position;
 
-        public UnityEngine.Vector3Int Target { get { return m_Target; } }
-        public UnityEngine.Vector3Int Position { get { return m_Position; } }
-        public UnityEngine.Vector3Int AnimationDelta {
+        private Vector2 m_AnimationDelta;
+        private readonly Vector3 m_AnimationSpeed;
+
+        public readonly int AnimationDirection;
+
+        public Vector3Int Target { get => m_Target; }
+        public Vector3Int Position { get => m_Position; }
+        public Vector3 AnimationDelta {
             get {
                 var delta = m_AnimationDelta;
-                delta.x = (m_Target.x - m_Position.x) * Constants.FieldSize;
-                delta.y = (m_Target.y - m_Position.y) * Constants.FieldSize;
+                delta.x += (m_Target.x - m_Position.x) * Constants.FieldSize;
+                delta.y += (m_Target.y - m_Position.y) * Constants.FieldSize;
                 return delta;
             }
         }
 
-        public MissileInstance(uint id, AppearanceType type, UnityEngine.Vector3Int fromPosition, UnityEngine.Vector3Int toPosition) : base(id, type) {
-            m_AnimationDelta = toPosition - fromPosition;
+        public MissileInstance(uint id, AppearanceType type, Vector3Int fromPosition, Vector3Int toPosition) : base(id, type) {
+            m_UniqueID = s_UniqueCounter++;
+            m_AnimationDelta = new Vector2Int(toPosition.x - fromPosition.x, toPosition.y - fromPosition.y);
             if (m_AnimationDelta.x == 0) {
                 if (m_AnimationDelta.y <= 0) {
                     AnimationDirection = 0;
@@ -90,46 +97,46 @@
                     break;
             }
 
-            double animationMagnitude = System.Math.Sqrt(m_AnimationDelta.x * m_AnimationDelta.x + m_AnimationDelta.y * m_AnimationDelta.y);
-            double loc6 = System.Math.Sqrt(animationMagnitude) * 150;
-            m_AnimationDelta.x = m_AnimationDelta.x * -Constants.FieldSize;
-            m_AnimationDelta.y = m_AnimationDelta.y * -Constants.FieldSize;
-            m_AnimationDelta.z = 0;
-            m_AnimationSpeed = new UnityEngine.Vector3Int(m_AnimationDelta.x, m_AnimationDelta.y, (int)loc6);
-            m_AnimationEnd = OpenTibiaUnity.TicksMillis + (int)loc6;
+            float duration = Mathf.Sqrt(m_AnimationDelta.magnitude) * 150;
+            m_AnimationDelta.x *= -Constants.FieldSize;
+            m_AnimationDelta.y *= -Constants.FieldSize;
+            m_AnimationSpeed = new Vector3(m_AnimationDelta.x, m_AnimationDelta.y, duration);
+            m_AnimationEnd = OpenTibiaUnity.TicksMillis + (int)duration;
             m_Target = toPosition;
             m_Position = fromPosition;
         }
 
         public override int GetSpriteIndex(int layer, int patternX, int patternY, int patternZ) {
-            int phase = layer >= 0 ? (int)(layer % m_Type.FrameGroups[(int)Proto.Appearances001.FrameGroupType.Idle].Phases) : Phase;
-            return (int)(((phase * m_Type.FrameGroups[(int)Proto.Appearances001.FrameGroupType.Idle].PatternDepth + 0)
-                * m_Type.FrameGroups[(int)Proto.Appearances001.FrameGroupType.Idle].PatternHeight + m_PatternY)
-                * m_Type.FrameGroups[(int)Proto.Appearances001.FrameGroupType.Idle].PatternWidth + m_PatternX);
+            int idleIndex = (int)Proto.Appearances.FrameGroupType.Idle;
+            int phase = layer >= 0 ? (int)(layer % m_Type.FrameGroups[idleIndex].Phases) : Phase;
+            return (int)(((phase * m_Type.FrameGroups[idleIndex].PatternDepth + 0)
+                * m_Type.FrameGroups[idleIndex].PatternHeight + m_PatternY)
+                * m_Type.FrameGroups[idleIndex].PatternWidth + m_PatternX);
         }
 
         public override bool Animate(int ticks, int delay = 0) {
             base.Animate(ticks, delay);
 
-            int diff = ticks - (m_AnimationEnd - m_AnimationSpeed.z);
-            if (diff <= 0) {
+            int elapsedMillis = ticks - (m_AnimationEnd - (int)m_AnimationSpeed.z);
+            if (elapsedMillis <= 0) {
                 m_AnimationDelta.x = m_AnimationSpeed.x;
                 m_AnimationDelta.y = m_AnimationSpeed.y;
-            } else if (diff >= m_AnimationSpeed.z) {
+            } else if (elapsedMillis >= m_AnimationSpeed.z) {
                 m_AnimationDelta.x = 0;
                 m_AnimationDelta.y = 0;
             } else {
-                m_AnimationDelta.x -= (int)(m_AnimationSpeed.x / m_AnimationSpeed.z * diff + 0.5f);
-                m_AnimationDelta.y -= (int)(m_AnimationSpeed.y / m_AnimationSpeed.z * diff + 0.5f);
+                m_AnimationDelta.x = m_AnimationSpeed.x - (int)(m_AnimationSpeed.x / m_AnimationSpeed.z * elapsedMillis + 0.5f);
+                m_AnimationDelta.y = m_AnimationSpeed.y - (int)(m_AnimationSpeed.y / m_AnimationSpeed.z * elapsedMillis + 0.5f);
             }
 
-            if (m_AnimationDelta.x == 0 && m_AnimationDelta.y == 0 || ticks >= m_AnimationEnd)
+            if ((m_AnimationDelta.x == 0 && m_AnimationDelta.y == 0) || ticks >= m_AnimationEnd)
                 return false;
 
-            float _loc4_ = (Target.x + 1) * Constants.FieldSize - m_Type.DisplacementX + m_AnimationDelta.x;
-            float _loc5_ = (Target.y + 1) * Constants.FieldSize - m_Type.DisplacementY + m_AnimationDelta.y;
-            m_Position.x = (int)((_loc4_ - 1) / Constants.FieldSize);
-            m_Position.y = (int)((_loc5_ - 1) / Constants.FieldSize);
+            var oldPosition = m_Position;
+            float mX = (m_Target.x + 1) * Constants.FieldSize - m_Type.DisplacementX + m_AnimationDelta.x;
+            float mY = (m_Target.y + 1) * Constants.FieldSize - m_Type.DisplacementY + m_AnimationDelta.y;
+            m_Position.x = (int)((mX - 1) / Constants.FieldSize);
+            m_Position.y = (int)((mY - 1) / Constants.FieldSize);
             return true;
         }
     }

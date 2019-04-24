@@ -9,8 +9,8 @@ namespace OpenTibiaUnity.Core.Components
         private static Color HiddenCreatureColor = Core.Colors.ColorFromRGB(192, 192, 192);
 #pragma warning disable CS0649 // never assigned to
         [SerializeField] private TMPro.TextMeshProUGUI m_NamePanel;
-        [SerializeField] private RectTransform m_HealthProgressPanel;
-        [SerializeField] private RectTransform m_ManaProgressPanel;
+        [SerializeField] private Slider m_HealthProgressBar;
+        [SerializeField] private Slider m_ManaProgressBar;
 
         [SerializeField] private VerticalLayoutGroup m_FlagsContainer;
         [SerializeField] private HorizontalLayoutGroup m_PartyPKFlagsContainer;
@@ -20,6 +20,7 @@ namespace OpenTibiaUnity.Core.Components
         [SerializeField] private Image m_SpeechFlagImage;
         [SerializeField] private Image m_GuildFlagImage;
 #pragma warning restore CS0649 // never assigned to
+
         public float CachedWidth { get; private set; } = 0;
         public float CachedHeight { get; private set; } = 0;
         public uint CachedRenderCount { get; set; } = 0;
@@ -32,15 +33,22 @@ namespace OpenTibiaUnity.Core.Components
         private Color m_HealthColor = Color.black;
         private Color m_ManaColor = Color.black;
 
-        private PartyFlags m_PartyFlag = 0;
-        private PKFlags m_PKFlag = 0;
-        private SummonTypeFlags m_TypeFlag = 0;
-        private SpeechCategories m_SpeechFlag = 0;
-        private GuildFlags m_GuildFlag = 0;
+        private PartyFlags m_PartyFlag = PartyFlags.None;
+        private PKFlags m_PKFlag = PKFlags.None;
+        private SummonTypeFlags m_TypeFlag = SummonTypeFlags.None;
+        private SpeechCategories m_SpeechFlag = SpeechCategories.None;
+        private GuildFlags m_GuildFlag = GuildFlags.None;
 
         private bool m_InternallyChanged = false;
         private bool m_LastCreatureVisiblity = true;
         private float m_LastLightFactor = 1f;
+
+        private uint m_CreatureID = 0;
+
+        public uint CreatureID {
+            get => m_CreatureID;
+            set { if (m_CreatureID == 0) m_CreatureID = value; }
+        }
 
         public static Color GetHealthColor(float percent) {
             Color tmpHealthColor;
@@ -66,8 +74,8 @@ namespace OpenTibiaUnity.Core.Components
             SetManaPercent(manaPercent);
             
             m_NamePanel.color = m_HealthColor;
-            m_HealthProgressPanel.GetComponent<RawImage>().color = m_HealthColor;
-            m_ManaProgressPanel.GetComponent<RawImage>().color = Color.blue;
+            m_HealthProgressBar.fillRect.GetComponent<RawImage>().color = m_HealthColor;
+            m_ManaProgressBar.fillRect.GetComponent<RawImage>().color = Color.blue;
         }
         
         public void SetDrawingProperties(bool drawName, bool drawHealth, bool drawMana) {
@@ -86,14 +94,14 @@ namespace OpenTibiaUnity.Core.Components
                 totalDrawn += 1;
             }
 
-            m_HealthProgressPanel.parent.gameObject.SetActive(drawHealth);
+            m_HealthProgressBar.gameObject.SetActive(drawHealth);
             if (drawHealth) {
                 CachedHeight += 4;
                 CachedWidth = Mathf.Max(CachedWidth, 27);
                 totalDrawn += 1;
             }
 
-            m_ManaProgressPanel.parent.gameObject.SetActive(drawMana);
+            m_ManaProgressBar.gameObject.SetActive(drawMana);
             if (drawMana) {
                 CachedHeight += 4;
                 CachedWidth = Mathf.Max(CachedWidth, 27);
@@ -163,29 +171,30 @@ namespace OpenTibiaUnity.Core.Components
         public void SetHealth(int health, int maxHealth) {
             float percent = (float)health / maxHealth;
             m_HealthColor = GetHealthColor(percent);
-            InternalUpdateProgress(m_HealthProgressPanel, health / (float)maxHealth);
+            m_HealthProgressBar.value = percent * 100;
         }
 
         public void SetHealthPercent(int healthPercent) {
             float percent = healthPercent / 100f;
             m_HealthColor = GetHealthColor(percent);
-            InternalUpdateProgress(m_HealthProgressPanel, healthPercent / 100f);
+            m_HealthProgressBar.value = healthPercent;
         }
 
         public void UpdateHealthColor() {
             if (m_LastCreatureVisiblity) {
                 var modifiedColor = ILightmapRenderer.MulColor32(m_HealthColor, m_LastLightFactor);
                 m_NamePanel.color = modifiedColor;
-                m_HealthProgressPanel.GetComponent<RawImage>().color = modifiedColor;
+                m_HealthProgressBar.fillRect.GetComponent<RawImage>().color = modifiedColor;
             }
         }
         
         public void SetMana(int mana, int maxMana) {
-            InternalUpdateProgress(m_ManaProgressPanel, mana / (float)maxMana);
+            float percent = (float)mana / maxMana;
+            m_ManaProgressBar.value = percent * 100;
         }
 
         public void SetManaPercent(int manaPercent) {
-            InternalUpdateProgress(m_ManaProgressPanel, manaPercent / 100f);
+            m_ManaProgressBar.value = manaPercent;
         }
         
         public void UpdateCreatureMisc(bool visible, float lightfactor) {
@@ -197,26 +206,20 @@ namespace OpenTibiaUnity.Core.Components
             if (visible) {
                 var modifiedHealthColor = ILightmapRenderer.MulColor32(m_HealthColor, m_LastLightFactor);
                 m_NamePanel.color = modifiedHealthColor;
-                m_HealthProgressPanel.GetComponent<RawImage>().color = modifiedHealthColor;
-                m_ManaProgressPanel.GetComponent<RawImage>().color = ILightmapRenderer.MulColor32(Color.blue, m_LastLightFactor);
+                m_HealthProgressBar.fillRect.GetComponent<RawImage>().color = modifiedHealthColor;
+                m_ManaProgressBar.fillRect.GetComponent<RawImage>().color = ILightmapRenderer.MulColor32(Color.blue, m_LastLightFactor);
             } else {
                 var hiddenColor = ILightmapRenderer.MulColor32(HiddenCreatureColor, m_LastLightFactor);
                 m_NamePanel.color = hiddenColor;
-                m_HealthProgressPanel.GetComponent<RawImage>().color = hiddenColor;
-                m_ManaProgressPanel.GetComponent<RawImage>().color = hiddenColor;
+                m_HealthProgressBar.fillRect.GetComponent<RawImage>().color = hiddenColor;
+                m_ManaProgressBar.fillRect.GetComponent<RawImage>().color = hiddenColor;
             }
         }
-
-        private void InternalUpdateProgress(RectTransform rectTransform, float percent) {
-            int baseWidth = 27 - 2;
-            var offsetMax = m_HealthProgressPanel.offsetMax;
-            offsetMax.x = -1 - baseWidth * Mathf.Min(1f, 1f - percent);
-            m_HealthProgressPanel.offsetMax = offsetMax;
-        }
+        
 
         private static PartyFlags s_GetPartyFlag(PartyFlags partyFlag) {
-            if (partyFlag < PartyFlags.None || partyFlag > PartyFlags.Other) {
-                throw new System.Exception("CharacterStatusPanel.s_GetPartyFlag: Invalid flag.");
+            if (partyFlag < PartyFlags.First || partyFlag > PartyFlags.Last) {
+                throw new System.Exception("CharacterStatusPanel.s_GetPartyFlag: Invalid party flag (" + (int)partyFlag + ").");
             }
 
             if (partyFlag == PartyFlags.Leader_SharedXP_Inactive_Innocent)
@@ -233,16 +236,16 @@ namespace OpenTibiaUnity.Core.Components
         private void InternalUpdatePartyFlag(PartyFlags partyFlag) {
             partyFlag = s_GetPartyFlag(partyFlag);
 
-            if (partyFlag == 0) {
-                if (m_PartyFlag != 0)
+            if (partyFlag == PartyFlags.None) {
+                if (m_PartyFlag != PartyFlags.None)
                     m_PartyFlagImage.gameObject.SetActive(false);
 
-                m_PartyFlag = 0;
+                m_PartyFlag = PartyFlags.None;
                 return;
             }
 
             m_PartyFlagImage.sprite = OpenTibiaUnity.GameManager.PartySprites[(int)partyFlag - 1];
-            if (m_PartyFlag == 0)
+            if (m_PartyFlag == PartyFlags.None)
                 m_PartyFlagImage.gameObject.SetActive(true);
 
             m_PartyFlag = partyFlag;
@@ -250,16 +253,16 @@ namespace OpenTibiaUnity.Core.Components
         }
 
         private void InternalUpdatePKFlag(PKFlags pkFlag) {
-            if (pkFlag == 0) {
-                if (m_PKFlag != 0)
+            if (pkFlag == PKFlags.None) {
+                if (m_PKFlag != PKFlags.None)
                     m_PKFlagImage.gameObject.SetActive(false);
 
-                m_PKFlag = 0;
+                m_PKFlag = PKFlags.None;
                 return;
             }
 
             m_PKFlagImage.sprite = OpenTibiaUnity.GameManager.PKSprites[(int)pkFlag - 1];
-            if (m_PKFlag == 0)
+            if (m_PKFlag == PKFlags.None)
                 m_PKFlagImage.gameObject.SetActive(true);
 
             m_PKFlag = pkFlag;
@@ -267,16 +270,16 @@ namespace OpenTibiaUnity.Core.Components
         }
 
         private void InternalUpdateTypeFlag(SummonTypeFlags typeFlag) {
-            if (typeFlag == 0) {
-                if (m_TypeFlag != 0)
+            if (typeFlag == SummonTypeFlags.None) {
+                if (m_TypeFlag != SummonTypeFlags.None)
                     m_TypeFlagImage.gameObject.SetActive(false);
 
-                m_TypeFlag = 0;
+                m_TypeFlag = SummonTypeFlags.None;
                 return;
             }
 
             m_TypeFlagImage.sprite = OpenTibiaUnity.GameManager.TypeSprites[(int)typeFlag - 1];
-            if (m_TypeFlag == 0)
+            if (m_TypeFlag == SummonTypeFlags.None)
                 m_TypeFlagImage.gameObject.SetActive(true);
 
             m_TypeFlag = typeFlag;
@@ -284,16 +287,16 @@ namespace OpenTibiaUnity.Core.Components
         }
 
         private void InternalUpdateSpeechFlag(SpeechCategories speechFlag) {
-            if (speechFlag == 0) {
-                if (m_SpeechFlag != 0)
+            if (speechFlag == SpeechCategories.None) {
+                if (m_SpeechFlag != SpeechCategories.None)
                     m_SpeechFlagImage.gameObject.SetActive(false);
 
-                m_SpeechFlag = 0;
+                m_SpeechFlag = SpeechCategories.None;
                 return;
             }
 
             m_SpeechFlagImage.sprite = OpenTibiaUnity.GameManager.SpeechSprites[(int)speechFlag - 1];
-            if (m_SpeechFlag == 0)
+            if (m_SpeechFlag == SpeechCategories.None)
                 m_SpeechFlagImage.gameObject.SetActive(true);
 
             m_SpeechFlag = speechFlag;
@@ -301,16 +304,16 @@ namespace OpenTibiaUnity.Core.Components
         }
 
         private void InternalUpdateGuildFlag(GuildFlags guildFlag) {
-            if (guildFlag == 0) {
-                if (m_GuildFlag != 0)
+            if (guildFlag == GuildFlags.None) {
+                if (m_GuildFlag != GuildFlags.None)
                     m_GuildFlagImage.gameObject.SetActive(false);
 
-                m_GuildFlag = 0;
+                m_GuildFlag = GuildFlags.None;
                 return;
             }
 
             m_GuildFlagImage.sprite = OpenTibiaUnity.GameManager.GuildSprites[(int)guildFlag - 1];
-            if (m_GuildFlag == 0)
+            if (m_GuildFlag == GuildFlags.None)
                 m_GuildFlagImage.gameObject.SetActive(true);
 
             m_GuildFlag = guildFlag;

@@ -15,7 +15,7 @@ namespace Priority_Queue
         /// </summary>
         public int QueueIndex { get; internal set; } = 0;
 
-#if !Debug
+#if DEBUG || NDEBUG
         /// <summary>
         /// The queue this node is tied to. Used only for debug builds.
         /// </summary>
@@ -28,7 +28,7 @@ namespace Priority_Queue
         public void Reset() {
             Priority = 0;
             QueueIndex = 0;
-#if !Debug
+#if DEBUG || NDEBUG
             Queue = null;
 #endif
         }

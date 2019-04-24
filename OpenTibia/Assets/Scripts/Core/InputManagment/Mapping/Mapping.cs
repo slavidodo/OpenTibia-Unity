@@ -20,8 +20,8 @@ namespace OpenTibiaUnity.Core.InputManagment.Mapping
             if (param1) {
                 m_Bindings.Clear();
             } else {
-                var length = m_Bindings.Count - 1;
-                var index = length;
+                int length = m_Bindings.Count - 1;
+                int index = length;
                 while (index > 0) {
                     if (m_Bindings[index] == null || m_Bindings[index].Editable) {
                         length--;

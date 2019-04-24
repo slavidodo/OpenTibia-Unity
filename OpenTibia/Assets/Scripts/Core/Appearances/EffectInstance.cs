@@ -3,21 +3,23 @@
     public sealed class EffectInstance : AppearanceInstance
     {
         public EffectInstance(uint id, AppearanceType type) : base(id, type) {
-            Phase = AppearanceAnimator.PhaseAsynchronous;
+            Phase = Constants.PhaseAsynchronous;
+            foreach (var animator in m_Animators) {
+                if (animator is Animation.LegacyAnimator legacyAnimator)
+                    legacyAnimator.PhaseDuration = 75;
+            }
         }
 
         public void SetEndless() {
-            AppearanceAnimator animator = m_Animators[m_ActiveFrameGroup];
-            if (animator) {
+            Animation.IAppearanceAnimator animator = m_Animators?[m_ActiveFrameGroupIndex];
+            if (animator != null)
                 animator.SetEndless();
-            }
         }
 
         public void End() {
-            AppearanceAnimator animator = m_Animators[m_ActiveFrameGroup];
-            if (animator) {
+            Animation.IAppearanceAnimator animator = m_Animators?[m_ActiveFrameGroupIndex];
+            if (animator != null)
                 animator.Finished = true;
-            }
         }
     }
 }

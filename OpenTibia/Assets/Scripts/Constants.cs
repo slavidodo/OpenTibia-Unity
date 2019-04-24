@@ -17,8 +17,8 @@
         public const int MapWidth = 15;
         public const int MapHeight = 11;
         public const int MapSizeW = 10;
-        public const int MapSizeX = MapWidth + 3;
-        public const int MapSizeY = MapHeight + 3;
+        public const int MapSizeX = MapWidth + 3; // 18
+        public const int MapSizeY = MapHeight + 3; // 14
         public const int MapSizeZ = 8;
         public const int MapMinX = 0; // Tibia restricted it to 24576 -> 24576 + (1 << 14 -1)
         public const int MapMinY = 0;
@@ -52,10 +52,6 @@
         public const int ObjectsUpdateInterval = 40;
         public const int AmbientUpdateInterval = 1000;
 
-        public const uint FieldEnterPossible = 0;
-        public const uint FieldEnterPossibleNoAnimation = 1;
-        public const uint FieldEnterNotPossible = 2;
-
         public const int OnscreenMessageHeight = 195;
         public const int OnscreenMessageWidth = 360;
 
@@ -84,14 +80,44 @@
 
         public const int LightmapShrinkFactor = 8;
 
-        // Legacy Things
+        public const uint MarkThicknessThin = 1;
+        public const uint MarkThicknessBold = 2;
+
+        public static UnityEngine.Color ColorAboveGround = new UnityEngine.Color32(200, 200, 255, 255);
+        public static UnityEngine.Color ColorBelowGround = new UnityEngine.Color32(255, 255, 255, 255);
+        public static UnityEngine.Color ObjectCursorColor = new UnityEngine.Color32(255, 225, 55, 255);
+
+        public const float HighlightMinOpacity = 0.3f;
+        public const float HighlightMaxOpacity = 0.6f;
+
         public const uint PlayerStartID = 0x10000000;
         public const uint PlayerEndID = 0x40000000;
         public const uint MonsterStartID = 0x40000000;
         public const uint MonsterEndID = 0x80000000;
         public const uint NpcStartID = 0x80000000;
         public const uint NpcEndID = 0xffffffff;
+
+        public const int AnimationDelayBeforeReset = 1000;
+        public const int PhaseAutomatic = -1;
+        public const int PhaseAsynchronous = 255;
+        public const int PhaseRandom = 254;
     }
+
+    public enum AppearanceCategory : byte
+    {
+        Object,
+        Outfit,
+        Effect,
+        Missile,
+    }
+
+    public enum EnterPossibleFlag : byte
+    {
+        Possible,
+        PossibleNoAnimation,
+        NotPossible,
+    }
+
     public enum PathState : byte
     {
         PathEmpty,
@@ -171,6 +197,9 @@
         None,
         Own,
         Other,
+
+        First = None,
+        Last = Other,
     }
     public enum SpeechCategories : byte
     {
@@ -180,6 +209,9 @@
         Quest,
         QuestTrader,
         Travel,
+
+        First = None,
+        Last = Travel,
     }
     public enum GuildFlags : byte
     {
@@ -188,7 +220,10 @@
         WarEnemy,
         WarNeutral,
         Member,
-        Other
+        Other,
+
+        First = None,
+        Last = Other,
     }
     public enum SkillTypes : int
     {
@@ -220,6 +255,28 @@
         ManaLeechChance,
         ManaLeechAmount,
     }
+    public enum States
+    {
+        None = -1,
+        Poisoned = 0,
+        Burning = 1,
+        Electrified = 2,
+        Drunk = 3,
+        ManaShield = 4,
+        Slow = 5,
+        Fast = 6,
+        Fighting = 7,
+        Drowning = 8,
+        Freezing = 9,
+        Dazzled = 10,
+        Cursed = 11,
+        Strengthened = 12,
+        PzBlock = 13,
+        PzEntered = 14,
+        Bleeding = 15,
+
+        Hungry = 31,
+    }
     public enum HUDArcOrientation
     {
         Left,
@@ -233,48 +290,56 @@
         Yell = 3,
         PrivateFrom = 4,
         PrivateTo = 5,
-        ChannelManagment = 6,
+        ChannelManagement = 6,
         Channel = 7,
         ChannelHighlight = 8,
         Spell = 9,
-        NpcFromStartBlock = 10,
-        NpcFrom = 11,
-        NpcTo = 12,
-        GamemasterBroadcast = 13,
-        GamemasterChannel = 14,
-        GamemasterPrivateFrom = 15,
-        GamemasterPrivateTo = 16,
-        Login = 17,
-        Admin = 18,
-        Game = 19,
-        GameHighlight = 20,
-        Failure = 21,
-        Look = 22,
-        DamageDealed = 23,
-        DamageReceived = 24,
-        Heal = 25,
-        Exp = 26,
-        DamageOthers = 27,
-        HealOthers = 28,
-        ExpOthers = 29,
-        Status = 30,
-        Loot = 31,
-        TradeNpc = 32,
-        Guild = 33,
-        PartyManagement = 34,
-        Party = 35,
-        BarkLow = 36,
-        BarkLoud = 37,
-        Report = 38,
-        HotkeyUse = 39,
-        TutorialHint = 40,
-        Thankyou = 41,
-        Market = 42,
-        Mana = 43,
+        NpcFrom = 10,
+        NpcTo = 11,
+        GamemasterBroadcast = 12,
+        GamemasterChannel = 13,
+        GamemasterPrivateFrom = 14,
+        GamemasterPrivateTo = 15,
+        Login = 16,
+        Admin = 17,
+        Game = 18,
+        Failure = 19,
+        Look = 20,
+        DamageDealed = 21,
+        DamageReceived = 22,
+        Heal = 23,
+        Exp = 24,
+        DamageOthers = 25,
+        HealOthers = 26,
+        ExpOthers = 27,
+        Status = 28,
+        Loot = 29,
+        TradeNpc = 30,
+        Guild = 31,
+        PartyManagement = 32,
+        Party = 33,
+        BarkLow = 34,
+        BarkLoud = 35,
+        Report = 36,
+        HotkeyUse = 37,
+        TutorialHint = 38,
+        Thankyou = 39,
+        Market = 40,
+        Mana = 41,
+        BeyondLast = 42,
 
-        BeyondLast = 44,
-        Last = Mana,
-        Invalid = 255,
+        // deprecated
+        MonsterYell = 43,
+        MonsterSay = 44,
+        Red = 45,
+        Blue = 46,
+        RVRChannel = 47,
+        RVRAnswer = 48,
+        RVRContinue = 49,
+        GameHighlight = 50,
+        NpcFromStartBlock = 51,
+        LastMessage = 52,
+        Invalid = 255
     }
     public enum MessageScreenTargets : int
     {
@@ -305,10 +370,10 @@
     }
     public enum MouseButtons : byte
     {
-        None = 1 << 0,
-        Left = 1 << 1,
-        Right = 1 << 2,
-        Middle = 1 << 3,
+        None = 0,
+        Left = 1 << 0,
+        Right = 1 << 1,
+        Middle = 1 << 2,
         Both = Left | Right,
     }
     public enum MousePresets : byte
@@ -353,9 +418,8 @@
         Use = 7,
         Open = 8,
         Talk = 9,
+        Loot = 10,
         SmartClick = 100,
-        UseOrOpen = 101,
-        AttackOrTalk = 102,
     }
     public enum CombatAttackModes : int
     {
@@ -377,6 +441,8 @@
     }
     public enum ClothSlots : int
     {
+        BothHands = 0,
+
         Head = 1,
         Neck = 2,
         Backpack = 3,
@@ -387,7 +453,11 @@
         Feet = 8,
         Finger = 9,
         Hip = 10,
+
+        // StoreInbox & Purse both represent the same slot in different client versions //
         StoreInbox = 11,
+        Purse = 11,
+
         Store = 12,
         Blessings = 13,
 
@@ -496,6 +566,34 @@
         Rebuild,
     }
 
+    public enum DialogType
+    {
+        // TODO, these are no longer existing, remove them
+        OptionsGeneral = 0,
+        OptionsRenderer = 1,
+        OptionsStatus = 2,
+        OptionsMessage = 3,
+        OptionsHotkey = 4,
+        OptionsNameFilter = 5,
+        OptionsMouseControl = 6,
+        CharacterSpells = 7,
+        CharacterProfile = 8,
+        CharacterOutfit = 9,
+        ChatChannelSelection = 10,
+        HelpQuestLog = 11,
+        PreyDialog = 12,
+    }
+
+    public enum MarkTypes
+    {
+        ClientMapWindow = 1,
+        ClientBattleList = 2,
+        OneSecondTemp = 3,
+        Permenant = 4,
+
+        None = 255,
+    }
+    
     public enum GameFeatures
     {
         GameProtocolChecksum = 1,
@@ -566,14 +664,15 @@
         GameUnjustifiedPoints = 68,
         GameSessionKey = 69,
         GameDeathType = 70,
-        GameIdleAnimations = 71,
+        GameSeparateAnimationGroups = 71,
         GameKeepUnawareTiles = 72,
         GameIngameStore = 73,
         GameIngameStoreHighlights = 74,
         GameIngameStoreServiceType = 75,
         GameAdditionalSkills = 76,
-        GameWorldName = 77,
-        GameProtocolSequenceNumber = 78,
+        GameExperienceGain = 77,
+        GameWorldName = 78,
+        GameProtocolSequenceNumber = 79,
 
         LastGameFeature = 101,
     };

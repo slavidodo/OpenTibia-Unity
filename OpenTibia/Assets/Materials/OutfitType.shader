@@ -1,11 +1,13 @@
 ﻿Shader "OpenTibiaUnity/OutfitType" {
 	Properties {
-		[NoScaleOffset] _MainTex("MainTexture", 2D) = "white" {}
-		[NoScaleOffset] _ChannelsTex("ChannelsTexture", 2D) = "white" {}
-		_HeadColor("HeadColor", Color) = (1,0.85,0.014,1)
-		_TorsoColor("TorsoColor", Color) = (0.34,0.14,0.33,1)
-		_LegsColor("LegsColor", Color) = (1,1,1,1)
-		_DetailColor("DetailColor", Color) = (1,1,1,1)
+		[NoScaleOffset] _MainTex("Main Texture", 2D) = "white" {}
+		[NoScaleOffset] _ChannelsTex("Channels Texture", 2D) = "white" {}
+		_HeadColor("Head Color", Color) = (1,0.85,0.014,1)
+		_TorsoColor("Torso Color", Color) = (0.34,0.14,0.33,1)
+		_LegsColor("Legs Color", Color) = (1,1,1,1)
+		_DetailColor("Detail Color", Color) = (1,1,1,1)
+		_HighlightColor("Highlight Color", Color) = (1,1,1,1)
+		_HighlightOpacity("Highlight Opacity", Float) = 0
 	}
 
 	SubShader {
@@ -38,6 +40,8 @@
 			fixed4 _TorsoColor;
 			fixed4 _LegsColor;
 			fixed4 _DetailColor;
+			fixed4 _HighlightColor;
+			fixed _HighlightOpacity;
 
 			float4 _MainTex_ST;
 			float4 _ChannelsTex_ST;
@@ -77,7 +81,10 @@
 				fixed4 _ChannelsTex_FinalAdditive = _ChannelsTex_Blend_Yellow + _ChannelsTex_Blend_Red + _ChannelsTex_Blend_Green + _ChannelsTex_Blend_Blue;
 				fixed4 _PropertyOut_Mul_Main = _ChannelsTex_FinalAdditive * _MainTex_RGBA;
 
-				return fixed4(_PropertyOut_Mul_Main.rgb, _ChannelsTex_RGBA.a);
+				fixed4 _RegularColor = fixed4(_PropertyOut_Mul_Main.rgb, _ChannelsTex_RGBA.a);
+				fixed3 _Blended = lerp(_RegularColor.rgb, _HighlightColor.rgb, _HighlightOpacity);
+				fixed4 _BlendedAndMasked = fixed4(_Blended, 1.0) * _RegularColor.a;
+				return _BlendedAndMasked;
 			}
 			ENDCG
 		}

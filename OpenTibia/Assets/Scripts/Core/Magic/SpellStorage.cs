@@ -10,6 +10,10 @@
             Spells = new Spell[] { };
         }
 
+        public void Reset() {
+            return;
+        }
+
         public static bool CheckRune(int id) {
             return GetRune(id) != null;
         }
@@ -19,7 +23,7 @@
 
             int index = 0;
             while (index <= lastIndex) {
-                int tmpIndex = (int)(index + (uint)lastIndex >> 1);
+                int tmpIndex = index + lastIndex >> 1;
                 var rune = Runes[tmpIndex];
                 if (rune.ID < id)
                     index = tmpIndex + 1;
@@ -37,7 +41,7 @@
 
             int index = 0;
             while (index <= lastIndex) {
-                int tmpIndex = (int)(index + (uint)lastIndex >> 1);
+                int tmpIndex = index + lastIndex >> 1;
                 var spell = Spells[tmpIndex];
                 if (spell.ID < id)
                     index = tmpIndex + 1;

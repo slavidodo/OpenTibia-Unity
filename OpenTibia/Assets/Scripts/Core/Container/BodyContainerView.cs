@@ -34,9 +34,11 @@ namespace OpenTibiaUnity.Core.Container
         public bool IsEquipped(uint objectID) {
             var appearanceStorage = OpenTibiaUnity.AppearanceStorage;
             var appearanceType = appearanceStorage.GetObjectType(objectID);
-            if (!!appearanceType && appearanceType.IsCloth) { // TODO; this is not returning the value if the item is two-handed (slot=0)
-                var clothSlot = appearanceType.Cloth;
-                var obj = Objects[(int)clothSlot - (int)ClothSlots.First];
+            if (!!appearanceType && appearanceType.IsCloth) {
+                ClothSlots clothSlot = (ClothSlots)appearanceType.Cloth;
+                if (clothSlot == ClothSlots.BothHands)
+                    clothSlot = ClothSlots.LeftHand;
+                var obj = Objects[clothSlot - ClothSlots.First];
                 if (!!obj)
                     return true;
             }

@@ -52,10 +52,10 @@ namespace OpenTibiaUnity.Modules.Login
                 }
             });
 
-            OpenTibiaUnity.InputHandler.AddKeyUpListener((Event e, bool repeat) => {
+            OpenTibiaUnity.InputHandler.AddKeyUpListener(Core.Utility.EventImplPriority.Default, (Event e, bool repeat) => {
                 if (!InputHandler.IsHighlighted(this))
                     return;
-
+                
                 switch (e.keyCode) {
                     case KeyCode.Return:
                     case KeyCode.KeypadEnter:
@@ -71,6 +71,8 @@ namespace OpenTibiaUnity.Modules.Login
                         m_LastReaction = OpenTibiaUnity.TicksMillis;
                         break;
                 }
+
+                e.Use();
             });
         }
 
@@ -180,18 +182,34 @@ namespace OpenTibiaUnity.Modules.Login
             SubmitEnterGame(characterIndex);
         }
 
-        void ConnectToGame(string characterName, CharacterList.World world) {
+        async void ConnectToGame(string characterName, CharacterList.World world) {
+            gameObject.SetActive(false);
+
+            var gameManager = OpenTibiaUnity.GameManager;
+            if (gameManager.IsLoadingClientAssets) {
+                gameManager.BackgroundCenterPanel.gameObject.SetActive(false);
+                gameManager.LobbyPanel.gameObject.SetActive(false);
+                gameManager.LoadingAppearancesWindow.gameObject.SetActive(true);
+
+                while (gameManager.IsLoadingClientAssets)
+                    await System.Threading.Tasks.Task.Yield();
+
+                gameManager.BackgroundCenterPanel.gameObject.SetActive(true);
+                gameManager.LobbyPanel.gameObject.SetActive(true);
+                gameManager.LoadingAppearancesWindow.gameObject.SetActive(false);
+            }
+
+
             m_LoggerWindow.SetTitle("Connecting");
             m_LoggerWindow.SetMessage("Connecting to the game world. Please wait.");
             m_LoggerWindow.LockToOverlay();
-            m_LoggerWindow.ResetToCenter();
+            m_LoggerWindow.ResetLocalPosition();
             m_LoggerWindow.gameObject.SetActive(true);
-            gameObject.SetActive(false);
 
             OpenTibiaUnity.ChatStorage.Reset();
-            //gameManager.ContainerStorage.Reset();
+            OpenTibiaUnity.ContainerStorage.Reset();
             OpenTibiaUnity.CreatureStorage.Reset();
-            //gameManager.SpellStorage.Reset();
+            OpenTibiaUnity.SpellStorage.Reset();
             OpenTibiaUnity.WorldMapStorage.Reset();
 
             OpenTibiaUnity.ProtocolGame = new ProtocolGame() {
@@ -204,7 +222,7 @@ namespace OpenTibiaUnity.Modules.Login
                 WorldIp = world.HostName,
                 WorldPort = world.Port,
             };
-
+            
             OpenTibiaUnity.ProtocolGame.Connect();
         }
 

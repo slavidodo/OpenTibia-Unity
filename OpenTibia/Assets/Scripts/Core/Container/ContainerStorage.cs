@@ -17,11 +17,15 @@ namespace OpenTibiaUnity.Core.Container
             BodyContainerView = new BodyContainerView();
         }
 
+        public void Reset() {
+
+        }
+
         public int GetAvailableInventory(uint id, int data) {
-            var lastIndex = m_PlayerInventory.Count - 1;
+            int lastIndex = m_PlayerInventory.Count - 1;
             int index = 0;
             while (index <= lastIndex) {
-                int tmpIndex = (int)(index + (uint)lastIndex >> 1);
+                int tmpIndex = index + lastIndex >> 1;
                 var typeInfo = m_PlayerInventory[tmpIndex];
                 int direction = typeInfo.Compare((int)id, data);
                 if (direction < 0)

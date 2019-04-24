@@ -37,11 +37,6 @@ namespace OpenTibiaUnity.Core.Utility
         private CursorState m_CursorState = CursorState.Default;
         private CursorPriority m_CursorPriority = CursorPriority.Low;
         private Texture2D[] m_CurrentTextures = null;
-        private List<Tuple<CursorState, CursorPriority>> m_CursorStack;
-
-        private void Awake() {
-            m_CursorStack = new List<Tuple<CursorState, CursorPriority>>();
-        }
 
         public void Start() {
             SetCursorState(CursorState.Default, CursorPriority.Low);
@@ -60,19 +55,10 @@ namespace OpenTibiaUnity.Core.Utility
 
         public void SetCursorState(CursorState cursorState, CursorPriority priority) {
             if (m_CursorState != cursorState) {
-                if (cursorState == CursorState.Default) {
-                    var tuple = PopCursorFromStack();
-                    cursorState = tuple.Item1;
-                    priority = tuple.Item2;
-                } else if (m_CursorPriority > priority) {
-                    PushCursorToStack(cursorState, priority);
+                if (cursorState == CursorState.Default)
+                    priority = CursorPriority.Low;
+                else if (priority < m_CursorPriority)
                     return;
-                }
-                
-                if (cursorState != CursorState.Default && m_CursorState != CursorState.Default) {
-                    // a higher priority cursor will overlap //
-                    PushCursorToStack(m_CursorState, m_CursorPriority);
-                }
 
                 m_CursorState = cursorState;
                 m_CursorPriority = priority;
@@ -146,42 +132,6 @@ namespace OpenTibiaUnity.Core.Utility
                     Cursor.SetCursor(null, Vector2.zero, CursorMode.Auto);
                 }
             }
-        }
-
-        private void PushCursorToStack(CursorState cursorState, CursorPriority priority) {
-            if (m_CursorStack == null)
-                m_CursorStack = new List<Tuple<CursorState, CursorPriority>>();
-
-            if (m_CursorStack.Count == 0) {
-                m_CursorStack.Add(Tuple.Create(cursorState, priority));
-                return;
-            }
-
-            var index = m_CursorStack.FindLastIndex((t) => t.Item2 == priority);
-            if (index == -1) {
-                if (priority == CursorPriority.High) { // high at the end
-                    m_CursorStack.Add(Tuple.Create(cursorState, priority));
-                } else if (priority == CursorPriority.Medium) {
-                    index = m_CursorStack.FindLastIndex((t) => t.Item2 == CursorPriority.Low);
-                    if (index == -1)
-                        m_CursorStack.Insert(0, Tuple.Create(cursorState, priority));
-                    else
-                        m_CursorStack.Insert(index, Tuple.Create(cursorState, priority));
-                } else if (priority == CursorPriority.Low) {
-                    m_CursorStack.Insert(0, Tuple.Create(cursorState, priority));
-                }
-            } else {
-                m_CursorStack.Insert(index, Tuple.Create(cursorState, priority));
-            }
-        }
-
-        private Tuple<CursorState, CursorPriority> PopCursorFromStack() {
-            if (m_CursorStack == null || m_CursorStack.Count == 0)
-                return Tuple.Create(CursorState.Default, CursorPriority.Low);
-
-            var tuple = m_CursorStack[m_CursorStack.Count - 1];
-            m_CursorStack.RemoveAt(m_CursorStack.Count - 1);
-            return tuple;
         }
     }
 }

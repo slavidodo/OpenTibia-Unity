@@ -24,61 +24,54 @@ namespace OpenTibiaUnity.Core.Creatures
         protected int m_BankGoldBalance = 0;
         protected int m_InventoryGoldBalance = 0;
 
+        protected double m_ExperienceBonus = 0.0f;
+
         protected UnityEngine.Vector3Int m_AutowalkPathDelta = UnityEngine.Vector3Int.zero;
         protected UnityEngine.Vector3Int m_AutowalkTarget = new UnityEngine.Vector3Int(-1, -1, -1);
         protected List<int> m_AutowalkPathSteps = new List<int>();
         protected List<int> m_KnownSpells = new List<int>();
 
         public override int HealthPercent {
-            get {
-                return (int)((GetSkillValue(SkillTypes.Health) / (float)GetSkillbase(SkillTypes.Health)) * 100);
-            }
+            get => (int)((GetSkillValue(SkillTypes.Health) / (float)GetSkillbase(SkillTypes.Health)) * 100);
         }
 
         public override int ManaPercent {
-            get {
-                return (int)((GetSkillValue(SkillTypes.Mana) / (float)GetSkillbase(SkillTypes.Mana)) * 100);
-            }
+            get => (int)((GetSkillValue(SkillTypes.Mana) / (float)GetSkillbase(SkillTypes.Mana)) * 100);
         }
 
         public int Mana {
-            get {
-                return GetSkillValue(SkillTypes.Mana);
-            }
+            get => GetSkillValue(SkillTypes.Mana);
         }
 
         public int Level {
-            get {
-                return GetSkillValue(SkillTypes.Level);
-            }
+            get => GetSkillValue(SkillTypes.Level);
         }
 
         public int LevelPercent {
-            get {
-                return GetSKillProgress(SkillTypes.Level);
-            }
+            get => GetSKillProgress(SkillTypes.Level);
         }
 
         protected ExperienceGainInfo m_ExperienceGainInfo = new ExperienceGainInfo();
-        public ExperienceGainInfo ExperienceGainInfo {
-            get { return m_ExperienceGainInfo; }
-        }
+        protected SkillCounter m_ExperienceCounter = new SkillCounter();
+
+        public double ExperienceBonus { get => m_ExperienceBonus; set => m_ExperienceBonus = value; } // <= 1096
+        public ExperienceGainInfo ExperienceGainInfo { get => m_ExperienceGainInfo; } // >= 1097
 
         protected uint m_StateFlags = 0;
         public uint StateFlags {
-            get { return m_StateFlags; }
-            set { if (m_StateFlags != value) { var old = m_StateFlags; m_StateFlags = value; onStateFlagsChange.Invoke(this, m_StateFlags, old); } }
+            get => m_StateFlags;
+            set => UpdateStateFlags(value);
         }
 
         public UnityEngine.Vector3Int AnticipatedPosition {
-            get {
-                return m_Position + m_AutowalkPathDelta;
-            }
+            get => m_Position + m_AutowalkPathDelta;
         }
-        
-        public Player(uint id, string name = null) : base(id, CreatureTypes.Player, name) {
-            
+
+        public bool IsFighting {
+            get => (m_StateFlags & 1 << (int)States.Fighting) > 0;
         }
+
+        public Player(uint id, string name = null) : base(id, CreatureTypes.Player, name) {}
 
         public void StartAutowalk(UnityEngine.Vector3Int targetPosition, bool diagonal, bool exact) {
             StartAutowalk(targetPosition.x, targetPosition.y, targetPosition.z, diagonal, exact);
@@ -107,7 +100,7 @@ namespace OpenTibiaUnity.Core.Creatures
             if (worldMapStorage.IsVisible(targetX, targetY, targetZ, true)) {
                 UnityEngine.Vector3Int s_v1 = new UnityEngine.Vector3Int(targetX, targetY, targetZ);
                 worldMapStorage.ToMap(s_v1, out s_v1);
-                if ((s_v1.x != Constants.PlayerOffsetX || s_v1.y != Constants.PlayerOffsetY) && worldMapStorage.GetEnterPossibleFlag(s_v1.x, s_v1.y, s_v1.z, true) == Constants.FieldEnterNotPossible) {
+                if ((s_v1.x != Constants.PlayerOffsetX || s_v1.y != Constants.PlayerOffsetY) && worldMapStorage.GetEnterPossibleFlag(s_v1.x, s_v1.y, s_v1.z, true) == EnterPossibleFlag.NotPossible) {
                     worldMapStorage.AddOnscreenMessage(MessageModes.Failure, TextResources.MSG_SORRY_NOT_POSSIBLE);
                     return;
                 }
@@ -219,73 +212,73 @@ namespace OpenTibiaUnity.Core.Creatures
                     throw new System.Exception("Player.NextAutowalkStep: Invalid step(1): " + (m_AutowalkPathSteps[0] & 65535));
             }
 
-            var s_v1 = worldMapStorage.ToMap(m_Position);
-            var s_v2 = worldMapStorage.ToMap(m_Position);
+            var mapPosition = worldMapStorage.ToMap(m_Position);
+            var tmpMapPosition = mapPosition;
 
-            s_v2.x += m_AutowalkPathDelta.x;
-            s_v2.y += m_AutowalkPathDelta.y;
+            tmpMapPosition.x += m_AutowalkPathDelta.x;
+            tmpMapPosition.y += m_AutowalkPathDelta.y;
 
             // Tile should be walkable (full ground)
             Appearances.ObjectInstance obj = null;
-            if (!(obj = worldMapStorage.GetObject(s_v2.x, s_v2.y, s_v2.z, 0)) || !obj.Type || !obj.Type.IsBank) {
+            if (!(obj = worldMapStorage.GetObject(tmpMapPosition.x, tmpMapPosition.y, tmpMapPosition.z, 0)) || !obj.Type || !obj.Type.IsGround) {
                 m_AutowalkPathDelta.Set(0, 0, 0);
                 return;
             }
 
-            uint possibleFlag = worldMapStorage.GetEnterPossibleFlag(s_v2.x, s_v2.y, s_v2.z, false);
-            if (possibleFlag == Constants.FieldEnterNotPossible || worldMapStorage.GetFieldHeight(s_v1.x, s_v1.y, s_v1.z) + 1 < worldMapStorage.GetFieldHeight(s_v2.x, s_v2.y, s_v2.z)) {
+            EnterPossibleFlag enterFlag = worldMapStorage.GetEnterPossibleFlag(tmpMapPosition.x, tmpMapPosition.y, tmpMapPosition.z, false);
+            if (enterFlag == EnterPossibleFlag.NotPossible || worldMapStorage.GetFieldHeight(mapPosition.x, mapPosition.y, mapPosition.z) + 1 < worldMapStorage.GetFieldHeight(tmpMapPosition.x, tmpMapPosition.y, tmpMapPosition.z)) {
                 m_AutowalkPathDelta.Set(0, 0, 0);
                 return;
             }
 
-            if (possibleFlag == Constants.FieldEnterPossible) {
-                base.StartMovementAnimation(m_AutowalkPathDelta.x, m_AutowalkPathDelta.y, (int)obj.Type.Waypoints);
+            if (enterFlag == EnterPossibleFlag.Possible) {
+                base.StartMovementAnimation(m_AutowalkPathDelta.x, m_AutowalkPathDelta.y, (int)obj.Type.GroundSpeed);
                 m_AnimationDelta.x = m_AnimationDelta.x + m_AutowalkPathDelta.x * Constants.FieldSize;
                 m_AnimationDelta.y = m_AnimationDelta.y + m_AutowalkPathDelta.y * Constants.FieldSize;
-            } else if (possibleFlag == Constants.FieldEnterPossibleNoAnimation) {
+            } else if (enterFlag == EnterPossibleFlag.PossibleNoAnimation) {
                 m_AnimationDelta.Set(0, 0, 0);
             }
 
             for (int i = 1; i < m_AutowalkPathSteps.Count; i++) {
-                var rawDirection = m_AutowalkPathSteps[i] & 65535;
+                var pathDirection = (PathDirection)(m_AutowalkPathSteps[i] & 65535);
                 var mapCost = ((uint)m_AutowalkPathSteps[i] & 4294901760U) >> 16;
-                switch ((PathDirection)rawDirection) {
+                switch (pathDirection) {
                     case PathDirection.East:
-                        s_v2.x = s_v2.x + 1;
+                        tmpMapPosition.x += 1;
                         break;
                     case PathDirection.NorthEast:
-                        s_v2.x = s_v2.x + 1;
-                        s_v2.y = s_v2.y - 1;
+                        tmpMapPosition.x += 1;
+                        tmpMapPosition.y -= 1;
                         break;
                     case PathDirection.North:
-                        s_v2.y = s_v2.y - 1;
+                        tmpMapPosition.y -= 1;
                         break;
                     case PathDirection.NorthWest:
-                        s_v2.x = s_v2.x - 1;
-                        s_v2.y = s_v2.y - 1;
+                        tmpMapPosition.x -= 1;
+                        tmpMapPosition.y -= 1;
                         break;
                     case PathDirection.West:
-                        s_v2.x = s_v2.x - 1;
+                        tmpMapPosition.x -= 1;
                         break;
                     case PathDirection.SouthWest:
-                        s_v2.x = s_v2.x - 1;
-                        s_v2.y = s_v2.y + 1;
+                        tmpMapPosition.x -= 1;
+                        tmpMapPosition.y += 1;
                         break;
                     case PathDirection.South:
-                        s_v2.y = s_v2.y + 1;
+                        tmpMapPosition.y += 1;
                         break;
                     case PathDirection.SouthEast:
-                        s_v2.x = s_v2.x + 1;
-                        s_v2.y = s_v2.y + 1;
+                        tmpMapPosition.x += 1;
+                        tmpMapPosition.y += 1;
                         break;
                     default:
                         throw new System.Exception("Player.NextAutowalkStep: Invalid step(2): " + (m_AutowalkPathSteps[i] & 65535));
                 }
 
-                if (s_v2.x < 0 || s_v2.x >= Constants.MapSizeX || s_v2.y < 0 || s_v2.y >= Constants.MapSizeY)
+                if (tmpMapPosition.x < 0 || tmpMapPosition.x >= Constants.MapSizeX || tmpMapPosition.y < 0 || tmpMapPosition.y >= Constants.MapSizeY)
                     break;
 
-                if (worldMapStorage.GetMiniMapCost(s_v2.x, s_v2.y, s_v2.z) > mapCost) {
+                if (worldMapStorage.GetMiniMapCost(tmpMapPosition.x, tmpMapPosition.y, tmpMapPosition.z) > mapCost) {
                     protocolGame.SendStop();
                     m_AutowalkPathAborting = true;
                     break;
@@ -321,9 +314,8 @@ namespace OpenTibiaUnity.Core.Creatures
         }
 
         public override void StartMovementAnimation(int deltaX, int deltaY, int movementCost) {
-            if (deltaX != m_AutowalkPathDelta.x || deltaY != m_AutowalkPathDelta.y) {
+            if (deltaX != m_AutowalkPathDelta.x || deltaY != m_AutowalkPathDelta.y)
                 base.StartMovementAnimation(deltaX, deltaY, movementCost);
-            }
 
             m_AutowalkPathDelta.Set(0, 0, 0);
             if (m_AutowalkPathSteps.Count > 0) {
@@ -336,11 +328,10 @@ namespace OpenTibiaUnity.Core.Creatures
             m_AnimationDelta.x += m_AutowalkPathDelta.x * Constants.FieldSize;
             m_AnimationDelta.y += m_AutowalkPathDelta.y * Constants.FieldSize;
             if (!m_MovementRunning && m_AutowalkPathDelta == UnityEngine.Vector3Int.zero) {
-                if (m_AutowalkPathSteps.Count > 0) {
+                if (m_AutowalkPathSteps.Count > 0)
                     NextAutowalkStep();
-                } else {
+                else
                     StartAutowalkInternal();
-                }
             }
         }
 
@@ -352,6 +343,52 @@ namespace OpenTibiaUnity.Core.Creatures
             m_Skills = new SkillStruct[(int)SkillTypes.ManaLeechAmount + 1];
             //m_ExperienceCounter.Reset();
             //m_ExperienceGainInfo.Reset();
+        }
+
+        public override void SetSkill(SkillTypes skillType, int level, int baseLevel = 0, int percentage = 0) {
+            switch (skillType) {
+                case SkillTypes.Experience:
+                    var currentLevel = GetSkillValue(skillType);
+                    if (level >= currentLevel) {
+                        if (currentLevel > 0)
+                            m_ExperienceCounter.AddSkillGain(level - currentLevel);
+                    } else {
+                        m_ExperienceCounter.Reset();
+                    }
+
+                    base.SetSkill(skillType, level, baseLevel, percentage);
+                    break;
+                case SkillTypes.Food:
+                    base.SetSkill(skillType, level, baseLevel, percentage);
+                    UpdateStateFlags();
+                    break;
+                default:
+                    base.SetSkill(skillType, level, baseLevel, percentage);
+                    break;
+            }
+        }
+
+        public override void SetSkillValue(SkillTypes skillType, int level) {
+            switch (skillType) {
+                case SkillTypes.Experience:
+                    var currentLevel = GetSkillValue(skillType);
+                    if (level >= currentLevel) {
+                        if (currentLevel > 0)
+                            m_ExperienceCounter.AddSkillGain(level - currentLevel);
+                    } else {
+                        m_ExperienceCounter.Reset();
+                    }
+
+                    base.SetSkillValue(skillType, level);
+                    break;
+                case SkillTypes.Food:
+                    base.SetSkillValue(skillType, level);
+                    UpdateStateFlags();
+                    break;
+                default:
+                    base.SetSkillValue(skillType, level);
+                    break;
+            }
         }
 
         public override void Reset() {
@@ -372,16 +409,27 @@ namespace OpenTibiaUnity.Core.Creatures
             m_InventoryGoldBalance = 0;
         }
 
+        public void UpdateStateFlags(uint? value = null) {
+            var flags = value ?? m_StateFlags;
+            if (GetSkillValue(SkillTypes.Food) <= GetSkillbase(SkillTypes.Food))
+                flags |= 1U << (int)States.Hungry;
+
+            if (m_StateFlags != flags) {
+                var old = m_StateFlags;
+                m_StateFlags = flags;
+                onStateFlagsChange.Invoke(this, m_StateFlags, old);
+            }
+        }
+
         public int GetRuneUses(Magic.Rune rune) {
             if (rune == null || rune.RestrictLevel > GetSkillValue(SkillTypes.Level)
                              || rune.RestrictMagicLevel > GetSkillValue(SkillTypes.MagLevel)
-                             || (rune.RestrictProfession & (1 << m_Profession)) == 0) {
+                             || (rune.RestrictProfession & (1 << m_Profession)) == 0)
                 return -1;
-            }
 
-            if (rune.CastMana <= Mana) {
+
+            if (rune.CastMana <= Mana)
                 return rune.CastMana > 0 ? Mana / rune.CastMana : int.MaxValue;
-            }
             return 0;
         }
     }

@@ -1,0 +1,12 @@
+# ===========================
+# sprites-related items
+# ===========================
+
+appearances.dat
+appearances.dat.meta
+catalog-content.json
+catalog-content.json.meta
+sprites
+sprites.meta
+sprites.manifest
+sprites.manifest.meta

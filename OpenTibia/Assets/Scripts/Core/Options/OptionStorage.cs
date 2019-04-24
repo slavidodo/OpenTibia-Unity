@@ -88,15 +88,15 @@ namespace OpenTibiaUnity.Core.Options
         public int FramerateLimit = 50;
         public bool ShowLightEffects = true;
         public int AmbientBrightness = 25; // Default: 25
-        public int LevelSeparator = 100; // Default: 33. If you want to play like tibia 10 (set this to 100)
+        public int LightLevelSeparator = 100; // Default: 33. If you want to play like tibia 10 (set this to 100)
         public int CloudAndIndoorEffect = 100; // Default: 100
         public bool AskBeforeBuyingProducts = true;
         public bool AskBeforeShowingContainerContent = true;
         public bool StayLoggedInForASession = true;
         public bool OptimiseConnectionStability = true;
         public bool QuickLogin = true;
-        /* AllowAllToInspectMe */
-        /* AutoChaseOff */
+        /* AllowAllToInspectMe (basic) */
+        /* AutoChaseOff (basic) */
         public bool OnlyCaptureGameWindow = true;
         public bool KeepBacklogOfScreenshotsOfTheLast5Seconds = false;
         public bool EnableAutoScreenshots = true;
@@ -125,16 +125,24 @@ namespace OpenTibiaUnity.Core.Options
         //[NonSerialized] private List<SideBarSet> m_SideBarSets;
         //[NonSerialized] private List<ActionBarSet> m_ActionBarSets;
         [NonSerialized] private List<MappingSet> m_MappingSets;
-        [NonSerialized] private MouseMapping m_MouseMapping;
         [NonSerialized] private List<MessageFilterSet> m_MessageFilterSets;
         //[NonSerialized] private List<ChannelSet> m_ChannelSets;
-        //[NonSerialized] private List<NameFilterSet> m_NameFilterSets;
+        [NonSerialized] private List<NameFilterSet> m_NameFilterSets;
         //[NonSerialized] private List<BuddySet> m_BuddySets;
+
+        // Proper options for client versions
+        public int FixedLightLevelSeparator {
+            get {
+                if (OpenTibiaUnity.GameManager.ClientVersion < 1100)
+                    return 100;
+                return LightLevelSeparator;
+            }
+        }
 
         public OptionStorage() {
             m_MappingSets = new List<MappingSet>();
-            m_MouseMapping = new MouseMapping();
             m_MessageFilterSets = new List<MessageFilterSet>();
+            m_NameFilterSets = new List<NameFilterSet>();
 
             InitialiseMappingSet();
             InitialiseMessageFilterSets();
@@ -150,7 +158,12 @@ namespace OpenTibiaUnity.Core.Options
 
         public void InitialiseMessageFilterSets() {
             m_MessageFilterSets.Clear();
-            m_MessageFilterSets.Add(MessageFilterSet.DefaultFilterSet);
+            m_MessageFilterSets.Add(new MessageFilterSet(MessageFilterSet.DefaultSet));
+        }
+
+        public void InitialiseNameFilterSets() {
+            m_NameFilterSets.Clear();
+            m_NameFilterSets.Add(new NameFilterSet(NameFilterSet.DefaultSet));
         }
 
         public void RemoveStarterMappings() {
@@ -175,6 +188,10 @@ namespace OpenTibiaUnity.Core.Options
 
         public MessageFilterSet GetMessageFilterSet(int id) {
             return GetListItem(m_MessageFilterSets, id);
+        }
+
+        public NameFilterSet GetNameFilterSet(int id) {
+            return GetListItem(m_NameFilterSets, id);
         }
 
         public T GetListItem<T>(List<T> list, int index) {

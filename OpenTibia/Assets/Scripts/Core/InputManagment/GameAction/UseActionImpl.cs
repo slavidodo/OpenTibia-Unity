@@ -1,10 +1,12 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.EventSystems;
 
 namespace OpenTibiaUnity.Core.InputManagment.GameAction
 {
-    class UseActionImpl : IActionImpl
+    public class UseActionImpl : IActionImpl
     {
-        public UseActionImpl ConcurrentMultiUse = null;
+        public static UseActionImpl ConcurrentMultiUse = null;
 
         Vector3Int m_AbsolutePosition;
         Appearances.AppearanceType m_AppearanceType;
@@ -15,8 +17,8 @@ namespace OpenTibiaUnity.Core.InputManagment.GameAction
             Init(absolutePosition, objectInstance?.Type, positionOrData, useTarget);
         }
 
-        public UseActionImpl(Vector3Int absolutePosition, Appearances.AppearanceType appearnceType, int positionOrData, UseActionTarget useTarget) {
-            Init(absolutePosition, appearnceType, positionOrData, useTarget);
+        public UseActionImpl(Vector3Int absolutePosition, Appearances.AppearanceType appearanceType, int positionOrData, UseActionTarget useTarget) {
+            Init(absolutePosition, appearanceType, positionOrData, useTarget);
         }
 
         public UseActionImpl(Vector3Int absolutePosition, uint objectID, int positionOrData, UseActionTarget useTarget) {
@@ -24,10 +26,10 @@ namespace OpenTibiaUnity.Core.InputManagment.GameAction
             Init(absolutePosition, appearnceType, positionOrData, useTarget);
         }
         
-        protected void Init(Vector3Int absolutePosition, Appearances.AppearanceType type, int positionOrData, UseActionTarget useTarget) {
-            m_AppearanceType = type;
+        protected void Init(Vector3Int absolutePosition, Appearances.AppearanceType appearanceType, int positionOrData, UseActionTarget useTarget) {
+            m_AppearanceType = appearanceType;
             if (!m_AppearanceType)
-                throw new System.ArgumentException("UseActionImpl.UseActionImpl: Invalid type: " + type);
+                throw new System.ArgumentException("UseActionImpl.UseActionImpl: Invalid type: " + appearanceType);
 
             m_AbsolutePosition = absolutePosition;
             if (m_AbsolutePosition.x == 65535 && m_AbsolutePosition.y == 0)
@@ -94,22 +96,42 @@ namespace OpenTibiaUnity.Core.InputManagment.GameAction
             }
         }
 
-        private void OnUsePerform(Event e, bool repeat) {
-            // ConcurrentUse
+        private void OnUsePerform(Event e, MouseButtons mouseButton, bool repeat) {
+            if ((mouseButton & MouseButtons.Left) == 0)
+                return;
+            
+            UpdateGlobalListeners(false);
+            UpdateCursor(false);
+            ConcurrentMultiUse = null;
+            
+            var pointerEventData = new PointerEventData(OpenTibiaUnity.EventSystem);
+            List<RaycastResult> results = new List<RaycastResult>();
+
+            // we must use the active raycaster to make sure that if the game
+            // is not running, we catch nothing in terms of (IWidgetContainerWidget)
+            OpenTibiaUnity.ActiveRaycaster.Raycast(pointerEventData, results);
+            foreach (var result in results) {
+                Debug.Log(result.gameObject.name + ": " + result.distance);
+            }
         }
 
-        private void OnUseAbort(Event e, bool repeat) {
+        private void OnUseAbort(Event e, MouseButtons mouseButton, bool repeat) {
+            if ((mouseButton & MouseButtons.Right) == 0)
+                return;
 
+            UpdateGlobalListeners(false);
+            UpdateCursor(false);
+            ConcurrentMultiUse = null;
         }
         
         private void UpdateGlobalListeners(bool add) {
             var inputManager = OpenTibiaUnity.InputHandler;
             if (add) {
-                inputManager.AddLeftMouseUpListener(OnUsePerform);
-                inputManager.AddLeftMouseDownListener(OnUseAbort);
+                inputManager.AddMouseUpListener(Utility.EventImplPriority.High, OnUsePerform);
+                inputManager.AddMouseDownListener(Utility.EventImplPriority.High, OnUseAbort);
             } else {
-                inputManager.RemoveLeftMouseUpListener(OnUsePerform);
-                inputManager.RemoveLeftMouseDownListener(OnUseAbort);
+                inputManager.RemoveMouseUpListener(OnUsePerform);
+                inputManager.RemoveMouseDownListener(OnUseAbort);
             }
         }
 

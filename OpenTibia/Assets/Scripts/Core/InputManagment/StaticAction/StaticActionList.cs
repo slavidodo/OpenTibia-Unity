@@ -6,6 +6,8 @@
         public static LogoutCharacter MiscLogoutCharacter = new LogoutCharacter(11, "MISC_LOGOUT_CHARACTER", InputEvent.KeyDown);
         public static ChangeCharacter MiscChangeCharacter = new ChangeCharacter(12, "MISC_CHANGE_CHARACTER", InputEvent.KeyDown);
 
+        public static ShowDialog MiscShowOutfit = new ShowDialog(18, "MISC_SHOW_OUTFIT", InputEvent.KeyDown, DialogType.CharacterOutfit);
+
         // Chat
         public static ChatMoveCursorHome ChatMoveCursorHome = new ChatMoveCursorHome(259, "CHAT_MOVE_CURSOR_HOME", InputEvent.KeyDown);
         public static ChatMoveCursorEnd ChatMoveCursorEnd = new ChatMoveCursorEnd(260, "CHAT_MOVE_CURSOR_END", InputEvent.KeyDown);

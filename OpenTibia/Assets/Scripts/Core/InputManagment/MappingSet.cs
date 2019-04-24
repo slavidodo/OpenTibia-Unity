@@ -37,11 +37,7 @@ namespace OpenTibiaUnity.Core.InputManagment
         static MappingSet() {
             ChatModeOffDefaultBindings = new Binding[] {
                 new Binding(StaticActionList.MiscLogoutCharacter, 'q', KeyCode.Q, EventModifiers.Control),
-#if UNITY_EDITOR
-                new Binding(StaticActionList.MiscChangeCharacter, 'm', KeyCode.M, EventModifiers.Control),
-#else
-                new Binding(StaticActionList.MiscChangeCharacter, 'f', KeyCode.F, EventModifiers.Control),
-#endif
+                new Binding(StaticActionList.MiscChangeCharacter, 'g', KeyCode.G, EventModifiers.Control),
                 //new Binding(StaticActionList.MiscEditOptions, 'z', KeyCode.Z, EventModifiers.Control),
                 //new Binding(StaticActionList.MiscEditOptions, 'k', KeyCode.K, EventModifiers.Control),
                 new Binding(StaticActionList.PlayerMount, 'r', KeyCode.R, EventModifiers.Control),
@@ -70,11 +66,7 @@ namespace OpenTibiaUnity.Core.InputManagment
 
             ChatModeOnDefaultBindings = new Binding[] {
                 new Binding(StaticActionList.MiscLogoutCharacter, 'q', KeyCode.Q, EventModifiers.Control),
-#if UNITY_EDITOR
-                new Binding(StaticActionList.MiscChangeCharacter, 'm', KeyCode.M, EventModifiers.Control),
-#else
-                new Binding(StaticActionList.MiscChangeCharacter, 'f', KeyCode.F, EventModifiers.Control),
-#endif
+                new Binding(StaticActionList.MiscChangeCharacter, 'g', KeyCode.G, EventModifiers.Control),
                 //new Binding(StaticActionList.MiscEditOptions, 'z', KeyCode.Z, EventModifiers.Control),
                 //new Binding(StaticActionList.MiscEditOptions, 'k', KeyCode.K, EventModifiers.Control),
                 new Binding(StaticActionList.PlayerMount, 'r', KeyCode.R, EventModifiers.Control),

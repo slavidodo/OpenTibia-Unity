@@ -6,40 +6,60 @@ namespace OpenTibiaUnity.Core.Appearances
     {
         private static List<ObjectInstance> EnvironmentalEffects = new List<ObjectInstance>();
 
-        Proto.Appearances001.Appearances m_ProtoAppearances;
+        Proto.Appearances.Appearances m_ProtoAppearances;
         SpritesProvider m_SpritesProvider;
-        private AppearanceType m_CreatureAppearanceType;
+        private readonly AppearanceType m_CreatureAppearanceType = new AppearanceType(AppearanceInstance.Creature, null, AppearanceCategory.Outfit);
+        private AppearanceType m_InvisibleOutfitType;
 
         private List<AppearanceType> m_ObjectTypes;
         private List<AppearanceType> m_EffectTypes;
         private List<AppearanceType> m_MissileTypes;
         private List<AppearanceType> m_OutfitTypes;
+
+        private List<AppearanceType> m_MarketObjectTypes;
+        private List<AppearanceTypeInfo> m_ObjectTypeInfoCache;
         
-        public void SetProtoAppearances(Proto.Appearances001.Appearances appearances) {
+        public void SetProtoAppearances(Proto.Appearances.Appearances appearances) {
             m_ProtoAppearances = appearances;
-
-            m_CreatureAppearanceType = new AppearanceType(AppearanceInstance.Creature, null);
-
+            
             m_ObjectTypes = new List<AppearanceType>(m_ProtoAppearances.Objects.Count);
-            foreach (var appearance in m_ProtoAppearances.Objects)
-                m_ObjectTypes.Add(new AppearanceType(appearance.Id, appearance));
+            m_MarketObjectTypes = new List<AppearanceType>();
+            foreach (var appearance in m_ProtoAppearances.Objects) {
+                var type = new AppearanceType(appearance.Id, appearance, AppearanceCategory.Object);
+                m_ObjectTypes.Add(type);
+                if (type.IsMarket)
+                    m_MarketObjectTypes.Add(type);
+            }
 
             m_EffectTypes = new List<AppearanceType>(m_ProtoAppearances.Effects.Count);
             foreach (var appearance in m_ProtoAppearances.Effects)
-                m_EffectTypes.Add(new AppearanceType(appearance.Id, appearance));
+                m_EffectTypes.Add(new AppearanceType(appearance.Id, appearance, AppearanceCategory.Effect));
 
             m_MissileTypes = new List<AppearanceType>(m_ProtoAppearances.Missles.Count);
             foreach (var appearance in m_ProtoAppearances.Missles)
-                m_MissileTypes.Add(new AppearanceType(appearance.Id, appearance));
+                m_MissileTypes.Add(new AppearanceType(appearance.Id, appearance, AppearanceCategory.Missile));
 
             m_OutfitTypes = new List<AppearanceType>(m_ProtoAppearances.Outfits.Count);
             foreach (var appearance in m_ProtoAppearances.Outfits)
-                m_OutfitTypes.Add(new AppearanceType(appearance.Id, appearance));
+                m_OutfitTypes.Add(new AppearanceType(appearance.Id, appearance, AppearanceCategory.Outfit));
+            
+            m_InvisibleOutfitType = m_EffectTypes[13 - 1];
         }
 
         public void SetSpriteProvider(SpritesProvider spriteProvider) => m_SpritesProvider = spriteProvider;
         public void UnloadSpriteProvider() => m_SpritesProvider?.Unload();
         public CachedSpriteInformation GetSprite(uint spriteID) => m_SpritesProvider.GetSprite(spriteID);
+
+        public void Unload() {
+            UnloadSpriteProvider();
+            m_SpritesProvider = null;
+
+            m_ObjectTypes?.Clear();
+            m_EffectTypes?.Clear();
+            m_MissileTypes?.Clear();
+            m_OutfitTypes?.Clear();
+            m_ProtoAppearances = null;
+        }
 
         public AppearanceType GetObjectType(uint id) {
             if (m_ObjectTypes == null)
@@ -65,6 +85,8 @@ namespace OpenTibiaUnity.Core.Appearances
             return null;
         }
 
+        public ObjectInstance CreateObjectInstance(uint id, int data) => CreateObjectInstance(id, (uint)data);
+
         public EffectInstance CreateEffectInstance(uint id) {
             if (m_EffectTypes == null)
                 throw new System.Exception("AppearanceStorage.CreateEffectInstance: proto appearances not loaded.");
@@ -87,16 +109,25 @@ namespace OpenTibiaUnity.Core.Appearances
             if (m_OutfitTypes == null)
                 throw new System.Exception("AppearanceStorage.CreateOutfitInstance: proto appearances not loaded.");
 
-            if (id >= 1 && id <= m_OutfitTypes.Count || id == OutfitInstance.InvisibleOutfitID) {
-                int index = id == OutfitInstance.InvisibleOutfitID ? (int)id : (int)(id - 1);
-                return new OutfitInstance(id, m_OutfitTypes[index], head, body, legs, feet, addons);
+            if (id == OutfitInstance.InvisibleOutfitID) {
+                return new OutfitInstance(id, m_InvisibleOutfitType, head, body, legs, feet, addons);
+            } else if (id >= 1 && id <= m_OutfitTypes.Count) {
+                return new OutfitInstance(id, m_OutfitTypes[(int)id - 1], head, body, legs, feet, addons);
             }
                 
             return null;
         }
 
+        public TextualEffectInstance CreateTextualEffect(int color, int value) {
+            return new TextualEffectInstance(color, value);
+        }
+
+        public TextualEffectInstance CreateTextualEffect(int color, string value) {
+            return new TextualEffectInstance(color, value);
+        }
+
         public ObjectInstance CreateEnvironmentalEffect(uint id) {
-            // TODO:
+            // TODO(priority=low):
             // this code will actually return null all the time
             // since environmental_effects is always empty..
 

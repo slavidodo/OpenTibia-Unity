@@ -30,7 +30,7 @@ namespace OpenTibiaUnity.Core.Network
         private bool m_FirstRecv = true;
         private byte m_PrevOpcode = 0;
         private byte m_LastOpcode = 0;
-
+        
         public int BeatDuration = 0;
 
         // More accurate about the game play..
@@ -38,9 +38,12 @@ namespace OpenTibiaUnity.Core.Network
         public bool GameEndProcessed { get; private set; } = false;
 
         public ProtocolGame() : base() {
+            BuildMessageNodesMap(OpenTibiaUnity.GameManager.ClientVersion);
         }
 
         public override void Connect() {
+            m_Player.Name = CharacterName;
+
             Connect(WorldIp, WorldPort);
         }
         public void Disconnect(bool forceLogout = true) {
@@ -60,8 +63,14 @@ namespace OpenTibiaUnity.Core.Network
                 ChecksumEnabled = true;
             }
 
-            if (!gameManager.GetFeature(GameFeatures.GameChallengeOnLogin))
-                SendLoginPacket(0, 0);
+            if (!gameManager.GetFeature(GameFeatures.GameChallengeOnLogin)) {
+                try {
+                    SendLoginPacket(0, 0);
+                } catch (Exception e) {
+                    Debug.Log(e);
+                    OnError(SocketError.SocketError, e.Message);
+                }
+            }
 
             BeginRecv();
         }
@@ -83,35 +92,41 @@ namespace OpenTibiaUnity.Core.Network
                 try {
                     base.OnRecv(message);
                 } catch (Exception e) {
-                    string err = string.Format("ProtocolGame.OnRecv: {0}\nStackTrace: {1}", e.Message, new System.Diagnostics.StackTrace(e, true));
-                    m_ChatStorage.AddDebugMessage(err);
+                    m_ChatStorage.AddDebugMessage(string.Format("ProtocolGame.OnRecv: {0}\nStackTrace: {1}", e.Message, new System.Diagnostics.StackTrace(e, true)));
                     return;
                 }
 
                 if (m_FirstRecv) {
                     m_FirstRecv = false;
 
-                    ushort size = message.GetU16();
-                    int unreadSize = message.GetUnreadSize();
-                    if (unreadSize != size) {
-                        string err = string.Format("ProtocolGame.OnRecv: Invalid message size (size: {0}, unread: {1})", size, unreadSize);
-                        m_ChatStorage.AddDebugMessage(err);
-                        return;
+                    if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameMessageSizeCheck)) {
+                        ushort size = message.GetU16();
+                        int unreadSize = message.GetUnreadSize();
+                        if (unreadSize != size) {
+                            m_ChatStorage.AddDebugMessage(string.Format("ProtocolGame.OnRecv: Invalid message size (size: {0}, unread: {1})", size, unreadSize));
+                            return;
+                        }
                     }
                 }
 
                 bool read = false;
-                while (message.CanRead(1)) {
+                while (message.CanRead()) {
                     read = true;
                     byte opcode = message.PeekU8();
 
-                    try {
-                        if (!ParsePacket(message)) {
-                            break;
+                    if (!OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameLoginPending)) {
+                        if (!IsGameRunning && opcode > GameServerOpCodes.GameServerFirstGameOpcode) {
+                            IsGameRunning = true;
+                            OpenTibiaUnity.GameManager.ProcessGameStart();
                         }
+                    }
+
+                    try {
+                        if (!ParsePacket(message))
+                            break;
                     } catch (Exception e) {
-                        string err = string.Format("ProtocolGame: Opcode: {0}, last Opcode ({1}), prev Opcode ({2}).\n{3}\nStackTrace: {4}",
-                            opcode, m_LastOpcode, m_PrevOpcode, e.Message, new System.Diagnostics.StackTrace(e, true));
+                        string err = string.Format("ProtocolGame: failed parsing opcode: {0}, last opcode ({1}), prev opcode ({2}), unread ({3}).\nMessage: {4}\nStackTrace: {5}",
+                            opcode, m_LastOpcode, m_PrevOpcode, message.GetUnreadSize(), e.Message, new System.Diagnostics.StackTrace(e, true));
 
                         m_ChatStorage.AddDebugMessage(err);
                         break;
@@ -124,14 +139,14 @@ namespace OpenTibiaUnity.Core.Network
         }
 
         private void SendWorldName() {
-            var index = WorldName.IndexOf("\n");
+            int index = WorldName.IndexOf("\n");
             if (index > 0 && index != WorldName.Length - 1)
                 throw new Exception(@"ProtocolGame.SendWorldName: World name can't contain \n or \r\n.");
 
             if (!WorldName.EndsWith("\n"))
                 WorldName += "\n";
 
-            OutputMessage message = new OutputMessage();
+            var message = new OutputMessage();
             message.AddString(WorldName, true);
             WriteToOutput(message, true);
         }
@@ -139,56 +154,23 @@ namespace OpenTibiaUnity.Core.Network
         private bool ParsePacket(InputMessage message) {
             byte opcode = message.GetU8();
             switch (opcode) {
-                // CUSTOM
-                case 76:
-                    int size = message.GetU8();
-                    for (int i = 0; i < size; i++) {
-                        message.GetString();
-                        message.GetString();
-                        message.GetU16();
-                        message.GetU8();
-                    }
-                    
-                    size = message.GetU8();
-                    for (int i = 0; i < size; i++) {
-                        int type = message.GetU8();
-                        message.GetU32();
-                        message.GetU32();
-                        if (message.GetBool() != true) {
-                            if (message.GetBool() != true) {
-                                message.GetU32();
-                            }
-                        }
-
-                        if (type == 0) {
-                            message.GetU32();
-                            message.GetU32();
-
-                            int size2 = message.GetU8();
-                            for (int j = 0; j < size2; j++) {
-                                message.GetU16();
-                                message.GetString();
-                                message.GetU32();
-                            }
-                        }
-
-                        message.GetString();
-                        message.GetString();
-                    }
-
-                    break;
-                // END CUSTOM
-
                 case GameServerOpCodes.LoginOrPendingState:
-                    SendEnterGame();
+                    if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameLoginPending))
+                        OpenTibiaUnity.GameManager.ProcessGamePending();
+                    else
+                        ParseLoginSuccess(message);
                     break;
                 case GameServerOpCodes.GMActions:
                     ParseGmActions(message);
                     break;
                 case GameServerOpCodes.WorldEntered:
                     ParseWorldEntered(message);
-                    IsGameRunning = true;
-                    OpenTibiaUnity.GameManager.ProcessGameStart();
+
+                    if (!IsGameRunning) {
+                        IsGameRunning = true;
+                        OpenTibiaUnity.GameManager.ProcessGameStart();
+                    }
+
                     break;
                 case GameServerOpCodes.LoginError:
                     ParseLoginError(message);
@@ -209,7 +191,6 @@ namespace OpenTibiaUnity.Core.Network
                     SendPingBack();
                     break;
                 case GameServerOpCodes.PingBack:
-                    SendPing();
                     break;
                 case GameServerOpCodes.Challenge:
                     ParseChallange(message);
@@ -217,7 +198,7 @@ namespace OpenTibiaUnity.Core.Network
                 case GameServerOpCodes.Death:
                     ParseDeath(message);
                     break;
-                case GameServerOpCodes.OTClientOpcode:
+                case GameServerOpCodes.OTClientExtendedOpcode:
                     ParseOtclientExtendedOpcode(message);
                     break;
                 case GameServerOpCodes.FullMap:
@@ -280,8 +261,14 @@ namespace OpenTibiaUnity.Core.Network
                 case GameServerOpCodes.GraphicalEffect:
                     ParseGraphicalEffect(message);
                     break;
+                case GameServerOpCodes.TextEffect:
+                    ParseTextEffect(message);
+                    break;
                 case GameServerOpCodes.MissleEffect:
                     ParseMissleEffect(message);
+                    break;
+                case GameServerOpCodes.CreatureMark:
+                    ParseCreatureMark(message);
                     break;
 
                 case GameServerOpCodes.CreatureHealth:
@@ -411,7 +398,7 @@ namespace OpenTibiaUnity.Core.Network
                     break;
 
                 default:
-                    string err = string.Format("<ProtocolGame> Unknown Opcode received ({0}). Last Opcode ({1}). Prev Opcode ({2})", opcode, m_LastOpcode, m_PrevOpcode);
+                    string err = string.Format("<ProtocolGame> Unknown opcode received ({0}), last opcode ({1}), prev opcode ({2}), unread ({3})", opcode, m_LastOpcode, m_PrevOpcode, message.GetUnreadSize());
                     m_ChatStorage.AddDebugMessage(err);
                     return false;
             }
@@ -422,12 +409,13 @@ namespace OpenTibiaUnity.Core.Network
         }
 
         private void ParseDeath(InputMessage message) {
-            DeathType deathType = (DeathType)message.GetU8();
+            DeathType deathType = DeathType.DeathTypeRegular;
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameDeathType))
+                deathType = (DeathType)message.GetU8();
 
             int penalty = 100;
-            if (deathType == DeathType.DeathTypeRegular) {
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GamePenalityOnDeath) && deathType == DeathType.DeathTypeRegular)
                 penalty = message.GetU8();
-            }
             
             // TODO death actions...
             //LocalPlayer.OnDeath(deathType, penalty);

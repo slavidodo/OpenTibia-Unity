@@ -90,12 +90,17 @@ namespace OpenTibiaUnity.Core.Network
             m_Player.SetSkill(SkillTypes.Level, level, 1, levelPercent);
 
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameExperienceBonus)) {
-                float baseXpGain = message.GetU16() / 100f;
-                float voucherAddend = message.GetU16() / 100f;
-                float grindingAddend = message.GetU16() / 100f;
-                float storeBoostAddend = message.GetU16() / 100f;
-                float huntingBoostFactor = message.GetU16() / 100f;
-                m_Player.ExperienceGainInfo.UpdateGainInfo(baseXpGain, voucherAddend, grindingAddend, storeBoostAddend, huntingBoostFactor);
+                if (OpenTibiaUnity.GameManager.ClientVersion <= 1096) {
+                    double experienceBonus = message.GetDouble();
+                    m_Player.ExperienceBonus = experienceBonus;
+                } else {
+                    float baseXpGain = message.GetU16() / 100f;
+                    float voucherAddend = message.GetU16() / 100f;
+                    float grindingAddend = message.GetU16() / 100f;
+                    float storeBoostAddend = message.GetU16() / 100f;
+                    float huntingBoostFactor = message.GetU16() / 100f;
+                    m_Player.ExperienceGainInfo.UpdateGainInfo(baseXpGain, voucherAddend, grindingAddend, storeBoostAddend, huntingBoostFactor);
+                }
             }
 
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameDoubleHealth)) {
@@ -152,27 +157,43 @@ namespace OpenTibiaUnity.Core.Network
                 SkillTypes.Distance,
                 SkillTypes.Shield,
                 SkillTypes.Fishing };
-            SkillTypes[] specialSkills = new SkillTypes[] {
-                SkillTypes.CriticalHitChance,
-                SkillTypes.CriticalHitDamage,
-                SkillTypes.LifeLeechChance,
-                SkillTypes.LifeLeechAmount,
-                SkillTypes.ManaLeechChance,
-                SkillTypes.ManaLeechAmount };
-
+            
             foreach (var skill in skills) {
-                int level = message.GetU16();
-                int baseLevel = message.GetU16();
+                int level;
+                if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameDoubleSkills))
+                    level = message.GetU16();
+                else
+                    level = message.GetU8();
+
+                int baseLevel;
+                if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameSkillsBase))
+                    if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameBaseSkillU16))
+                        baseLevel = message.GetU16();
+                    else
+                        baseLevel = message.GetU8();
+                else
+                    baseLevel = level;
+                
                 int percentage = message.GetU8();
 
                 m_Player.SetSkill(skill, level, baseLevel, percentage);
             }
 
-            foreach (var skill in specialSkills) {
-                int level = message.GetU16();
-                int baseLevel = message.GetU16();
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameAdditionalSkills)) {
+                SkillTypes[] specialSkills = new SkillTypes[] {
+                    SkillTypes.CriticalHitChance,
+                    SkillTypes.CriticalHitDamage,
+                    SkillTypes.LifeLeechChance,
+                    SkillTypes.LifeLeechAmount,
+                    SkillTypes.ManaLeechChance,
+                    SkillTypes.ManaLeechAmount };
 
-                m_Player.SetSkill(skill, level, baseLevel);
+                foreach (var skill in specialSkills) {
+                    int level = message.GetU16();
+                    int baseLevel = message.GetU16();
+
+                    m_Player.SetSkill(skill, level, baseLevel);
+                }
             }
         }
 

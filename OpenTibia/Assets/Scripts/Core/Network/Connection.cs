@@ -11,6 +11,7 @@ namespace OpenTibiaUnity.Core.Network
         public delegate void OnConnectionDisconnect();
         public delegate void OnConnectionError(SocketError code, string message);
         public delegate void OnConnectionRecv(InputMessage message);
+        public delegate void OnSendMessage(OutputMessage message);
 
         public const int HEADER_LENGTH = 2;
 
@@ -22,6 +23,7 @@ namespace OpenTibiaUnity.Core.Network
         private OnConnectionDisconnect m_OnConnectionDisconnect;
         private OnConnectionError m_OnConnectionError;
         private OnConnectionRecv m_OnConnectionRecv;
+        private OnSendMessage m_OnSendMessage;
         
         public bool IsConnected {
             get {
@@ -32,27 +34,29 @@ namespace OpenTibiaUnity.Core.Network
         public Connection(OnConnectionConnect onConnected = null,
                             OnConnectionDisconnect onDisconnected = null,
                             OnConnectionError onError = null,
-                            OnConnectionRecv onRecv = null) {
+                            OnConnectionRecv onRecv = null,
+                            OnSendMessage onSendMessage = null) {
             m_OnConnectionConnect = onConnected;
             m_OnConnectionDisconnect = onDisconnected;
             m_OnConnectionError = onError;
             m_OnConnectionRecv = onRecv;
+            m_OnSendMessage = onSendMessage;
 
             m_MessageQueue = new Queue();
             m_Mutex = new object();
         }
         
         public void Connect(string ip, int port) {
-            var addresses = Dns.GetHostAddresses(ip);
-            if (addresses == null || addresses.Length != 1) {
-                OnError(SocketError.InvalidArgument, "Invalid IP/Hostname given as a parameter.");
-                return;
-            }
-            
-            IPEndPoint iPEndPoint = new IPEndPoint(addresses[0], port);
-            m_Socket = new Socket(iPEndPoint.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-            
             try {
+                var addresses = Dns.GetHostAddresses(ip);
+                if (addresses == null || addresses.Length != 1) {
+                    OnError(SocketError.InvalidArgument, "Invalid IP/Hostname given as a parameter.");
+                    return;
+                }
+
+                IPEndPoint iPEndPoint = new IPEndPoint(addresses[0], port);
+                m_Socket = new Socket(iPEndPoint.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+
                 m_Socket.BeginConnect(iPEndPoint, OnConnected, m_Socket);
             } catch (SocketException e) {
                 OnError(e.SocketErrorCode, e.Message);
@@ -86,11 +90,12 @@ namespace OpenTibiaUnity.Core.Network
             m_MessageQueue.Enqueue(message);
             
             if (empty)
-                publicSend(message);
+                internalSend(message);
         }
 
-        void publicSend(OutputMessage message) {
+        void internalSend(OutputMessage message) {
             try {
+                m_OnSendMessage?.Invoke(message);
                 m_Socket.BeginSend(message.GetBufferArray(), 0, message.GetBufferLength(), SocketFlags.None, OnSend, m_Socket);
             } catch (SocketException e) {
                 OnError(e.SocketErrorCode, e.Message);
@@ -149,7 +154,7 @@ namespace OpenTibiaUnity.Core.Network
             
             m_MessageQueue.Dequeue();
             if (m_MessageQueue.Count > 0)
-                publicSend((OutputMessage)m_MessageQueue.Peek());
+                internalSend((OutputMessage)m_MessageQueue.Peek());
         }
 
         protected void OnRecvHeader(IAsyncResult result) {

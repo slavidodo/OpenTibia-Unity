@@ -2,7 +2,7 @@
 {
     public interface IUseWidget
     {
-        Appearances.ObjectInstance GetUseObjectUnderPoint(UnityEngine.Vector2 point);
-        Appearances.ObjectInstance GetMultiUseObjectUnderPoint(UnityEngine.Vector2 point);
+        int GetUseObjectUnderPoint(UnityEngine.Vector3 mousePosition, out Appearances.ObjectInstance obj);
+        int GetMultiUseObjectUnderPoint(UnityEngine.Vector3 mousePosition, out Appearances.ObjectInstance obj);
     }
 }

@@ -4,21 +4,13 @@ namespace OpenTibiaUnity.Core.Network
 {
     public partial class ProtocolGame : Protocol
     {
-        private int m_PingSent = 0;
-        private int m_Ping = -1;
-        private System.Diagnostics.Stopwatch m_PingStopwatch = new System.Diagnostics.Stopwatch();
-
-        public int Ping {
-            get { return m_Ping; }
-        }
-
         // TODO: use a pool instead
         // and confirm the encryption of the packet ONLY on a successful sent
         // This is working, but using a pool is more of a robust
 
         public void SendLoginPacket(uint challengeTimestamp, byte challengeRandom) {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.PendingGame);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.PendingGame);
             message.AddU16(Utility.OperatingSystem.GetCurrentOs());
 
             var gameManager = OpenTibiaUnity.GameManager;
@@ -81,55 +73,49 @@ namespace OpenTibiaUnity.Core.Network
             if (gameManager.GetFeature(GameFeatures.GameLoginPacketEncryption))
                 XteaEnabled = true;
         }
-        private void SendEnterGame() {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.EnterGame);
+        public void SendEnterGame() {
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.EnterGame);
             WriteToOutput(message);
         }
         public void SendLeaveGame() {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.LeaveGame);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.LeaveGame);
             WriteToOutput(message);
         }
         public void SendPing() {
-            m_Ping = (int)m_PingStopwatch.ElapsedMilliseconds;
-
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.Ping);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.Ping);
             WriteToOutput(message);
-
-            m_PingSent++;
-            m_PingStopwatch.Restart();
         }
         public void SendPingBack() {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.PingBack);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.PingBack);
             WriteToOutput(message);
         }
         
-
         public void SendGo(List<int> pathSteps) {
             if (pathSteps == null)
                 return;
             
             m_CreatureStorage.ClearTargets();
-            OutputMessage message = new OutputMessage();
+            var message = new OutputMessage();
             if (pathSteps.Count == 1) {
                 switch ((PathDirection)(pathSteps[0] & 65535)) {
-                    case PathDirection.East: message.AddU8(ClientServerOpCodes.GoEast); break;
-                    case PathDirection.NorthEast: message.AddU8(ClientServerOpCodes.GoNorthEast); break;
-                    case PathDirection.North: message.AddU8(ClientServerOpCodes.GoNorth); break;
-                    case PathDirection.NorthWest: message.AddU8(ClientServerOpCodes.GoNorthWest); break;
-                    case PathDirection.West: message.AddU8(ClientServerOpCodes.GoWest); break;
-                    case PathDirection.SouthWest: message.AddU8(ClientServerOpCodes.GoSouthWest); break;
-                    case PathDirection.South: message.AddU8(ClientServerOpCodes.GoSouth); break;
-                    case PathDirection.SouthEast: message.AddU8(ClientServerOpCodes.GoSouthEast); break;
+                    case PathDirection.East: message.AddU8(GameClientOpCodes.GoEast); break;
+                    case PathDirection.NorthEast: message.AddU8(GameClientOpCodes.GoNorthEast); break;
+                    case PathDirection.North: message.AddU8(GameClientOpCodes.GoNorth); break;
+                    case PathDirection.NorthWest: message.AddU8(GameClientOpCodes.GoNorthWest); break;
+                    case PathDirection.West: message.AddU8(GameClientOpCodes.GoWest); break;
+                    case PathDirection.SouthWest: message.AddU8(GameClientOpCodes.GoSouthWest); break;
+                    case PathDirection.South: message.AddU8(GameClientOpCodes.GoSouth); break;
+                    case PathDirection.SouthEast: message.AddU8(GameClientOpCodes.GoSouthEast); break;
                     default: return;
                 }
             } else {
                 int pathMaxSteps = (byte)System.Math.Min(byte.MaxValue, pathSteps.Count);
 
-                message.AddU8(ClientServerOpCodes.GoPath);
+                message.AddU8(GameClientOpCodes.GoPath);
                 message.AddU8((byte)pathMaxSteps);
                 int i = 0;
                 while (i < pathMaxSteps) {
@@ -141,92 +127,132 @@ namespace OpenTibiaUnity.Core.Network
             WriteToOutput(message);
         }
         public void SendStop() {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.Stop);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.Stop);
             WriteToOutput(message);
         }
         public void SendTurnNorth() {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.TurnNorth);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.TurnNorth);
             WriteToOutput(message);
         }
         public void SendTurnEast() {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.TurnEast);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.TurnEast);
             WriteToOutput(message);
         }
         public void SendTurnSouth() {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.TurnSouth);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.TurnSouth);
             WriteToOutput(message);
         }
         public void SendTurnWest() {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.TurnWest);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.TurnWest);
             WriteToOutput(message);
         }
 
-        public void SendUseObject(UnityEngine.Vector3Int position, uint typeID, int positionOrData, int window) {
-            if (position.x != 65535)
+        public void SendMoveObject(UnityEngine.Vector3Int sourceAbsolute, uint typeID, int stackPos, UnityEngine.Vector3Int destAbsolute, int moveAmount) {
+            if (sourceAbsolute.x != 65535)
                 m_Player.StopAutowalk(false);
 
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.UseObject);
-            message.AddPosition(position);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.MoveObject);
+            message.AddPosition(sourceAbsolute);
             message.AddU16((ushort)typeID);
-            message.AddU8((byte)positionOrData);
+            message.AddU8((byte)stackPos);
+            message.AddPosition(destAbsolute);
+            message.AddU8((byte)moveAmount);
+            WriteToOutput(message);
+        }
+
+        public void SendUseObject(UnityEngine.Vector3Int absolute, uint typeID, int stackPosOrData, int window) {
+            if (absolute.x != 65535)
+                m_Player.StopAutowalk(false);
+
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.UseObject);
+            message.AddPosition(absolute);
+            message.AddU16((ushort)typeID);
+            message.AddU8((byte)stackPosOrData);
             message.AddU8((byte)window); // for containers
             WriteToOutput(message);
         }
 
-        public void SendUseTwoObjects(UnityEngine.Vector3Int firstPosition, uint firstID, int firstData, UnityEngine.Vector3Int secondPosition, uint secondID, int secondData) {
-            if (firstPosition.x != 65535 || secondPosition.x != 65535)
+        public void SendUseTwoObjects(UnityEngine.Vector3Int firstAbsolute, uint firstID, int firstData, UnityEngine.Vector3Int secondAbsolute, uint secondID, int secondData) {
+            if (firstAbsolute.x != 65535 || secondAbsolute.x != 65535)
                 m_Player.StopAutowalk(false);
 
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.UseTwoObject);
-            message.AddPosition(firstPosition);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.UseTwoObjects);
+            message.AddPosition(firstAbsolute);
             message.AddU16((ushort)firstID);
             message.AddU8((byte)firstData);
-            message.AddPosition(secondPosition);
+            message.AddPosition(secondAbsolute);
             message.AddU16((ushort)secondID);
             message.AddU8((byte)secondData);
             WriteToOutput(message);
         }
 
-        public void SendUseOnCreature(UnityEngine.Vector3Int position, uint typeID, int positionOrData, uint creatureID) {
-            if (position.x != 65535)
+        public void SendUseOnCreature(UnityEngine.Vector3Int absolute, uint typeID, int stackPosOrData, uint creatureID) {
+            if (absolute.x != 65535)
                 m_Player.StopAutowalk(false);
 
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.UseObject);
-            message.AddPosition(position);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.UseOnCreature);
+            message.AddPosition(absolute);
             message.AddU16((ushort)typeID);
-            message.AddU8((byte)positionOrData);
+            message.AddU8((byte)stackPosOrData);
             message.AddU32(creatureID);
             WriteToOutput(message);
         }
 
-        public void SendLook(UnityEngine.Vector3Int position, uint typeID, int stackPosition) {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.Look);
-            message.AddPosition(position);
+        public void SendTurnObject(UnityEngine.Vector3Int absolute, uint typeID, int stackPos) {
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.TurnObject);
+            message.AddPosition(absolute);
             message.AddU16((ushort)typeID);
-            message.AddU8((byte)stackPosition);
+            message.AddU8((byte)stackPos);
+            WriteToOutput(message);
+        }
+
+        public void SendToggleWrapState(UnityEngine.Vector3Int absolute, uint typeID, int stackPos) {
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.ToggleWrapState);
+            message.AddU8(GameClientOpCodes.ToggleWrapState);
+            message.AddPosition(absolute);
+            message.AddU16((ushort)typeID);
+            message.AddU8((byte)stackPos);
+            WriteToOutput(message);
+        }
+
+        public void SendLook(UnityEngine.Vector3Int absolute, uint typeID, int stackPos) {
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.Look);
+            message.AddPosition(absolute);
+            message.AddU16((ushort)typeID);
+            message.AddU8((byte)stackPos);
             WriteToOutput(message);
         }
 
         public void SendLookAtCreature(uint creatureID) {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.Look);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.Look);
+            message.AddU32(creatureID);
+            WriteToOutput(message);
+        }
+
+        public void SendJoinAggression(uint creatureID) {
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.JoinAggression);
             message.AddU32(creatureID);
             WriteToOutput(message);
         }
 
         public void SendTalk(MessageModes mode, params object[] rest) {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.Talk);
-            message.AddU8((byte)mode);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.Talk);
+            message.AddU8(TranslateMessageModeToServer(mode));
             
             if (rest.Length == 1 && rest[0] is string) {
                 message.AddString(rest[0] as string);
@@ -242,34 +268,34 @@ namespace OpenTibiaUnity.Core.Network
             WriteToOutput(message);
         }
         public void SendGetChannels() {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.GetChannels);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.GetChannels);
             WriteToOutput(message);
         }
         public void SendJoinChannel(int channelID) {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.JoinChannel);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.JoinChannel);
             message.AddU16((ushort)channelID);
             WriteToOutput(message);
         }
         public void SendLeaveChannel(int channelID) {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.LeaveChannel);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.LeaveChannel);
             message.AddU16((ushort)channelID);
             WriteToOutput(message);
         }
 
         public void SendCloseNPCChannel() {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.CloseNPCChannel);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.CloseNPCChannel);
             WriteToOutput(message);
         }
 
         public void SendSetTactics() {
             var optionStorage = OpenTibiaUnity.OptionStorage;
 
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.SetTactics);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.SetTactics);
             message.AddU8((byte)optionStorage.CombatAttackMode);
             message.AddU8((byte)optionStorage.CombatChaseMode);
             message.AddU8(optionStorage.CombatSecureMode ? (byte)1 : (byte)0);
@@ -278,54 +304,115 @@ namespace OpenTibiaUnity.Core.Network
         }
 
         public void SendAttack(uint creatureID) {
-            if (creatureID != 0) {
+            if (creatureID != 0)
                 m_Player.StopAutowalk(false);
-            }
 
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.Attack);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.Attack);
             message.AddU32(creatureID);
-            message.AddU32(creatureID); // Sequence
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameAttackSeq))
+                message.AddU32(creatureID); // Sequence
             WriteToOutput(message);
         }
 
         public void SendFollow(uint creatureID) {
-            if (creatureID != 0) {
+            if (creatureID != 0)
                 m_Player.StopAutowalk(false);
-            }
 
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.Follow);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.Follow);
             message.AddU32(creatureID);
-            message.AddU32(creatureID); // Sequence
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameAttackSeq))
+                message.AddU32(creatureID); // Sequence
+            WriteToOutput(message);
+        }
+
+        public void SendInviteToParty(uint creatureID) {
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.InviteToParty);
+            message.AddU32(creatureID);
+            WriteToOutput(message);
+        }
+
+        public void SendJoinParty(uint creatureID) {
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.JoinParty);
+            message.AddU32(creatureID);
+            WriteToOutput(message);
+        }
+
+        public void SendRevokeInvitation(uint creatureID) {
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.RevokeInvitation);
+            message.AddU32(creatureID);
+            WriteToOutput(message);
+        }
+
+        public void SendPassLeadership(uint creatureID) {
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.PassLeadership);
+            message.AddU32(creatureID);
+            WriteToOutput(message);
+        }
+
+        public void SendLeaveParty() {
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.LeaveParty);
+            WriteToOutput(message);
+        }
+
+        public void SendShareExperience(bool shared) {
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.ShareExperience);
+            message.AddBool(shared);
             WriteToOutput(message);
         }
 
         public void SendInviteToChannel(string name, int channelID) {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.InviteToChannel);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.InviteToChannel);
             message.AddString(name);
             message.AddU16((ushort)channelID);
             WriteToOutput(message);
         }
+
         public void SendExcludeFromChannel(string name, int channelID) {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.ExcludeFromChannel);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.ExcludeFromChannel);
             message.AddString(name);
             message.AddU16((ushort)channelID);
             WriteToOutput(message);
         }
 
         public void SendCancel() {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.Cancel);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.Cancel);
+            WriteToOutput(message);
+        }
+
+        public void SendBrowseField(UnityEngine.Vector3Int absolute) {
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.BrowseField);
+            message.AddPosition(absolute);
+            WriteToOutput(message);
+        }
+
+        public void SendGetOutfit() {
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.GetOutfit);
             WriteToOutput(message);
         }
 
         public void SendMount(bool toggle) {
-            OutputMessage message = new OutputMessage();
-            message.AddU8(ClientServerOpCodes.Mount);
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.Mount);
             message.AddBool(toggle);
+            WriteToOutput(message);
+        }
+
+        public void SendGetQuestLog() {
+            var message = new OutputMessage();
+            message.AddU8(GameClientOpCodes.GetQuestLog);
             WriteToOutput(message);
         }
     }

@@ -10,12 +10,12 @@ namespace OpenTibiaUnity.Core
         private static readonly Color?[] s_ColorsCache = new Color?[HSI_SI_VALUES * HSI_H_STEPS + 1];
 
         public static Color ColorFromHSI(int color) {
-            if (s_ColorsCache[color].HasValue) {
+            if (color >= HSI_H_STEPS * HSI_SI_VALUES)
+                color = 0;
+
+            if (s_ColorsCache[color].HasValue)
                 return s_ColorsCache[color].Value;
-            }
-
-            if (color >= HSI_H_STEPS * HSI_SI_VALUES) color = 0;
-
+            
             float loc1, loc2, loc3;
             if (color % HSI_H_STEPS != 0) {
                 loc1 = color % HSI_H_STEPS * 1.0f / 18.0f;
@@ -39,10 +39,8 @@ namespace OpenTibiaUnity.Core
 
             if (loc3 == 0)
                 return new Color(0, 0, 0);
-
-            if (loc2 == 0) {
+             else if (loc2 == 0)
                 return new Color(loc3, loc3, loc3);
-            }
 
             float red = 0, green = 0, blue = 0;
             if (loc1 < 1.0 / 6.0) {
@@ -75,17 +73,17 @@ namespace OpenTibiaUnity.Core
             return new Color(red, green, blue);
         }
 
-        public static Color ColorFromARGB(uint r, uint g, uint b, uint a) {
+        public static Color ColorFromRGBA(uint r, uint g, uint b, uint a) {
             return new Color((r & 255) / 255f, (g & 255) / 255f, (b & 255) / 255f, (a & 255) / 255f);
         }
 
-        public static Color ColorFromARGB(uint argb) {
-            uint a = argb >> 24;
-            uint r = argb >> 16;
-            uint g = argb >> 8;
-            uint b = argb;
+        public static Color ColorFromARGB(uint ARGB) {
+            uint a = ARGB >> 24;
+            uint r = ARGB >> 16;
+            uint g = ARGB >> 8;
+            uint b = ARGB;
 
-            return ColorFromARGB(r, g, b, a);
+            return ColorFromRGBA(r, g, b, a);
         }
 
         public static Color ColorFromRGB(uint r, uint g, uint b) {

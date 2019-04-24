@@ -2,6 +2,7 @@
 using OpenTibiaUnity.Core.Network;
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
@@ -24,7 +25,6 @@ namespace OpenTibiaUnity.Modules.Login
 
         private Core.Components.PopupWindow m_LoggerWindow;
         private ProtocolLogin m_ProtocolLogin;
-        private string m_SessionKey;
         private int m_MotdNum;
         private string m_Motd;
         private string m_LoginError;
@@ -33,12 +33,16 @@ namespace OpenTibiaUnity.Modules.Login
         private bool m_LoggerWindowActive = false;
         private bool m_LoggerWindowDisposable = false;
 
-        public string AccountName {
+        private string m_SessionKey = string.Empty;
+        private string m_AccountName = string.Empty;
+        private string m_Password = string.Empty;
+
+        public string InputAccountName {
             get => m_AccountNameInputField.text;
             set => m_AccountNameInputField.text = value;
         }
 
-        public string Password {
+        public string InputPassword {
             get => m_PasswordInputField.text;
             set => m_PasswordInputField.text = value;
         }
@@ -53,7 +57,7 @@ namespace OpenTibiaUnity.Modules.Login
             var gameManager = OpenTibiaUnity.GameManager;
             var inputHandler = OpenTibiaUnity.InputHandler;
             
-            inputHandler.AddKeyUpListener((Event e, bool repeat) => {
+            inputHandler.AddKeyUpListener(Core.Utility.EventImplPriority.Medium, (Event e, bool repeat) => {
                 if (e.alt || e.shift || e.control)
                     return;
 
@@ -69,12 +73,16 @@ namespace OpenTibiaUnity.Modules.Login
                             m_AccountNameInputField.Select();
                             m_AccountNameInputField.MoveTextEnd(false);
                         }
-                        
+
+                        e.Use();
                         break;
                     case KeyCode.Return:
                     case KeyCode.KeypadEnter:
-                        if (InputHandler.IsGameObjectHighlighted(gameObject) && AccountName.Length > 0)
-                            SubmitLogin();
+                        if (!InputHandler.IsGameObjectHighlighted(gameObject))
+                            return;
+                        
+                        OnLoginButtonClicked();
+                        e.Use();
                         break;
                 }
             });
@@ -83,7 +91,7 @@ namespace OpenTibiaUnity.Modules.Login
             m_LoginButton.onClick.AddListener(OnLoginButtonClicked);
 
             m_LoggerWindow = Instantiate(gameManager.PopupWindowPrefab, transform.parent);
-            m_LoggerWindow.gameObject.SetActive(false);
+            m_LoggerWindow.Hide();
 
             m_LoggerWindow.OnClickOk.AddListener(() => {
                 RemoveLogger();
@@ -104,52 +112,46 @@ namespace OpenTibiaUnity.Modules.Login
             }
 
             m_VersionsDropdown.options = options;
+            m_VersionsDropdown.onValueChanged.AddListener(OnClientVersionDropdownValueChanged);
+
+            OnClientVersionDropdownValueChanged(0);
         }
 
-        protected override void OnEnable() {
-            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => m_AccountNameInputField.Select());
-        }
+        protected override void OnEnable() => OpenTibiaUnity.GameManager.InvokeOnMainThread(() => m_AccountNameInputField.Select());
 
-        public void Show() {
-            gameObject.SetActive(true);
-        }
+        public void Show() => gameObject.SetActive(true);
 
-        public void RemoveLogger() {
+        private void RemoveLogger() {
             m_LoggerWindowActive = false;
             m_LoggerWindowDisposable = false;
             m_LoggerWindow.UnlockFromOverlay();
-            m_LoggerWindow.gameObject.SetActive(false);
+            m_LoggerWindow.Hide();
 
             PostLoggerRemoval();
         }
 
-        public void PostLoggerRemoval() {
-            if (m_LoggerActionsQueue.Count == 0) {
+        private void PostLoggerRemoval() {
+            if (m_LoggerActionsQueue.Count == 0)
                 return;
-            }
 
-            while (!m_LoggerWindowActive && m_LoggerActionsQueue.Count > 0) {
-                var action = m_LoggerActionsQueue.Dequeue();
-                action.Invoke();
-            }
+            while (!m_LoggerWindowActive && m_LoggerActionsQueue.Count > 0)
+                m_LoggerActionsQueue.Dequeue().Invoke();
 
-            if (!m_LoggerWindowActive && !m_CharactersWindow.gameObject.activeSelf) {
+            if (!m_LoggerWindowActive && !m_CharactersWindow.gameObject.activeSelf)
                 m_AccountNameInputField.Select();
-            }
         }
 
-        public void PopupInfo(string title, string message, PopupMenuType popupType = PopupMenuType.OK, TMPro.TextAlignmentOptions alignment = TMPro.TextAlignmentOptions.MidlineGeoAligned) {
+        private void PopupInfo(string title, string message, PopupMenuType popupType = PopupMenuType.OK, TMPro.TextAlignmentOptions alignment = TMPro.TextAlignmentOptions.MidlineGeoAligned) {
             // any popup can override the current popup
             // i.e motd can override waiting message
 
             // this will be discarded if characters' window is currently visible;
-            if (m_CharactersWindow.gameObject.activeSelf) {
+            if (m_CharactersWindow.gameObject.activeSelf)
                 return;
-            }
             
             m_LoggerWindow.Show();
             m_LoggerWindow.LockToOverlay();
-            m_LoggerWindow.ResetToCenter();
+            m_LoggerWindow.ResetLocalPosition();
 
             m_LoggerWindow.PopupType = popupType;
 
@@ -160,13 +162,12 @@ namespace OpenTibiaUnity.Modules.Login
             m_LoggerWindowActive = true;
         }
 
-        public bool CanTraceWindow() {
+        private bool CanTraceWindow() {
             if (m_LoggerWindowActive) {
                 if (m_LoggerWindowDisposable) {
                     OpenTibiaUnity.GameManager.InvokeOnMainThread(RemoveLogger);
-                    if (m_LoggerActionsQueue.Count == 0) {
+                    if (m_LoggerActionsQueue.Count == 0)
                         return true;
-                    }
 
                     return false;
                 }
@@ -174,26 +175,14 @@ namespace OpenTibiaUnity.Modules.Login
 
             return false;
         }
+        
+        private void SubmitLogin() {
+            m_AccountName = InputAccountName;
+            m_Password = InputPassword;
 
-        void OnLoginButtonClicked() {
-            if (AccountName.Length > 0) {
-                SubmitLogin();
-            }
-        }
+            InputAccountName = string.Empty;
+            InputPassword = string.Empty;
 
-        void SubmitLogin() {
-            string accountName = AccountName;
-            string password = Password;
-
-            AccountName = string.Empty;
-            Password = string.Empty;
-
-            TryToLogin(accountName, password);
-            PopupInfo("Loading...", "Please wait while we fetch your characters list.", PopupMenuType.Cancel);
-            m_LoggerWindowDisposable = true;
-        }
-
-        void TryToLogin(string accountName, string password) {
             string ip_port = IPAddress;
 
             string ip;
@@ -209,12 +198,11 @@ namespace OpenTibiaUnity.Modules.Login
             }
 
             var version = OpenTibiaUnity.GetSupportedVersions()[m_VersionsDropdown.value];
-            OpenTibiaUnity.GameManager.SetClientVersion(version);
-            OpenTibiaUnity.GameManager.SetProtocolVersion(GetClientProtocolVersion(version));
+            OpenTibiaUnity.GameManager.LoadThingsAsync(version);
 
             m_ProtocolLogin = new ProtocolLogin();
-            m_ProtocolLogin.AccountName = accountName;
-            m_ProtocolLogin.Password = password;
+            m_ProtocolLogin.AccountName = m_AccountName;
+            m_ProtocolLogin.Password = m_Password;
 
             m_ProtocolLogin.onCustomLoginError.AddListener(TriggerCustomLoginError);
             m_ProtocolLogin.onLoginError.AddListener(TriggerLoginError);
@@ -224,7 +212,10 @@ namespace OpenTibiaUnity.Modules.Login
             m_ProtocolLogin.onSessionKey.AddListener(TriggerLoginSessionKey);
             m_ProtocolLogin.onCharacterList.AddListener(TriggerLoginCharacterList);
 
-            m_ProtocolLogin.Connect(ip, port);
+            Task.Run(() => m_ProtocolLogin.Connect(ip, port));
+
+            PopupInfo("Loading...", "Please wait while we fetch your characters list.", PopupMenuType.Cancel);
+            m_LoggerWindowDisposable = true;
         }
 
         private int GetClientProtocolVersion(int version) {
@@ -242,70 +233,75 @@ namespace OpenTibiaUnity.Modules.Login
             }
         }
 
-        void TriggerCustomLoginError(string message) {
+        private void TriggerCustomLoginError(string message) {
             m_LoginError = message;
-
-            // no checks are needed, usually those are the first errors
-            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
-                PopupInfo("Login Error", m_LoginError, PopupMenuType.OK, TMPro.TextAlignmentOptions.MidlineLeft);
-            });
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupInfo("Login Error", m_LoginError, PopupMenuType.OK, TMPro.TextAlignmentOptions.MidlineLeft));
         }
-        void TriggerLoginError(string message) {
+        private void TriggerLoginError(string message) {
             m_LoginError = message;
-
-            // no checks are needed, usually those are the first errors
-            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
-                PopupInfo("Login Error", m_LoginError);
-            });
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupInfo("Login Error", m_LoginError));
         }
-        void TriggerLoginTokenError(int unknown) {
+        private void TriggerLoginTokenError(int unknown) {
             m_LoginError = "You have entered incorrect authenticator token.";
 
-            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
-                PopupInfo("Authentication Error", m_LoginError);
-            });
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupInfo("Authentication Error", m_LoginError));
         }
-        void TriggerLoginMotd(int num, string motd) {
+        private void TriggerLoginMotd(int num, string motd) {
             m_MotdNum = num;
             m_Motd = motd;
-            UnityAction showMotdWindow = () => {
-                PopupInfo("Message of the Day", m_Motd);
-            };
+            UnityAction showMotdWindow = () => PopupInfo("Message of the Day", m_Motd);
 
-            if (!CanTraceWindow()) {
-                OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
-                    m_LoggerActionsQueue.Enqueue(showMotdWindow);
-                });
-            } else {
+            if (!CanTraceWindow())
+                OpenTibiaUnity.GameManager.InvokeOnMainThread(() => m_LoggerActionsQueue.Enqueue(showMotdWindow));
+            else
                 OpenTibiaUnity.GameManager.InvokeOnMainThread(showMotdWindow);
-            }
         }
-        void TriggerUpdateRequired() {
+        private void TriggerUpdateRequired() {
             m_LoginError = "Your client is outdated, consider updating it!";
 
-            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
-                PopupInfo("Client Error", m_LoginError);
-            });
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupInfo("Client Error", m_LoginError));
         }
-        void TriggerLoginSessionKey(string sessionKey) {
-            m_SessionKey = sessionKey;
-        }
-        void TriggerLoginCharacterList(CharacterList characterList) {
+        private void TriggerLoginSessionKey(string sessionKey) => m_SessionKey = sessionKey;
+        private void TriggerLoginCharacterList(CharacterList characterList) {
             UnityAction showCharactersWindow = () => {
                 gameObject.SetActive(false);
-
-                // TODO; support auth token
-                m_CharactersWindow.Setup(m_SessionKey, AccountName, Password, string.Empty, characterList);
+                
+                m_CharactersWindow.Setup(m_SessionKey, m_AccountName, m_Password, string.Empty, characterList);
                 m_CharactersWindow.Show();
             };
 
-            if (!CanTraceWindow()) {
-                OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
-                    m_LoggerActionsQueue.Enqueue(showCharactersWindow);
-                });
-            } else {
+            if (!CanTraceWindow())
+                OpenTibiaUnity.GameManager.InvokeOnMainThread(() => m_LoggerActionsQueue.Enqueue(showCharactersWindow));
+            else
                 OpenTibiaUnity.GameManager.InvokeOnMainThread(showCharactersWindow);
+        }
+
+        private void OnLoginButtonClicked() {
+            if (!InputHandler.IsGameObjectHighlighted(gameObject))
+                return;
+
+            if (OpenTibiaUnity.GameManager.ClientVersion >= 1100 && InputAccountName.Length == 0)
+                return;
+
+            SubmitLogin();
+        }
+        private void OnClientVersionDropdownValueChanged(int value) {
+            var version = OpenTibiaUnity.GetSupportedVersions()[value];
+
+            var gameManager = OpenTibiaUnity.GameManager;
+            gameManager.SetProtocolVersion(GetClientProtocolVersion(version));
+            gameManager.SetClientVersion(version);
+            
+            var validation = m_AccountNameInputField.characterValidation;
+            if (gameManager.GetFeature(GameFeatures.GameAccountNames)) {
+                m_AccountNameInputField.characterValidation = TMPro.TMP_InputField.CharacterValidation.None;
+            } else {
+                m_AccountNameInputField.characterValidation = TMPro.TMP_InputField.CharacterValidation.Integer;
             }
+
+            if (validation != m_AccountNameInputField.characterValidation)
+                m_AccountNameInputField.text = string.Empty;
         }
     }
 }
+ 

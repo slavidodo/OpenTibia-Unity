@@ -174,7 +174,7 @@ namespace OpenTibiaUnity.Core.Network
             throw new Exception(string.Format("Trying to read after EOF has reached (n = {0}, total = {1}).", n, GetUnreadSize()));
         }
 
-        public bool CanRead(int n) {
+        public bool CanRead(int n = 1) {
             return m_Buffer.Length >= m_Position + n;
         }
 
@@ -224,8 +224,8 @@ namespace OpenTibiaUnity.Core.Network
             m_Position = Mathf.Clamp(position, 0, m_Buffer.Length - 1);
         }
 
-        byte[] m_Buffer;
-        long m_Position = 0;
+        protected byte[] m_Buffer;
+        protected long m_Position = 0;
     }
 
     public class OutputMessage
@@ -373,9 +373,9 @@ namespace OpenTibiaUnity.Core.Network
             m_HeaderLength = 0;
         }
 
-        List<byte> m_Buffer = new List<byte>();
-        int m_Position = 0;
-        int m_HeaderLength = 0;
-        int m_MessageSize = 0;
+        protected List<byte> m_Buffer = new List<byte>();
+        protected int m_Position = 0;
+        protected int m_HeaderLength = 0;
+        protected int m_MessageSize = 0;
     }
 }

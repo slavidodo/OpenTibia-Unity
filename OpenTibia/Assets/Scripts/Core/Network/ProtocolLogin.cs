@@ -25,6 +25,9 @@ namespace OpenTibiaUnity.Core.Network
         public CharacterListEvent onCharacterList = new CharacterListEvent();
         public UnityEvent onUpdateRequired = new UnityEvent();
 
+        private byte m_PrevOpcode = 0;
+        private byte m_LastOpcode = 0;
+
         public override void Connect() {
             throw new System.InvalidOperationException("You can't connect without ip/port in a plogin.");
         }
@@ -52,20 +55,13 @@ namespace OpenTibiaUnity.Core.Network
             }
         }
         protected override void OnRecv(InputMessage message) {
-            try {
-                base.OnRecv(message);
-            } catch (System.Exception e) {
-                UnityEngine.Debug.LogWarning(e.Message);
-            }
-
+            base.OnRecv(message);
             OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
                 while (message.CanRead(1)) {
                     byte opcode = message.GetU8();
                     switch (opcode) {
-                        case LoginServerOpCodes.LoginRetry:
-                            break;
-
                         case LoginServerOpCodes.LoginError:
+                        case LoginServerOpCodes.Login_1076_Error:
                             string error = message.GetString();
                             onLoginError.Invoke(error);
                             break;
@@ -103,15 +99,19 @@ namespace OpenTibiaUnity.Core.Network
                             break;
 
                         default:
-                            break;
+                            string err = string.Format("<ProtocolGame> Unknown opcode received ({0}), last opcode ({1}), prev opcode ({2}), unread ({3})", opcode, m_LastOpcode, m_PrevOpcode, message.GetUnreadSize());
+                            throw new System.Exception(err);
                     }
+
+                    m_PrevOpcode = m_LastOpcode;
+                    m_LastOpcode = opcode;
                 }
             });
         }
         
         protected void SendLogin() {
             OutputMessage message = new OutputMessage();
-            message.AddU8(ClientLoginOpCodes.EnterAccount);
+            message.AddU8(LoginClientOpCodes.EnterAccount);
             message.AddU16(Utility.OperatingSystem.GetCurrentOs());
 
             var gameManager = OpenTibiaUnity.GameManager;
@@ -207,8 +207,8 @@ namespace OpenTibiaUnity.Core.Network
         public int AccountState { get; private set; }
         public bool IsPremium { get; private set; }
         public bool InfinitePremium { get; private set; }
-
-        // Premium Until or Last PremiumTime
+        
+        public ushort PremiumDays { get; private set; }
         public uint PremiumTimeStamp { get; private set; }
 
         public struct World
@@ -227,30 +227,81 @@ namespace OpenTibiaUnity.Core.Network
         }
         
         public void Parse(InputMessage message) {
-            byte worlds = message.GetU8();
-            for (int i = 0; i < worlds; i++) {
-                var world = new World();
-                world.ID = message.GetU8();
-                world.Name = message.GetString();
-                world.HostName = message.GetString();
-                world.Port = message.GetU16();
-                world.Preview = message.GetBool();
-                Worlds.Add(world);
+            if (OpenTibiaUnity.GameManager.ClientVersion >= 1010) {
+                byte worlds = message.GetU8();
+                for (int i = 0; i < worlds; i++) {
+                    var world = new World();
+                    world.ID = message.GetU8();
+                    world.Name = message.GetString();
+                    world.HostName = message.GetString();
+                    world.Port = message.GetU16();
+                    world.Preview = message.GetBool();
+                    Worlds.Add(world);
+                }
+
+                byte characters = message.GetU8();
+                for (int i = 0; i < characters; i++) {
+                    Character character = new Character();
+                    character.World = message.GetU8();
+                    character.Name = message.GetString();
+                    Characters.Add(character);
+                }
+            } else {
+                byte characters = message.GetU8();
+                for (int i = 0; i < characters; i++) {
+                    Character character = new Character();
+                    character.Name = message.GetString();
+
+                    var worldName = message.GetString();
+                    var worldIpLong = message.GetU32();
+                    var worldPort = message.GetU16();
+
+                    World world = GetOrCreateWorld(worldName, worldIpLong, worldPort);
+                    character.World = world.ID;
+                    Characters.Add(character);
+                }
             }
 
-            byte characters = message.GetU8();
-            for (int i = 0; i < characters; i++) {
-                Character character = new Character();
-                character.World = message.GetU8();
-                character.Name = message.GetString();
-                Characters.Add(character);
-            }
-            
-            AccountState = message.GetU8();
-            IsPremium = message.GetBool();
-            PremiumTimeStamp = message.GetU32();
+            uint now = (uint)System.DateTime.Now.Second;
+            if (OpenTibiaUnity.GameManager.ClientVersion >= 1077) {
+                AccountState = message.GetU8();
+                IsPremium = message.GetBool();
+                PremiumTimeStamp = message.GetU32();
+                if (PremiumTimeStamp > now)
+                    PremiumDays = (ushort)((PremiumTimeStamp - now) / 86400U);
+                else
+                    PremiumDays = 0;
 
-            InfinitePremium = (IsPremium && PremiumTimeStamp == 0);
+                InfinitePremium = (IsPremium && PremiumTimeStamp == 0);
+            } else {
+                AccountState = 0;
+                PremiumDays = message.GetU16();
+                if (PremiumDays > 0)
+                    PremiumTimeStamp = now + PremiumDays * 86400U;
+                else
+                    PremiumTimeStamp = 0;
+
+                IsPremium = PremiumDays > 0;
+                InfinitePremium = PremiumDays == 65535;
+            }
+        }
+
+        protected World GetOrCreateWorld(string name, uint ip, ushort port) {
+            string ipAddress = new System.Net.IPAddress(ip).ToString();
+            foreach (var world in Worlds) {
+                if (world.Name == name && world.HostName == ipAddress && world.Port == port)
+                    return world;
+            }
+
+            World newWorld = new World();
+            newWorld.ID = Worlds.Count;
+            newWorld.Name = name;
+            newWorld.HostName = ipAddress;
+            newWorld.Port = port;
+            newWorld.Preview = false;
+
+            Worlds.Add(newWorld);
+            return newWorld;
         }
 
         public World FindWorld(int id) {

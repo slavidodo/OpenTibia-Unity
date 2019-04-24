@@ -21,7 +21,7 @@ namespace Priority_Queue
         /// </summary>
         /// <param name="maxNodes">The max nodes ever allowed to be enqueued (going over this will cause undefined behavior)</param>
         public FastPriorityQueue(int maxNodes) {
-#if !Debug
+#if DEBUG || NDEBUG
             if (maxNodes <= 0) {
                 throw new InvalidOperationException("New queue size cannot be smaller than 1");
             }
@@ -72,7 +72,7 @@ namespace Priority_Queue
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public bool Contains(T node) {
-#if !Debug
+#if DEBUG || NDEBUG
             if (node == null) {
                 throw new ArgumentNullException("node");
             }
@@ -98,7 +98,7 @@ namespace Priority_Queue
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public void Enqueue(T node, float priority) {
-#if !Debug
+#if DEBUG || NDEBUG
             if (node == null) {
                 throw new ArgumentNullException("node");
             }
@@ -302,7 +302,7 @@ namespace Priority_Queue
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public T Dequeue() {
-#if !Debug
+#if DEBUG || NDEBUG
             if (_numNodes <= 0) {
                 throw new InvalidOperationException("Cannot call Dequeue() on an empty queue");
             }
@@ -339,7 +339,7 @@ namespace Priority_Queue
         /// O(n)
         /// </summary>
         public void Resize(int maxNodes) {
-#if !Debug
+#if DEBUG || NDEBUG
             if (maxNodes <= 0) {
                 throw new InvalidOperationException("Queue size cannot be smaller than 1");
             }
@@ -362,7 +362,7 @@ namespace Priority_Queue
         /// </summary>
         public T First {
             get {
-#if !Debug
+#if DEBUG || NDEBUG
                 if (_numNodes <= 0) {
                     throw new InvalidOperationException("Cannot call .First on an empty queue");
                 }
@@ -382,7 +382,7 @@ namespace Priority_Queue
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public void UpdatePriority(T node, float priority) {
-#if !Debug
+#if DEBUG || NDEBUG
             if (node == null) {
                 throw new ArgumentNullException("node");
             }
@@ -422,7 +422,7 @@ namespace Priority_Queue
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public void Remove(T node) {
-#if !Debug
+#if DEBUG || NDEBUG
             if (node == null) {
                 throw new ArgumentNullException("node");
             }
@@ -461,7 +461,7 @@ namespace Priority_Queue
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
 #endif
         public void ResetNode(T node) {
-#if !Debug
+#if DEBUG || NDEBUG
             if (node == null) {
                 throw new ArgumentNullException("node");
             }

@@ -1,6 +1,6 @@
 ﻿Shader "OpenTibiaUnity/Lightmap" {
     Properties {
-		[NoScaleOffset] _MainTex("MainTexture", 2D) = "white" {}
+		[NoScaleOffset] _MainTex("Main Texture", 2D) = "white" {}
     }
 
     SubShader {

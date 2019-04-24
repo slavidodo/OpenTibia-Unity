@@ -2,6 +2,6 @@
 {
     public interface IMoveWidget
     {
-        Appearances.ObjectInstance GetMoveObjectUnderPoint(UnityEngine.Vector2 point);
+        int GetMoveObjectUnderPoint(UnityEngine.Vector3 mousePosition, out Appearances.ObjectInstance obj);
     }
 }

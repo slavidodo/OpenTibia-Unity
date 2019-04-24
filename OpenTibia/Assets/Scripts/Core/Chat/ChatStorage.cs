@@ -25,6 +25,7 @@ namespace OpenTibiaUnity.Core.Chat
         public const int DebugChannelID = 131069;
         public const int ServerChannelID = 131070;
         public const int LocalChannelID = 131071;
+        public const int RVRChannelID = 131072;
 
         public const int ChannelActivationTimeout = 500;
 
@@ -79,7 +80,7 @@ namespace OpenTibiaUnity.Core.Chat
         }
 
         public void CloseChannel(Utility.UnionStrInt channelID) {
-            AddChannelMessage(channelID, -1, null, 0, MessageModes.ChannelManagment, "The channel has been closed. You need to re-join the channel if you get invited.");
+            AddChannelMessage(channelID, -1, null, 0, MessageModes.ChannelManagement, "The channel has been closed. You need to re-join the channel if you get invited.");
 
             Channel channel = GetChannel(channelID);
             if (channel != null) {
@@ -118,11 +119,11 @@ namespace OpenTibiaUnity.Core.Chat
 
                 switch ((int)channelID) {
                     case HelpChannelID:
-                        AddChannelMessage(channelID, -1, null, 0, MessageModes.ChannelManagment, "Welcome to the help channel. In this channel you can ask questions about/ Tibia. Experienced players will gladly help you to the best of their knowledge. If their answer was helpful, reward them with a \"Thank You!\" which/you /can select by right-clicking on their statement. For detailed information about quests and other game content, please take a look at our /supported fansite in /the community section of the official Tibia website.");
+                        AddChannelMessage(channelID, -1, null, 0, MessageModes.ChannelManagement, "Welcome to the help channel. In this channel you can ask questions about/ Tibia. Experienced players will gladly help you to the best of their knowledge. If their answer was helpful, reward them with a \"Thank You!\" which/you /can select by right-clicking on their statement. For detailed information about quests and other game content, please take a look at our /supported fansite in /the community section of the official Tibia website.");
                         break;
                     case MainAdvertisingChannelID:
                     case RookAdvertisingChannelID:
-                        AddChannelMessage(channelID, -1, null, 0, MessageModes.ChannelManagment, "Here you can advertise all kinds of things. Among others, you can trade Tibia/ items, advertise ingame events, seek characters for a quest or a hunting group, find members for your guild or look for somebody to help you with /something. It goes without saying that all advertisements must conform to the Tibia Rules. Keep in mind that it is illegal to advertise trades /including real money or Tibia characters.");
+                        AddChannelMessage(channelID, -1, null, 0, MessageModes.ChannelManagement, "Here you can advertise all kinds of things. Among others, you can trade Tibia/ items, advertise ingame events, seek characters for a quest or a hunting group, find members for your guild or look for somebody to help you with /something. It goes without saying that all advertisements must conform to the Tibia Rules. Keep in mind that it is illegal to advertise trades /including real money or Tibia characters.");
                         break;
                     default:
                         break;
@@ -175,12 +176,14 @@ namespace OpenTibiaUnity.Core.Chat
         }
 
         public ChannelMessage AddChannelMessage(Utility.UnionStrInt channelID, int statementID, string speaker, int speakerLevel, MessageModes mode, string text) {
-            var messageFilterSet = OpenTibiaUnity.OptionStorage.GetMessageFilterSet(MessageFilterSet.Default);
+            var messageFilterSet = OpenTibiaUnity.OptionStorage.GetMessageFilterSet(MessageFilterSet.DefaultSet);
             var messageMode = messageFilterSet.GetMessageMode(mode);
             if (messageMode == null || !messageMode.ShowChannelMessage)
                 return null;
 
-            // TODO: NameFilterSet
+            var nameFilterSet = OpenTibiaUnity.OptionStorage.GetNameFilterSet(NameFilterSet.DefaultSet);
+            if (nameFilterSet != null && !nameFilterSet.AcceptMessage(mode, speaker, text))
+                return null;
 
             bool isReportName = speaker != null && channelID.IsInt && ((int)channelID == ChatStorage.HelpChannelID || speakerLevel > 0);
             bool isReportStatement = statementID > 0;
@@ -210,7 +213,7 @@ namespace OpenTibiaUnity.Core.Chat
                     if (channel == null)
                         channel = GetChannel(ChatStorage.LocalChannelID);
                     break;
-                case MessageModes.ChannelManagment:
+                case MessageModes.ChannelManagement:
                     channel = GetChannel(channelID);
                     if (channel == null)
                         channel = GetChannel(ChatStorage.LocalChannelID);
@@ -277,6 +280,24 @@ namespace OpenTibiaUnity.Core.Chat
                     if (channel == null)
                         channel = GetChannel(ChatStorage.ServerChannelID);
                     break;
+                case MessageModes.BarkLow:
+                case MessageModes.BarkLoud:
+                    if (channel == null)
+                        channel = GetChannel(ChatStorage.LocalChannelID);
+                    break;
+
+                case MessageModes.MonsterSay:
+                case MessageModes.MonsterYell:
+                    break;
+
+                case MessageModes.Blue:
+                    if (channel == null)
+                        channel = GetChannel(ChatStorage.LocalChannelID);
+                    break;
+
+                default:
+                    AddDebugMessage(string.Format("ChatStorage.AddChannelMessage: Unhandled MessageMode ({0}).", mode));
+                    break;
             }
 
             if (channel != null) {
@@ -293,11 +314,11 @@ namespace OpenTibiaUnity.Core.Chat
 #endif
 
             if (GetChannel(DebugChannelID) == null) {
-                var channel = AddChannel(DebugChannelID, "Debug", MessageModes.ChannelManagment);
+                var channel = AddChannel(DebugChannelID, "Debug", MessageModes.ChannelManagement);
                 channel.SendAllowed = false;
             }
 
-            return AddChannelMessage(DebugChannelID, -1, null, 0, MessageModes.ChannelManagment, text);
+            return AddChannelMessage(DebugChannelID, -1, null, 0, MessageModes.ChannelManagement, text);
         }
         public string SendChannelMessage(string text, Channel channel, MessageModes mode) {
             var protocolGame = OpenTibiaUnity.ProtocolGame;

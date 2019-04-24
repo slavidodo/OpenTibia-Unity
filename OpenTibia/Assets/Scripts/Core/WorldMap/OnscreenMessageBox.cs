@@ -68,7 +68,7 @@ namespace OpenTibiaUnity.Core.WorldMap
         public int ExpireMessages(int ticks) {
             int totalExprired = 0;
             if (Visible) {
-                var index = GetFirstNonHeaderIndex();
+                int index = GetFirstNonHeaderIndex();
                 while (m_Messages.Length > index) {
                     var message = m_Messages.GetItemAt(index);
                     if (message.VisibleSince < ticks && message.VisibleSince + message.TTL < ticks) {
@@ -171,7 +171,7 @@ namespace OpenTibiaUnity.Core.WorldMap
 
             float width = Mathf.Min(m_TextMesh.preferredWidth, Constants.OnscreenMessageWidth);
             float height = m_TextMesh.preferredHeight;
-
+            
             var parentRT = rectTransform.transform.parent as RectTransform;
             
             x = Mathf.Clamp(x, width / 2, parentRT.rect.width - width / 2);

@@ -10,29 +10,18 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         private Material m_LightMaterial;
         private Matrix4x4 m_LightTransformationMatrix = new Matrix4x4();
         private Color32[] m_ColorData = new Color32[(Constants.MapSizeX + 1) * (Constants.MapSizeY + 1)];
-
-        private Mesh m_TestMesh = new Mesh();
+        
         private int m_CachedScreenWidth = -1;
         private int m_CachedScreenHeight = -1;
 
         public override Color32 this[int index] {
-            get {
-                return m_ColorData[index];
-            }
-
-            set {
-                m_ColorData[index] = value;
-            }
+            get => m_ColorData[index];
+            set => m_ColorData[index] = value;
         }
-
+        
         public MeshBasedLightmapRenderer() {
             CreateMeshBuffers();
             m_LightMaterial = new Material(Shader.Find("Hidden/Internal-Colored"));
-
-            m_TestMesh = new Mesh();
-            m_TestMesh.vertices = new Vector3[] { new Vector3(0, 0, 0), new Vector3(0, 1, 0), new Vector3(1, 0, 0), new Vector3(1, 1, 0) };
-            m_TestMesh.colors = new Color[] { Color.red, Color.black, Color.white, Color.blue };
-            m_TestMesh.SetIndices(new int[] { 0, 1, 2, 3 }, MeshTopology.Quads, 0);
 
             for (int i = 0; i < m_ColorData.Length; i++)
                 m_ColorData[i] = new Color32(255, 255, 255, 255);
@@ -120,7 +109,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                         var color32 = MulColor32(defaultColor32, Mathf.Min(magnitude, 1f));
                         int index = j * Constants.MapSizeX + i;
                         if (layerInformation[index])
-                            color32 = MulColor32(color32, OpenTibiaUnity.OptionStorage.LevelSeparator / 100f);
+                            color32 = MulColor32(color32, OpenTibiaUnity.OptionStorage.FixedLightLevelSeparator / 100f);
 
                         var colorIndex = ToColorIndex(i, j);
                         var currentColor32 = m_ColorData[colorIndex];
@@ -140,18 +129,13 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             Color ambient = OpenTibiaUnity.WorldMapStorage.AmbientCurrentColor;
             brightness = Mathf.Clamp(brightness, 0, 255);
 
-            Color32 color32 = MulColor32(ambient, brightness / 255F);
-
-            Color32 staticColor;
-            if (aboveGround)
-                staticColor = ColorAboveGround;
-            else
-                staticColor = ColorBelowGround;
+            Color32 color32 = MulColor32(ambient, brightness / 255f);
+            Color32 staticColor = aboveGround ? Constants.ColorAboveGround : Constants.ColorBelowGround;
 
             float internalFactor = (OpenTibiaUnity.OptionStorage.AmbientBrightness / 100f) * ((255f - color32.r) / 255f);
             color32 = (Color)color32 + MulColor32(staticColor, internalFactor);
 
-            var index = ToColorIndex(x, y);
+            int index = ToColorIndex(x, y);
             m_ColorData[index] = color32;
         }
 

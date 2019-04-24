@@ -1,254 +1,109 @@
-﻿using System.Collections.Generic;
-
-namespace OpenTibiaUnity.Core.Appearances
+﻿namespace OpenTibiaUnity.Core.Appearances
 {
     public class AppearanceType {
-        Proto.Appearances001.Appearance m_ProtoAppearance;
+        protected readonly Proto.Appearances.Appearance m_ProtoAppearance;
+
+        protected Proto.Appearances.AppearanceFlags AppearanceFlags { get => m_ProtoAppearance?.Flags; }
+        public Google.Protobuf.Collections.RepeatedField<Proto.Appearances.FrameGroup> FrameGroups { get => m_ProtoAppearance?.FrameGroups; }
+        public bool HasAppearanceFlags { get => AppearanceFlags != null; }
+        public Proto.Appearances.Ground Ground { get => HasAppearanceFlags ? AppearanceFlags.Ground : null; }
+        public bool IsGround { get => Ground != null; }
+        public uint GroundSpeed { get => IsGround ? Ground.Speed : 0; }
+        public bool IsGroundBorder { get => HasAppearanceFlags ? AppearanceFlags.GroundBorder : false; }
+        public bool IsBottom { get => HasAppearanceFlags ? AppearanceFlags.Bottom : false; }
+        public bool IsTop { get => HasAppearanceFlags ? AppearanceFlags.Top : false; }
+        public bool IsContainer { get => HasAppearanceFlags ? AppearanceFlags.Container : false; }
+        public bool IsStackable { get => HasAppearanceFlags ? AppearanceFlags.Stackable : false; }
+        public bool IsUsable { get => HasAppearanceFlags ? AppearanceFlags.Use : false; }
+        public bool IsForceUse { get => HasAppearanceFlags ? AppearanceFlags.ForceUse : false; }
+        public bool IsMultiUse { get => HasAppearanceFlags ? AppearanceFlags.MultiUse : false; }
+        public bool IsWritable { get => HasAppearanceFlags && AppearanceFlags.Writable != null; }
+        public uint WritableLength { get => IsWritable ? AppearanceFlags.Writable.Length : 0; }
+        public bool IsWritableOnce { get => HasAppearanceFlags && AppearanceFlags.WritableOnce != null; }
+        public uint WritableOnceLength { get => IsWritableOnce ? AppearanceFlags.WritableOnce.Length : 0; }
+        public uint MaxTextLen { get => WritableLength != 0 ? WritableLength : WritableOnceLength; }
+        public bool IsFluidContainer { get => HasAppearanceFlags ? AppearanceFlags.FluidContainer : false; }
+        public bool IsSplash { get => HasAppearanceFlags ? AppearanceFlags.Splash : false; }
+        public bool IsUnpassable { get => HasAppearanceFlags ? AppearanceFlags.Unpassable : false; }
+        public bool IsUnmovable { get => HasAppearanceFlags ? AppearanceFlags.Unmoveable : false; }
+        public bool IsUnsight { get => HasAppearanceFlags ? AppearanceFlags.Unsight : false; }
+        public bool IsBlockPath { get => HasAppearanceFlags ? AppearanceFlags.BlockPath : false; }
+        public bool IsNoMoveAnimation { get => HasAppearanceFlags ? AppearanceFlags.NoMoveAnimation : false; }
+        public bool IsPickupable { get => HasAppearanceFlags ? AppearanceFlags.Pickupable : false; }
+        public bool IsHangable { get => HasAppearanceFlags ? AppearanceFlags.Hangable : false; }
+        public Proto.Appearances.Hook Hook { get => HasAppearanceFlags ? AppearanceFlags.Hook : null; }
+        public bool IsHook { get => Hook != null; }
+        public bool IsHookSouth { get => IsHook ? Hook.Type == Proto.Appearances.HookType.South : false; }
+        public bool IsHookEast { get => IsHook ? Hook.Type == Proto.Appearances.HookType.East : false; }
+        public bool IsRotateable { get => HasAppearanceFlags ? AppearanceFlags.Rotateable : false; }
+        public Proto.Appearances.LightInfo LightInfo { get => HasAppearanceFlags ? AppearanceFlags.Light : null; }
+        public bool IsLight { get => LightInfo != null; }
+        public uint LightColor { get => IsLight ? LightInfo.Color : 0; }
+        public uint Brightness { get => IsLight ? LightInfo.Intensity : 0; }
+        public bool IsDontHide { get => HasAppearanceFlags ? AppearanceFlags.DontHide : false; }
+        public bool IsTranslucent { get => HasAppearanceFlags ? AppearanceFlags.Translucent : false; }
+        public Proto.Appearances.Displacement Displacement { get => HasAppearanceFlags ? AppearanceFlags.Displacement : null; }
+        public bool HasDisplacement { get => Displacement != null; }
+        public uint DisplacementX { get => HasDisplacement ? Displacement.X : 0; }
+        public uint DisplacementY { get => HasDisplacement ? Displacement.Y : 0; }
+        public UnityEngine.Vector2Int DisplacementVector2 { get => new UnityEngine.Vector2Int((int)DisplacementX, (int)DisplacementY); }
+        public bool HasElevation { get => HasAppearanceFlags && AppearanceFlags.Elevation != null; }
+        public uint Elevation { get => HasElevation ? AppearanceFlags.Elevation.Elevation_ : 0; }
+        public bool IsLyingCorpse { get => HasAppearanceFlags ? AppearanceFlags.LyingCorpse : false; }
+        public bool IsAnimateAlways { get => HasAppearanceFlags ? AppearanceFlags.AnimateAlways : false; }
+        public bool IsMiniMap { get => HasAppearanceFlags && AppearanceFlags.Minimap != null; }
+        public uint MiniMapColor { get => IsMiniMap ? AppearanceFlags.Minimap.Color : 0; }
+        public bool HasLensHelp { get => HasAppearanceFlags && AppearanceFlags.LensHelp != null; }
+        public uint LensHelp { get => HasLensHelp ? AppearanceFlags.LensHelp.Id : 0; }
+        public bool IsFullGround { get => HasAppearanceFlags ? AppearanceFlags.FullGround : false; }
+        public bool IsIgnoreLook { get => HasAppearanceFlags ? AppearanceFlags.Look : false; }
+        public bool IsCloth { get => HasAppearanceFlags && AppearanceFlags.Cloth != null; }
+        public uint Cloth { get => IsCloth ? AppearanceFlags.Cloth.Slot : 0; }
+        public Proto.Appearances.MarketInfo MarketInfo { get => HasAppearanceFlags ? AppearanceFlags.Market: null; }
+        public bool IsMarket { get => MarketInfo != null; }
+        public bool HasDefaultAction { get => HasAppearanceFlags && AppearanceFlags.DefaultAction != null; }
+        public Proto.Appearances.PlayerAction DefaultAction { get => HasDefaultAction ? AppearanceFlags.DefaultAction.Action : Proto.Appearances.PlayerAction.None; }
+        public bool IsWrappable { get => HasAppearanceFlags ? AppearanceFlags.Wrapable : false; }
+        public bool IsUnwrappable { get => HasAppearanceFlags ? AppearanceFlags.UnWrapable : false; }
+        public bool IsTopEffect { get => HasAppearanceFlags ? AppearanceFlags.TopEffect : false; }
+
+        public bool IsAnimation { get; }
+        public bool IsCachable { get; }
         
-        protected Proto.Appearances001.AppearanceFlags AppearanceFlags {
-            get {
-                return m_ProtoAppearance != null ? m_ProtoAppearance.Flags : null;
-            }
-        }
-
-        public Google.Protobuf.Collections.RepeatedField<Proto.Appearances001.FrameGroup> FrameGroups {
-            get {
-                return m_ProtoAppearance != null ? m_ProtoAppearance.FrameGroups : null;
-            }
-        }
-
-        public bool HasAppearanceFlags {
-            get => AppearanceFlags != null;
-        }
-
-        public uint Ground {
-            get => HasAppearanceFlags ? AppearanceFlags.Ground : 0;
-        }
-        
-        public bool IsGroundBorder {
-            get => HasAppearanceFlags ? AppearanceFlags.GroundBorder : false;
-        }
-
-        public bool IsBottom {
-            get { return HasAppearanceFlags ? AppearanceFlags.OnBottom : false; }
-        }
-
-        public bool IsTop {
-            get { return HasAppearanceFlags ? AppearanceFlags.OnTop : false; }
-        }
-
-        public bool IsContainer {
-            get { return HasAppearanceFlags ? AppearanceFlags.Container : false; }
-        }
-
-        public bool IsStackable {
-            get { return HasAppearanceFlags ? AppearanceFlags.Stackable : false; }
-        }
-
-        public bool IsForceUse {
-            get { return HasAppearanceFlags ? AppearanceFlags.Stackable : false; }
-        }
-
-        public bool IsMultiUse {
-            get { return HasAppearanceFlags ? AppearanceFlags.MultiUse : false; }
-        }
-
-        public uint Writable {
-            get { return HasAppearanceFlags ? AppearanceFlags.Writable : 0; }
-        }
-
-        public uint WritableOnce {
-            get { return HasAppearanceFlags ? AppearanceFlags.WritableOnce : 0; }
-        }
-
-        public bool IsFluidContainer {
-            get { return HasAppearanceFlags ? AppearanceFlags.FluidContainer : false; }
-        }
-
-        public bool IsSplash {
-            get { return HasAppearanceFlags ? AppearanceFlags.Splash : false; }
-        }
-
-        public bool IsNotWalkable {
-            get { return HasAppearanceFlags ? AppearanceFlags.NotWalkable : false; }
-        }
-
-        public bool IsNotMoveable {
-            get { return HasAppearanceFlags ? AppearanceFlags.NotMoveable : false; }
-        }
-
-        public bool IsBlockProjectile {
-            get { return HasAppearanceFlags ? AppearanceFlags.BlockProjectile : false; }
-        }
-
-        public bool IsNotPathable {
-            get { return HasAppearanceFlags ? AppearanceFlags.NotPathable : false; }
-        }
-
-        public bool IsNoMoveAnimation {
-            get { return HasAppearanceFlags ? AppearanceFlags.NoMoveAnimation : false; }
-        }
-
-        public bool IsPickupable {
-            get { return HasAppearanceFlags ? AppearanceFlags.Pickupable : false; }
-        }
-
-        public bool IsHangable {
-            get { return HasAppearanceFlags ? AppearanceFlags.Hangable : false; }
-        }
-
-        public bool IsHookSouth {
-            get { return HasAppearanceFlags ? AppearanceFlags.HookSouth : false; }
-        }
-
-        public bool IsHookEast {
-            get { return HasAppearanceFlags ? AppearanceFlags.HookEast : false; }
-        }
-
-        public bool IsRotateable {
-            get { return HasAppearanceFlags ? AppearanceFlags.Rotateable : false; }
-        }
-
-        public Proto.Appearances001.LightInfo LightInfo {
-            get { return HasAppearanceFlags ? AppearanceFlags.Light : null; }
-        }
-
-        public bool IsDontHide {
-            get { return HasAppearanceFlags ? AppearanceFlags.DontHide : false; }
-        }
-
-        public bool IsTranslucent {
-            get { return HasAppearanceFlags ? AppearanceFlags.Translucent : false; }
-        }
-
-        private UnityEngine.Vector2Int m_Displacement = UnityEngine.Vector2Int.zero;
-        public UnityEngine.Vector2Int Displacement {
-            get { return m_Displacement; }
-        }
-        
-        public uint Elevation {
-            get { return HasAppearanceFlags ? AppearanceFlags.Elevation : 0; }
-        }
-
-        public bool IsLyingCorpse {
-            get { return HasAppearanceFlags ? AppearanceFlags.LyingCorpse : false; }
-        }
-
-        public bool IsAnimateAlways {
-            get { return HasAppearanceFlags ? AppearanceFlags.AnimateAlways : false; }
-        }
-
-        public uint MiniMapColor {
-            get { return HasAppearanceFlags ? AppearanceFlags.MiniMapColor : 0; }
-        }
-
-        public uint LensHelp {
-            get { return HasAppearanceFlags ? AppearanceFlags.LensHelp : 0; }
-        }
-
-        public bool IsFullGround {
-            get { return HasAppearanceFlags ? AppearanceFlags.FullGround : false; }
-        }
-
-        public bool IsIgnoreLook {
-            get { return HasAppearanceFlags ? AppearanceFlags.Look : false; }
-        }
-
-        public uint Cloth {
-            get { return HasAppearanceFlags ? AppearanceFlags.Cloth : 0; }
-        }
-
-        public Proto.Appearances001.MarketInfo MarketInfo {
-            get { return HasAppearanceFlags ? AppearanceFlags.Market: null; }
-        }
-
-        public uint DefaultAction {
-            get { return HasAppearanceFlags ? AppearanceFlags.DefaultAction : 0; }
-        }
-
-        public bool IsWrappable {
-            get { return HasAppearanceFlags ? AppearanceFlags.Wrapable : false; }
-        }
-
-        public bool IsUnwrappable {
-            get { return HasAppearanceFlags ? AppearanceFlags.UnWrapable : false; }
-        }
-
-        public bool IsTopEffect {
-            get { return HasAppearanceFlags ? AppearanceFlags.TopEffect : false; }
-        }
-
-        public bool IsUsable {
-            get { return HasAppearanceFlags ? AppearanceFlags.Usable : false; }
-        }
-
-        // Helper
-        public bool IsAnimation { get; private set; }
-        public bool IsCachable { get; private set; }
-        //
-
-        public uint Waypoints { get { return Ground; } }
-        public bool IsGround { get { return Ground != 0; } }
-        public bool IsBank { get { return IsGround; } }
-        public bool IsClip { get { return IsGroundBorder; } }
-        public bool IsWritable { get { return Writable != 0; } }
-        public bool IsWritableOnce { get { return WritableOnce != 0; } }
-        public uint MaxTextLen { get { return Writable != 0 ? Writable : WritableOnce; } }
-        public bool IsCulmative { get { return IsStackable; } }
-        public bool IsLiquidContainer { get { return IsFluidContainer; } }
-        public bool IsLiquidPool { get { return IsSplash; } }
-        public bool IsUnpassable {  get { return IsNotWalkable; } }
-        public bool IsUnmoveable {  get { return IsNotMoveable; } }
-        public bool IsUnsight { get { return IsBlockProjectile; } }
-        public bool IsAvoid { get { return IsNotPathable; } }
-        public bool PreventMoveAnimation { get { return IsNoMoveAnimation; } }
-        public bool IsTakeable { get { return IsPickupable; } }
-        public bool IsLight { get { return LightInfo != null; } }
-        public uint LightColor { get { return IsLight ? LightInfo.Color : 0; } }
-        public uint Brightness { get { return IsLight ? LightInfo.Intensity : 0; } }
-        public int DisplacementX { get { return m_Displacement.x; } }
-        public int DisplacementY { get { return m_Displacement.y; } }
-        public bool IsLyingObject { get { return IsLyingCorpse; } }
-        public bool IsAutoMap { get { return MiniMapColor != 0; } }
-        public uint AutoMapColor { get { return MiniMapColor; } }
-        public bool IsFullBank { get { return IsFullGround; } }
-        public bool IsCloth { get { return Cloth != 0; } }
-        public bool IsMarket { get { return MarketInfo != null; } }
-
-        public bool IsCreature {
-            get {
-                return ID == AppearanceInstance.Creature || ID == AppearanceInstance.OutdatedCreature || ID == AppearanceInstance.UnknownCreature;
-            }
-        }
-
         public uint ID { get; }
+        public bool IsCreature { get => ID == AppearanceInstance.Creature; }
+        public AppearanceCategory Category { get; }
+        public int IdleAnimationPhases { get; } = 0;
+        public int WalkingAnimationPhases { get; } = 0;
+        public int AnimationPhases { get; }
 
-        public AppearanceType(uint id, Proto.Appearances001.Appearance appearance) {
+        public AppearanceType(uint id, Proto.Appearances.Appearance appearance, AppearanceCategory category) {
             ID = id;
+            Category = category;
             m_ProtoAppearance = appearance;
-
-            if (HasAppearanceFlags && AppearanceFlags.Displacement != null) {
-                m_Displacement = new UnityEngine.Vector2Int() {
-                    x = (int)appearance.Flags.Displacement.X,
-                    y = (int)appearance.Flags.Displacement.Y
-                };
-            }
-
-            if (m_ProtoAppearance != null && m_ProtoAppearance.FrameGroups != null) {
+            
+            if (FrameGroups != null) {
                 bool animation = false;
                 int exactSize = 0;
-                foreach (var fg in m_ProtoAppearance.FrameGroups) {
-                    animation = animation || fg.IsAnimation;
-                    exactSize = System.Math.Max(exactSize, (int)fg.ExactSize);
+                for (int i = 0; i < FrameGroups.Count; i++) {
+                    var frameGroup = FrameGroups[i];
+                    animation = animation || frameGroup.IsAnimation;
+                    exactSize = System.Math.Max(exactSize, (int)frameGroup.ExactSize);
+
+                    if (i == (int)Proto.Appearances.FrameGroupType.Idle)
+                        IdleAnimationPhases = (int)frameGroup.Phases;
+                    else if (i == (int)Proto.Appearances.FrameGroupType.Walking)
+                        WalkingAnimationPhases = (int)frameGroup.Phases;
                 }
 
                 IsAnimation = animation;
-
-                // TODO, this is used to cache a whole tile (using texture blit)
                 IsCachable = !IsAnimation && !IsHangable && !IsLight && exactSize + System.Math.Max(DisplacementX, DisplacementY) <= Constants.FieldCacheSize;
             } else {
+                IsAnimation = false;
                 IsCachable = false;
             }
+
+            AnimationPhases = IdleAnimationPhases + WalkingAnimationPhases;
         }
 
         public static bool operator !(AppearanceType instance) {

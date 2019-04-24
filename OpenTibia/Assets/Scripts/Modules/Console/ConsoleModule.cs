@@ -42,7 +42,7 @@ namespace OpenTibiaUnity.Modules.Console
         protected override void Start() {
             base.Start();
 
-            OpenTibiaUnity.InputHandler.AddKeyUpListener((Event e, bool repeated) => {
+            OpenTibiaUnity.InputHandler.AddKeyUpListener(Core.Utility.EventImplPriority.Default, (Event e, bool repeated) => {
                 if (!Core.InputManagment.InputHandler.IsGameObjectHighlighted(m_ChatInputField.gameObject))
                     return;
 
@@ -108,7 +108,7 @@ namespace OpenTibiaUnity.Modules.Console
             m_ChannelButtons.Remove(m_ActiveChannel.ID);
 
             var rectTransform = m_ActiveChannelButton.transform as RectTransform;
-            var index = rectTransform.GetSiblingIndex();
+            int index = rectTransform.GetSiblingIndex();
 
             int relativeIndex;
             if (index == 0)

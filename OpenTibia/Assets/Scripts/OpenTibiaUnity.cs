@@ -2,33 +2,36 @@
 {
     public static class OpenTibiaUnity
     {
-        public static int TicksMillis { get { return (int)(UnityEngine.Time.time * 1000); } }
-        public static int TicksSeconds { get { return (int)UnityEngine.Time.time; } }
+        public static int TicksMillis { get => (int)(UnityEngine.Time.time * 1000); }
+        public static int TicksSeconds { get => (int)UnityEngine.Time.time; }
         public static System.Threading.Thread MainThread { get; internal set; }
         public static string GraphicsVendor { get; internal set; }
         public static string GraphicsDevice { get; internal set; }
         public static string GraphicsVersion { get; internal set; }
         public static int StartupTimeMillis { get; internal set; } = 0;
-        public static int DeltaTimeMillis { get { return (int)(UnityEngine.Time.deltaTime * 1000); } }
+        public static int DeltaTimeMillis { get => (int)(UnityEngine.Time.deltaTime * 1000); }
         public static bool Quiting { get; internal set; }
 
-        public static Core.GameManager GameManager { get {return Core.GameManager.Instance; } }
+        public static Core.GameManager GameManager { get => Core.GameManager.Instance; }
         public static Core.Network.ProtocolGame ProtocolGame {
-            get { return GameManager?.ProtocolGame; }
+            get => GameManager?.ProtocolGame;
             set { if (GameManager != null) GameManager.ProtocolGame = value; }
         }
-        public static Core.Creatures.CreatureStorage CreatureStorage { get { return GameManager?.CreatureStorage; } }
-        public static Core.Creatures.Player Player { get { return CreatureStorage?.Player; } }
-        public static Core.Appearances.AppearanceStorage AppearanceStorage { get { return GameManager?.AppearanceStorage; } }
-        public static Core.WorldMap.WorldMapStorage WorldMapStorage { get { return GameManager?.WorldMapStorage; } }
-        public static Core.WorldMap.Rendering.WorldMapRenderer WorldMapRenderer { get { return GameManager?.WorldMapRenderer; } }
-        public static Core.MiniMap.MiniMapStorage MiniMapStorage { get { return GameManager?.MiniMapStorage; } }
-        public static Core.MiniMap.Rendering.MiniMapRenderer MiniMapRenderer { get { return GameManager?.MiniMapRenderer; } }
-        public static Core.Options.OptionStorage OptionStorage { get { return GameManager?.OptionStorage; } }
-        public static Core.InputManagment.InputHandler InputHandler { get { return GameManager?.InputHandler; } }
-        public static Core.Chat.ChatStorage ChatStorage { get { return GameManager?.ChatStorage; } }
-        public static Core.Chat.MessageStorage MessageStorage { get { return GameManager?.MessageStorage; } }
-        public static Core.Container.ContainerStorage ContainerStorage { get { return GameManager?.ContainerStorage; } }
+        public static UnityEngine.UI.GraphicRaycaster ActiveRaycaster { get => GameManager?.ActiveRaycaster; }
+        public static UnityEngine.EventSystems.EventSystem EventSystem { get => GameManager?.EventSystem; }
+        public static Core.Creatures.CreatureStorage CreatureStorage { get => GameManager?.CreatureStorage; }
+        public static Core.Creatures.Player Player { get => CreatureStorage?.Player; }
+        public static Core.Appearances.AppearanceStorage AppearanceStorage { get => GameManager?.AppearanceStorage; }
+        public static Core.WorldMap.WorldMapStorage WorldMapStorage { get => GameManager?.WorldMapStorage; }
+        public static Core.WorldMap.Rendering.WorldMapRenderer WorldMapRenderer { get => GameManager?.WorldMapRenderer; }
+        public static Core.MiniMap.MiniMapStorage MiniMapStorage { get => GameManager?.MiniMapStorage; }
+        public static Core.MiniMap.Rendering.MiniMapRenderer MiniMapRenderer { get => GameManager?.MiniMapRenderer; }
+        public static Core.Options.OptionStorage OptionStorage { get => GameManager?.OptionStorage; }
+        public static Core.InputManagment.InputHandler InputHandler { get => GameManager?.InputHandler; }
+        public static Core.Chat.ChatStorage ChatStorage { get => GameManager?.ChatStorage; }
+        public static Core.Chat.MessageStorage MessageStorage { get => GameManager?.MessageStorage; }
+        public static Core.Container.ContainerStorage ContainerStorage { get => GameManager?.ContainerStorage; }
+        public static Core.Magic.SpellStorage SpellStorage { get => GameManager?.SpellStorage; }
 
         public static int[] GetSupportedVersions() => SupportedVersions;
         private static int[] SupportedVersions => new int[] {
@@ -68,6 +71,19 @@
                 return false;
 #endif
             }
+        }
+
+        public static Core.Components.ObjectContextMenu CreateObjectContextMenu(UnityEngine.Vector3Int absolute,
+            Core.Appearances.ObjectInstance lookObject, int lookObjectStackPos,
+            Core.Appearances.ObjectInstance useObject, int useObjectStackPos,
+            Core.Creatures.Creature creature) {
+
+            var canvas = GameManager.ActiveCanvas;
+            var gameObject = UnityEngine.Object.Instantiate(GameManager.ContextMenuBasePrefab, canvas.transform);
+
+            var objectContextMenu = gameObject.AddComponent<Core.Components.ObjectContextMenu>();
+            objectContextMenu.Set(absolute, lookObject, lookObjectStackPos, useObject, useObjectStackPos, creature);
+            return objectContextMenu;
         }
     }
 }

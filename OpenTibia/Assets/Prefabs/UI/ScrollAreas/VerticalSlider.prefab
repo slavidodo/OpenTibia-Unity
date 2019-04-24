@@ -41,9 +41,9 @@ MonoBehaviour:
   m_HandleRect: {fileID: 3212063137567164936}
   m_Direction: 2
   m_MinValue: 0
-  m_MaxValue: 100
-  m_WholeNumbers: 0
-  m_Value: 0
+  m_MaxValue: 1000
+  m_WholeNumbers: 1
+  m_Value: 274
   m_OnValueChanged:
     m_PersistentCalls:
       m_Calls: []
@@ -273,12 +273,12 @@ PrefabInstance:
     - target: {fileID: 6863981495585134887, guid: 014aaf97446bcff42a2a92203c16e73b,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 104.8
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6863981495585134887, guid: 014aaf97446bcff42a2a92203c16e73b,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: -56.59
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6863981495585134887, guid: 014aaf97446bcff42a2a92203c16e73b,
         type: 3}
@@ -288,7 +288,7 @@ PrefabInstance:
     - target: {fileID: 6863981495585134887, guid: 014aaf97446bcff42a2a92203c16e73b,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 213.19
+      value: 200
       objectReference: {fileID: 0}
     - target: {fileID: 6863981495585134887, guid: 014aaf97446bcff42a2a92203c16e73b,
         type: 3}

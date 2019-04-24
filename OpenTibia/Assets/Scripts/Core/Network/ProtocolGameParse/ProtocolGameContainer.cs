@@ -10,10 +10,18 @@ namespace OpenTibiaUnity.Core.Network
             string name = message.GetString();
             byte capacity = message.GetU8();
             bool hasParent = message.GetBool();
-            bool unlocked = message.GetBool();
-            bool hasPages = message.GetBool();
-            ushort containerSize = message.GetU16();
-            ushort firstIndex = message.GetU16();
+
+            bool unlocked = true;
+            bool hasPages = false;
+            int containerSize = 0;
+            int firstIndex = 0;
+
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameContainerPagination)) {
+                unlocked = message.GetBool();
+                hasPages = message.GetBool();
+                containerSize = message.GetU16();
+                firstIndex = message.GetU16();
+            }
 
             int itemCount = message.GetU8();
 
@@ -29,26 +37,36 @@ namespace OpenTibiaUnity.Core.Network
 
         private void ParseContainerAddItem(InputMessage message) {
             byte containerId = message.GetU8();
-            ushort slot = message.GetU16();
+            ushort slot = 0;
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameContainerPagination))
+                slot = message.GetU16();
             Appearances.ObjectInstance item = ReadObjectInstance(message);
         }
 
         private void ParseContainerUpdateItem(InputMessage message) {
             byte containerId = message.GetU8();
-            ushort slot = message.GetU16();
+            ushort slot = 0;
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameContainerPagination))
+                slot = message.GetU16();
+            else
+                slot = message.GetU8();
             Appearances.ObjectInstance item = ReadObjectInstance(message);
         }
 
         private void ParseContainerRemoveItem(InputMessage message) {
             byte containerId = message.GetU8();
-            ushort slot = message.GetU16();
+            ushort slot;
+            Appearances.ObjectInstance lastItem = null;
 
-            ushort itemId = message.GetU16();
-            Appearances.ObjectInstance item;
-            if (itemId != 0)
-                item = ReadObjectInstance(message);
-            else
-                item = null;
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameContainerPagination)) {
+                slot = message.GetU16();
+                ushort itemId = message.GetU16();
+                
+                if (itemId != 0)
+                    lastItem = ReadObjectInstance(message, itemId);
+            } else {
+                slot = message.GetU8();
+            }
         }
     }
 }

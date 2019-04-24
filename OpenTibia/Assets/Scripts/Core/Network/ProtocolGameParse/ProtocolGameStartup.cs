@@ -34,10 +34,9 @@ namespace OpenTibiaUnity.Core.Network
         }
         private void ParseLoginSuccess(InputMessage message) {
             m_Player.ID = message.GetU32();
-            m_Player.Name = CharacterName;
 
 #if !UNITY_EDITOR
-            string title = string.Format("OpenTibiaUnity - {0}", m_Player.Name);
+            string title = string.Format("{0} - {1}", Application.productName, m_Player.Name);
             OpenTibiaUnity.GameManager.SetApplicationTitle(title);
 #endif
 

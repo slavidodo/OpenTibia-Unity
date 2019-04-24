@@ -15,21 +15,42 @@ namespace OpenTibiaUnity.Core.Appearances
         public static Rect s_TempRect = Rect.zero;
         public static Vector2 s_FieldVector = new Vector2(Constants.FieldSize, Constants.FieldSize);
 
+        public int MapData = -1; // stack position
+        public int MapField = -1; // field index in cached map
+
+        protected bool m_CacheDirty = false;
+        protected uint m_ID;
         protected int m_LastPhase = -1;
         protected int m_LastpublicPhase = -1;
-        protected bool m_CacheDirty = false;
         protected int m_LastCachedSpriteIndex = -1;
         protected int m_LastInternalPhase = -1;
-        public int MapData = -1; // stack pos
-        protected int m_ActiveFrameGroup = 0;
-        protected AppearanceType m_Type;
-        protected uint m_ID;
+        protected int m_ActiveFrameGroupIndex = 0;
         protected int m_LastPatternX = -1;
         protected int m_LastPatternY = -1;
         protected int m_LastPatternZ = -1;
-        protected AppearanceAnimator[] m_Animators = new AppearanceAnimator[2];
-        public int MapField = -1;
+
+
+        protected AppearanceType m_Type;
         protected List<uint> m_TempAlternativePhases;
+        protected Animation.IAppearanceAnimator[] m_Animators;
+        protected List<CachedSpriteInformation[]> m_CachedSpriteInformations;
+
+        protected Proto.Appearances.FrameGroup m_ActiveFrameGroup {
+            get {
+                if (m_ActiveFrameGroupIndex < 0)
+                    return null;
+
+                if (m_ActiveFrameGroupIndex != m_ActiveFrameGroupIndexInternal) {
+                    m_ActiveFrameGroupIndexInternal = m_ActiveFrameGroupIndex;
+                    m_ActiveFrameGroupInternal = m_Type.FrameGroups?[m_ActiveFrameGroupIndex];
+                }
+
+                return m_ActiveFrameGroupInternal;
+            }
+        }
+
+        private int m_ActiveFrameGroupIndexInternal = -1;
+        private Proto.Appearances.FrameGroup m_ActiveFrameGroupInternal = null;
 
         protected CachedSpriteInformation m_CachedSpriteInformation = null;
 
@@ -42,18 +63,14 @@ namespace OpenTibiaUnity.Core.Appearances
 
         public int Phase {
             set {
-                AppearanceAnimator animator = m_Animators[m_ActiveFrameGroup];
-                if (animator) {
+                var animator = m_Animators?[m_ActiveFrameGroupIndex];
+                if (animator != null)
                     animator.Phase = value;
-                }
             }
             
             get {
-                AppearanceAnimator animator = m_Animators[m_ActiveFrameGroup];
-                if (animator) {
-                    return animator.Phase;
-                }
-                return 0;
+                var animator = m_Animators?[m_ActiveFrameGroupIndex];
+                return animator != null ? animator.Phase : 0;
             }
         }
 
@@ -62,90 +79,93 @@ namespace OpenTibiaUnity.Core.Appearances
             m_Type = type;
 
             if (!!m_Type && m_Type.FrameGroups != null) {
-                if (m_Type.FrameGroups[m_ActiveFrameGroup].IsAnimation) {
-                    m_TempAlternativePhases = new List<uint>((int)m_Type.FrameGroups[m_ActiveFrameGroup].Phases);
-                }
+                m_Animators = new Animation.IAppearanceAnimator[m_Type.FrameGroups.Count];
+                for (int i = 0; i < m_Animators.Length; i++) {
+                    var animator = type.FrameGroups[i].Animator?.Clone();
+                    if (animator is Animation.LegacyAnimator legacyAnimator)
+                        legacyAnimator.Initialise(type);
 
-                int i = 0;
-                foreach (var fg in type.FrameGroups) {
-                    if (fg.Animator)
-                        m_Animators[i] = fg.Animator.Clone();
-                    i++;
+                    m_Animators[i] = animator;
                 }
             }
         }
 
-        public virtual int GetSpriteIndex(int _, int patternX, int patternY, int patternZ) {
-            int phase = Phase;
+        public virtual int GetSpriteIndex(int layer, int patternX, int patternY, int patternZ) {
+            int phase = Phase % (int)m_ActiveFrameGroup.Phases;
             if (!(phase == m_LastInternalPhase && patternX == m_LastPatternX && patternX >= 0 && patternY == m_LastPatternY && patternY >= 0 && patternZ == m_LastPatternZ && patternZ >= 0)) {
                 m_LastInternalPhase = phase;
                 m_LastPatternX = patternX;
                 m_LastPatternY = patternY;
                 m_LastPatternZ = patternZ;
-
-                var fg = m_Type.FrameGroups[m_ActiveFrameGroup];
-
-                int z = patternZ >= 0 ? (int)(patternZ % fg.PatternDepth) : 0;
-                int y = patternY >= 0 ? (int)(patternY % fg.PatternHeight) : 0;
-                int x = patternX >= 0 ? (int)(patternX % fg.PatternWidth) : 0;
                 
-                m_LastCachedSpriteIndex = 
-                        (int)(((phase * fg.PatternDepth + z)
-                                      * fg.PatternHeight + y)
-                                      * fg.PatternWidth + x);
+                int z = patternZ >= 0 ? patternZ % (int)m_ActiveFrameGroup.PatternDepth : 0;
+                int y = patternY >= 0 ? patternY % (int)m_ActiveFrameGroup.PatternHeight : 0;
+                int x = patternX >= 0 ? patternX % (int)m_ActiveFrameGroup.PatternWidth : 0;
+                
+                m_LastCachedSpriteIndex = (((phase * (int)m_ActiveFrameGroup.PatternDepth + z)
+                                                   * (int)m_ActiveFrameGroup.PatternHeight + y)
+                                                   * (int)m_ActiveFrameGroup.PatternWidth + x) * (int)m_ActiveFrameGroup.Layers;
             }
-            return m_LastCachedSpriteIndex;
+
+            return m_LastCachedSpriteIndex + (layer >= 0 ? layer % (int)m_ActiveFrameGroup.Layers : 0);
         }
 
         public CachedSpriteInformation GetSprite(int layer, int patternX, int patternY, int patternZ, bool animation) {
-            if (!Type.IsAnimation) {
-                if (m_CachedSpriteInformation == null) {
-                    m_CachedSpriteInformation = OpenTibiaUnity.AppearanceStorage.GetSprite(
-                        m_Type.FrameGroups[m_ActiveFrameGroup].Sprites[GetSpriteIndex(layer, patternX, patternY, patternZ)]);
-                }
+            if (m_Type.FrameGroups == null)
+                return null;
 
-                return m_CachedSpriteInformation;
-            }
+            var appearanceStorage = OpenTibiaUnity.AppearanceStorage;
             
-            // TODO(priority=med)
-            // store all sprites of this item in a mapped list
-            // OR - use indepedant spriteProvider for each appearance type
+            var spriteIndex = GetSpriteIndex(layer, patternX, patternY, patternZ);
+            if (m_CachedSpriteInformations == null) {
+                m_CachedSpriteInformations = new List<CachedSpriteInformation[]>();
+                foreach (var frameGroup in m_Type.FrameGroups)
+                    m_CachedSpriteInformations.Add(new CachedSpriteInformation[frameGroup.Sprites.Count]);
+                
+                uint spriteId = m_ActiveFrameGroup.Sprites[spriteIndex];
+                m_CachedSpriteInformations[m_ActiveFrameGroupIndex][spriteIndex] = appearanceStorage.GetSprite(spriteId);
+            } else if (m_CachedSpriteInformations[m_ActiveFrameGroupIndex][spriteIndex] == null) {
+                var spriteId = m_ActiveFrameGroup.Sprites[spriteIndex];
+                m_CachedSpriteInformations[m_ActiveFrameGroupIndex][spriteIndex] = appearanceStorage.GetSprite(spriteId);
+            }
 
-            int spriteIndex = GetSpriteIndex(layer, patternX, patternY, patternZ);
-            uint spriteID = m_Type.FrameGroups[m_ActiveFrameGroup].Sprites[spriteIndex];
-            return OpenTibiaUnity.AppearanceStorage.GetSprite(spriteID);
+            return m_CachedSpriteInformations[m_ActiveFrameGroupIndex][spriteIndex];
         }
         
-        public virtual void DrawTo(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ) {
-            var cachedInformation = GetSprite(-1, patternX, patternY, patternZ, m_Type.FrameGroups[m_ActiveFrameGroup].IsAnimation);
-            InternalDrawTo(screenPosition.x, screenPosition.y, zoom, cachedInformation);
+        public virtual void DrawTo(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+            for (int layer = 0; layer < m_ActiveFrameGroup.Layers; layer++) {
+                var cachedInformation = GetSprite(layer, patternX, patternY, patternZ, m_ActiveFrameGroup.IsAnimation);
+                InternalDrawTo(screenPosition.x, screenPosition.y, zoom, highlighted, highlightOpacity, cachedInformation);
+            }
         }
         
-        protected void InternalDrawTo(float screenX, float screenY, Vector2 zoom,
+        protected void InternalDrawTo(float screenX, float screenY, Vector2 zoom, bool highlighted, float highlightOpacity,
             CachedSpriteInformation cachedSpriteInfo, Material material = null) {
+            if (cachedSpriteInfo == null) // TODO; if this is null, then this call should probably never be called
+                return;
             
             s_TempPoint.Set(screenX - m_Type.DisplacementX, screenY - m_Type.DisplacementY);
             s_TempRect.position = (s_TempPoint - cachedSpriteInfo.spriteSize + s_FieldVector) * zoom;
             s_TempRect.size = cachedSpriteInfo.spriteSize * zoom;
-            
-            if (material != null) {
-                Graphics.DrawTexture(s_TempRect, cachedSpriteInfo.texture, cachedSpriteInfo.rect, 0, 0, 0, 0, material);
-            } else {
-                Graphics.DrawTexture(s_TempRect, cachedSpriteInfo.texture, cachedSpriteInfo.rect, 0, 0, 0, 0, OpenTibiaUnity.GameManager.DefaultMaterial);
-            }
+
+            if (material == null)
+                material = OpenTibiaUnity.GameManager.AppearanceTypeMaterial;
+
+            material.SetFloat("_HighlightOpacity", highlighted ? highlightOpacity : 0);
+            Graphics.DrawTexture(s_TempRect, cachedSpriteInfo.texture, cachedSpriteInfo.rect, 0, 0, 0, 0, material);
         }
 
         public virtual void SwitchFrameGroup(int _, int __) { }
 
         public virtual bool Animate(int ticks, int delay = 0) {
-            AppearanceAnimator animator = m_Animators[m_ActiveFrameGroup];
-            if (!!animator) {
+            Animation.IAppearanceAnimator animator = m_Animators?[m_ActiveFrameGroupIndex];
+            if (animator != null) {
                 animator.Animate(ticks, delay);
                 return !animator.Finished;
             }
             return false;
         }
-
+        
         public static bool operator !(AppearanceInstance instance) {
             return instance == null;
         }

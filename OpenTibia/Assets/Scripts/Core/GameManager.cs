@@ -2,8 +2,11 @@
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Core
 {
@@ -11,7 +14,7 @@ namespace OpenTibiaUnity.Core
     public class VersionChangeEvent : UnityEvent<int, int> { }
 
     public class ElapsedEvent : UnityEvent { }
-    
+
     [DisallowMultipleComponent]
     public class GameManager : MonoBehaviour {
         /// <summary>
@@ -40,6 +43,7 @@ namespace OpenTibiaUnity.Core
         public Chat.ChatStorage ChatStorage { get; private set; }
         public Chat.MessageStorage MessageStorage { get; private set; }
         public Container.ContainerStorage ContainerStorage { get; private set; }
+        public Magic.SpellStorage SpellStorage { get; private set; }
         public Network.ProtocolGame ProtocolGame { get; set; }
         public int PendingCharacterIndex { get; set; } = -1;
         public ElapsedEvent OnSecondaryTimeCheck { get; private set; }
@@ -55,6 +59,13 @@ namespace OpenTibiaUnity.Core
 #pragma warning disable CS0649 // never assigned to
         // Prefabs
         [Header("Prefabs")]
+        public TMPro.TextMeshProUGUI DefaultLabel;
+        public Button DefaultButton;
+        public Button DefaulBlueButton;
+        public Button DefaulGreenButton;
+        public Button DefaulYellowButton;
+        public GameObject HorizontalSeparator;
+        public GameObject VerticalSeparator;
         public Components.ExitWindow ExitWindowPrefab;
         public Components.PopupWindow PopupWindowPrefab;
         public Components.CharacterPanel CharacterPanelPrefab;
@@ -62,13 +73,17 @@ namespace OpenTibiaUnity.Core
         [Tooltip("Module.Console")] public Modules.Console.ChannelMessageLabel ChannelMessageLabelPrefab;
         [Tooltip("Module.Console")] public Modules.Console.ChannelButton ChannelButtonPrefab;
         public TMPro.TextMeshProUGUI LabelOnscreenMessageBoxPrefab;
+        public Components.SplitStackWindow SplitStackWindowPrefab;
+        public GameObject ContextMenuBasePrefab;
+        public LayoutElement ContextMenuItemPrefab;
 
         // UI Default Objects
         [Header("Canvases & Overlays")]
         public Canvas BackgroundCanvas;
-        public RectTransform BackgroundPanelOverlay;
+        public Canvas BackgroundPanelBlocker;
         public Canvas GameCanvas;
-        public RectTransform GamePanelOverlay;
+        public Canvas GamePanelBlocker;
+        public EventSystem EventSystem;
 
         [Header("Static Panels")]
         public RectTransform BackgroundCenterPanel;
@@ -83,8 +98,9 @@ namespace OpenTibiaUnity.Core
         public Components.Base.Window LoadingAppearancesWindow;
 
         [Header("Materials")]
-        public Material DefaultMaterial;
-        public Material OutfitsMaterial;
+        public Material AppearanceTypeMaterial;
+        public Material OutfitTypeMaterial;
+        public Material MarksViewMaterial;
         public Material LightmapMaterial;
         public Material LightSurfaceMaterial;
 
@@ -106,7 +122,7 @@ namespace OpenTibiaUnity.Core
 
         [Header("Textures & Sprites")]
         public Texture2D MarksViewTexture;
-        public Texture2D SampleTexture;
+        public Texture2D TileCursorTexture;
         public Sprite[] PartySprites;
         public Sprite[] PKSprites;
         public Sprite[] TypeSprites;
@@ -114,11 +130,11 @@ namespace OpenTibiaUnity.Core
         public Sprite[] GuildSprites;
 #pragma warning restore CS0649 // never assigned to
 
-        public RectTransform ActiveOverlay {
+        public Canvas ActiveBlocker {
             get {
                 if (BackgroundCanvas.gameObject.activeSelf)
-                    return BackgroundPanelOverlay;
-                return GamePanelOverlay;
+                    return BackgroundPanelBlocker;
+                return GamePanelBlocker;
             }
         }
 
@@ -130,17 +146,23 @@ namespace OpenTibiaUnity.Core
             }
         }
 
+        public GraphicRaycaster ActiveRaycaster {
+            get => ActiveCanvas.GetComponent<GraphicRaycaster>();
+        }
+
         public bool IsGameRunning {
-            get {
-                return ProtocolGame != null && ProtocolGame.IsGameRunning;
-            }
+            get => ProtocolGame != null && ProtocolGame.IsGameRunning;
+        }
+
+        public bool IsLoadingClientAssets {
+            get => m_LoadingClientAssets;
         }
 
         // private fields
         private Queue<UnityAction> m_ActionQueue;
         private Components.ExitWindow m_ExitWindow;
-        private AssetBundleCreateRequest m_SpritesBundleLoadingRequest = null;
         private bool m_LastMiniMapSaveWasSuccessfull = false;
+        private bool m_LoadingClientAssets = false;
 
         protected void Awake() {
             // setup static fields
@@ -182,6 +204,7 @@ namespace OpenTibiaUnity.Core
             ChatStorage = new Chat.ChatStorage(OptionStorage);
             MessageStorage = new Chat.MessageStorage();
             ContainerStorage = new Container.ContainerStorage();
+            SpellStorage = new Magic.SpellStorage();
 
             // Load options
             OptionStorage.LoadOptions();
@@ -198,10 +221,7 @@ namespace OpenTibiaUnity.Core
             onProtocolVersionChange = new VersionChangeEvent();
         }
 
-        System.Collections.IEnumerator Start() {
-            LoadProtoAppearanaces();
-            yield return LoadSpriteAssets();
-
+        void Start() {
             InvokeRepeating("SecondaryTimerCheck", 0, 0.05f);
             InvokeRepeating("SaveMiniMap", 0, 0.5f);
 
@@ -229,10 +249,12 @@ namespace OpenTibiaUnity.Core
                 InputHandler.OnKeyEvent(e);
                 e.Use();
                 return;
-            } else if (e.type == EventType.MouseDown) {
-                InputHandler.OnMouseDown(e);
-            } else if (e.type == EventType.MouseUp) {
-                InputHandler.OnMouseUp(e);
+            } else if (e.type == EventType.MouseDown || e.type == EventType.MouseUp) {
+                InputHandler.OnMouseEvent(e);
+            } else if (e.type == EventType.MouseMove) {
+                // TODO: mouseMove
+            } else if (e.type == EventType.MouseDrag) {
+                InputHandler.OnDragEvent(e);
             }
             
             // avoid concurrent actions on the same input module //
@@ -302,9 +324,16 @@ namespace OpenTibiaUnity.Core
         }
 
         public void DequeueMainThreadActions() {
-            lock (m_ActionQueue) {
-                while (m_ActionQueue.Count > 0)
-                    m_ActionQueue.Dequeue().Invoke();
+            while (true) {
+                UnityAction action;
+                lock (m_ActionQueue) {
+                    if (m_ActionQueue.Count == 0)
+                        break;
+
+                    action = m_ActionQueue.Dequeue();
+                }
+
+                action.Invoke();
             }
         }
 
@@ -331,62 +360,86 @@ namespace OpenTibiaUnity.Core
             }
         }
 
-        public void LoadProtoAppearanaces() {
-            TextAsset appearancesBinary = Resources.Load("appearances001") as TextAsset;
-            if (!appearancesBinary)
-                throw new System.Exception("GameManager.LoadSpriteAssets: Unable to appearances asset.");
+        public async void LoadThingsAsync(int version) {
+            if (m_LoadingClientAssets)
+                return;
 
-            AppearanceStorage.SetProtoAppearances(Proto.Appearances001.Appearances.Parser.ParseFrom(appearancesBinary.bytes));
+            m_LoadingClientAssets = true;
+            try {
+                AppearanceStorage.Unload();
+                LoadProtoAppearanaces(version);
+                await LoadSpriteAssets(version);
+            } catch (System.Exception) {}
+            m_LoadingClientAssets = false;
         }
 
-        public System.Collections.IEnumerator LoadSpriteAssets() {
-            m_SpritesBundleLoadingRequest = AssetBundle.LoadFromFileAsync(Path.Combine(Application.streamingAssetsPath, "sprites"));
-            yield return m_SpritesBundleLoadingRequest;
+        protected void LoadProtoAppearanaces(int version) {
+            try {
+                byte[] bytes = File.ReadAllBytes(Path.Combine(Application.streamingAssetsPath, version.ToString(), "appearances.dat"));
+                AppearanceStorage.SetProtoAppearances(Proto.Appearances.Appearances.Parser.ParseFrom(bytes));
+            } catch (System.Exception e) {
+                throw new System.Exception(string.Format("Unable to appearances.dat ({0}).", e.Message));
+            }
+        }
+
+        protected async Task LoadSpriteAssets(int version) {
+            string path = Path.Combine(Application.streamingAssetsPath, version.ToString(), "sprites");
+            if (!File.Exists(path))
+                throw new FileNotFoundException(string.Format("Couldn't find the sprites assetbundle ({0}).", path));
             
-            var assetBundle = m_SpritesBundleLoadingRequest.assetBundle;
-            if (assetBundle == null) {
-                Debug.LogWarning("Failed to load AssetBundle!");
-                yield break;
-            }
+            AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(path);
+            while (!request.isDone)
+                await Task.Yield();
 
-            TextAsset catalogContent = Resources.Load("catalog-content") as TextAsset;
-            if (!catalogContent) {
-                Debug.LogWarning("Failed to load AssetBundle!");
+            var assetBundle = request.assetBundle;
+            if (assetBundle == null)
+                throw new System.Exception("Unable to load asset bundle.");
+
+            try {
+                string catalogJson = File.ReadAllText(Path.Combine(Application.streamingAssetsPath, version.ToString(), "catalog-content.json"));
+                Appearances.SpritesProvider spriteProvider = new Appearances.SpritesProvider(assetBundle, catalogJson);
+                AppearanceStorage.SetSpriteProvider(spriteProvider);
+            } catch (System.Exception e) {
                 assetBundle.Unload(true);
-                yield break;
+                throw new System.Exception(string.Format("Unable to catalog-content.json ({0}).", e.Message));
             }
+        }
 
-            Appearances.SpritesProvider spriteProvider = new Appearances.SpritesProvider(assetBundle, catalogContent);
-            AppearanceStorage.SetSpriteProvider(spriteProvider);
+        public void ProcessGamePending() {
+            // onGamePending.Invoke();
 
-            BackgroundCenterPanel.gameObject.SetActive(true);
-            LobbyPanel.gameObject.SetActive(true);
-            LoadingAppearancesWindow.gameObject.SetActive(false);
+            ProtocolGame.SendEnterGame();
         }
 
         public void ProcessGameStart() {
+            // onGameStart.Invoke();
+
             PendingCharacterIndex = -1;
 
             BackgroundCanvas.gameObject.SetActive(false);
             GameCanvas.gameObject.SetActive(true);
 
             CharactersWindow.ProcessGameStart();
-            UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(GameCanvas.gameObject);
+            EventSystem.SetSelectedGameObject(GameCanvas.gameObject);
         }
 
         public void ProcessGameEnd() {
+            // onGameEnd.Invoke();
+
             WorldMapRenderer.DestroyUIElements();
+
+            CursorController.SetCursorState(CursorState.Default, CursorPriority.Low);
 
             BackgroundCanvas.gameObject.SetActive(true);
             GameCanvas.gameObject.SetActive(false);
-            UnityEngine.EventSystems.EventSystem.current.SetSelectedGameObject(BackgroundCanvas.gameObject);
+            EventSystem.SetSelectedGameObject(BackgroundCanvas.gameObject);
 
 #if !UNITY_EDITOR
-            OpenTibiaUnity.GameManager.SetApplicationTitle("OpenTibiaUnity");
+            OpenTibiaUnity.GameManager.SetApplicationTitle(Application.productName);
 #endif
 
             // show the characters window
-            CharactersWindow.ResetToCenter();
+            CharactersWindow.ResetLocalPosition();
             CharactersWindow.Show();
 
             // if there is a pending character, the characters window will take care
@@ -396,7 +449,7 @@ namespace OpenTibiaUnity.Core
         }
         
         public void ProcessChangeCharacter() {
-            CharactersWindow.ResetToCenter();
+            CharactersWindow.ResetLocalPosition();
             CharactersWindow.Show();
         }
 
@@ -547,7 +600,7 @@ namespace OpenTibiaUnity.Core
             }
 
             if (version >= 1057) {
-                EnableFeature(GameFeatures.GameIdleAnimations);
+                EnableFeature(GameFeatures.GameSeparateAnimationGroups);
             }
 
             if (version >= 1061) {

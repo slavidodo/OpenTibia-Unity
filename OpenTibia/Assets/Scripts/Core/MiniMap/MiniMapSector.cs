@@ -157,8 +157,6 @@ namespace OpenTibiaUnity.Core.MiniMap
             
             File.WriteAllBytes(colorPath, colorTexBytes);
             File.WriteAllBytes(waypointsPath, waypointsTexBytes);
-
-            //Debug.Log(colorPath);
         }
 
         public bool Equals(MiniMapSector sector) {

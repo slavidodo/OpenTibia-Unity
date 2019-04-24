@@ -192,9 +192,9 @@ namespace OpenTibiaUnity.Core.MiniMap
             if (steps == null)
                 return PathState.PathErrorInternal;
             else if (targetZ > startZ)
-                return PathState.PathErrorGoUpstairs;
-            else if (targetZ < startZ)
                 return PathState.PathErrorGoDownstairs;
+            else if (targetZ < startZ)
+                return PathState.PathErrorGoUpstairs;
             else if (dX == 0 && dY == 0)
                 return PathState.PathEmpty;
             else if (System.Math.Abs(dX) >= Constants.PathMaxDistance || System.Math.Abs(dY) > Constants.PathMaxDistance)
@@ -266,7 +266,8 @@ namespace OpenTibiaUnity.Core.MiniMap
             PathQueueNode pathNode = m_PathMatrix[matrixCenter * matrixSize + matrixCenter];
             pathNode.Reset();
             pathNode.Predecessor = null;
-            pathNode.Cost = pathNode.PathCost = int.MaxValue;
+            pathNode.Cost = int.MaxValue;
+            pathNode.PathCost = int.MaxValue;
             pathNode.PathHeuristic = 0;
             
             m_PathDirty.Add(pathNode); // push the initial position to the closed list
@@ -303,82 +304,74 @@ namespace OpenTibiaUnity.Core.MiniMap
 
             PathQueueNode currentPathNode = null;
             PathQueueNode tmpPathNode = null;
-
-            uint s = 0, s2 = 0;
+            
             // looping through the very first SQM in the heap
             while (m_PathPriorityQueue.Count > 0) {
-                s++;
                 currentPathNode = m_PathPriorityQueue.Dequeue();
                 // check if the current move won't exceed our current shortest path, otherwise end it up
                 // if it exceeds, then we will loop again through our heap, if exists
                 // if not, then we are done searching if the current path is undefined that means we can't
                 // reach that field
-                if (currentPathNode.Priority >= pathNode.PathCost)
-                    break;
+                if (currentPathNode.Priority < pathNode.PathCost) {
+                    for (int i = -1; i <= 1; i++) {
+                        for (int j = -1; j <= 1; j++) {
+                            if (i != 0 || j != 0) {
+                                int gridX = currentPathNode.X + i;
+                                int gridY = currentPathNode.Y + j;
 
-                for (int i = -1; i <= 1; i++) {
-                    for (int j = -1; j <= 1; j++) {
-                        if (i == 0 && j == 0)
-                            continue;
+                                // check if that grid is in the range or validity
+                                if (!(gridX < -matrixCenter || gridX > matrixCenter || gridY < -matrixCenter || gridY > matrixCenter)) {
+                                    int currentPathCost;
+                                    if (i * j == 0) // straight movement (not diagonal)
+                                        currentPathCost = currentPathNode.PathCost + currentPathNode.Cost;
+                                    else // diagonal movements worth as 3 as a normal movement;
+                                        currentPathCost = currentPathNode.PathCost + 3 * currentPathNode.Cost;
 
-                        int gridX = currentPathNode.x + i;
-                        int gridY = currentPathNode.y + j;
+                                    tmpPathNode = m_PathMatrix[(matrixCenter + gridY) * matrixSize + (matrixCenter + gridX)];
+                                    if (tmpPathNode.PathCost > currentPathCost) {
+                                        tmpPathNode.Predecessor = currentPathNode;
+                                        tmpPathNode.PathCost = currentPathCost;
+                                        if (tmpPathNode.Cost == int.MaxValue) {
+                                            int currentPosX = startX + tmpPathNode.X;
+                                            int currentPosY = startY + tmpPathNode.Y;
+                                            if (currentPosX < sectorMaxX) {
+                                                if (currentPosY < sextorMaxY)
+                                                    tmpIndex = (int)Directions.North;
+                                                else
+                                                    tmpIndex = (int)Directions.East;
+                                            } else if (currentPosY < sextorMaxY) {
+                                                tmpIndex = (int)Directions.West;
+                                            } else {
+                                                tmpIndex = (int)Directions.South;
+                                            }
 
-                        // check if that grid is in the range or validity
-                        if (gridX < -matrixCenter || gridX > matrixCenter || gridY < -matrixCenter || gridY > matrixCenter)
-                            continue;
-                        
-                        int currentPathCost;
-                        if (i * j == 0) // straight movement (not diagonal)
-                            currentPathCost = currentPathNode.PathCost + currentPathNode.Cost;
-                        else // diagonal movements worth as 3 as a normal movement;
-                            currentPathCost = currentPathNode.PathCost + 3 * currentPathNode.Cost;
+                                            tmpPathNode.Cost = tmpSectors[tmpIndex].GetCost(currentPosX, currentPosY, startZ);
+                                            tmpPathNode.PathHeuristic = tmpPathNode.Cost + (tmpPathNode.Distance - 1) * overallMinCost;
+                                            m_PathDirty.Add(tmpPathNode);
+                                        }
 
-                        tmpPathNode = m_PathMatrix[(matrixCenter + gridY) * matrixSize + (matrixCenter + gridX)];
-                        if (tmpPathNode.PathCost > currentPathCost) {
-                            tmpPathNode.Predecessor = currentPathNode;
-                            tmpPathNode.PathCost = currentPathCost;
-                            if (tmpPathNode.Cost == int.MaxValue) {
-                                int currentPosX = startX + tmpPathNode.x;
-                                int currentPosY = startY + tmpPathNode.y;
-                                if (currentPosX < sectorMaxX) {
-                                    if (currentPosY < sextorMaxY)
-                                        tmpIndex = (int)Directions.North;
-                                    else
-                                        tmpIndex = (int)Directions.East;
-                                } else if (currentPosY < sextorMaxY) {
-                                    tmpIndex = (int)Directions.West;
-                                } else {
-                                    tmpIndex = (int)Directions.South;
+                                        if (!(tmpPathNode == pathNode || tmpPathNode.Cost >= Constants.PathCostObstacle)) {
+                                            if (tmpPathNode.Queue == m_PathPriorityQueue) {
+                                                m_PathPriorityQueue.UpdatePriority(tmpPathNode, currentPathCost + tmpPathNode.PathHeuristic);
+                                            } else {
+                                                tmpPathNode.Reset();
+                                                m_PathPriorityQueue.Enqueue(tmpPathNode, currentPathCost + tmpPathNode.PathHeuristic);
+                                            }
+                                        }
+                                    }
                                 }
-                                tmpPathNode.Cost = tmpSectors[tmpIndex].GetCost(currentPosX, currentPosY, startZ);
-                                tmpPathNode.PathHeuristic = tmpPathNode.Cost + (tmpPathNode.Distance - 1) * overallMinCost;
-                                m_PathDirty.Add(tmpPathNode);
-                            }
-
-                            if (tmpPathNode == pathNode || tmpPathNode.Cost >= Constants.PathCostObstacle)
-                                continue;
-
-                            s2++;
-                            if (tmpPathNode.Queue == m_PathPriorityQueue) {
-                                m_PathPriorityQueue.UpdatePriority(tmpPathNode, currentPathCost + tmpPathNode.PathHeuristic);
-                            } else {
-                                tmpPathNode.Reset();
-                                m_PathPriorityQueue.Enqueue(tmpPathNode, currentPathCost + tmpPathNode.PathHeuristic);
                             }
                         }
                     }
                 }
             }
-
-            //Debug.Log("Recuresive Count: " + s + ", " + s2);
             
             var ret = PathState.PathErrorInternal;
             if (pathNode.PathCost < int.MaxValue) {
                 currentPathNode = pathNode;
                 tmpPathNode = null;
                 while (currentPathNode != null) {
-                    if (!forceExact && currentPathNode.x == lastPathNode.x && currentPathNode.y == lastPathNode.y && lastPathNode.Cost >= Constants.PathCostObstacle) {
+                    if (!forceExact && currentPathNode.X == lastPathNode.X && currentPathNode.Y == lastPathNode.Y && lastPathNode.Cost >= Constants.PathCostObstacle) {
                         currentPathNode = null;
                         break;
                     }
@@ -387,8 +380,8 @@ namespace OpenTibiaUnity.Core.MiniMap
                         break;
 
                     if (tmpPathNode != null) {
-                        dX = currentPathNode.x - tmpPathNode.x;
-                        dY = currentPathNode.y - tmpPathNode.y;
+                        dX = currentPathNode.X - tmpPathNode.X;
+                        dY = currentPathNode.Y - tmpPathNode.Y;
                         if (dX == 1 && dY == 0) {
                             steps.Add((int)PathDirection.East);
                         } else if (dX == 1 && dY == -1) {

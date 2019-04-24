@@ -23,8 +23,8 @@ namespace OpenTibiaUnity.Core.Appearances
 
     public sealed class SpritesProvider
     {
-        public const int AtlasTexture_Width = 384 * 2;
-        public const int AtlasTexture_Height = 384 * 2;
+        public const int AtlasTexture_Width = 512;
+        public const int AtlasTexture_Height = 512;
 
         AssetBundle m_SpritesAssetBundle;
 
@@ -39,8 +39,8 @@ namespace OpenTibiaUnity.Core.Appearances
             new Vector2Int(2, 2)
         };
         
-        public SpritesProvider(AssetBundle spritesBundle, TextAsset catalogContent) {
-            var jsonDeserializedObj = JsonConvert.DeserializeObject(catalogContent.text);
+        public SpritesProvider(AssetBundle spritesBundle, string catalogJson) {
+            var jsonDeserializedObj = JsonConvert.DeserializeObject(catalogJson);
             JArray jArray = (JArray)jsonDeserializedObj;
             if (jArray == null)
                 throw new System.Exception("SpriteProvider.CSOR: Invalid catalog-content JSON");
@@ -56,9 +56,7 @@ namespace OpenTibiaUnity.Core.Appearances
                 foreach (var property in obj.Properties()) {
                     string name = property.Name;
                     JToken value = property.Value;
-                    if (name == "type") {
-                        // skip
-                    } if (name == "file") {
+                    if (name == "file") {
                         if (a0)
                             continue;
             
@@ -102,6 +100,10 @@ namespace OpenTibiaUnity.Core.Appearances
         public void Unload() {
             m_SpritesAssetBundle?.Unload(true);
             m_SpritesAssetBundle = null;
+
+            m_SpriteSheet.Clear();
+            m_CachedTextures.Clear();
+            m_SpriteCachedInformation.Clear();
         }
 
         private bool GetSpriteInfo(uint spriteID, out string filename, out Rect spriteRect, out Vector2 realSpriteSize) {
@@ -165,8 +167,8 @@ namespace OpenTibiaUnity.Core.Appearances
         private CachedSpriteInformation FindCachedInformation(uint spriteID) {
             int lastIndex = m_SpriteCachedInformation.Count - 1;
             int index = 0;
-            while (index < lastIndex) {
-                int tmpIndex = (int)(index + (uint)lastIndex >> 1);
+            while (index <= lastIndex) {
+                int tmpIndex = index + lastIndex >> 1;
                 var cachedInformation = m_SpriteCachedInformation[tmpIndex];
                 if (cachedInformation.id > spriteID)
                     index = tmpIndex + 1;

@@ -86,12 +86,15 @@
                 throw new System.Exception("ProtocolGame.ParseCreateOnMap: Co-ordinate " + absolutePosition + " is out of range.");
 
             UnityEngine.Vector3Int mapPosition = m_WorldMapStorage.ToMap(absolutePosition);
-            int stackPos = message.GetU8();
+            int stackPos = 255;
+            if (OpenTibiaUnity.GameManager.ClientVersion >= 841)
+                stackPos = message.GetU8();
+
             int typeOrId = message.GetU16();
 
             Appearances.ObjectInstance obj;
             if (typeOrId == Appearances.AppearanceInstance.Creature || typeOrId == Appearances.AppearanceInstance.OutdatedCreature || typeOrId == Appearances.AppearanceInstance.UnknownCreature) {
-                Creatures.Creature creature = ReadCreatureInstance(message, typeOrId);
+                Creatures.Creature creature = ReadCreatureInstance(message, typeOrId, absolutePosition);
                 if (creature.ID == m_Player.ID) {
                     m_Player.StopAutowalk(true);
                 }
@@ -104,9 +107,8 @@
             if (stackPos == 255) {
                 m_WorldMapStorage.PutObject(mapPosition, obj);
             } else {
-                if (stackPos > Constants.MapSizeW) {
-                    throw new System.Exception("ProtocolGame.ParseCreateOnMap: Invalid position.");
-                }
+                if (stackPos > Constants.MapSizeW)
+                    throw new System.Exception("ProtocolGame.ParseCreateOnMap: Invalid stack position (" + stackPos + ").");
 
                 m_WorldMapStorage.InsertObject(mapPosition, stackPos, obj);
             }
@@ -137,7 +139,7 @@
                 if (!(objectInstance = m_WorldMapStorage.GetObject(mapPosition, stackPos)))
                     throw new System.Exception("ProtocolGame.ParseChangeOnMap: Object not found.");
 
-                if (objectInstance.ID == Appearances.AppearanceInstance.Creature && !(creature = m_CreatureStorage.GetCreature(objectInstance.Data)))
+                if (objectInstance.IsCreature && !(creature = m_CreatureStorage.GetCreature(objectInstance.Data)))
                     throw new System.Exception("ProtocolGame.ParseChangeOnMap: Creature not found: " + objectInstance.Data);
 
                 if (!!creature)
@@ -192,7 +194,7 @@
             UnityEngine.Vector3Int absolutePosition;
             UnityEngine.Vector3Int mapPosition;
 
-            if (x != 0xFFFF) {
+            if (x != 65535) {
                 absolutePosition = message.GetPosition(x);
 
                 if (!m_WorldMapStorage.IsVisible(absolutePosition, true)) {
@@ -206,14 +208,14 @@
                     throw new System.Exception($"ProtocolGame.ParseDeleteOnMap: Object not found.");
                 }
 
-                if (objectInstance.ID == Appearances.AppearanceInstance.Creature && (creature = m_CreatureStorage.GetCreature(objectInstance.Data)) == null) {
+                if (objectInstance.IsCreature && (creature = m_CreatureStorage.GetCreature(objectInstance.Data)) == null) {
                     throw new System.Exception($"ProtocolGame.ParseDeleteOnMap: Creature not found.");
                 }
 
                 m_WorldMapStorage.DeleteObject(mapPosition, stackPos);
             } else {
-                uint creatureId = message.GetU32();
-                if ((creature = m_CreatureStorage.GetCreature(creatureId)) == null) {
+                uint creatureID = message.GetU32();
+                if ((creature = m_CreatureStorage.GetCreature(creatureID)) == null) {
                     throw new System.Exception($"ProtocolGame.ParseDeleteOnMap: Object not found.");
                 }
 
@@ -279,7 +281,7 @@
             // if the movement is not actually a move (usually he is teleported)
             bool pushMovement = delta.z != 0 || System.Math.Abs(delta.x) > 1 || System.Math.Abs(delta.y) > 1;
             Appearances.ObjectInstance otherObj = null;
-            if (!pushMovement && (!(otherObj = m_WorldMapStorage.GetObject(newMapPosition, 0)) || !otherObj.Type || !otherObj.Type.IsBank))
+            if (!pushMovement && (!(otherObj = m_WorldMapStorage.GetObject(newMapPosition, 0)) || !otherObj.Type || !otherObj.Type.IsGround))
                 throw new System.Exception("ProtocolGame.ParseCreateOnMap: Target field " + newAbsolutePosition + " has no BANK.");
 
             if (x != 65535)
@@ -304,7 +306,7 @@
                 if (creature.ID != m_Player.ID)
                     creature.StopMovementAnimation();
             } else {
-                creature.StartMovementAnimation(delta.x, delta.y, (int)otherObj.Type.Waypoints);
+                creature.StartMovementAnimation(delta.x, delta.y, (int)otherObj.Type.GroundSpeed);
             }
 
             m_CreatureStorage.MarkOpponentVisible(creature, true);
@@ -422,11 +424,14 @@
         }
 
         private void ParseClearTarget(InputMessage message) {
-            uint creatureID = message.GetU32();
+            uint creatureID = 0;
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeatures.GameAttackSeq))
+                creatureID = message.GetU32();
+            
             Creatures.Creature creature;
-            if (!!(creature = m_CreatureStorage.AttackTarget) && creature.ID == creatureID)
+            if (!!(creature = m_CreatureStorage.AttackTarget) && (creature.ID == creatureID || creatureID == 0))
                 m_CreatureStorage.SetAttackTarget(null, false);
-            else if (!!(creature = m_CreatureStorage.FollowTarget) && creature.ID == creatureID)
+            else if (!!(creature = m_CreatureStorage.FollowTarget) && (creature.ID == creatureID || creatureID == 0))
                 m_CreatureStorage.SetFollowTarget(null, false);
         }
     }
