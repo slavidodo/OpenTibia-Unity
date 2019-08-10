@@ -12,12 +12,12 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         public int fieldY { get; set; }
         public object Object { get; set; }
 
-        public RenderAtom(object obj = null, int x = 0, int y = 0, int z = 0, int fieldX = 0, int fieldY = 0) {
-            Update(obj, x, y, z, fieldX, fieldY);
+        public RenderAtom(object @object = null, int x = 0, int y = 0, int z = 0, int fieldX = 0, int fieldY = 0) {
+            Update(@object, x, y, z, fieldX, fieldY);
         }
 
-        public void Update(object obj = null, int x = 0, int y = 0, int z = 0, int fieldX = 0, int fieldY = 0) {
-            Object = obj;
+        public void Update(object @object = null, int x = 0, int y = 0, int z = 0, int fieldX = 0, int fieldY = 0) {
+            Object = @object;
             this.x = x;
             this.y = y;
             this.z = z;

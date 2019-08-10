@@ -16,19 +16,23 @@ namespace OpenTibiaUnity.Core.Components
             }
         }
 
+        [SerializeField] private float m_MinSize = 14f;
+
         protected void LateUpdate() {
             var horizontalScrollbar = scrollRect.horizontalScrollbar;
             var verticalScrollBar = scrollRect.verticalScrollbar;
-            var scrollRectTransform = verticalScrollBar.transform as RectTransform;
+            var scrollRectTransform = scrollRect.transform as RectTransform;
             
             if (verticalScrollBar) {
-                var minSize = 20f / scrollRectTransform.rect.height;
+                var totalSliderAreaHeight = (verticalScrollBar.handleRect.parent as RectTransform).rect.height;
+                var minSize = m_MinSize / totalSliderAreaHeight;
                 if (verticalScrollBar.size < minSize)
                     verticalScrollBar.size = minSize;
             }
 
             if (horizontalScrollbar) {
-                var minSize = 20f / scrollRectTransform.rect.width;
+                var totalSliderAreaWidth = (horizontalScrollbar.handleRect.parent as RectTransform).rect.width;
+                var minSize = m_MinSize / totalSliderAreaWidth;
                 if (horizontalScrollbar.size < minSize)
                     horizontalScrollbar.size = minSize;
             }

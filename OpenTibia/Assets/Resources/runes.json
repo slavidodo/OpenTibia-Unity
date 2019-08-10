@@ -1,0 +1,15 @@
+{
+"runes": [
+  {
+    "id": 3152,
+    "group": {
+      "primary": "none",
+      "secondary": "none"
+    },
+    "spellid": 4,
+    "level": 15,
+    "magiclevel": 1,
+    "vocations": [ "any" ]
+  }
+]
+}

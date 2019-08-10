@@ -2,7 +2,7 @@
 
 namespace OpenTibiaUnity.Core.WorldMap
 {
-    public class OnscreenMessage
+    internal class OnscreenMessage
     {
         private static int s_NextID = 0;
 
@@ -11,27 +11,27 @@ namespace OpenTibiaUnity.Core.WorldMap
         protected int m_VisibleSince;
         protected int m_SpeakerLevel;
         protected string m_Speaker;
-        protected MessageModes m_Mode;
+        protected MessageModeType m_Mode;
         protected string m_Text;
         protected string m_RichText = null;
 
-        public int VisibleSince {
+        internal int VisibleSince {
             get { return m_VisibleSince; }
             set { m_VisibleSince = value; }
         }
-        public int TTL {
+        internal int TTL {
             get { return m_TTL; }
             set { m_TTL = value; }
         }
 
-        public string Text {
+        internal string Text {
             get { return Text; }
         }
-        public string RichText {
+        internal string RichText {
             get { return m_RichText; }
         }
 
-        public OnscreenMessage(int statementID, string speaker, int speakerLevel, MessageModes mode, string text) {
+        internal OnscreenMessage(int statementID, string speaker, int speakerLevel, MessageModeType mode, string text) {
             if (statementID <= 0)
                 m_ID = --s_NextID;
             else
@@ -45,9 +45,9 @@ namespace OpenTibiaUnity.Core.WorldMap
             m_TTL = (30 + m_Text.Length / 3) * 100;
         }
         
-        public void FormatMessage(string text, uint textARGB, uint highlightARGB) {
+        internal void FormatMessage(string text, uint textARGB, uint highlightARGB) {
             m_RichText = StringHelper.RichTextSpecialChars(m_Text);
-            if (m_Mode == MessageModes.NpcFrom)
+            if (m_Mode == MessageModeType.NpcFrom)
                 m_RichText = StringHelper.HighlightNpcTalk(m_RichText, highlightARGB);
 
             if (text != null)

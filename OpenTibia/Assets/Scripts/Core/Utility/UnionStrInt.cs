@@ -6,7 +6,7 @@ namespace OpenTibiaUnity.Core.Utility
     public class UnionStrInt : IEquatable<UnionStrInt>, IComparable<UnionStrInt>, IComparable
     {
         private bool m_IsInt = false;
-        private bool m_IsString = true;
+        private bool m_IsString = false;
 
         private int? m_IntValue = null;
         private string m_StringValue = null;
@@ -24,11 +24,11 @@ namespace OpenTibiaUnity.Core.Utility
             m_StringValue = value ?? throw new System.ArgumentNullException("ChannelID.ChannelID: (string) value can't be null.");
         }
 
-        public override bool Equals(object obj) {
-            if (!(obj is UnionStrInt))
+        public override bool Equals(object @object) {
+            if (!(@object is UnionStrInt))
                 return false;
 
-            UnionStrInt other = obj as UnionStrInt;
+            UnionStrInt other = @object as UnionStrInt;
             if (m_IsInt)
                 return other.m_IsInt && m_IntValue == other.m_IntValue;
 
@@ -56,9 +56,17 @@ namespace OpenTibiaUnity.Core.Utility
             return hashCode;
         }
 
-        public int CompareTo(object obj) {
-            if (obj is UnionStrInt)
-                return CompareTo(obj as UnionStrInt);
+        public override string ToString() {
+            if (m_IsString)
+                return m_StringValue;
+            else if (m_IsInt)
+                return m_IntValue.Value.ToString();
+            return null;
+        }
+
+        public int CompareTo(object @object) {
+            if (@object is UnionStrInt)
+                return CompareTo(@object as UnionStrInt);
             return -1;
         }
 

@@ -23,21 +23,19 @@ namespace OpenTibiaUnity.Modules.MiniMap
                 return m_RawImageComponent;
             }
         }
+        
+        [SerializeField] private Texture2D m_DefaultTexture = null;
+        [SerializeField] private Texture2D m_NorthClicked = null;
+        [SerializeField] private Texture2D m_EastClicked = null;
+        [SerializeField] private Texture2D m_SouthClicked = null;
+        [SerializeField] private Texture2D m_WestClicked = null;
+        [SerializeField] private Texture2D m_NorthEastClicked = null;
+        [SerializeField] private Texture2D m_NorthWestClicked = null;
+        [SerializeField] private Texture2D m_SouthWestClicked = null;
+        [SerializeField] private Texture2D m_SouthEastClicked = null;
 
-#pragma warning disable CS0649 // never assigned to
-        [SerializeField] private Texture2D m_DefaultTexture;
-        [SerializeField] private Texture2D m_NorthClicked;
-        [SerializeField] private Texture2D m_EastClicked;
-        [SerializeField] private Texture2D m_SouthClicked;
-        [SerializeField] private Texture2D m_WestClicked;
-        [SerializeField] private Texture2D m_NorthEastClicked;
-        [SerializeField] private Texture2D m_NorthWestClicked;
-        [SerializeField] private Texture2D m_SouthWestClicked;
-        [SerializeField] private Texture2D m_SouthEastClicked;
-#pragma warning restore CS0649 // never assigned to
-
-        private Directions m_Direction = Directions.Stop;
-        private Directions m_LastDirection = Directions.Stop;
+        private Direction m_Direction = Direction.Stop;
+        private Direction m_LastDirection = Direction.Stop;
         private bool m_MouseDown = false;
 
         private void OnGUI() {
@@ -48,7 +46,7 @@ namespace OpenTibiaUnity.Modules.MiniMap
 
                 var direction = CalculateDirection(e);
                 if (direction != m_Direction)
-                    direction = Directions.Stop;
+                    direction = Direction.Stop;
 
                 if (direction != m_LastDirection)
                     ChangeTexture(direction);
@@ -65,28 +63,28 @@ namespace OpenTibiaUnity.Modules.MiniMap
 
                 if (m_LastDirection == m_Direction) {
                     switch (m_Direction) {
-                        case Directions.North:
+                        case Direction.North:
                             OpenTibiaUnity.MiniMapRenderer.TranslatePosition(0, -1, 0);
                             break;
-                        case Directions.East:
+                        case Direction.East:
                             OpenTibiaUnity.MiniMapRenderer.TranslatePosition(1, 0, 0);
                             break;
-                        case Directions.South:
+                        case Direction.South:
                             OpenTibiaUnity.MiniMapRenderer.TranslatePosition(0, 1, 0);
                             break;
-                        case Directions.West:
+                        case Direction.West:
                             OpenTibiaUnity.MiniMapRenderer.TranslatePosition(-1, 0, 0);
                             break;
-                        case Directions.NorthEast:
+                        case Direction.NorthEast:
                             OpenTibiaUnity.MiniMapRenderer.TranslatePosition(1, -1, 0);
                             break;
-                        case Directions.SouthEast:
+                        case Direction.SouthEast:
                             OpenTibiaUnity.MiniMapRenderer.TranslatePosition(1, 1, 0);
                             break;
-                        case Directions.SouthWest:
+                        case Direction.SouthWest:
                             OpenTibiaUnity.MiniMapRenderer.TranslatePosition(-1, 1, 0);
                             break;
-                        case Directions.NorthWest:
+                        case Direction.NorthWest:
                             OpenTibiaUnity.MiniMapRenderer.TranslatePosition(-1, -1, 0);
                             break;
                         default:
@@ -94,12 +92,12 @@ namespace OpenTibiaUnity.Modules.MiniMap
                     }
                 }
                 
-                m_LastDirection = Directions.Stop;
-                m_Direction = Directions.Stop;
+                m_LastDirection = Direction.Stop;
+                m_Direction = Direction.Stop;
             }
         }
 
-        private Directions CalculateDirection(Event e) {
+        private Direction CalculateDirection(Event e) {
             var mousePosition = Input.mousePosition;
             var position = transform.position;
             var size = rawImageComponent.rectTransform.rect.size;
@@ -109,47 +107,47 @@ namespace OpenTibiaUnity.Modules.MiniMap
             var rB = rA - 6;
             var distance = Mathf.Sqrt(Mathf.Pow(mousePosition.x - position.x, 2) + Mathf.Pow(mousePosition.y - position.y, 2));
 
-            Directions direction = Directions.Stop;
+            Direction direction = Direction.Stop;
             if (distance >= rB && distance <= rA) {
                 var delta = mousePosition - position;
                 if (delta.y <= 7 & delta.y >= -7)
-                    direction = delta.x < 0 ? Directions.West : Directions.East;
+                    direction = delta.x < 0 ? Direction.West : Direction.East;
                 else if (delta.x >= -7 && delta.x <= 7)
-                    direction = delta.y > 0 ? Directions.North : Directions.South;
+                    direction = delta.y > 0 ? Direction.North : Direction.South;
                 else
                     direction = delta.y > 0 ?
-                        delta.x < 0 ? Directions.NorthWest : Directions.NorthEast :
-                        delta.x < 0 ? Directions.SouthWest : Directions.SouthEast;
+                        delta.x < 0 ? Direction.NorthWest : Direction.NorthEast :
+                        delta.x < 0 ? Direction.SouthWest : Direction.SouthEast;
             }
 
             return direction;
         }
 
-        private void ChangeTexture(Directions direction) {
+        private void ChangeTexture(Direction direction) {
             Texture2D texture = null;
             switch (direction) {
-                case Directions.North:
+                case Direction.North:
                     texture = m_NorthClicked;
                     break;
-                case Directions.East:
+                case Direction.East:
                     texture = m_EastClicked;
                     break;
-                case Directions.South:
+                case Direction.South:
                     texture = m_SouthClicked;
                     break;
-                case Directions.West:
+                case Direction.West:
                     texture = m_WestClicked;
                     break;
-                case Directions.NorthEast:
+                case Direction.NorthEast:
                     texture = m_NorthEastClicked;
                     break;
-                case Directions.SouthEast:
+                case Direction.SouthEast:
                     texture = m_SouthEastClicked;
                     break;
-                case Directions.SouthWest:
+                case Direction.SouthWest:
                     texture = m_SouthWestClicked;
                     break;
-                case Directions.NorthWest:
+                case Direction.NorthWest:
                     texture = m_NorthWestClicked;
                     break;
                 default:

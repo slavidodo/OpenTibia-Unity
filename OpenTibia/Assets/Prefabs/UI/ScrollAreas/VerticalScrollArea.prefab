@@ -12,6 +12,33 @@ MonoBehaviour:
   m_Script: {fileID: -146154839, guid: f70555f144d8491a825f0804e09c671c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &4579824055718295820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8603925423507969433}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -98529514, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 0}
+  m_RaycastTarget: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
+      Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
+  m_Texture: {fileID: 0}
+  m_UVRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
 --- !u!1 &9015815410751262734
 GameObject:
   m_ObjectHideFlags: 0
@@ -23,9 +50,8 @@ GameObject:
   - component: {fileID: 9080445934372335244}
   - component: {fileID: 9079426618754651162}
   - component: {fileID: 8971339246936076036}
-  - component: {fileID: 8975395674204010320}
   - component: {fileID: 8971189566979353510}
-  - component: {fileID: 3134940570828995615}
+  - component: {fileID: 8292267865939939864}
   m_Layer: 5
   m_Name: VerticalScrollArea
   m_TagString: Untagged
@@ -91,38 +117,6 @@ MonoBehaviour:
   m_FillClockwise: 1
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
---- !u!114 &8975395674204010320
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9015815410751262734}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1367256648, guid: f70555f144d8491a825f0804e09c671c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Content: {fileID: 1970024145670434700}
-  m_Horizontal: 0
-  m_Vertical: 1
-  m_MovementType: 2
-  m_Elasticity: 0.1
-  m_Inertia: 0
-  m_DecelerationRate: 0.135
-  m_ScrollSensitivity: 10
-  m_Viewport: {fileID: 7725056495120241054}
-  m_HorizontalScrollbar: {fileID: 0}
-  m_VerticalScrollbar: {fileID: 8975592622985898134}
-  m_HorizontalScrollbarVisibility: 0
-  m_VerticalScrollbarVisibility: 0
-  m_HorizontalScrollbarSpacing: 0
-  m_VerticalScrollbarSpacing: 0
-  m_OnValueChanged:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.UI.ScrollRect+ScrollRectEvent, UnityEngine.UI, Version=1.0.0.0,
-      Culture=neutral, PublicKeyToken=null
 --- !u!114 &8971189566979353510
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -143,7 +137,7 @@ MonoBehaviour:
   m_FlexibleWidth: -1
   m_FlexibleHeight: 120
   m_LayoutPriority: 1
---- !u!114 &3134940570828995615
+--- !u!114 &8292267865939939864
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -152,9 +146,31 @@ MonoBehaviour:
   m_GameObject: {fileID: 9015815410751262734}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 057ad173f4552424f93975f3e213fe4f, type: 3}
+  m_Script: {fileID: 11500000, guid: f4bdd66a1d30b6946893c403d83e1233, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_Content: {fileID: 1970024145670434700}
+  m_Horizontal: 0
+  m_Vertical: 1
+  m_MovementType: 2
+  m_Elasticity: 0.1
+  m_Inertia: 0
+  m_DecelerationRate: 0.135
+  m_ScrollSensitivity: 10
+  m_Viewport: {fileID: 0}
+  m_HorizontalScrollbar: {fileID: 0}
+  m_VerticalScrollbar: {fileID: 8975592622985898134}
+  m_HorizontalScrollbarVisibility: 0
+  m_MinHorizontalScrollbarHeight: 14
+  m_VerticalScrollbarVisibility: 0
+  m_MinVerticalScrollbarWidth: 14
+  m_HorizontalScrollbarSpacing: 0
+  m_VerticalScrollbarSpacing: 0
+  m_OnValueChanged:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: OpenTibiaUnity.Core.Components.OTU_ScrollRect+ScrollRectEvent, Assembly-CSharp,
+      Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
 --- !u!1001 &3779974988749310137
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -405,6 +421,12 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 014aaf97446bcff42a2a92203c16e73b, type: 3}
+--- !u!1 &8603925423507969433 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3706573398821905202, guid: 014aaf97446bcff42a2a92203c16e73b,
+    type: 3}
+  m_PrefabInstance: {fileID: 4906439008882800299}
+  m_PrefabAsset: {fileID: 0}
 --- !u!224 &1970024145670434700 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 6863981495585134887, guid: 014aaf97446bcff42a2a92203c16e73b,

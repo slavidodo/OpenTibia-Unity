@@ -108,14 +108,14 @@ namespace OpenTibiaUnity.Core.Utility
 
         public override void UpdateModule() {
             m_LastMousePosition = m_MousePosition;
-            m_MousePosition = Input.mousePosition;
+            m_MousePosition = UnityEngine.Input.mousePosition;
         }
 
         public override bool IsModuleSupported() {
             // Check for mouse presence instead of whether touch is supported,
             // as you can connect mouse to a tablet and in that case we'd want
             // to use StandaloneInputModule for non-touch input events.
-            return m_ForceModuleActive || Input.mousePresent;
+            return m_ForceModuleActive || UnityEngine.Input.mousePresent;
         }
 
         public override bool ShouldActivateModule() {
@@ -123,19 +123,19 @@ namespace OpenTibiaUnity.Core.Utility
                 return false;
 
             var shouldActivate = m_ForceModuleActive;
-            Input.GetButtonDown(m_SubmitButton);
-            shouldActivate |= Input.GetButtonDown(m_CancelButton);
-            shouldActivate |= !Mathf.Approximately(Input.GetAxisRaw(m_HorizontalAxis), 0.0f);
-            shouldActivate |= !Mathf.Approximately(Input.GetAxisRaw(m_VerticalAxis), 0.0f);
+            UnityEngine.Input.GetButtonDown(m_SubmitButton);
+            shouldActivate |= UnityEngine.Input.GetButtonDown(m_CancelButton);
+            shouldActivate |= !Mathf.Approximately(UnityEngine.Input.GetAxisRaw(m_HorizontalAxis), 0.0f);
+            shouldActivate |= !Mathf.Approximately(UnityEngine.Input.GetAxisRaw(m_VerticalAxis), 0.0f);
             shouldActivate |= (m_MousePosition - m_LastMousePosition).sqrMagnitude > 0.0f;
-            shouldActivate |= Input.GetMouseButtonDown(0);
+            shouldActivate |= UnityEngine.Input.GetMouseButtonDown(0);
             return shouldActivate;
         }
 
         public override void ActivateModule() {
             base.ActivateModule();
-            m_MousePosition = Input.mousePosition;
-            m_LastMousePosition = Input.mousePosition;
+            m_MousePosition = UnityEngine.Input.mousePosition;
+            m_LastMousePosition = UnityEngine.Input.mousePosition;
 
             var toSelect = eventSystem.currentSelectedGameObject;
             if (toSelect == null)
@@ -171,26 +171,26 @@ namespace OpenTibiaUnity.Core.Utility
                 return false;
 
             var data = GetBaseEventData();
-            if (Input.GetButtonDown(m_SubmitButton))
+            if (UnityEngine.Input.GetButtonDown(m_SubmitButton))
                 ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.submitHandler);
 
-            if (Input.GetButtonDown(m_CancelButton))
+            if (UnityEngine.Input.GetButtonDown(m_CancelButton))
                 ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.cancelHandler);
             return data.used;
         }
 
         private Vector2 GetRawMoveVector() {
             Vector2 move = Vector2.zero;
-            move.x = Input.GetAxisRaw(m_HorizontalAxis);
-            move.y = Input.GetAxisRaw(m_VerticalAxis);
+            move.x = UnityEngine.Input.GetAxisRaw(m_HorizontalAxis);
+            move.y = UnityEngine.Input.GetAxisRaw(m_VerticalAxis);
 
-            if (Input.GetButtonDown(m_HorizontalAxis)) {
+            if (UnityEngine.Input.GetButtonDown(m_HorizontalAxis)) {
                 if (move.x < 0)
                     move.x = -1f;
                 if (move.x > 0)
                     move.x = 1f;
             }
-            if (Input.GetButtonDown(m_VerticalAxis)) {
+            if (UnityEngine.Input.GetButtonDown(m_VerticalAxis)) {
                 if (move.y < 0)
                     move.y = -1f;
                 if (move.y > 0)
@@ -212,7 +212,7 @@ namespace OpenTibiaUnity.Core.Utility
             }
 
             // If user pressed key again, always allow event
-            bool allow = Input.GetButtonDown(m_HorizontalAxis) || Input.GetButtonDown(m_VerticalAxis);
+            bool allow = UnityEngine.Input.GetButtonDown(m_HorizontalAxis) || UnityEngine.Input.GetButtonDown(m_VerticalAxis);
             bool similarDir = (Vector2.Dot(movement, m_LastMoveVector) > 0);
             if (!allow) {
                 // Otherwise, user held down key or axis.

@@ -2,44 +2,44 @@
 
 namespace OpenTibiaUnity.Core.Chat
 {
-    public class MessageFilterSet
+    internal class MessageFilterSet
     {
-        public const int DefaultSet = 0;
-        public const int NumSets = 1;
+        internal const int DefaultSet = 0;
+        internal const int NumSets = 1;
         
         private int m_ID = 0;
         private MessageMode[] m_MessageModes;
 
-        public bool ShowTimeStamps { get; } = true;
-        public bool ShowLevels { get; } = true;
+        internal bool ShowTimeStamps { get; } = true;
+        internal bool ShowLevels { get; } = true;
 
         // [TODO] Allowment to have custom filter sets (changing the default colors of anything)
-        public MessageFilterSet(int id) {
+        internal MessageFilterSet(int id) {
             m_ID = id;
-            m_MessageModes = new MessageMode[(int)MessageModes.Invalid];
+            m_MessageModes = new MessageMode[(int)MessageModeType.Invalid];
 
-            for (MessageModes i = MessageModes.None; i < MessageModes.BeyondLast; i++)
+            for (MessageModeType i = MessageModeType.None; i < MessageModeType.BeyondLast; i++)
                 AddMessageMode(new MessageMode(i));
             
-            AddMessageMode(new MessageMode(MessageModes.MonsterYell));
-            AddMessageMode(new MessageMode(MessageModes.MonsterSay));
-            AddMessageMode(new MessageMode(MessageModes.Red));
-            AddMessageMode(new MessageMode(MessageModes.Blue));
-            AddMessageMode(new MessageMode(MessageModes.RVRChannel));
-            AddMessageMode(new MessageMode(MessageModes.RVRAnswer));
-            AddMessageMode(new MessageMode(MessageModes.RVRContinue));
-            AddMessageMode(new MessageMode(MessageModes.GameHighlight));
-            AddMessageMode(new MessageMode(MessageModes.NpcFromStartBlock));
+            AddMessageMode(new MessageMode(MessageModeType.MonsterYell));
+            AddMessageMode(new MessageMode(MessageModeType.MonsterSay));
+            AddMessageMode(new MessageMode(MessageModeType.Red));
+            AddMessageMode(new MessageMode(MessageModeType.Blue));
+            AddMessageMode(new MessageMode(MessageModeType.RVRChannel));
+            AddMessageMode(new MessageMode(MessageModeType.RVRAnswer));
+            AddMessageMode(new MessageMode(MessageModeType.RVRContinue));
+            AddMessageMode(new MessageMode(MessageModeType.GameHighlight));
+            AddMessageMode(new MessageMode(MessageModeType.NpcFromStartBlock));
         }
 
-        public MessageMode GetMessageMode(MessageModes mode) {
+        internal MessageMode GetMessageMode(MessageModeType mode) {
             if (!MessageMode.s_CheckMode((int)mode))
                 throw new System.ArgumentException("MessageModeSet.getMessageMode: Invalid mode: " + (int)mode + ".");
 
             return m_MessageModes[(int)mode];
         }
 
-        public void AddMessageMode(MessageMode messageMode) {
+        internal void AddMessageMode(MessageMode messageMode) {
             m_MessageModes[(int)messageMode.ID] = messageMode;
         }
     }

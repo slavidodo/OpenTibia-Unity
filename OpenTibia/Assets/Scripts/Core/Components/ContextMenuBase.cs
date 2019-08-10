@@ -4,29 +4,29 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Core.Components
 {
-    public class ContextMenuBase : Base.AbstractComponent {
+    internal class ContextMenuBase : Base.AbstractComponent {
         public static ContextMenuBase CurrentContextMenu = null;
 
         bool m_ShouldAddSeparator = false;
         float m_MaxWidth = 0;
         Dictionary<int, System.Action> m_MappedFunctions = new Dictionary<int, System.Action>();
 
-        public void CreateSeparatorItem() {
+        internal void CreateSeparatorItem() {
             m_ShouldAddSeparator = true;
         }
 
-        private void InternalCreateSeparatorItem() {
+        internal void InternalCreateSeparatorItem() {
             var separatorGO = Instantiate(OpenTibiaUnity.GameManager.HorizontalSeparator, transform);
             var layoutElement = separatorGO.AddComponent<LayoutElement>();
 
             layoutElement.minWidth = 120;
         }
 
-        public void CreateTextItem(string text, System.Action func) {
+        internal void CreateTextItem(string text, System.Action func) {
             CreateTextItem(text, null, func);
         }
 
-        public void CreateTextItem(string text, string shortcut, System.Action func) {
+        internal void CreateTextItem(string text, string shortcut, System.Action func) {
             if (m_ShouldAddSeparator)
                 InternalCreateSeparatorItem();
 
@@ -43,15 +43,19 @@ namespace OpenTibiaUnity.Core.Components
             labelText.text = text;
             labelShortcut.text = shortcut;
 
+            float prefferedSize = labelText.preferredWidth + 30;
+            if (!string.IsNullOrEmpty(shortcut))
+                prefferedSize += labelShortcut.preferredWidth;
+
             var sizeDelta = rectTransform.sizeDelta;
-            m_MaxWidth = Mathf.Max(100f, m_MaxWidth, labelText.preferredWidth + 60);
+            m_MaxWidth = Mathf.Max(100f, m_MaxWidth, prefferedSize);
             sizeDelta.x = m_MaxWidth;
             rectTransform.sizeDelta = sizeDelta;
 
             m_MappedFunctions.Add(siblingIndex, func);
         }
 
-        public virtual void InitialiseOptions() { }
+        internal virtual void InitialiseOptions() { }
 
         protected virtual void OnSelectedToggle(int index) {
             System.Action action;
@@ -61,13 +65,17 @@ namespace OpenTibiaUnity.Core.Components
             Hide();
         }
 
-        public void Display(Vector3 position) {
+        internal void Display(Vector3 position) {
             if (CurrentContextMenu != null)
                 CurrentContextMenu.Hide();
 
             InitialiseOptions();
             LockToOverlay();
 
+            LayoutRebuilder.ForceRebuildLayoutImmediate(rectTransform);
+            position.x = Mathf.Min(position.x, Screen.width - rectTransform.rect.width);
+            position.y = Mathf.Min(position.y, Screen.height - rectTransform.rect.height);
+            
             rectTransform.anchorMin = new Vector2(0, 1);
             rectTransform.anchorMax = new Vector2(0, 1);
             rectTransform.pivot = new Vector2(0, 1);
@@ -83,8 +91,8 @@ namespace OpenTibiaUnity.Core.Components
 
             CurrentContextMenu = this;
         }
-        
-        public void Hide() {
+
+        internal void Hide() {
             UnlockFromOverlay();
             Destroy(gameObject);
 

@@ -2,20 +2,20 @@
 
 namespace OpenTibiaUnity.Core.Chat
 {
-    public class MessageModeProperties
+    internal class MessageModeProperties
     {
-        public MessageModes Mode;
-        public bool ShowOnscreen;
-        public bool ShowChannel;
-        public uint TextARGB;
-        public uint HighlightARGB;
-        public bool Editable;
-        public bool IgnoreNameFilter;
-        public MessageScreenTargets ScreenTarget;
-        public MessageModeHeaders Header;
-        public MessageModePrefixes Prefix;
+        internal MessageModeType Mode;
+        internal bool ShowOnscreen;
+        internal bool ShowChannel;
+        internal uint TextARGB;
+        internal uint HighlightARGB;
+        internal bool Editable;
+        internal bool IgnoreNameFilter;
+        internal MessageScreenTargets ScreenTarget;
+        internal MessageModeHeaders Header;
+        internal MessageModePrefixes Prefix;
 
-        public MessageModeProperties(MessageModes mode, bool showOnscreen, bool showChannel, uint textARGB, uint highlightARGB, bool editable, bool ignoreNameFilter, MessageScreenTargets screenTarget = MessageScreenTargets.None, MessageModeHeaders header = MessageModeHeaders.None, MessageModePrefixes prefix = MessageModePrefixes.None) {
+        internal MessageModeProperties(MessageModeType mode, bool showOnscreen, bool showChannel, uint textARGB, uint highlightARGB, bool editable, bool ignoreNameFilter, MessageScreenTargets screenTarget = MessageScreenTargets.None, MessageModeHeaders header = MessageModeHeaders.None, MessageModePrefixes prefix = MessageModePrefixes.None) {
             Mode = mode;
             ShowOnscreen = showOnscreen;
             ShowChannel = showChannel;
@@ -29,111 +29,102 @@ namespace OpenTibiaUnity.Core.Chat
         }
     }
 
-    public static class MessageColors
+    internal static class MessageColors
     {
-        public const uint White = 0xFFFFFF;
-        public const uint Yellow = 0xFFFF00;
+        internal const uint White = 0xFFFFFF;
+        internal const uint Yellow = 0xFFFF00;
 
-        public const uint Red = 0xF55E5E;
-        public const uint Green = 0x00EB00;
+        internal const uint Red = 0xF55E5E;
+        internal const uint Green = 0x00EB00;
 
-        public const uint Blue = 0x9F9DFD;
-        public const uint Cyan = 0x5FF7F7;
+        internal const uint Blue = 0x9F9DFD;
+        internal const uint Cyan = 0x5FF7F7;
 
-        public const uint Orange = 0xFE6500;
+        internal const uint Orange = 0xFE6500;
 
-        public const uint Pink = 0xF080CE;
+        internal const uint Pink = 0xF080CE;
+
+        internal const uint Grey = 0x7F7F7F;
     }
 
-    public class MessageMode {
-        public static Dictionary<MessageModes, MessageModeProperties> MessageModeDefaults;
-        public static uint[] MessageModeColors;
+    internal class MessageMode {
+        internal static Dictionary<MessageModeType, MessageModeProperties> MessageModeDefaults;
 
         static MessageMode() {
-            MessageModeDefaults = new Dictionary<MessageModes, MessageModeProperties>();
-            MessageModeDefaults.Add(MessageModes.None, new MessageModeProperties(MessageModes.None, false, false, 0, 0, false, true));
-            MessageModeDefaults.Add(MessageModes.Say, new MessageModeProperties(MessageModes.Say, true, true, MessageColors.Yellow, 0, false, false, MessageScreenTargets.BoxCoordinate, MessageModeHeaders.Say));
-            MessageModeDefaults.Add(MessageModes.Whisper, new MessageModeProperties(MessageModes.Whisper, true, true, MessageColors.Yellow, 0, false, false, MessageScreenTargets.BoxCoordinate, MessageModeHeaders.Whisper));
-            MessageModeDefaults.Add(MessageModes.Yell, new MessageModeProperties(MessageModes.Yell, true, true, MessageColors.Yellow, 0, false, false, MessageScreenTargets.BoxCoordinate, MessageModeHeaders.Yell));
-            MessageModeDefaults.Add(MessageModes.PrivateFrom, new MessageModeProperties(MessageModes.PrivateFrom, true, true, MessageColors.Cyan, 0, true, false, MessageScreenTargets.BoxTop, MessageModeHeaders.None, MessageModePrefixes.PrivateFrom));
-            MessageModeDefaults.Add(MessageModes.PrivateTo, new MessageModeProperties(MessageModes.PrivateTo, false, true, MessageColors.Blue, 0, true, false));
-            MessageModeDefaults.Add(MessageModes.ChannelManagement, new MessageModeProperties(MessageModes.ChannelManagement, true, true, MessageColors.White, 0, false, true, MessageScreenTargets.BoxHigh));
-            MessageModeDefaults.Add(MessageModes.Channel, new MessageModeProperties(MessageModes.Channel, false, true, MessageColors.Yellow, 0, false, false));
-            MessageModeDefaults.Add(MessageModes.ChannelHighlight, new MessageModeProperties(MessageModes.ChannelHighlight, false, true, MessageColors.Orange, 0, false, false));
-            MessageModeDefaults.Add(MessageModes.Spell, new MessageModeProperties(MessageModes.Spell, true, true, MessageColors.Yellow, 2, true, false, MessageScreenTargets.BoxCoordinate, MessageModeHeaders.Spell));
-            MessageModeDefaults.Add(MessageModes.NpcFrom, new MessageModeProperties(MessageModes.NpcFrom, true, true, MessageColors.Cyan, MessageColors.Cyan, false, true, MessageScreenTargets.BoxCoordinate, MessageModeHeaders.NpcFrom));
-            MessageModeDefaults.Add(MessageModes.NpcTo, new MessageModeProperties(MessageModes.NpcTo, false, true, MessageColors.Blue, 0, false, true));
-            MessageModeDefaults.Add(MessageModes.GamemasterBroadcast, new MessageModeProperties(MessageModes.GamemasterBroadcast, true, true, MessageColors.Red, 0, false, true, MessageScreenTargets.BoxLow, MessageModeHeaders.None, MessageModePrefixes.GamemasterBroadcast));
-            MessageModeDefaults.Add(MessageModes.GamemasterChannel, new MessageModeProperties(MessageModes.GamemasterChannel, false, true, MessageColors.Red, 0, false, true));
-            MessageModeDefaults.Add(MessageModes.GamemasterPrivateFrom, new MessageModeProperties(MessageModes.GamemasterPrivateFrom, true, true, MessageColors.Red, 0, false, true, MessageScreenTargets.BoxLow, MessageModeHeaders.None, MessageModePrefixes.GamemasterPrivateFrom));
-            MessageModeDefaults.Add(MessageModes.GamemasterPrivateTo, new MessageModeProperties(MessageModes.GamemasterPrivateTo, false, true, MessageColors.Blue, 0, false, true, MessageScreenTargets.BoxTop));
-            MessageModeDefaults.Add(MessageModes.Login, new MessageModeProperties(MessageModes.Login, true, true, MessageColors.White, 0, false, true, MessageScreenTargets.BoxBottom));
-            MessageModeDefaults.Add(MessageModes.Admin, new MessageModeProperties(MessageModes.Admin, true, true, MessageColors.Red, 0, false, true, MessageScreenTargets.BoxLow));
-            MessageModeDefaults.Add(MessageModes.Game, new MessageModeProperties(MessageModes.Game, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.BoxLow));
-            MessageModeDefaults.Add(MessageModes.Failure, new MessageModeProperties(MessageModes.Failure, true, false, MessageColors.White, 0, false, true, MessageScreenTargets.BoxBottom));
-            MessageModeDefaults.Add(MessageModes.Look, new MessageModeProperties(MessageModes.Look, true, true, MessageColors.Green, 0, true, true, MessageScreenTargets.BoxHigh));
-            MessageModeDefaults.Add(MessageModes.DamageDealed, new MessageModeProperties(MessageModes.DamageDealed, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.EffectCoordinate));
-            MessageModeDefaults.Add(MessageModes.DamageReceived, new MessageModeProperties(MessageModes.DamageReceived, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.EffectCoordinate));
-            MessageModeDefaults.Add(MessageModes.Heal, new MessageModeProperties(MessageModes.Heal, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.EffectCoordinate));
-            MessageModeDefaults.Add(MessageModes.Exp, new MessageModeProperties(MessageModes.Exp, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.EffectCoordinate));
-            MessageModeDefaults.Add(MessageModes.DamageOthers, new MessageModeProperties(MessageModes.DamageOthers, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.EffectCoordinate));
-            MessageModeDefaults.Add(MessageModes.HealOthers, new MessageModeProperties(MessageModes.DamageOthers, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.EffectCoordinate));
-            MessageModeDefaults.Add(MessageModes.ExpOthers, new MessageModeProperties(MessageModes.ExpOthers, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.EffectCoordinate));
-            MessageModeDefaults.Add(MessageModes.Status, new MessageModeProperties(MessageModes.Status, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.BoxBottom));
-            MessageModeDefaults.Add(MessageModes.Loot, new MessageModeProperties(MessageModes.Loot, true, true, MessageColors.Green, 0, true, true, MessageScreenTargets.BoxHigh));
-            MessageModeDefaults.Add(MessageModes.TradeNpc, new MessageModeProperties(MessageModes.TradeNpc, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.BoxHigh));
-            MessageModeDefaults.Add(MessageModes.Guild, new MessageModeProperties(MessageModes.Guild, false, true, MessageColors.White, 0, false, true, MessageScreenTargets.BoxLow));
-            MessageModeDefaults.Add(MessageModes.PartyManagement, new MessageModeProperties(MessageModes.PartyManagement, false, true, MessageColors.White, 0, false, true));
-            MessageModeDefaults.Add(MessageModes.Party, new MessageModeProperties(MessageModes.Party, false, true, MessageColors.Green, 0, false, true, MessageScreenTargets.BoxLow));
-            MessageModeDefaults.Add(MessageModes.BarkLow, new MessageModeProperties(MessageModes.BarkLow, true, false, MessageColors.Orange, 0, false, true, MessageScreenTargets.BoxCoordinate));
-            MessageModeDefaults.Add(MessageModes.BarkLoud, new MessageModeProperties(MessageModes.BarkLoud, true, true, MessageColors.Orange, 0, false, true, MessageScreenTargets.BoxCoordinate));
-            MessageModeDefaults.Add(MessageModes.Report, new MessageModeProperties(MessageModes.Report, true, true, MessageColors.Red, 0, false, true, MessageScreenTargets.BoxLow));
-            MessageModeDefaults.Add(MessageModes.HotkeyUse, new MessageModeProperties(MessageModes.HotkeyUse, true, true, MessageColors.Green, 0, true, true, MessageScreenTargets.BoxBottom));
-            MessageModeDefaults.Add(MessageModes.TutorialHint, new MessageModeProperties(MessageModes.TutorialHint, true, true, MessageColors.Green, 0, false, true, MessageScreenTargets.BoxBottom));
-            MessageModeDefaults.Add(MessageModes.Thankyou, new MessageModeProperties(MessageModes.Thankyou, true, true, MessageColors.White, 0, false, true, MessageScreenTargets.BoxLow));
-            MessageModeDefaults.Add(MessageModes.Market, new MessageModeProperties(MessageModes.Market, false, false, MessageColors.White, 0, false, true));
-            MessageModeDefaults.Add(MessageModes.Mana, new MessageModeProperties(MessageModes.Mana, true, true, MessageColors.White, 0, false, true, MessageScreenTargets.EffectCoordinate));
+            MessageModeDefaults = new Dictionary<MessageModeType, MessageModeProperties>();
+            MessageModeDefaults.Add(MessageModeType.None, new MessageModeProperties(MessageModeType.None, false, false, 0, 0, false, true));
+            MessageModeDefaults.Add(MessageModeType.Say, new MessageModeProperties(MessageModeType.Say, true, true, MessageColors.Yellow, 0, false, false, MessageScreenTargets.BoxCoordinate, MessageModeHeaders.Say));
+            MessageModeDefaults.Add(MessageModeType.Whisper, new MessageModeProperties(MessageModeType.Whisper, true, true, MessageColors.Yellow, 0, false, false, MessageScreenTargets.BoxCoordinate, MessageModeHeaders.Whisper));
+            MessageModeDefaults.Add(MessageModeType.Yell, new MessageModeProperties(MessageModeType.Yell, true, true, MessageColors.Yellow, 0, false, false, MessageScreenTargets.BoxCoordinate, MessageModeHeaders.Yell));
+            MessageModeDefaults.Add(MessageModeType.PrivateFrom, new MessageModeProperties(MessageModeType.PrivateFrom, true, true, MessageColors.Cyan, 0, true, false, MessageScreenTargets.BoxTop, MessageModeHeaders.None, MessageModePrefixes.PrivateFrom));
+            MessageModeDefaults.Add(MessageModeType.PrivateTo, new MessageModeProperties(MessageModeType.PrivateTo, false, true, MessageColors.Blue, 0, true, false));
+            MessageModeDefaults.Add(MessageModeType.ChannelManagement, new MessageModeProperties(MessageModeType.ChannelManagement, true, true, MessageColors.White, 0, false, true, MessageScreenTargets.BoxHigh));
+            MessageModeDefaults.Add(MessageModeType.Channel, new MessageModeProperties(MessageModeType.Channel, false, true, MessageColors.Yellow, 0, false, false));
+            MessageModeDefaults.Add(MessageModeType.ChannelHighlight, new MessageModeProperties(MessageModeType.ChannelHighlight, false, true, MessageColors.Orange, 0, false, false));
+            MessageModeDefaults.Add(MessageModeType.Spell, new MessageModeProperties(MessageModeType.Spell, true, true, MessageColors.Yellow, 2, true, false, MessageScreenTargets.BoxCoordinate, MessageModeHeaders.Spell));
+            MessageModeDefaults.Add(MessageModeType.NpcFrom, new MessageModeProperties(MessageModeType.NpcFrom, true, true, MessageColors.Cyan, MessageColors.Cyan, false, true, MessageScreenTargets.BoxCoordinate, MessageModeHeaders.NpcFrom));
+            MessageModeDefaults.Add(MessageModeType.NpcTo, new MessageModeProperties(MessageModeType.NpcTo, false, true, MessageColors.Blue, 0, false, true));
+            MessageModeDefaults.Add(MessageModeType.GamemasterBroadcast, new MessageModeProperties(MessageModeType.GamemasterBroadcast, true, true, MessageColors.Red, 0, false, true, MessageScreenTargets.BoxLow, MessageModeHeaders.None, MessageModePrefixes.GamemasterBroadcast));
+            MessageModeDefaults.Add(MessageModeType.GamemasterChannel, new MessageModeProperties(MessageModeType.GamemasterChannel, false, true, MessageColors.Red, 0, false, true));
+            MessageModeDefaults.Add(MessageModeType.GamemasterPrivateFrom, new MessageModeProperties(MessageModeType.GamemasterPrivateFrom, true, true, MessageColors.Red, 0, false, true, MessageScreenTargets.BoxLow, MessageModeHeaders.None, MessageModePrefixes.GamemasterPrivateFrom));
+            MessageModeDefaults.Add(MessageModeType.GamemasterPrivateTo, new MessageModeProperties(MessageModeType.GamemasterPrivateTo, false, true, MessageColors.Blue, 0, false, true, MessageScreenTargets.BoxTop));
+            MessageModeDefaults.Add(MessageModeType.Login, new MessageModeProperties(MessageModeType.Login, true, true, MessageColors.White, 0, false, true, MessageScreenTargets.BoxBottom));
+            MessageModeDefaults.Add(MessageModeType.Admin, new MessageModeProperties(MessageModeType.Admin, true, true, MessageColors.Red, 0, false, true, MessageScreenTargets.BoxLow));
+            MessageModeDefaults.Add(MessageModeType.Game, new MessageModeProperties(MessageModeType.Game, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.BoxLow));
+            MessageModeDefaults.Add(MessageModeType.Failure, new MessageModeProperties(MessageModeType.Failure, true, false, MessageColors.White, 0, false, true, MessageScreenTargets.BoxBottom));
+            MessageModeDefaults.Add(MessageModeType.Look, new MessageModeProperties(MessageModeType.Look, true, true, MessageColors.Green, 0, true, true, MessageScreenTargets.BoxHigh));
+            MessageModeDefaults.Add(MessageModeType.DamageDealed, new MessageModeProperties(MessageModeType.DamageDealed, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.EffectCoordinate));
+            MessageModeDefaults.Add(MessageModeType.DamageReceived, new MessageModeProperties(MessageModeType.DamageReceived, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.EffectCoordinate));
+            MessageModeDefaults.Add(MessageModeType.Heal, new MessageModeProperties(MessageModeType.Heal, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.EffectCoordinate));
+            MessageModeDefaults.Add(MessageModeType.Exp, new MessageModeProperties(MessageModeType.Exp, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.EffectCoordinate));
+            MessageModeDefaults.Add(MessageModeType.DamageOthers, new MessageModeProperties(MessageModeType.DamageOthers, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.EffectCoordinate));
+            MessageModeDefaults.Add(MessageModeType.HealOthers, new MessageModeProperties(MessageModeType.DamageOthers, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.EffectCoordinate));
+            MessageModeDefaults.Add(MessageModeType.ExpOthers, new MessageModeProperties(MessageModeType.ExpOthers, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.EffectCoordinate));
+            MessageModeDefaults.Add(MessageModeType.Status, new MessageModeProperties(MessageModeType.Status, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.BoxBottom));
+            MessageModeDefaults.Add(MessageModeType.Loot, new MessageModeProperties(MessageModeType.Loot, true, true, MessageColors.Green, 0, true, true, MessageScreenTargets.BoxHigh));
+            MessageModeDefaults.Add(MessageModeType.TradeNpc, new MessageModeProperties(MessageModeType.TradeNpc, true, true, MessageColors.White, 0, true, true, MessageScreenTargets.BoxHigh));
+            MessageModeDefaults.Add(MessageModeType.Guild, new MessageModeProperties(MessageModeType.Guild, false, true, MessageColors.White, 0, false, true, MessageScreenTargets.BoxLow));
+            MessageModeDefaults.Add(MessageModeType.PartyManagement, new MessageModeProperties(MessageModeType.PartyManagement, false, true, MessageColors.White, 0, false, true));
+            MessageModeDefaults.Add(MessageModeType.Party, new MessageModeProperties(MessageModeType.Party, false, true, MessageColors.Green, 0, false, true, MessageScreenTargets.BoxLow));
+            MessageModeDefaults.Add(MessageModeType.BarkLow, new MessageModeProperties(MessageModeType.BarkLow, true, false, MessageColors.Orange, 0, false, true, MessageScreenTargets.BoxCoordinate));
+            MessageModeDefaults.Add(MessageModeType.BarkLoud, new MessageModeProperties(MessageModeType.BarkLoud, true, true, MessageColors.Orange, 0, false, true, MessageScreenTargets.BoxCoordinate));
+            MessageModeDefaults.Add(MessageModeType.Report, new MessageModeProperties(MessageModeType.Report, true, true, MessageColors.Red, 0, false, true, MessageScreenTargets.BoxLow));
+            MessageModeDefaults.Add(MessageModeType.HotkeyUse, new MessageModeProperties(MessageModeType.HotkeyUse, true, true, MessageColors.Green, 0, true, true, MessageScreenTargets.BoxBottom));
+            MessageModeDefaults.Add(MessageModeType.TutorialHint, new MessageModeProperties(MessageModeType.TutorialHint, true, true, MessageColors.Green, 0, false, true, MessageScreenTargets.BoxBottom));
+            MessageModeDefaults.Add(MessageModeType.Thankyou, new MessageModeProperties(MessageModeType.Thankyou, true, true, MessageColors.White, 0, false, true, MessageScreenTargets.BoxLow));
+            MessageModeDefaults.Add(MessageModeType.Market, new MessageModeProperties(MessageModeType.Market, false, false, MessageColors.White, 0, false, true));
+            MessageModeDefaults.Add(MessageModeType.Mana, new MessageModeProperties(MessageModeType.Mana, true, true, MessageColors.White, 0, false, true, MessageScreenTargets.EffectCoordinate));
             
-            MessageModeDefaults.Add(MessageModes.MonsterYell, new MessageModeProperties(MessageModes.MonsterYell, true, true, MessageColors.Orange, 0, false, true, MessageScreenTargets.BoxCoordinate));
-            MessageModeDefaults.Add(MessageModes.MonsterSay, new MessageModeProperties(MessageModes.MonsterSay, true, false, MessageColors.Orange, 0, false, true, MessageScreenTargets.BoxCoordinate));
-            MessageModeDefaults.Add(MessageModes.Red, new MessageModeProperties(MessageModes.Red, false, true, MessageColors.Red, 0, false, true));
-            MessageModeDefaults.Add(MessageModes.Blue, new MessageModeProperties(MessageModes.Blue, false, true, MessageColors.Cyan, 0, false, true));
-            MessageModeDefaults.Add(MessageModes.RVRChannel, new MessageModeProperties(MessageModes.RVRChannel, true, true, MessageColors.White, 0, false, true));
-            MessageModeDefaults.Add(MessageModes.RVRAnswer, new MessageModeProperties(MessageModes.RVRAnswer, true, true, MessageColors.Orange, 0, false, true));
-            MessageModeDefaults.Add(MessageModes.RVRContinue, new MessageModeProperties(MessageModes.RVRContinue, true, true, MessageColors.Yellow, 0, false, true));
-            MessageModeDefaults.Add(MessageModes.GameHighlight, new MessageModeProperties(MessageModes.GameHighlight, true, true, 0, 0, false, true, MessageScreenTargets.BoxLow));
-            MessageModeDefaults.Add(MessageModes.NpcFromStartBlock, new MessageModeProperties(MessageModes.NpcFromStartBlock, true, true, MessageColors.Cyan, MessageColors.Cyan, false, true, MessageScreenTargets.BoxCoordinate, MessageModeHeaders.NpcFromStartBlock));
+            MessageModeDefaults.Add(MessageModeType.MonsterYell, new MessageModeProperties(MessageModeType.MonsterYell, true, true, MessageColors.Orange, 0, false, true, MessageScreenTargets.BoxCoordinate));
+            MessageModeDefaults.Add(MessageModeType.MonsterSay, new MessageModeProperties(MessageModeType.MonsterSay, true, false, MessageColors.Orange, 0, false, true, MessageScreenTargets.BoxCoordinate));
+            MessageModeDefaults.Add(MessageModeType.Red, new MessageModeProperties(MessageModeType.Red, false, true, MessageColors.Red, 0, false, true));
+            MessageModeDefaults.Add(MessageModeType.Blue, new MessageModeProperties(MessageModeType.Blue, false, true, MessageColors.Blue, 0, false, true));
+            MessageModeDefaults.Add(MessageModeType.RVRChannel, new MessageModeProperties(MessageModeType.RVRChannel, true, true, MessageColors.White, 0, false, true));
+            MessageModeDefaults.Add(MessageModeType.RVRAnswer, new MessageModeProperties(MessageModeType.RVRAnswer, true, true, MessageColors.Orange, 0, false, true));
+            MessageModeDefaults.Add(MessageModeType.RVRContinue, new MessageModeProperties(MessageModeType.RVRContinue, true, true, MessageColors.Yellow, 0, false, true));
+            MessageModeDefaults.Add(MessageModeType.GameHighlight, new MessageModeProperties(MessageModeType.GameHighlight, true, true, 0, 0, false, true, MessageScreenTargets.BoxLow));
+            MessageModeDefaults.Add(MessageModeType.NpcFromStartBlock, new MessageModeProperties(MessageModeType.NpcFromStartBlock, true, true, MessageColors.Cyan, MessageColors.Cyan, false, true, MessageScreenTargets.BoxCoordinate, MessageModeHeaders.NpcFromStartBlock));
         }
 
-        private MessageModes m_ID;
+        private MessageModeType m_ID;
         private bool m_ShowOnscreenMessage;
         private bool m_ShowChannelMessage;
         private uint m_TextARGB;
         private uint m_HighlightARGB;
         private MessageScreenTargets m_ScreenTarget;
+        private bool m_IgnoreNameFilter;
         private MessageModeHeaders m_Header;
         private MessageModePrefixes m_Prefix;
 
-        public MessageModes ID {
-            get { return m_ID; }
-        }
-        public bool ShowOnScreen {
-            get { return m_ShowOnscreenMessage; }
-        }
-        public bool ShowChannelMessage {
-            get { return m_ShowChannelMessage; }
-        }
-        public uint TextARGB {
-            get { return FormattedTextARGB(); }
-        }
-        public uint HighlightARGB {
-            get { return m_HighlightARGB; }
-        }
-        public MessageScreenTargets ScreenTarget {
-            get { return m_ScreenTarget; }
-        }
+        internal MessageModeType ID { get => m_ID; }
+        internal bool ShowOnScreen { get => m_ShowOnscreenMessage; }
+        internal bool ShowChannelMessage { get => m_ShowChannelMessage; }
+        internal uint TextARGB { get => FormattedTextARGB(); }
+        internal uint HighlightARGB { get => m_HighlightARGB; }
+        internal MessageScreenTargets ScreenTarget { get => m_ScreenTarget; }
+        internal bool IgnoreNameFilter { get => m_IgnoreNameFilter; }
 
-        public MessageMode(MessageModes mode) {
+        internal MessageMode(MessageModeType mode) {
             m_ID = mode;
             if (!MessageModeDefaults.ContainsKey(mode)) {
                 UnityEngine.Debug.LogWarningFormat("Unable to find a settings for mode: {0}.", mode);
@@ -147,9 +138,10 @@ namespace OpenTibiaUnity.Core.Chat
             m_ScreenTarget = MessageModeDefaults[m_ID].ScreenTarget;
             m_Header = MessageModeDefaults[m_ID].Header;
             m_Prefix = MessageModeDefaults[m_ID].Prefix;
+            m_IgnoreNameFilter = MessageModeDefaults[m_ID].IgnoreNameFilter;
         }
 
-        public string GetOnscreenMessageHeader(params object[] rest) {
+        internal string GetOnscreenMessageHeader(params object[] rest) {
             switch (m_Header) {
                 case MessageModeHeaders.Say:
                     return string.Format("{0} says:", rest);
@@ -167,7 +159,7 @@ namespace OpenTibiaUnity.Core.Chat
             }
         }
 
-        public string GetOnscreenMessagePrefix(params object[] rest) {
+        internal string GetOnscreenMessagePrefix(params object[] rest) {
             switch (m_Prefix) {
                 case MessageModePrefixes.PrivateFrom:
                 case MessageModePrefixes.GamemasterBroadcast:
@@ -179,21 +171,25 @@ namespace OpenTibiaUnity.Core.Chat
             }
         }
 
-        public uint FormattedTextARGB() {
+        internal uint FormattedTextARGB() {
             var clientVersion = OpenTibiaUnity.GameManager.ClientVersion;
 
             switch (m_ID) {
-                case MessageModes.Spell:
+                case MessageModeType.Spell:
                     if (clientVersion > 1100 && clientVersion < 1110)
                         return MessageColors.Pink;
+                    break;
+                case MessageModeType.Loot:
+                    if (clientVersion >= 1200)
+                        return MessageColors.White;
                     break;
             }
 
             return m_TextARGB;
         }
 
-        public static bool s_CheckMode(int mode) {
-            return mode >= 0 && mode != (int)MessageModes.Invalid;
+        internal static bool s_CheckMode(int mode) {
+            return mode >= 0 && mode != (int)MessageModeType.Invalid;
         }
     }
 }

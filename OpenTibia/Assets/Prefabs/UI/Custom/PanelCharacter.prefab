@@ -14,11 +14,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterName: {fileID: 1253622217585012290}
   worldName: {fileID: 7431346654051137846}
-  onDoubleClick:
-    m_PersistentCalls:
-      m_Calls: []
-    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
-      Culture=neutral, PublicKeyToken=null
 --- !u!114 &1361323002072912905
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37,7 +32,7 @@ MonoBehaviour:
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
     m_SelectOnRight: {fileID: 0}
-  m_Transition: 1
+  m_Transition: 0
   m_Colors:
     m_NormalColor: {r: 0.28235295, g: 0.28235295, b: 0.28235295, a: 1}
     m_HighlightedColor: {r: 0.34509805, g: 0.34509805, b: 0.34509805, a: 1}
@@ -78,7 +73,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.28235295, g: 0.28235295, b: 0.28235295, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -125,16 +120,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: LabelCharacterName
-      objectReference: {fileID: 0}
-    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
-        type: 3}
-      propertyPath: m_firstOverflowCharacterIndex
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
-        type: 3}
-      propertyPath: m_textInfo.lineCount
-      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 1861785186114806433, guid: 54eba66ce4c99784c9bc8796c90e8b87,
         type: 3}
@@ -240,6 +225,31 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_firstOverflowCharacterIndex
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_textInfo.lineCount
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_textAlignment
+      value: 4097
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_havePropertiesChanged
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_isInputParsingRequired
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 54eba66ce4c99784c9bc8796c90e8b87, type: 3}
@@ -398,16 +408,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: LabelWorldName
       objectReference: {fileID: 0}
-    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
-        type: 3}
-      propertyPath: m_firstOverflowCharacterIndex
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
-        type: 3}
-      propertyPath: m_textInfo.lineCount
-      value: 5
-      objectReference: {fileID: 0}
     - target: {fileID: 1861785186114806433, guid: 54eba66ce4c99784c9bc8796c90e8b87,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -512,6 +512,31 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_firstOverflowCharacterIndex
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_textInfo.lineCount
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_textAlignment
+      value: 4097
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_havePropertiesChanged
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_isInputParsingRequired
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 54eba66ce4c99784c9bc8796c90e8b87, type: 3}

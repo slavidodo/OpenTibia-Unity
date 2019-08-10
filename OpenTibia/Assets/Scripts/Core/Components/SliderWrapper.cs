@@ -18,8 +18,7 @@ namespace OpenTibiaUnity.Core.Components
         public void SetMinMax(float min, float max) {
             slider.minValue = min;
             slider.maxValue = max;
-
-            var rectTransform = transform as RectTransform;
+            
             float pxrange;
             if (slider.direction == Slider.Direction.BottomToTop || slider.direction == Slider.Direction.TopToBottom)
                 pxrange = rectTransform.rect.height - 24;

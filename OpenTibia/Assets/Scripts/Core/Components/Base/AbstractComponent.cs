@@ -68,26 +68,30 @@ namespace OpenTibiaUnity.Core.Components.Base
         private void InternalLockToOverlay() {
             var gameManager = OpenTibiaUnity.GameManager;
             if (TopLockedComponent != null) {
-                if (TopLockedComponent.LockingBlocker != gameManager.ActiveBlocker) {
+                if (gameManager.ActiveBlocker && TopLockedComponent.LockingBlocker != gameManager.ActiveBlocker) {
                     TopLockedComponent.LockingBlocker.gameObject.SetActive(false);
                     gameManager.ActiveBlocker.gameObject.SetActive(true);
                 }
-            } else {
+            } else if (gameManager.ActiveBlocker) {
                 gameManager.ActiveBlocker.gameObject.SetActive(true);
             }
 
-            gameManager.ActiveBlocker.transform.SetAsLastSibling();
-            transform.SetParent(gameManager.ActiveCanvas.transform);
+            if (gameManager.ActiveBlocker) {
+                gameManager.ActiveBlocker.transform.SetAsLastSibling();
+                transform.SetParent(gameManager.ActiveCanvas.transform);
+            }
+
             transform.SetAsLastSibling();
 
             var canvas = transform.GetComponent<Canvas>();
-            if (canvas != null) {
+            if (canvas)
                 canvas.sortingOrder = ++BlockerIndexCounter;
-            }
 
             AbstractComponent.TopLockedComponent = this;
-            this.LockedToOverlay = true;
-            this.LockingBlocker = gameManager.ActiveBlocker;
+
+            LockedToOverlay = true;
+            if (gameManager.ActiveBlocker)
+                LockingBlocker = gameManager.ActiveBlocker;
         }
 
         public void UnlockFromOverlay() {
@@ -111,6 +115,16 @@ namespace OpenTibiaUnity.Core.Components.Base
 
         public void ResetLocalPosition() {
             GetComponent<RectTransform>().localPosition = new Vector3(0, 0, 0);
+        }
+
+        public virtual Vector2 CalculateRelativeMousePosition() {
+            return CalculateRelativeMousePosition(UnityEngine.Input.mousePosition);
+        }
+
+        public virtual Vector2 CalculateRelativeMousePosition(Vector3 mousePosition) {
+            var pivotDelta = rectTransform.pivot - new Vector2(0, 1);
+            var size = rectTransform.rect.size;
+            return new Vector2(mousePosition.x + (pivotDelta.x * size.x), mousePosition.y + (pivotDelta.y * size.y));
         }
     }
 }

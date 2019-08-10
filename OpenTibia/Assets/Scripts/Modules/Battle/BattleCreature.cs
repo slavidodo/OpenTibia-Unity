@@ -5,14 +5,14 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Battle
 {
-    public class BattleCreature : Core.Components.Base.AbstractComponent
+    internal class BattleCreature : Core.Components.Base.AbstractComponent
     {
-        public RawImage markImageComponent;
-        public RawImage outfitImageCompoenent;
+        public RawImage markImageComponent = null;
+        public RawImage outfitImageCompoenent = null;
 
-        public TMPro.TextMeshProUGUI nameTextComponent;
-        public Slider healthProgressBar;
-        public RawImage healthProgressFillArea;
+        public TMPro.TextMeshProUGUI nameTextComponent = null;
+        public Slider healthProgressBar = null;
+        public RawImage healthProgressFillArea = null;
 
         protected CachedSpriteInformation m_CachedSpriteInformation;
         private Creature m_Creature = null;
@@ -35,9 +35,17 @@ namespace OpenTibiaUnity.Modules.Battle
 
             var outfit = creature.Outfit;
             if (outfit) {
-                m_CachedSpriteInformation = outfit.GetSprite(0, (int)Directions.South, 0, 0, false);
+                m_CachedSpriteInformation = outfit.GetSprite(0, (int)Direction.South, 0, 0, false);
                 outfitImageCompoenent.texture = m_CachedSpriteInformation.texture;
                 outfitImageCompoenent.uvRect = m_CachedSpriteInformation.rect;
+            }
+
+            var markColor = creature.Marks.GetMarkColor(MarkType.ClientBattleList);
+            if (markColor == Marks.MarkUnmarked) {
+                markImageComponent.gameObject.SetActive(false);
+            } else {
+                markImageComponent.gameObject.SetActive(true);
+                markImageComponent.color = Core.Colors.ColorFromARGB(markColor);
             }
         }
     }

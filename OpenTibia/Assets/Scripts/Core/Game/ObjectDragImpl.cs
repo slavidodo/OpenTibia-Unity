@@ -1,20 +1,18 @@
-﻿using OpenTibiaUnity.Core.InputManagment.GameAction;
+﻿using OpenTibiaUnity.Core.Input.GameAction;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Game
 {
-    public class ObjectDragImpl
+    internal class ObjectDragImpl
     {
-        protected static List<IWidgetContainerWidget> s_ObjectDraggingImpls;
+        protected static List<IWidgetContainerWidget> s_ObjectDragImpls;
 
-        public static bool AnyDraggingObject = false;
+        internal static bool AnyDraggingObject = false;
     }
 
-    public class ObjectDragImpl<T> : ObjectDragImpl where T : IMoveWidget, IWidgetContainerWidget
+    internal sealed class ObjectDragImpl<T> : ObjectDragImpl where T : IMoveWidget, IWidgetContainerWidget
     {
-        
-
         private T m_MoveWidget = default;
 
         private Appearances.ObjectInstance m_DragObject;
@@ -22,11 +20,11 @@ namespace OpenTibiaUnity.Core.Game
         private Vector3Int m_DragStart = Vector3Int.zero;
 
         private bool m_DragStarted = false;
-        public bool DragStarted {
+        internal bool DragStarted {
             get => m_DragStarted;
         }
 
-        public ObjectDragImpl(T moveWidget) {
+        internal ObjectDragImpl(T moveWidget) {
             var inputHandler = OpenTibiaUnity.InputHandler;
             if (inputHandler != null) {
                 inputHandler.AddBeginDragListener(Utility.EventImplPriority.High, OnDragBegin);
@@ -35,23 +33,22 @@ namespace OpenTibiaUnity.Core.Game
 
             m_MoveWidget = moveWidget;
 
-            if (s_ObjectDraggingImpls == null)
-                s_ObjectDraggingImpls = new List<IWidgetContainerWidget>();
+            if (s_ObjectDragImpls == null)
+                s_ObjectDragImpls = new List<IWidgetContainerWidget>();
 
-            s_ObjectDraggingImpls.Add(moveWidget);
+            s_ObjectDragImpls.Add(moveWidget);
         }
         
-        protected void OnDragBegin(Event e, MouseButtons mouseButton, bool repeated) {
-            if (AnyDraggingObject || OpenTibiaUnity.InputHandler.GetRawEventModifiers() != EventModifiers.None || mouseButton != MouseButtons.Left) {
+        private void OnDragBegin(Event e, MouseButton mouseButton, bool repeated) {
+            if (AnyDraggingObject || OpenTibiaUnity.InputHandler.GetRawEventModifiers() != EventModifiers.None || mouseButton != MouseButton.Left) {
                 return;
             }
 
             int stackPos = m_MoveWidget.GetMoveObjectUnderPoint(e.mousePosition, out m_DragObject);
-            if (stackPos == -1) {
+            if (stackPos == -1)
                 return;
-            }
             
-            m_DragStart = m_MoveWidget.PointToAbsolute(e.mousePosition).Value;
+            m_DragStart = m_MoveWidget.MousePositionToAbsolutePosition(e.mousePosition).Value;
             m_DragStarted = true;
             m_DragStackPos = stackPos;
             AnyDraggingObject = true;
@@ -59,19 +56,19 @@ namespace OpenTibiaUnity.Core.Game
             e.Use();
             OpenTibiaUnity.GameManager.CursorController.SetCursorState(CursorState.Crosshair, CursorPriority.High);
         }
-        
-        protected void OnDragEnd(Event e, MouseButtons mouseButton, bool repeated) {
+
+        private void OnDragEnd(Event e, MouseButton mouseButton, bool repeated) {
             if (!m_DragStarted)
                 return;
 
             e.Use();
-            OpenTibiaUnity.GameManager.CursorController.SetCursorState(CursorState.Default, CursorPriority.Low);
+            OpenTibiaUnity.GameManager.CursorController.SetCursorState(CursorState.Default, CursorPriority.High);
             m_DragStarted = false;
             AnyDraggingObject = false;
 
             Vector3Int? destAbsolute = null;
-            foreach (var moveWidget in s_ObjectDraggingImpls) {
-                destAbsolute = moveWidget.PointToAbsolute(e.mousePosition);
+            foreach (var moveWidget in s_ObjectDragImpls) {
+                destAbsolute = moveWidget.MousePositionToAbsolutePosition(e.mousePosition);
                 if (destAbsolute.HasValue)
                     break;
             }

@@ -7,7 +7,8 @@ namespace OpenTibiaUnity.Core.Utility
     {
         Low = 1,
         Medium = 2,
-        High = 3,
+        UpperMedium = 3,
+        High = 4,
 
         Default = Low
     }
@@ -22,9 +23,9 @@ namespace OpenTibiaUnity.Core.Utility
             while (index < lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
                 var listener = list[tmpIndex];
-                if (listener.Key > priority)
+                if (listener.Key < priority)
                     index = tmpIndex + 1;
-                else if (listener.Key < priority)
+                else if (listener.Key > priority)
                     lastIndex = tmpIndex - 1;
                 else
                     break;
@@ -33,10 +34,8 @@ namespace OpenTibiaUnity.Core.Utility
             list.Insert(index, new KeyValuePair<EventImplPriority, T>(priority, action));
         }
 
-        protected static void InternalRemoveListener<T>(ref List<KeyValuePair<EventImplPriority, T>> list, T action) {
-            list = list.Where((KeyValuePair<EventImplPriority, T> x) => {
-                return !x.Value.Equals(action);
-            }).ToList();
+        protected static bool InternalRemoveListener<T>(ref List<KeyValuePair<EventImplPriority, T>> list, T action) {
+            return list.RemoveAll((x) => x.Value.Equals(action)) != 0;
         }
     }
 

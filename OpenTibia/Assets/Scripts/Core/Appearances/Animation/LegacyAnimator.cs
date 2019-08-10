@@ -2,7 +2,7 @@
 
 namespace OpenTibiaUnity.Core.Appearances.Animation
 {
-    public class LegacyAnimator : IAppearanceAnimator
+    internal class LegacyAnimator : IAppearanceAnimator
     {
 
         private IAppearanceFrameStategy m_NextFrameStrategy;
@@ -17,8 +17,8 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
 
         public int LastAnimationTick { get; private set; } = 0;
         public bool Finished { get; set; } = false;
-        public int PhaseDuration { get; set; }
-        public bool Async { get; set; } = true;
+        internal int PhaseDuration { get; set; }
+        internal bool Async { get; set; } = true;
 
         public int Phase {
             get => m_CurrentPhase;
@@ -38,9 +38,9 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
             }
         }
         
-        public AppearanceType AppearanceType { get; set; }
+        internal AppearanceType AppearanceType { get; set; }
 
-        public LegacyAnimator(int phaseCount, int phaseDuration = 0) {
+        internal LegacyAnimator(int phaseCount, int phaseDuration = 0) {
             m_PhaseCount = phaseCount;
             m_WalkPhaseCount = m_PhaseCount > 1 ? m_PhaseCount - 1 : 0;
 
@@ -52,11 +52,9 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
                 PhaseDuration = 1000 / m_PhaseCount;
             else
                 PhaseDuration = 40;
-
-            m_NextFrameStrategy = new LoopFrameStrategy(0);
         }
 
-        public void Initialise(AppearanceType type) {
+        internal void Initialise(AppearanceType type) {
             if (type.IsAnimateAlways || type.Category == AppearanceCategory.Object) {
                 m_NextFrameStrategy = new LoopFrameStrategy(0);
             } else if (type.Category == AppearanceCategory.Outfit) {
@@ -67,7 +65,7 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
                 m_NextFrameStrategy = new LoopFrameStrategy(1);
             }
         }
-        
+
         public void Animate(int ticks, int delay = 0) {
             if (ticks != LastAnimationTick && !Finished) {
                 int elapsedTicks = ticks - LastAnimationTick;
@@ -95,7 +93,7 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
                 }
             }
         }
-        
+
         public void SetEndless() {
             m_NextFrameStrategy = new LoopFrameStrategy(0);
         }
@@ -147,11 +145,11 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
         }
     }
 
-    public class LegacyOutfitFrameStrategy : IAppearanceFrameStategy
+    internal class LegacyOutfitFrameStrategy : IAppearanceFrameStategy
     {
         private bool m_Walking = false;
 
-        public void UpdateState(bool walking) {
+        internal void UpdateState(bool walking) {
             m_Walking = walking;
         }
 

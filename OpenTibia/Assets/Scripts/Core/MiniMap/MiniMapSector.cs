@@ -41,15 +41,15 @@ namespace OpenTibiaUnity.Core.MiniMap
                 m_Cost[i] = Constants.PathCostUndefined;
         }
 
-        public static string GetSectorName(object obj, int sectorY = 0, int sectorZ = 0) {
+        public static string GetSectorName(object @object, int sectorY = 0, int sectorZ = 0) {
             int sectorX;
 
-            if (obj is MiniMapSector sector) {
+            if (@object is MiniMapSector sector) {
                 sectorX = sector.SectorX;
                 sectorY = sector.SectorY;
                 sectorZ = sector.SectorZ;
-            } else if (obj is int) {
-                sectorX = (int)obj;
+            } else if (@object is int) {
+                sectorX = (int)@object;
             } else {
                 throw new System.ArgumentException("MiniMapSector.s_GetSectorName: Invalid argument (must be MiniMapSector or int).");
             }

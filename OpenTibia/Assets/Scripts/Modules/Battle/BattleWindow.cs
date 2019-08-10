@@ -8,22 +8,20 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Battle
 {
-    public class BattleWindow : MiniWindow, IUseWidget, IMoveWidget
+    internal class BattleWindow : MiniWindow, IUseWidget, IMoveWidget
     {
-#pragma warning disable CS0649 // never assigned to
-        [SerializeField] private RectTransform m_FiltersPanel;
-        [SerializeField] private RectTransform m_BattleList;
-        [SerializeField] private BattleCreature m_BattleCreaturePrefab;
+        [SerializeField] private RectTransform m_FiltersPanel = null;
+        [SerializeField] private RectTransform m_BattleList = null;
+        [SerializeField] private BattleCreature m_BattleCreaturePrefab = null;
 
-        [SerializeField] private Button m_ShowSortTypesPanel;
-        [SerializeField] private Toggle m_FiltersPanelToggle;
-        [SerializeField] private Toggle m_FilterPlayersToggle;
-        [SerializeField] private Toggle m_FilterNPCsToggle;
-        [SerializeField] private Toggle m_FilterMonstersToggle;
-        [SerializeField] private Toggle m_FilterNonSkulledToggle;
-        [SerializeField] private Toggle m_FilterPartyToggle;
-        [SerializeField] private Toggle m_FilterSummonsToggle;
-#pragma warning restore CS0649 // never assigned to
+        [SerializeField] private Button m_ShowSortTypesButton = null;
+        [SerializeField] private Toggle m_FiltersPanelToggle = null;
+        [SerializeField] private Toggle m_FilterPlayersToggle = null;
+        [SerializeField] private Toggle m_FilterNPCsToggle = null;
+        [SerializeField] private Toggle m_FilterMonstersToggle = null;
+        [SerializeField] private Toggle m_FilterNonSkulledToggle = null;
+        [SerializeField] private Toggle m_FilterPartyToggle = null;
+        [SerializeField] private Toggle m_FilterSummonsToggle = null;
 
         protected override void Start() {
             base.Start();
@@ -81,6 +79,14 @@ namespace OpenTibiaUnity.Modules.Battle
             m_FiltersPanel.gameObject.SetActive(value);
         }
 
+        protected override void OnClientVersionChange(int _, int newVersion) {
+            bool isTibia11 = newVersion >= 1100;
+
+            m_FiltersPanelToggle.gameObject.SetActive(isTibia11);
+            m_ShowSortTypesButton.gameObject.SetActive(isTibia11);
+            m_FiltersPanel.gameObject.SetActive(isTibia11 && m_FiltersPanelToggle.isOn);
+        }
+
         protected void ToggleOpponentsFilter(OpponentFilters filter, bool value) {
             var optionStorage = OpenTibiaUnity.OptionStorage;
             if (value)
@@ -91,18 +97,23 @@ namespace OpenTibiaUnity.Modules.Battle
             OpenTibiaUnity.CreatureStorage.InvalidateOpponents();
             OpenTibiaUnity.CreatureStorage.RefreshOpponents();
         }
-
-        public int GetMoveObjectUnderPoint(Vector3 mousePosition, out ObjectInstance obj) {
-            return GetUseObjectUnderPoint(mousePosition, out obj);
-        }
-
-        public int GetUseObjectUnderPoint(Vector3 mousePosition, out ObjectInstance obj) {
-            obj = null;
+        
+        public int GetTopObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
+            @object = null;
             return -1;
         }
 
-        public int GetMultiUseObjectUnderPoint(Vector3 mousePosition, out ObjectInstance obj) {
-            return GetUseObjectUnderPoint(mousePosition, out obj);
+        public int GetMoveObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
+            return GetUseObjectUnderPoint(mousePosition, out @object);
+        }
+
+        public int GetUseObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
+            @object = null;
+            return -1;
+        }
+
+        public int GetMultiUseObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
+            return GetUseObjectUnderPoint(mousePosition, out @object);
         }
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.WorldMap.Rendering
 {
-    public sealed class MeshBasedLightmapRenderer : ILightmapRenderer
+    internal sealed class MeshBasedLightmapRenderer : ILightmapRenderer
     {
         private RenderTexture m_RenderTexture = new RenderTexture(Constants.WorldMapScreenWidth, Constants.WorldMapScreenHeight, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
         private Mesh m_LightMesh = new Mesh();
@@ -14,12 +14,12 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         private int m_CachedScreenWidth = -1;
         private int m_CachedScreenHeight = -1;
 
-        public override Color32 this[int index] {
+        internal override Color32 this[int index] {
             get => m_ColorData[index];
             set => m_ColorData[index] = value;
         }
-        
-        public MeshBasedLightmapRenderer() {
+
+        internal MeshBasedLightmapRenderer() {
             CreateMeshBuffers();
             m_LightMaterial = new Material(Shader.Find("Hidden/Internal-Colored"));
 
@@ -52,7 +52,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             m_LightMesh.triangles = indicies.ToArray();
         }
 
-        public override Texture CreateLightmap() {
+        internal override Texture CreateLightmap() {
             for (int x = 0; x < Constants.MapSizeX + 1; x++)
                 m_ColorData[x] = m_ColorData[x + Constants.MapSizeX + 1];
             
@@ -86,7 +86,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             return m_RenderTexture;
         }
 
-        public override void SetLightSource(int x, int y, int z, uint brightness, Color32 defaultColor32) {
+        internal override void SetLightSource(int x, int y, int z, uint brightness, Color32 defaultColor32) {
             if (x < 0 || x > Constants.MapSizeX || y < 0 || y > Constants.MapSizeY || brightness <= 0)
                 return;
 
@@ -125,8 +125,8 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             }
         }
 
-        public override void SetFieldBrightness(int x, int y, int brightness, bool aboveGround) {
-            Color ambient = OpenTibiaUnity.WorldMapStorage.AmbientCurrentColor;
+        internal override void SetFieldBrightness(int x, int y, int brightness, bool aboveGround) {
+            var ambient = OpenTibiaUnity.WorldMapStorage.AmbientCurrentColor;
             brightness = Mathf.Clamp(brightness, 0, 255);
 
             Color32 color32 = MulColor32(ambient, brightness / 255f);
@@ -139,7 +139,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             m_ColorData[index] = color32;
         }
 
-        public override int GetFieldBrightness(int x, int y) {
+        internal override int GetFieldBrightness(int x, int y) {
             if (x >= 0 && x < Constants.MapSizeX && y >= 0 && y < Constants.MapSizeY) {
                 var color32 = m_ColorData[ToColorIndex(x, y)];
                 return (color32.r + color32.g + color32.b) / 3;
@@ -147,12 +147,12 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 
             return int.MaxValue;
         }
-        
-        public override int ToColorIndex(int x, int y) {
+
+        internal override int ToColorIndex(int x, int y) {
             return (y + 1) * (Constants.MapSizeX + 1) + (x + 1);
         }
 
-        public override float CalculateCreatureBrightnessFactor(Creatures.Creature creature, bool isLocalPlayer) {
+        internal override float CalculateCreatureBrightnessFactor(Creatures.Creature creature, bool isLocalPlayer) {
             var mapPosition = OpenTibiaUnity.WorldMapStorage.ToMapClosest(creature.Position);
             var brightness = GetFieldBrightness(mapPosition.x, mapPosition.y);
             if (isLocalPlayer)

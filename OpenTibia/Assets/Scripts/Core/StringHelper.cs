@@ -6,13 +6,14 @@ namespace OpenTibiaUnity.Core
     {
         private static Regex NpcHighlightRegex = new Regex(@"\{([^}]+)\}(?:\s+\{[^}]+\})*");
         private static Regex RichTextRegex = new Regex(@"\<[^<>]+\>");
+        private static Regex LootHighlightRegex = new Regex(@"\{([^}]+)\|([^}]+)\}(?:\s+\{[^}]+\})*");
 
         public static string HighlightNpcTalk(string text, uint highlightColor) {
             if (text == null)
                 return null;
 
             return NpcHighlightRegex.Replace(text, (Match match) => {
-                return string.Format("<color=#{0:X6}>{1}</color>", highlightColor, match.Groups[1]);
+                return string.Format("<link=\"{1}\"><color=#{0:X6}>{1}</color></link>", highlightColor, match.Groups[1]);
             });
         }
 
@@ -36,6 +37,37 @@ namespace OpenTibiaUnity.Core
                 return null;
 
             return RichTextRegex.Replace(text, (Match m) => { return $"<noparse>{m.Value}</noparse>"; });
+        }
+
+        private static string GetSelectionInternal(TMPro.TMP_InputField inputField, out int startPosition, out int endPosition) {
+            startPosition = inputField.selectionStringAnchorPosition;
+            endPosition = inputField.selectionStringFocusPosition;
+            if (startPosition > endPosition) {
+                int tmpPosition = startPosition;
+                startPosition = endPosition;
+                endPosition = tmpPosition;
+            } else if (startPosition == endPosition) {
+                return null; // no selection found //
+            }
+
+            var selectedString = inputField.text.Substring(startPosition, endPosition - startPosition);
+            return Regex.Replace(selectedString, @"<[^>]*>", string.Empty);
+        }
+
+        public static string GetSelection(TMPro.TMP_InputField inputField) {
+            return GetSelectionInternal(inputField, out int _, out int __);
+        }
+
+        public static string CutSelection(TMPro.TMP_InputField inputField) {
+            int startPosition, endPosition;
+            string selection = GetSelectionInternal(inputField, out startPosition, out endPosition);
+
+            if (!string.IsNullOrEmpty(selection)) {
+                inputField.text = inputField.text.Remove(startPosition, endPosition - startPosition);
+                inputField.selectionStringFocusPosition = inputField.selectionStringAnchorPosition = startPosition;
+            }
+
+            return selection;
         }
     }
 }

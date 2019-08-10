@@ -1,27 +1,70 @@
 ﻿using OpenTibiaUnity.Core.Appearances;
 using System.Collections.Generic;
+using UnityEngine.Events;
 
 namespace OpenTibiaUnity.Core.Container
 {
-    public class ContainerStorage
+    internal class ContainerViewEvent : UnityEvent<ContainerView> { }
+    internal class PlayerMoneyEvent : UnityEvent<long, long> { }
+    internal class PlayerInventoryEvent : UnityEvent<List<InventoryTypeInfo>> { }
+
+    internal class ContainerStorage
     {
-        private long m_PlayerMoney = 0;
         private Utility.Delay m_MultiuseDelay = new Utility.Delay(0, 0);
+        private ContainerView[] m_ContainerViews = new ContainerView[Constants.MaxContainerViews];
+
+        internal ContainerViewEvent onContainerAdded = new ContainerViewEvent();
+        internal ContainerViewEvent onContainerClosed = new ContainerViewEvent();
+
+        internal PlayerMoneyEvent onPlayerMoneyChange = new PlayerMoneyEvent();
+        internal PlayerInventoryEvent onPlayerInventoryChange = new PlayerInventoryEvent();
+        internal PlayerInventoryEvent onPlayerGoodsChange = new PlayerInventoryEvent();
+
+        private long m_PlayerMoney = 0;
+        internal long PlayerMoney {
+            get { return m_PlayerMoney; }
+            set { var oldMoney = m_PlayerMoney; m_PlayerMoney = value; onPlayerMoneyChange.Invoke(oldMoney, m_PlayerMoney); }
+        }
+
         private List<InventoryTypeInfo> m_PlayerInventory = new List<InventoryTypeInfo>();
+        internal List<InventoryTypeInfo> PlayerInventory {
+            get { return m_PlayerInventory; }
+            set {
+                if (value == null)
+                    throw new System.ArgumentNullException("ContainerStorage.SetPlayerGoods: Invalid goods.");
+
+                if (m_PlayerInventory != value) {
+                    m_PlayerInventory = value;
+                    onPlayerInventoryChange.Invoke(m_PlayerInventory);
+                }
+            }
+        }
+
         private List<InventoryTypeInfo> m_PlayerGoods = new List<InventoryTypeInfo>();
-        private List<ContainerView> m_ContainerViews = new List<ContainerView>(Constants.MaxContainerViews);
+        internal List<InventoryTypeInfo> PlayerGoods {
+            get { return m_PlayerGoods; }
+            set {
+                if (value == null)
+                    throw new System.ArgumentNullException("ContainerStorage.SetPlayerGoods: Invalid goods.");
 
-        public BodyContainerView BodyContainerView { get; set; }
+                if (m_PlayerGoods != value) {
+                    m_PlayerGoods = value;
+                    onPlayerGoodsChange.Invoke(m_PlayerGoods);
+                }
+            }
+        }
 
-        public ContainerStorage() {
+        internal BodyContainerView BodyContainerView { get; set; }
+
+        internal ContainerStorage() {
             BodyContainerView = new BodyContainerView();
         }
 
-        public void Reset() {
+        internal void Reset() {
 
         }
 
-        public int GetAvailableInventory(uint id, int data) {
+        internal int GetAvailableInventory(uint id, int data) {
             int lastIndex = m_PlayerInventory.Count - 1;
             int index = 0;
             while (index <= lastIndex) {
@@ -39,27 +82,40 @@ namespace OpenTibiaUnity.Core.Container
             return 0;
         }
 
-        public int GetFreeContainerViewID() {
-            int index = 0;
-            while (index < Constants.MaxContainerViews) {
-                if (m_ContainerViews[index] == null)
-                    return index;
-                index++;
+        internal int GetFreeContainerViewID() {
+            for (int i = 0; i < Constants.MaxContainerViews; i++) {
+                if (m_ContainerViews[i] == null)
+                    return i;
             }
-            return Constants.MaxContainerViews - index;
+
+            return 0;
         }
 
-        public void SetPlayerMoney(long playerMoney) {
-            if (m_PlayerMoney != playerMoney) {
-                m_PlayerMoney = playerMoney;
-                // TODO dispatch event
-            }
+        internal ContainerView GetContainerView(int containerId) {
+            if (containerId < 0 || containerId >= Constants.MaxContainerViews)
+                throw new System.ArgumentOutOfRangeException("ContainerStorage.GetContainerView: Invalid container number: " + containerId);
+
+            return m_ContainerViews[containerId];
         }
 
-        public void CreateContainerView(int id, ObjectInstance icon, string name, bool subContainer, bool dragAndDrop, bool pagination, int nOfSlots, int nOfObjects, int indexOfFirstObject) {
-            var containerView = new ContainerView(id, icon, name, subContainer, dragAndDrop, pagination, nOfSlots, nOfObjects, indexOfFirstObject);
+        internal ContainerView CreateContainerView(int containerId, ObjectInstance objectIcon, string name, bool isSubContainer, bool isDragAndDropEnabled, bool isPaginationEnabled, int nOfSlotsPerPage, int nOfTotalObjects, int indexOfFirstObject) {
+            var containerView = new ContainerView(containerId, objectIcon, name, isSubContainer, isDragAndDropEnabled, isPaginationEnabled, nOfSlotsPerPage, nOfTotalObjects, indexOfFirstObject);
+            
+            m_ContainerViews[containerId] = containerView;
+            onContainerAdded.Invoke(containerView);
 
-            m_ContainerViews[id] = containerView;
+            return containerView;
+        }
+
+        internal void CloseContainerView(int containerId) {
+            if (containerId < 0 || containerId >= Constants.MaxContainerViews)
+                throw new System.ArgumentOutOfRangeException("ContainerStorage.GetContainerView: Invalid container number: " + containerId);
+            
+            var containerView = m_ContainerViews[containerId];
+            m_ContainerViews[containerId] = null;
+
+            if (!!containerView)
+                onContainerClosed.Invoke(containerView);
         }
     }
 }

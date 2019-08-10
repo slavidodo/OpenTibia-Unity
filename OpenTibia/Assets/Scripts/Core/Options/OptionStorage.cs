@@ -1,6 +1,6 @@
 ﻿using OpenTibiaUnity.Core.Chat;
-using OpenTibiaUnity.Core.InputManagment;
-using OpenTibiaUnity.Core.InputManagment.Mapping;
+using OpenTibiaUnity.Core.Input;
+using OpenTibiaUnity.Core.Input.Mapping;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -11,7 +11,7 @@ using UnityEngine;
 namespace OpenTibiaUnity.Core.Options
 {
     [Serializable]
-    public class OptionStorage
+    internal class OptionStorage
     {
         // Options are preferred to be listed as how they are placed
         // in the actual options window (except presets, these have their own handler)
@@ -110,7 +110,13 @@ namespace OpenTibiaUnity.Core.Options
         public int GeneralInputSetID = MappingSet.DefaultSet;
         public int GeneralInputSetMode = MappingSet.ChatModeON;
 
-        // Options that are not visible
+        // Internal Client Options
+        public bool AuthenticatorTokenOn = false;
+        public string LoginAddress = string.Empty;
+        public int SelectedClientVersion = -1;
+        public int SelectedBuildVersion = -1;
+
+        // Internal Game Options
         public CombatAttackModes CombatAttackMode = CombatAttackModes.Balanced;
         public CombatChaseModes CombatChaseMode = CombatChaseModes.Off;
         public bool CombatSecureMode = true;
@@ -146,6 +152,7 @@ namespace OpenTibiaUnity.Core.Options
 
             InitialiseMappingSet();
             InitialiseMessageFilterSets();
+            InitialiseNameFilterSets();
         }
 
         private void InitialiseMappingSet() {

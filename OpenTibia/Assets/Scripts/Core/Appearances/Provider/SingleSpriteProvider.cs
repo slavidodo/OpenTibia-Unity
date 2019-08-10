@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace OpenTibiaUnity.Assets.Scripts.Core.Appearances.Provider
+namespace OpenTibiaUnity.Core.Appearances.Provider
 {
-    class SingleSpriteProvider
+    internal class SingleSpriteProvider
     {
     }
 }

@@ -7,19 +7,17 @@ namespace OpenTibiaUnity.Core.Components
     [RequireComponent(typeof(TMPro.TMP_Dropdown))]
     public class DropdownExtention : Base.AbstractComponent
     {
-#pragma warning disable CS0649 // never assigned to
         [Header("Panel Wrapper")]
-        [SerializeField] private Sprite m_PanelWrapperNormalSprite;
-        [SerializeField] private Sprite m_PanelWrapperHighlightedSprite;
+        [SerializeField] private Sprite m_PanelWrapperNormalSprite = null;
+        [SerializeField] private Sprite m_PanelWrapperHighlightedSprite = null;
 
         [Header("Panel Arrow")]
-        [SerializeField] private Sprite m_PanelArrowNormalSprite;
-        [SerializeField] private Sprite m_PanelArrowHighlightedSprite;
+        [SerializeField] private Sprite m_PanelArrowNormalSprite = null;
+        [SerializeField] private Sprite m_PanelArrowHighlightedSprite = null;
 
         [Header("Panels")]
-        [SerializeField] private Image m_PanelWrapperImage;
-        [SerializeField] private Image m_PanelArrowImage;
-#pragma warning restore CS0649 // never assigned to
+        [SerializeField] private Image m_PanelWrapperImage = null;
+        [SerializeField] private Image m_PanelArrowImage = null;
 
         bool m_TemplateVisible = false;
 
@@ -35,6 +33,7 @@ namespace OpenTibiaUnity.Core.Components
         
         protected void LateUpdate() {
             if (dropdown.IsExpanded != m_TemplateVisible) {
+                // highlight the dropdown
                 if (!dropdown.IsExpanded) {
                     m_PanelWrapperImage.sprite = m_PanelWrapperNormalSprite;
                     m_PanelArrowImage.sprite = m_PanelArrowNormalSprite;
@@ -42,6 +41,21 @@ namespace OpenTibiaUnity.Core.Components
                     m_PanelWrapperImage.sprite = m_PanelWrapperHighlightedSprite;
                     m_PanelArrowImage.sprite = m_PanelArrowHighlightedSprite;
                 }
+
+                if (dropdown.IsExpanded) {
+                    var scrollRect = transform.GetComponentInChildren<ScrollRect>();
+                    if (scrollRect) {
+                        float value = 1f - dropdown.value / (float)(scrollRect.content.childCount - 2);
+
+                        if (scrollRect.horizontalScrollbar)
+                            scrollRect.horizontalScrollbar.value = value;
+                        else if (scrollRect.verticalScrollbar)
+                            scrollRect.verticalScrollbar.value = value;
+                    }
+                }
+
+                // scroll to selection
+                //EnsureChildVisible();
 
                 m_TemplateVisible = dropdown.IsExpanded;
             }

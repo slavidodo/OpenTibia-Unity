@@ -1,307 +1,660 @@
-﻿using OpenTibiaUnity.Core.InputManagment;
-using OpenTibiaUnity.Core.Network;
+﻿using OpenTibiaUnity.Core.Input;
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
-using UnityEngine.Events;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using OpenTibiaUnity.Core.Communication.Login;
+using System.Threading.Tasks;
 
 namespace OpenTibiaUnity.Modules.Login
 {
-    [DisallowMultipleComponent]
-    public sealed class LoginWindow : Core.Components.Base.Window
+    internal class LoginWindow : Core.Components.Base.Window
     {
-#pragma warning disable CS0649 // never assigned to
-        [SerializeField] private TMPro.TMP_InputField m_AccountNameInputField;
-        [SerializeField] private TMPro.TMP_InputField m_PasswordInputField;
-        [SerializeField] private TMPro.TMP_InputField m_IPAddressInputField;
-        [SerializeField] private Button m_LoginButton;
-        [SerializeField] private TMPro.TMP_Dropdown m_VersionsDropdown;
-        [SerializeField] private CharactersWindow m_CharactersWindow;
-        
-#pragma warning restore CS0649 // never assigned to
+        // Serializable Fields
+        [SerializeField] protected RawImage m_BackgroundImageComponent = null;
+        [SerializeField] protected AspectRatioFitter m_BackgroundAspectRatioFitter = null;
 
-        private Core.Components.PopupWindow m_LoggerWindow;
-        private ProtocolLogin m_ProtocolLogin;
-        private int m_MotdNum;
-        private string m_Motd;
-        private string m_LoginError;
+        [SerializeField] protected TMPro.TextMeshProUGUI m_AccountIdentifierLabel = null;
+        [SerializeField] protected TMPro.TMP_InputField m_AccountIdentifierInput = null;
+        [SerializeField] protected TMPro.TMP_InputField m_PasswordInput = null;
+        [SerializeField] protected TMPro.TMP_InputField m_TokenInput = null;
+        [SerializeField] protected TMPro.TMP_InputField m_AddressInput = null; // ip-address or login web address
 
-        private Queue<UnityAction> m_LoggerActionsQueue = new Queue<UnityAction>();
-        private bool m_LoggerWindowActive = false;
-        private bool m_LoggerWindowDisposable = false;
+        [SerializeField] protected TMPro.TextMeshProUGUI m_AddressLabel = null;
 
-        private string m_SessionKey = string.Empty;
-        private string m_AccountName = string.Empty;
-        private string m_Password = string.Empty;
+        [SerializeField] protected TMPro.TMP_Dropdown m_ClientVersionDropdown = null;
+        [SerializeField] protected TMPro.TMP_Dropdown m_BuildVersionDropdown = null;
 
-        public string InputAccountName {
-            get => m_AccountNameInputField.text;
-            set => m_AccountNameInputField.text = value;
+        [SerializeField] private Button m_AuthButton = null;
+        [SerializeField] private Button m_OKButton = null;
+        [SerializeField] private Button m_CancelButton = null;
+
+        [SerializeField] private RectTransform m_PanelAccountManagementV11 = null;
+        [SerializeField] private Core.Components.Draggable m_DraggableComponent = null;
+
+        [SerializeField] private Texture2D m_ClientArtwork700 = null;
+        [SerializeField] private Texture2D m_ClientArtwork800 = null;
+        [SerializeField] private Texture2D m_ClientArtwork910 = null;
+        [SerializeField] private Texture2D m_ClientArtwork1020 = null;
+        [SerializeField] private Texture2D m_ClientArtwork1100 = null;
+        [SerializeField] private Texture2D m_ClientArtwork1103 = null;
+        [SerializeField] private Texture2D m_ClientArtwork1140 = null;
+        [SerializeField] private Texture2D m_ClientArtwork1150 = null;
+        [SerializeField] private Texture2D m_ClientArtwork1180 = null;
+        [SerializeField] private Texture2D m_ClientArtwork1200 = null;
+
+        // Fields
+        protected string m_SessionKey = string.Empty;
+        protected string m_ProtocolAccountIdentifier = string.Empty;
+        protected string m_ProtocolPassword = string.Empty;
+        protected string m_ProtocolToken = string.Empty;
+
+        protected ProtocolLogin m_ProtocolLogin = null;
+        protected LoginWebClient m_LoginWebClient = null;
+
+        protected Core.Components.PopupWindow m_PopupWindow;
+        protected bool m_PopupIsMOTD = false;
+
+
+        // Properties
+        protected string AcccountIdentifier {
+            get => m_AccountIdentifierInput.text;
+            set => m_AccountIdentifierInput.text = value;
+        }
+        protected string Password {
+            get => m_PasswordInput.text;
+            set => m_PasswordInput.text = value;
+        }
+        protected string Token {
+            get => m_TokenInput.text;
+            set => m_TokenInput.text = value;
+        }
+        protected string Address {
+            get => m_AddressInput.text;
+            set => m_AddressInput.text = value;
         }
 
-        public string InputPassword {
-            get => m_PasswordInputField.text;
-            set => m_PasswordInputField.text = value;
-        }
-
-        public string IPAddress {
-            get => m_IPAddressInputField.text;
-            set => m_IPAddressInputField.text = value;
-        }
 
         protected override void Start() {
             base.Start();
-            var gameManager = OpenTibiaUnity.GameManager;
-            var inputHandler = OpenTibiaUnity.InputHandler;
             
-            inputHandler.AddKeyUpListener(Core.Utility.EventImplPriority.Medium, (Event e, bool repeat) => {
-                if (e.alt || e.shift || e.control)
-                    return;
+            // setup input
+            OpenTibiaUnity.InputHandler.AddKeyDownListener(Core.Utility.EventImplPriority.High, OnKeyDown);
+            OpenTibiaUnity.InputHandler.AddKeyUpListener(Core.Utility.EventImplPriority.High, OnKeyUp);
 
-                switch (e.keyCode) {
-                    case KeyCode.Tab:
-                        if (InputHandler.IsHighlighted(m_AccountNameInputField)) {
-                            m_PasswordInputField.Select();
-                            m_PasswordInputField.MoveTextEnd(false);
-                        } else if (InputHandler.IsHighlighted(m_PasswordInputField)) {
-                            m_IPAddressInputField.Select();
-                            m_IPAddressInputField.MoveTextEnd(false);
-                        } else if (InputHandler.IsHighlighted(m_IPAddressInputField)) {
-                            m_AccountNameInputField.Select();
-                            m_AccountNameInputField.MoveTextEnd(false);
-                        }
+            // setup events
+            m_AuthButton.onClick.AddListener(OnAuthButtonClick);
+            m_OKButton.onClick.AddListener(OnOkButtonClick);
+            m_CancelButton.onClick.AddListener(OnCancelButtonClick);
+            m_ClientVersionDropdown.onValueChanged.AddListener(OnClientVersionDropdownValueChanged);
+            m_BuildVersionDropdown.onValueChanged.AddListener(OnBuildVersionDropdownValueChanged);
 
-                        e.Use();
-                        break;
-                    case KeyCode.Return:
-                    case KeyCode.KeypadEnter:
-                        if (!InputHandler.IsGameObjectHighlighted(gameObject))
-                            return;
-                        
-                        OnLoginButtonClicked();
-                        e.Use();
-                        break;
-                }
-            });
-            
-            gameObject.SetActive(true);
-            m_LoginButton.onClick.AddListener(OnLoginButtonClicked);
+            // setup popup message
+            m_PopupWindow = Instantiate(OpenTibiaUnity.GameManager.PopupWindowPrefab, transform.parent);
+            m_PopupWindow.name = "PopupWindow_LoginWindow";
+            m_PopupWindow.HideWindow();
 
-            m_LoggerWindow = Instantiate(gameManager.PopupWindowPrefab, transform.parent);
-            m_LoggerWindow.Hide();
+            m_PopupWindow.onOKClick.AddListener(OnPopupOkClick);
+            m_PopupWindow.onCancelClick.AddListener(OnPopupCancelClick);
 
-            m_LoggerWindow.OnClickOk.AddListener(() => {
-                RemoveLogger();
-                m_AccountNameInputField.Select();
-            });
-
-            m_LoggerWindow.OnClickCancel.AddListener(() => {
-                RemoveLogger();
-                m_ProtocolLogin?.Disconnect();
-                m_ProtocolLogin = null;
-                m_AccountNameInputField.Select();
-            });
-
-            var supportedVersions = OpenTibiaUnity.GetSupportedVersions();
-            List<TMPro.TMP_Dropdown.OptionData> options = new List<TMPro.TMP_Dropdown.OptionData>();
-            foreach (var version in supportedVersions) {
+            // setup client versions
+            var options = new System.Collections.Generic.List<TMPro.TMP_Dropdown.OptionData>();
+            foreach (int version in OpenTibiaUnity.GetClientVersions())
                 options.Add(new TMPro.TMP_Dropdown.OptionData(version.ToString()));
+            m_ClientVersionDropdown.options = options;
+
+            // setup our client with loaded options
+            SetupWithOptions();
+        }
+
+        protected override void OnEnable() {
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => m_AccountIdentifierInput.Select());
+        }
+
+        protected void OnKeyDown(Event e, bool repeat) {
+            if (repeat)
+                OnKeyUp(e, false);
+        }
+
+        protected void OnKeyUp(Event e, bool _) {
+            if (e.alt || e.shift || e.control || !InputHandler.IsHighlighted(this))
+                return;
+            
+            switch (e.keyCode) {
+                case KeyCode.Tab:
+                    e.Use();
+
+                    if (InputHandler.IsHighlighted(m_AccountIdentifierInput)) {
+                        m_PasswordInput.Select();
+                        m_PasswordInput.MoveTextEnd(false);
+                    } else if (InputHandler.IsHighlighted(m_PasswordInput)) {
+                        if (m_TokenInput.transform.parent.gameObject.activeSelf) {
+                            m_TokenInput.Select();
+                            m_TokenInput.MoveTextEnd(false);
+                        } else {
+                            m_AddressInput.Select();
+                            m_AddressInput.MoveTextEnd(false);
+                        }
+                    } else if (InputHandler.IsHighlighted(m_TokenInput)) {
+                        m_AddressInput.Select();
+                        m_AddressInput.MoveTextEnd(false);
+                    } else { // to fix any error //
+                        m_AccountIdentifierInput.Select();
+                        m_AccountIdentifierInput.MoveTextEnd(false);
+                    }
+                    
+                    break;
+                case KeyCode.Return:
+                case KeyCode.KeypadEnter:
+                    if (e.type == EventType.KeyDown)
+                        return;
+
+                    e.Use();
+                    OnOkButtonClick();
+                    break;
             }
-
-            m_VersionsDropdown.options = options;
-            m_VersionsDropdown.onValueChanged.AddListener(OnClientVersionDropdownValueChanged);
-
-            OnClientVersionDropdownValueChanged(0);
         }
 
-        protected override void OnEnable() => OpenTibiaUnity.GameManager.InvokeOnMainThread(() => m_AccountNameInputField.Select());
+        protected void OnAuthButtonClick() {
 
-        public void Show() => gameObject.SetActive(true);
-
-        private void RemoveLogger() {
-            m_LoggerWindowActive = false;
-            m_LoggerWindowDisposable = false;
-            m_LoggerWindow.UnlockFromOverlay();
-            m_LoggerWindow.Hide();
-
-            PostLoggerRemoval();
         }
 
-        private void PostLoggerRemoval() {
-            if (m_LoggerActionsQueue.Count == 0)
+        protected void OnOkButtonClick() {
+            if (!InputHandler.IsHighlighted(this))
                 return;
 
-            while (!m_LoggerWindowActive && m_LoggerActionsQueue.Count > 0)
-                m_LoggerActionsQueue.Dequeue().Invoke();
-
-            if (!m_LoggerWindowActive && !m_CharactersWindow.gameObject.activeSelf)
-                m_AccountNameInputField.Select();
-        }
-
-        private void PopupInfo(string title, string message, PopupMenuType popupType = PopupMenuType.OK, TMPro.TextAlignmentOptions alignment = TMPro.TextAlignmentOptions.MidlineGeoAligned) {
-            // any popup can override the current popup
-            // i.e motd can override waiting message
-
-            // this will be discarded if characters' window is currently visible;
-            if (m_CharactersWindow.gameObject.activeSelf)
+            if (OpenTibiaUnity.GameManager.ClientVersion >= 1100 && AcccountIdentifier.Length == 0)
                 return;
-            
-            m_LoggerWindow.Show();
-            m_LoggerWindow.LockToOverlay();
-            m_LoggerWindow.ResetLocalPosition();
 
-            m_LoggerWindow.PopupType = popupType;
-
-            m_LoggerWindow.SetTitle(title);
-            m_LoggerWindow.SetMessage(message, 500, 250);
-            m_LoggerWindow.SetMessageAlignment(alignment);
-            
-            m_LoggerWindowActive = true;
+            DoLogin(AcccountIdentifier, Password, Token, Address);
         }
 
-        private bool CanTraceWindow() {
-            if (m_LoggerWindowActive) {
-                if (m_LoggerWindowDisposable) {
-                    OpenTibiaUnity.GameManager.InvokeOnMainThread(RemoveLogger);
-                    if (m_LoggerActionsQueue.Count == 0)
-                        return true;
+        protected void OnCancelButtonClick() {
+        }
 
-                    return false;
+        protected void OnClientVersionDropdownValueChanged(int value) {
+            var gameManager = OpenTibiaUnity.GameManager;
+            var optionStorage = OpenTibiaUnity.OptionStorage;
+
+            int oldVersion = gameManager.ClientVersion;
+            int newVersion = OpenTibiaUnity.GetClientVersions()[value];
+
+            gameManager.SetClientVersion(newVersion);
+
+            // check character validation
+            // on older protocols, account name consisted only of numbers
+            var oldValidation = m_AccountIdentifierInput.characterValidation;
+            if (gameManager.GetFeature(GameFeature.GameAccountNames))
+                m_AccountIdentifierInput.characterValidation = TMPro.TMP_InputField.CharacterValidation.None;
+            else
+                m_AccountIdentifierInput.characterValidation = TMPro.TMP_InputField.CharacterValidation.Integer;
+
+            if (oldValidation != m_AccountIdentifierInput.characterValidation)
+                m_AccountIdentifierInput.text = string.Empty;
+            
+            // check authenticator button
+            // on tibia 11, authenticator button was hidden until it's required
+            // on tibia 10, the player has the ability to switch it on/off
+            bool authButtonSupported = gameManager.GetFeature(GameFeature.GameAuthenticator) && newVersion < 1100;
+            m_AuthButton.gameObject.SetActive(authButtonSupported);
+            if (authButtonSupported && optionStorage.AuthenticatorTokenOn) {
+                m_TokenInput.transform.parent.gameObject.SetActive(true);
+                m_TokenInput.text = "";
+                m_AuthButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().SetText(TextResources.LOGIN_AUTHBUTTON_ON);
+            } else {
+                m_TokenInput.transform.parent.gameObject.SetActive(false);
+                m_AuthButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().SetText(TextResources.LOGIN_AUTHBUTTON_OFF);
+                optionStorage.AuthenticatorTokenOn = false;
+            }
+            
+            // check address label, okButton & cancelButton
+            // on tibia 11 & later versions, we use a login web client
+            // on earlier versions (10, 9, 8, 7.x) we use protocols, thus requires address & port
+            if ((oldVersion < 1100 && newVersion >= 1100) || (oldVersion >= 1100 && newVersion < 1100)) {
+                m_CancelButton.gameObject.SetActive(newVersion < 1100);
+                m_OKButton.GetComponent<LayoutElement>().preferredWidth = newVersion < 1100 ? 50 : 100;
+                if (newVersion < 1100) {
+                    m_OKButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().SetText(TextResources.LOGIN_OKBUTTON_LEGACY);
+                    m_AddressLabel.SetText(TextResources.IP_ADDRESS_LABEL);
+                    m_AddressInput.placeholder.GetComponent<TMPro.TextMeshProUGUI>().SetText(Constants.OpenTibiaDefaultFullIPAddress);
+                } else {
+                    m_OKButton.GetComponentInChildren<TMPro.TextMeshProUGUI>().SetText(TextResources.LOGIN_OKBUTTON_NEW);
+                    m_AddressLabel.SetText(TextResources.LOGIN_WEB_ADDRESS_LABEL);
+                    m_AddressInput.placeholder.GetComponent<TMPro.TextMeshProUGUI>().SetText(Constants.OpenTibiaDefaultClientServicesAddress);
                 }
             }
 
-            return false;
+            // check abilities of the login window
+            // reset the window the the center of the screen
+            // the player can drag the window if it's not tibia 11
+            ResetLocalPosition();
+            m_DraggableComponent.enabled = newVersion < 1100;
+
+            // check build versions
+            // build version is supported from tibia 11 and later versions
+            var buildVersions = OpenTibiaUnity.GetBuildVersions(newVersion); // == null on tibia 10
+            m_BuildVersionDropdown.gameObject.SetActive(buildVersions != null);
+
+            int buildVersion = 0;
+            if (buildVersions != null) {
+                var options = new System.Collections.Generic.List<string>();
+                foreach (var version in buildVersions) {
+                    string text;
+                    if (OpenTibiaUnity.IsTestBuildVersion(version))
+                        text = string.Format("{0} <pos=70%><color=#{1:x}>Test</color></pos>", version, Core.Chat.MessageColors.Red);
+                    else
+                        text = version.ToString();
+                    options.Add(text);
+                }
+                
+                m_BuildVersionDropdown.ClearOptions();
+                m_BuildVersionDropdown.AddOptions(options);
+                OpenTibiaUnity.GameManager.SetBuildVersion(buildVersions[0]);
+                buildVersion = buildVersions[0];
+            }
+
+            // now update protocol version
+            // this is required for login purposes later
+            gameManager.SetProtocolVersion(OpenTibiaUnity.GetProtocolVersion(newVersion, buildVersion));
+
+            // update the layout of clientVersions dropdown
+            var clientVersionsRectTransform = m_ClientVersionDropdown.GetComponent<RectTransform>();
+            var anchorMin = clientVersionsRectTransform.anchorMin;
+            var anchorMax = clientVersionsRectTransform.anchorMax;
+            if (newVersion >= 1100) {
+                clientVersionsRectTransform.anchorMin = new Vector2(0.0f, anchorMin.y);
+                clientVersionsRectTransform.anchorMax = new Vector2(0.5f, anchorMax.y);
+            } else {
+                clientVersionsRectTransform.anchorMin = new Vector2(0.25f, anchorMin.y);
+                clientVersionsRectTransform.anchorMax = new Vector2(0.8f, anchorMax.y);
+            }
+
+            // the manage account panel should only be visible on tibia 11
+            m_PanelAccountManagementV11.gameObject.SetActive(newVersion >= 1100);
+
+            // update background image
+            Texture2D newTexture;
+            if (newVersion < 800)
+                newTexture = m_ClientArtwork700;
+            else if (newVersion < 910)
+                newTexture = m_ClientArtwork800;
+            else if (newVersion < 1020)
+                newTexture = m_ClientArtwork910;
+            else if (newVersion < 1100)
+                newTexture = m_ClientArtwork1020;
+            else if (newVersion < 1103)
+                newTexture = m_ClientArtwork1100;
+            else if (newVersion < 1140)
+                newTexture = m_ClientArtwork1103;
+            else if (newVersion < 1150)
+                newTexture = m_ClientArtwork1140;
+            else if (newVersion < 1180)
+                newTexture = m_ClientArtwork1150;
+            else if (newVersion < 1200)
+                newTexture = m_ClientArtwork1180;
+            else
+                newTexture = m_ClientArtwork1200;
+
+            m_BackgroundImageComponent.texture = newTexture;
+            m_BackgroundImageComponent.enabled = true;
+
+            float aspectRatio = 1.6f;
+            if (newVersion < 1020)
+                aspectRatio = Screen.width / Screen.height;
+
+            m_BackgroundAspectRatioFitter.aspectRatio = aspectRatio;
+
+            // update based on both client version & build version
+            OnStaticVersionChange();
+
+            // update options
+            OpenTibiaUnity.OptionStorage.SelectedClientVersion = newVersion;
+        }
+
+        protected void OnBuildVersionDropdownValueChanged(int value) {
+            var gameManager = OpenTibiaUnity.GameManager;
+            int clientVersion = gameManager.ClientVersion;
+            //int oldVersion = gameManager.BuildVersion;
+
+            var buildVersions = OpenTibiaUnity.GetBuildVersions(clientVersion);
+            int newVersion = buildVersions != null ? buildVersions[value] : 0;
+            
+            gameManager.SetBuildVersion(newVersion);
+
+            // update based on both client version & build version
+            OnStaticVersionChange();
+
+            // update options
+            OpenTibiaUnity.OptionStorage.SelectedBuildVersion = newVersion;
+        }
+
+        protected void OnStaticVersionChange() {
+            var gameManager = OpenTibiaUnity.GameManager;
+
+            string newAccountIdentifierLabel;
+            if (gameManager.GetFeature(GameFeature.GameAccountEmailAddress))
+                newAccountIdentifierLabel = TextResources.ACCOUNT_IDENTIFIER_EMAIL;
+            else if (gameManager.GetFeature(GameFeature.GameAccountNames))
+                newAccountIdentifierLabel = TextResources.ACCOUNT_IDENTIFIER_ACCOUNTNAME;
+            else
+                newAccountIdentifierLabel = TextResources.ACCOUNT_IDENTIFIER_ACCOUNTNUMBER;
+
+            if (m_AccountIdentifierLabel.text != newAccountIdentifierLabel)
+                m_AccountIdentifierLabel.text = newAccountIdentifierLabel;
+        }
+
+        protected void OnPopupOkClick() {
+            if (m_LoginWebClient) {
+                RemoveLoginWebClientListeners();
+                m_LoginWebClient = null;
+            }
+
+            if (m_ProtocolLogin) {
+                RemoveProtocolLoginListeners();
+                m_ProtocolLogin.Disconnect();
+                m_ProtocolLogin = null;
+            }
+
+            if (m_PopupIsMOTD) { // up to 10.99, motd can be displayed!
+                m_PopupIsMOTD = false;
+                HideWindow();
+
+                ModulesManager.Instance.CharactersWindow.OpenWindow();
+            } else {
+                ShowWindow();
+
+                m_AccountIdentifierInput.Select();
+            }
+        }
+
+        protected void OnPopupCancelClick() {
+            if (m_LoginWebClient) {
+                RemoveLoginWebClientListeners();
+                m_LoginWebClient = null;
+            }
+
+            if (m_ProtocolLogin) {
+                RemoveProtocolLoginListeners();
+                m_ProtocolLogin.Disconnect();
+                m_ProtocolLogin = null;
+            }
+
+            gameObject.SetActive(true);
+            m_AccountIdentifierInput.Select();
+            ResetLocalPosition();
+        }
+
+        protected void SetupWithOptions() {
+            var optionStorage = OpenTibiaUnity.OptionStorage;
+            var gameManager = OpenTibiaUnity.GameManager;
+            var supportedVersions = OpenTibiaUnity.GetClientVersions();
+
+            // update client version
+            if (optionStorage.SelectedClientVersion > 0) {
+                int foundIndex = -1;
+                for (int i = 0; i < supportedVersions.Length; i++) {
+                    if (supportedVersions[i] == optionStorage.SelectedClientVersion)
+                        foundIndex = i;
+                }
+
+                if (foundIndex != -1) {
+                    m_ClientVersionDropdown.value = foundIndex;
+                } else {
+                    OnClientVersionDropdownValueChanged(0);
+                    optionStorage.SelectedClientVersion = gameManager.ClientVersion;
+                }
+            } else {
+                OnClientVersionDropdownValueChanged(0);
+            }
+
+            // update build version
+            if (optionStorage.SelectedBuildVersion > 0) {
+                var buildVersions = OpenTibiaUnity.GetBuildVersions(gameManager.ClientVersion);
+
+                int foundIndex = -1;
+                if (buildVersions != null) {
+                    for (int i = 0; i < buildVersions.Length; i++) {
+                        if (buildVersions[i] == optionStorage.SelectedBuildVersion)
+                            foundIndex = i;
+                    }
+                }
+
+                if (foundIndex != -1) {
+                    m_BuildVersionDropdown.value = foundIndex;
+                } else {
+                    OnBuildVersionDropdownValueChanged(0);
+                    optionStorage.SelectedBuildVersion = gameManager.ClientVersion;
+                }
+            } else {
+                OnBuildVersionDropdownValueChanged(0);
+            }
+
+            // update login address
+            m_AddressInput.text = optionStorage.LoginAddress;
+
+            // todo: save account name & password encrypted //
+        }
+
+        protected void PopupMessage(string title, string message, PopupMenuType popupType = PopupMenuType.OK, TMPro.TextAlignmentOptions alignment = TMPro.TextAlignmentOptions.MidlineGeoAligned) {
+            m_PopupWindow.OpenWindow();
+            m_PopupWindow.LockToOverlay();
+            m_PopupWindow.ResetLocalPosition();
+
+            m_PopupWindow.PopupType = popupType;
+
+            m_PopupWindow.SetTitle(title);
+            m_PopupWindow.SetMessage(message, 500, 250);
+            m_PopupWindow.SetMessageAlignment(alignment);
+        }
+
+        protected async void DoLogin(string accountIdentifier, string password, string token, string address) {
+            m_ProtocolAccountIdentifier = accountIdentifier;
+            m_ProtocolPassword = password;
+            m_ProtocolToken = token;
+
+            AcccountIdentifier = string.Empty;
+            Password = string.Empty;
+            Token = string.Empty;
+
+            OpenTibiaUnity.OptionStorage.LoginAddress = address;
+
+            var gameManager = OpenTibiaUnity.GameManager;
+            int clientVersion = gameManager.ClientVersion;
+            int buildVersion = gameManager.BuildVersion;
+
+            ClientSpecification specification;
+            string rawAddress = address.ToLower();
+            if (rawAddress == "cipsoft")
+                specification = ClientSpecification.Cipsoft;
+            else
+                specification = ClientSpecification.OpenTibia;
+
+            gameManager.SetClientSpecification(specification);
+
+            if (clientVersion >= 1200) {
+                gameObject.SetActive(false);
+                gameManager.LoadingAppearancesWindow.OpenWindow();
+                bool loaded = await gameManager.LoadThingsAsyncAwaitable(clientVersion, buildVersion, specification);
+                gameManager.LoadingAppearancesWindow.CloseWindow();
+                gameObject.SetActive(true);
+
+                if (!loaded) {
+                    PopupMessage("Sorry", string.Format("Couldn't load appearances for version {0}.{1}.", clientVersion / 100f, buildVersion));
+                    return;
+                }
+            } else {
+                if (!gameManager.CanLoadThings(clientVersion, buildVersion, specification)) {
+                    PopupMessage("Sorry", string.Format("Couldn't load appearances for version {0}.{1}.", clientVersion / 100f, buildVersion));
+                    return;
+                }
+
+                gameManager.LoadThingsAsync(clientVersion, buildVersion, specification);
+            }
+            
+            if (clientVersion >= 1100) {
+                m_LoginWebClient = new LoginWebClient(clientVersion, buildVersion) {
+                    AccountIdentifier = m_ProtocolAccountIdentifier,
+                    Password = m_ProtocolPassword,
+                    Token = m_ProtocolToken,
+                };
+
+                if (specification == ClientSpecification.Cipsoft)
+                    address = Constants.RealTibiaClientServicesAddress;
+                else if (address.Length == 0)
+                    address = Constants.OpenTibiaDefaultClientServicesAddress;
+                
+                AddLoginWebClientListeners();
+                new Task(() => m_LoginWebClient.LoadDataAsync(address)).Start();
+            } else {
+                string ip;
+                int port = 0;
+                
+                if (address.Length != 0) {
+                    var split = address.Split(':');
+                    ip = split[0];
+                    if (split.Length < 2 || !int.TryParse(split[1], out port))
+                        port = Constants.OpenTibiaDefaultPort;
+                } else {
+                    ip = Constants.OpenTibiaDefaultIPAddress;
+                    port = Constants.OpenTibiaDefaultPort;
+                }
+                
+                m_ProtocolLogin = new ProtocolLogin() {
+                    AccountName = m_ProtocolAccountIdentifier,
+                    Password = m_ProtocolPassword,
+                    Token = m_ProtocolToken
+                };
+
+                AddProtocolLoginListners();
+                new Task(() => m_ProtocolLogin.Connect(ip, port)).Start();
+            }
+
+            gameObject.SetActive(clientVersion >= 1100);
+            PopupMessage("Connecting", "Your character list is being loaded. Please wait.", PopupMenuType.Cancel);
+        }
+
+        internal void DoLoginWithNewToken(string token) {
+            DoLogin(m_ProtocolAccountIdentifier, m_ProtocolPassword, token, OpenTibiaUnity.OptionStorage.LoginAddress);
+        }
+
+        private void AddLoginWebClientListeners() {
+            if (m_LoginWebClient) {
+                m_LoginWebClient.onTechnicalError.AddListener(OnLoginWebClientTechnicalError);
+                m_LoginWebClient.onLoginError.AddListener(OnLoginWebClientLoginError);
+                m_LoginWebClient.onTokenError.AddListener(OnLoginWebClientTokenError);
+                m_LoginWebClient.onLoginSuccess.AddListener(OnLoginWebClientSuccess);
+            }
+        }
+
+        private void RemoveLoginWebClientListeners() {
+            if (m_LoginWebClient) {
+                m_LoginWebClient.onTechnicalError.RemoveListener(OnLoginWebClientTechnicalError);
+                m_LoginWebClient.onLoginError.RemoveListener(OnLoginWebClientLoginError);
+                m_LoginWebClient.onTokenError.RemoveListener(OnLoginWebClientTokenError);
+                m_LoginWebClient.onLoginSuccess.RemoveListener(OnLoginWebClientSuccess);
+            }
+        }
+
+        private void AddProtocolLoginListners() {
+            if (m_ProtocolLogin) {
+                m_ProtocolLogin.onInternalError.AddListener(OnProtocolLoginInternalError);
+                m_ProtocolLogin.onLoginError.AddListener(OnProtocolLoginError);
+                m_ProtocolLogin.onLoginTokenError.AddListener(OnProtocolLoginTokenError);
+                m_ProtocolLogin.onMessageOfTheDay.AddListener(OnProtocolLoginMOTD);
+                m_ProtocolLogin.onSessionKey.AddListener(OnProtocolLoginSessionKey);
+                m_ProtocolLogin.onCharacterList.AddListener(OnProtocolLoginCharacterList);
+                m_ProtocolLogin.onUpdateRequired.AddListener(OnProtocolUpdateRequired);
+            }
+        }
+
+        private void RemoveProtocolLoginListeners() {
+            if (m_ProtocolLogin) {
+                m_ProtocolLogin.onInternalError.RemoveListener(OnProtocolLoginInternalError);
+                m_ProtocolLogin.onLoginError.RemoveListener(OnProtocolLoginError);
+                m_ProtocolLogin.onLoginTokenError.RemoveListener(OnProtocolLoginTokenError);
+                m_ProtocolLogin.onMessageOfTheDay.RemoveListener(OnProtocolLoginMOTD);
+                m_ProtocolLogin.onSessionKey.RemoveListener(OnProtocolLoginSessionKey);
+                m_ProtocolLogin.onCharacterList.RemoveListener(OnProtocolLoginCharacterList);
+                m_ProtocolLogin.onUpdateRequired.RemoveListener(OnProtocolUpdateRequired);
+            }
+        }
+
+        #region ProtocolLoginListeners
+        private void OnProtocolLoginInternalError(string message) {
+            PopupMessage("Sorry", message, PopupMenuType.OK, TMPro.TextAlignmentOptions.MidlineLeft);
+        }
+
+        private void OnProtocolLoginError(string message) {
+            PopupMessage("Sorry", message);
         }
         
-        private void SubmitLogin() {
-            m_AccountName = InputAccountName;
-            m_Password = InputPassword;
+        private void OnProtocolLoginTokenError(int tries) {
+            PopupMessage("Authentication Error", TextResources.ERRORMSG_AUTHENTICATION_ERROR);
+        }
 
-            InputAccountName = string.Empty;
-            InputPassword = string.Empty;
+        private void OnProtocolLoginMOTD(int number, string message) {
+            PopupMessage("Message of the day", message);
+            m_PopupIsMOTD = true;
+        }
 
-            string ip_port = IPAddress;
+        private void OnProtocolLoginSessionKey(string sessionKey) {
+            m_SessionKey = sessionKey;
+        }
 
-            string ip;
-            int port;
-            if (ip_port.Length == 0) {
-                ip = Constants.LocalHostIP;
-                port = Constants.LocalHostLoginPort;
-            } else {
-                var split = ip_port.Split(':');
-                ip = split[0];
-                if (split.Length != 2 || !int.TryParse(split[1], out port))
-                    port = Constants.LocalHostLoginPort;
+        private void OnProtocolLoginCharacterList(CharacterList characterList) {
+            ModulesManager.Instance.CharactersWindow.Setup(m_SessionKey, m_ProtocolAccountIdentifier, m_ProtocolPassword, m_ProtocolToken, characterList);
+
+            if (m_PopupWindow.Visible) {
+                if (m_PopupIsMOTD)
+                    return;
+                else
+                    m_PopupWindow.CloseWindow();
             }
 
-            var version = OpenTibiaUnity.GetSupportedVersions()[m_VersionsDropdown.value];
-            OpenTibiaUnity.GameManager.LoadThingsAsync(version);
-
-            m_ProtocolLogin = new ProtocolLogin();
-            m_ProtocolLogin.AccountName = m_AccountName;
-            m_ProtocolLogin.Password = m_Password;
-
-            m_ProtocolLogin.onCustomLoginError.AddListener(TriggerCustomLoginError);
-            m_ProtocolLogin.onLoginError.AddListener(TriggerLoginError);
-            m_ProtocolLogin.onLoginTokenError.AddListener(TriggerLoginTokenError);
-            m_ProtocolLogin.onMotd.AddListener(TriggerLoginMotd);
-            m_ProtocolLogin.onUpdateRequired.AddListener(TriggerUpdateRequired);
-            m_ProtocolLogin.onSessionKey.AddListener(TriggerLoginSessionKey);
-            m_ProtocolLogin.onCharacterList.AddListener(TriggerLoginCharacterList);
-
-            Task.Run(() => m_ProtocolLogin.Connect(ip, port));
-
-            PopupInfo("Loading...", "Please wait while we fetch your characters list.", PopupMenuType.Cancel);
-            m_LoggerWindowDisposable = true;
+            ShowCharactersWindow();
         }
 
-        private int GetClientProtocolVersion(int version) {
-            switch (version) {
-                case 980: return 971;
-                case 981: return 973;
-                case 982: return 974;
-                case 983: return 975;
-                case 984: return 976;
-                case 985: return 977;
-                case 986: return 978;
-                case 1001: return 979;
-                case 1002: return 980;
-                default: return version;
-            }
+        private void OnProtocolUpdateRequired() {
+            throw new NotImplementedException();
+        }
+        #endregion
+
+        #region LoginWebClientListeners
+        private void OnLoginWebClientTechnicalError(string message) {
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupMessage("Sorry", message));
         }
 
-        private void TriggerCustomLoginError(string message) {
-            m_LoginError = message;
-            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupInfo("Login Error", m_LoginError, PopupMenuType.OK, TMPro.TextAlignmentOptions.MidlineLeft));
+        private void OnLoginWebClientLoginError(string message) {
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupMessage("Sorry", message));
         }
-        private void TriggerLoginError(string message) {
-            m_LoginError = message;
-            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupInfo("Login Error", m_LoginError));
-        }
-        private void TriggerLoginTokenError(int unknown) {
-            m_LoginError = "You have entered incorrect authenticator token.";
-
-            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupInfo("Authentication Error", m_LoginError));
-        }
-        private void TriggerLoginMotd(int num, string motd) {
-            m_MotdNum = num;
-            m_Motd = motd;
-            UnityAction showMotdWindow = () => PopupInfo("Message of the Day", m_Motd);
-
-            if (!CanTraceWindow())
-                OpenTibiaUnity.GameManager.InvokeOnMainThread(() => m_LoggerActionsQueue.Enqueue(showMotdWindow));
-            else
-                OpenTibiaUnity.GameManager.InvokeOnMainThread(showMotdWindow);
-        }
-        private void TriggerUpdateRequired() {
-            m_LoginError = "Your client is outdated, consider updating it!";
-
-            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupInfo("Client Error", m_LoginError));
-        }
-        private void TriggerLoginSessionKey(string sessionKey) => m_SessionKey = sessionKey;
-        private void TriggerLoginCharacterList(CharacterList characterList) {
-            UnityAction showCharactersWindow = () => {
-                gameObject.SetActive(false);
-                
-                m_CharactersWindow.Setup(m_SessionKey, m_AccountName, m_Password, string.Empty, characterList);
-                m_CharactersWindow.Show();
-            };
-
-            if (!CanTraceWindow())
-                OpenTibiaUnity.GameManager.InvokeOnMainThread(() => m_LoggerActionsQueue.Enqueue(showCharactersWindow));
-            else
-                OpenTibiaUnity.GameManager.InvokeOnMainThread(showCharactersWindow);
+        
+        private void OnLoginWebClientTokenError(string message) {
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => ModulesManager.Instance.AuthenticatorWindow.OpenWindow());
         }
 
-        private void OnLoginButtonClicked() {
-            if (!InputHandler.IsGameObjectHighlighted(gameObject))
-                return;
-
-            if (OpenTibiaUnity.GameManager.ClientVersion >= 1100 && InputAccountName.Length == 0)
-                return;
-
-            SubmitLogin();
+        private void OnLoginWebClientSuccess(Session session, Playdata playdata) {
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
+                ModulesManager.Instance.CharactersWindow.Setup(session, playdata);
+                m_PopupWindow.CloseWindow();
+                ShowCharactersWindow();
+            });
         }
-        private void OnClientVersionDropdownValueChanged(int value) {
-            var version = OpenTibiaUnity.GetSupportedVersions()[value];
 
-            var gameManager = OpenTibiaUnity.GameManager;
-            gameManager.SetProtocolVersion(GetClientProtocolVersion(version));
-            gameManager.SetClientVersion(version);
-            
-            var validation = m_AccountNameInputField.characterValidation;
-            if (gameManager.GetFeature(GameFeatures.GameAccountNames)) {
-                m_AccountNameInputField.characterValidation = TMPro.TMP_InputField.CharacterValidation.None;
-            } else {
-                m_AccountNameInputField.characterValidation = TMPro.TMP_InputField.CharacterValidation.Integer;
-            }
+        #endregion
 
-            if (validation != m_AccountNameInputField.characterValidation)
-                m_AccountNameInputField.text = string.Empty;
+        private void ShowCharactersWindow() {
+            var charactersWindow = ModulesManager.Instance.CharactersWindow;
+            charactersWindow.onClosed.AddListener(OnCharacersWindowClosed);
+
+            HideWindow();
+            charactersWindow.OpenWindow();
+        }
+
+        private void OnCharacersWindowClosed() {
+            var charactersWindow = ModulesManager.Instance.CharactersWindow;
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => charactersWindow.onClosed.RemoveListener(OnCharacersWindowClosed));
+
+            gameObject.SetActive(true);
+            ResetLocalPosition();
         }
     }
 }
- 

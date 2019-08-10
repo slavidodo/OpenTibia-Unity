@@ -3,57 +3,57 @@ using UnityEngine.Events;
 
 namespace OpenTibiaUnity.Core.Chat
 {
-    public class Channel
+    internal class Channel
     {
-        public class ChannelMessageAddEvent : UnityEvent<Channel, ChannelMessage> { }
+        internal class ChannelMessageAddEvent : UnityEvent<Channel, ChannelMessage> { }
 
         protected const int MessagesSize = 50000;
-        public const int MaxNameLength = 30;
+        internal const int MaxNameLength = 30;
 
         protected Utility.UnionStrInt m_ID = null;
         protected string m_Name = null;
         
         protected bool m_SendAllowed = true;
         protected bool m_Closable = true;
-        protected MessageModes m_SendMode = 0;
+        protected MessageModeType m_SendMode = 0;
 
         protected List<object> m_NicklistItems = null;
         protected List<ChannelMessage> m_Messages = null;
 
-        public ChannelMessageAddEvent onAddChannelMessage = new ChannelMessageAddEvent();
+        internal ChannelMessageAddEvent onAddChannelMessage = new ChannelMessageAddEvent();
 
 
-        public string Name {
+        internal string Name {
             get { return m_Name; }
             set { m_Name = value; }
         }
 
-        public bool SendAllowed {
+        internal bool SendAllowed {
             get { return m_SendAllowed; }
             set { m_SendAllowed = value; }
         }
 
-        public bool Closable {
+        internal bool Closable {
             get { return m_Closable; }
             set { m_Closable = value; }
         }
 
-        public Utility.UnionStrInt ID {
+        internal Utility.UnionStrInt ID {
             get { return m_ID; }
             set { m_ID = value; }
         }
 
-        public MessageModes SendMode {
+        internal MessageModeType SendMode {
             get { return m_SendMode; }
         }
 
-        public bool CanModerate { get; set; } = false;
+        internal bool CanModerate { get; set; } = false;
 
-        public bool IsPrivate {
+        internal bool IsPrivate {
             get { return ChatStorage.s_IsPrivateChannel(ID); }
         }
 
-        public Channel(Utility.UnionStrInt ID, string name, MessageModes sendMode) {
+        internal Channel(Utility.UnionStrInt ID, string name, MessageModeType sendMode) {
             m_ID = ID;
             m_Name = name;
             m_SendMode = sendMode;
@@ -63,32 +63,32 @@ namespace OpenTibiaUnity.Core.Chat
             m_Messages = new List<ChannelMessage>(MessagesSize);
         }
 
-        public void ClearMessages() {
+        internal void ClearMessages() {
             m_Messages.Clear();
         }
 
-        public void AppendMessage(ChannelMessage message) {
+        internal void AppendMessage(ChannelMessage message) {
             m_Messages.Add(message);
             onAddChannelMessage.Invoke(this, message);
         }
 
-        public void PlayerJoined(string name) {
+        internal void PlayerJoined(string name) {
             // TODO
         }
 
-        public void PlayerLeft(string name) {
+        internal void PlayerLeft(string name) {
             // TODO
         }
 
-        public void PlayerInvited(string name) {
+        internal void PlayerInvited(string name) {
             // TODO
         }
 
-        public void PlayerExcluded(string name) {
+        internal void PlayerExcluded(string name) {
             // TODO
         }
 
-        public void PlayerPending(string name) {
+        internal void PlayerPending(string name) {
             // TODO
         }
     }

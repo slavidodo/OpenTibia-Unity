@@ -6,28 +6,26 @@ using UnityEngine.EventSystems;
 namespace OpenTibiaUnity.Core.Utility
 {
     [ExecuteInEditMode]
-    public class CursorController : MonoBehaviour
+    internal class CursorController : MonoBehaviour
     {
-#pragma warning disable CS0649 // never assigned to
         [Tooltip("Animation frame between each sprite in seconds")]
         [SerializeField] private float m_DefaultAnimationTick = 0.15f;
 
-        [SerializeField] private Texture2D[] m_DefaultTextures;
-        [SerializeField] private Texture2D[] m_DefaultDisabledTextures;
-        [SerializeField] private Texture2D[] m_NResizeTextures;
-        [SerializeField] private Texture2D[] m_EResizeTextures;
-        [SerializeField] private Texture2D[] m_HandTextures;
-        [SerializeField] private Texture2D[] m_CrosshairTextures;
-        [SerializeField] private Texture2D[] m_CrosshairDisabledTextures;
-        [SerializeField] private Texture2D[] m_ScanTextures;
-        [SerializeField] private Texture2D[] m_AttackTextures;
-        [SerializeField] private Texture2D[] m_WalkTextures;
-        [SerializeField] private Texture2D[] m_UseTextures;
-        [SerializeField] private Texture2D[] m_TalkTextures;
-        [SerializeField] private Texture2D[] m_LookTextures;
-        [SerializeField] private Texture2D[] m_OpenTextures;
-        [SerializeField] private Texture2D[] m_LootTextures;
-#pragma warning restore CS0649 // never assigned to
+        [SerializeField] private Texture2D[] m_DefaultTextures = null;
+        [SerializeField] private Texture2D[] m_DefaultDisabledTextures = null;
+        [SerializeField] private Texture2D[] m_NResizeTextures = null;
+        [SerializeField] private Texture2D[] m_EResizeTextures = null;
+        [SerializeField] private Texture2D[] m_HandTextures = null;
+        [SerializeField] private Texture2D[] m_CrosshairTextures = null;
+        [SerializeField] private Texture2D[] m_CrosshairDisabledTextures = null;
+        [SerializeField] private Texture2D[] m_ScanTextures = null;
+        [SerializeField] private Texture2D[] m_AttackTextures = null;
+        [SerializeField] private Texture2D[] m_WalkTextures = null;
+        [SerializeField] private Texture2D[] m_UseTextures = null;
+        [SerializeField] private Texture2D[] m_TalkTextures = null;
+        [SerializeField] private Texture2D[] m_LookTextures = null;
+        [SerializeField] private Texture2D[] m_OpenTextures = null;
+        [SerializeField] private Texture2D[] m_LootTextures = null;
 
         private bool m_CustomCursor = false;
         private bool m_SequenceAnimation = false;
@@ -38,8 +36,8 @@ namespace OpenTibiaUnity.Core.Utility
         private CursorPriority m_CursorPriority = CursorPriority.Low;
         private Texture2D[] m_CurrentTextures = null;
 
-        public void Start() {
-            SetCursorState(CursorState.Default, CursorPriority.Low);
+        internal void Start() {
+            SetCursorState(CursorState.Default, CursorPriority.High);
         }
 
         private void Update() {
@@ -53,12 +51,48 @@ namespace OpenTibiaUnity.Core.Utility
             }
         }
 
-        public void SetCursorState(CursorState cursorState, CursorPriority priority) {
+        private static CursorState GetCursorForAction(AppearanceActions action) {
+            switch (action) {
+                case AppearanceActions.Attack:
+                    return CursorState.Attack;
+
+                case AppearanceActions.AutoWalk:
+                case AppearanceActions.AutoWalkHighlight:
+                    return CursorState.Walk;
+
+                case AppearanceActions.Look:
+                    return CursorState.Look;
+
+                case AppearanceActions.Use:
+                    return CursorState.Use;
+
+                case AppearanceActions.Open:
+                    return CursorState.Open;
+
+                case AppearanceActions.Talk:
+                    return CursorState.Talk;
+
+                case AppearanceActions.Loot:
+                    return CursorState.Loot;
+
+                default:
+                    return CursorState.Default;
+            }
+        }
+
+        internal void SetCursorState(AppearanceActions action, CursorPriority priority) {
+            SetCursorState(GetCursorForAction(action), priority);
+        }
+
+        internal void SetCursorState(CursorState cursorState, CursorPriority priority) {
             if (m_CursorState != cursorState) {
+                // priority must match the priority of the original cursor
+                if (priority < m_CursorPriority)
+                    return;
+
+                // usually default cursor can be overriten by any action
                 if (cursorState == CursorState.Default)
                     priority = CursorPriority.Low;
-                else if (priority < m_CursorPriority)
-                    return;
 
                 m_CursorState = cursorState;
                 m_CursorPriority = priority;

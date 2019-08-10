@@ -1,29 +1,34 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Appearances.Provider
 {
-    public class GeneralSpriteProvider
+    internal class GeneralSpriteProvider
     {
         private SpritesInformation m_SpritesInformation;
         private AssetBundle m_AssetBundle;
         private Utility.RingBuffer<Rendering.CachedSpriteInformation> m_CachedSpriteInformations;
 
-        public GeneralSpriteProvider(AssetBundle assetBundle, string catalogContent) {
+        internal GeneralSpriteProvider(AssetBundle assetBundle, string catalogContent) {
             m_AssetBundle = assetBundle;
             m_SpritesInformation = new SpritesInformation(catalogContent);
             
-            // cache up to 20160 at a single time
             m_CachedSpriteInformations = new Utility.RingBuffer<Rendering.CachedSpriteInformation>(Constants.MapSizeX * Constants.MapSizeY * Constants.MapSizeZ * Constants.MapSizeW);
         }
 
-        public Rendering.CachedSpriteInformation GetCachedSpriteInformation(uint spriteID) {
+        internal Rendering.CachedSpriteInformation GetCachedSpriteInformation(uint spriteID) {
             // have we loaded this one recently?
             var cachedSpriteInformation = FindCachedSpriteInformation(spriteID);
-            if (cachedSpriteInformation != null)
+            if (!!cachedSpriteInformation)
                 return cachedSpriteInformation;
 
             var asset = m_SpritesInformation.FindSpritesAsset(spriteID);
+            if (!asset)
+                return null;
 
+            cachedSpriteInformation = asset.GetCachedSpriteInformation(spriteID, m_AssetBundle);
+            if (!cachedSpriteInformation)
+                return null;
 
             // cache it, and continue
             InsertCachedSpriteInformation(cachedSpriteInformation);
@@ -62,6 +67,18 @@ namespace OpenTibiaUnity.Core.Appearances.Provider
             }
 
             m_CachedSpriteInformations.AddItemAt(cachedSpriteInformation, index);
+        }
+        
+        public static bool operator !(GeneralSpriteProvider instance) {
+            return instance == null;
+        }
+
+        public static bool operator true(GeneralSpriteProvider instance) {
+            return !!instance;
+        }
+
+        public static bool operator false(GeneralSpriteProvider instance) {
+            return !instance;
         }
     }
 }

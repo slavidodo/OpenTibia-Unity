@@ -2,7 +2,7 @@
 
 namespace OpenTibiaUnity.Core.Appearances
 {
-    public class ObjectInstance : AppearanceInstance
+    internal class ObjectInstance : AppearanceInstance
     {
         protected int m_Hang = 0;
         protected int m_SpecialPatternX = 0;
@@ -11,40 +11,40 @@ namespace OpenTibiaUnity.Core.Appearances
         protected uint m_Data;
         protected bool m_HasSpecialPattern = false;
 
-        public uint Data {
+        internal uint Data {
             get { return m_Data; }
             set { if (m_Data != value) { m_Data = value; UpdateSpecialPattern(); } }
         }
 
-        public int Hang {
+        internal int Hang {
             get { return m_Hang; }
             set { if (m_Hang != value) { m_Hang = value; UpdateSpecialPattern(); } }
         }
 
-        public Marks Marks {
+        internal Marks Marks {
             get { return m_Marks; }
         }
 
-        public bool HasMark {
-            get { return !!Marks && Marks.IsMarkSet(MarkTypes.Permenant); }
+        internal bool HasMark {
+            get { return !!Marks && Marks.IsMarkSet(MarkType.Permenant); }
         }
 
-        public bool IsCreature {
+        internal bool IsCreature {
             get { return !!Type ? Type.IsCreature : false; }
         }
 
-        public ObjectInstance(uint id, AppearanceType type, uint data) : base(id, type) {
+        internal ObjectInstance(uint id, AppearanceType type, uint data) : base(id, type) {
             m_Data = data;
             UpdateSpecialPattern();
         }
 
-        public override int GetSpriteIndex(int layer, int patternX, int patternY, int patternZ) {
+        internal override int GetSpriteIndex(int layer, int patternX, int patternY, int patternZ) {
             patternX = m_SpecialPatternX > 0 ? m_SpecialPatternX : patternX;
             patternY = m_SpecialPatternY > 0 ? m_SpecialPatternY : patternY;
             return base.GetSpriteIndex(layer, patternX, patternY, patternZ);
         }
 
-        public override void DrawTo(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+        internal override void DrawTo(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
             if (m_HasSpecialPattern) {
                 patternX = -1;
                 patternY = -1;
@@ -86,80 +86,84 @@ namespace OpenTibiaUnity.Core.Appearances
                     m_SpecialPatternY = 1;
                 }
 
-                m_SpecialPatternX = m_SpecialPatternX % (int)m_Type.FrameGroups[(int)Proto.Appearances.FrameGroupType.Idle].PatternWidth;
-                m_SpecialPatternY = m_SpecialPatternY % (int)m_Type.FrameGroups[(int)Proto.Appearances.FrameGroupType.Idle].PatternHeight;
+                m_SpecialPatternX = m_SpecialPatternX % (int)m_Type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternWidth;
+                m_SpecialPatternY = m_SpecialPatternY % (int)m_Type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternHeight;
             } else if (m_Type.IsSplash || m_Type.IsFluidContainer) {
                 m_HasSpecialPattern = true;
-                int color = 0;
-                switch (m_Data) {
-                    case 0:
-                        color = 0;
-                        break;
-                    case 1:
-                        color = 1;
-                        break;
-                    case 2:
-                        color = 7;
-                        break;
-                    case 3:
-                        color = 3;
-                        break;
-                    case 4:
-                        color = 3;
-                        break;
-                    case 5:
-                        color = 2;
-                        break;
-                    case 6:
-                        color = 4;
-                        break;
-                    case 7:
-                        color = 3;
-                        break;
-                    case 8:
-                        color = 5;
-                        break;
-                    case 9:
-                        color = 6;
-                        break;
-                    case 10:
-                        color = 7;
-                        break;
-                    case 11:
-                        color = 2;
-                        break;
-                    case 12:
-                        color = 5;
-                        break;
-                    case 13:
-                        color = 3;
-                        break;
-                    case 14:
-                        color = 5;
-                        break;
-                    case 15:
-                        color = 6;
-                        break;
-                    case 16:
-                        color = 3;
-                        break;
-                    case 17:
-                        color = 3;
-                        break;
-                    default:
-                        color = 1;
-                        break;
+                FluidsColor color = FluidsColor.Transparent;
+                if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameNewFluids)) {
+                    switch ((FluidsType)m_Data) {
+                        case FluidsType.None:
+                            color = FluidsColor.Transparent;
+                            break;
+                        case FluidsType.Water:
+                            color = FluidsColor.Blue;
+                            break;
+                        case FluidsType.Mana:
+                            color = FluidsColor.Purple;
+                            break;
+                        case FluidsType.Beer:
+                            color = FluidsColor.Brown;
+                            break;
+                        case FluidsType.Oil:
+                            color = FluidsColor.Brown;
+                            break;
+                        case FluidsType.Blood:
+                            color = FluidsColor.Red;
+                            break;
+                        case FluidsType.Slime:
+                            color = FluidsColor.Green;
+                            break;
+                        case FluidsType.Mud:
+                            color = FluidsColor.Brown;
+                            break;
+                        case FluidsType.Lemonade:
+                            color = FluidsColor.Yellow;
+                            break;
+                        case FluidsType.Milk:
+                            color = FluidsColor.White;
+                            break;
+                        case FluidsType.Wine:
+                            color = FluidsColor.Purple;
+                            break;
+                        case FluidsType.Health:
+                            color = FluidsColor.Red;
+                            break;
+                        case FluidsType.Urine:
+                            color = FluidsColor.Yellow;
+                            break;
+                        case FluidsType.Rum:
+                            color = FluidsColor.Brown;
+                            break;
+                        case FluidsType.FruidJuice:
+                            color = FluidsColor.Yellow;
+                            break;
+                        case FluidsType.CoconutMilk:
+                            color = FluidsColor.White;
+                            break;
+                        case FluidsType.Tea:
+                            color = FluidsColor.Brown;
+                            break;
+                        case FluidsType.Mead:
+                            color = FluidsColor.Brown;
+                            break;
+                        default:
+                            color = FluidsColor.Blue;
+                            break;
+                    }
+                } else {
+                    color = (FluidsColor)m_Data;
                 }
-
-                m_SpecialPatternX = (color & 3) % (int)m_Type.FrameGroups[(int)Proto.Appearances.FrameGroupType.Idle].PatternWidth;
-                m_SpecialPatternY = (color >> 2) % (int)m_Type.FrameGroups[(int)Proto.Appearances.FrameGroupType.Idle].PatternHeight;
+                
+                m_SpecialPatternX = ((int)color & 3) % (int)m_Type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternWidth;
+                m_SpecialPatternY = ((int)color >> 2) % (int)m_Type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternHeight;
             } else if (m_Type.IsHangable) {
                 m_HasSpecialPattern = true;
                 if (m_Hang == AppearanceInstance.HookSouth) {
-                    m_SpecialPatternX = m_Type.FrameGroups[(int)Proto.Appearances.FrameGroupType.Idle].PatternWidth >= 2 ? 1 : 0;
+                    m_SpecialPatternX = m_Type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternWidth >= 2 ? 1 : 0;
                     m_SpecialPatternY = 0;
                 } else if (m_Hang == AppearanceInstance.HookEast) {
-                    m_SpecialPatternX = m_Type.FrameGroups[(int)Proto.Appearances.FrameGroupType.Idle].PatternWidth >= 3 ? 2 : 0;
+                    m_SpecialPatternX = m_Type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternWidth >= 3 ? 2 : 0;
                     m_SpecialPatternY = 0;
                 } else {
                     m_SpecialPatternX = 0;

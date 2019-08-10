@@ -56,7 +56,7 @@ namespace OpenTibiaUnity.Core.Chat
         protected void ShowNextOnscreenMessage() {
             if (m_NextOnscreenMessageIndex < m_TextPieces.Count) {
                 if (IsNpcInReach()) {
-                    m_LastOnscreenBox = OpenTibiaUnity.WorldMapStorage.AddOnscreenMessage(m_Position, 0, m_Speaker, 0, MessageModes.NpcFrom,
+                    m_LastOnscreenBox = OpenTibiaUnity.WorldMapStorage.AddOnscreenMessage(m_Position, 0, m_Speaker, 0, MessageModeType.NpcFrom,
                         m_TextPieces[m_NextOnscreenMessageIndex]);
 
                     m_MinTimeForNextOnscreenMessage = OpenTibiaUnity.TicksMillis + (int)MessageStorage.s_GetTalkDelay(m_TextPieces[m_NextOnscreenMessageIndex]);
@@ -72,7 +72,7 @@ namespace OpenTibiaUnity.Core.Chat
                 throw new System.ArgumentNullException("MessageBlock.AddText: text is null.");
 
             m_TextPieces.Add(text);
-            MessageModes mode = m_NextOnscreenMessageIndex == 0 ? MessageModes.NpcFromStartBlock : MessageModes.NpcFrom;
+            MessageModeType mode = m_NextOnscreenMessageIndex == 0 ? MessageModeType.NpcFromStartBlock : MessageModeType.NpcFrom;
 
             OpenTibiaUnity.ChatStorage.AddChannelMessage(ChatStorage.NpcChannelID, 0, m_Speaker, 0, mode, text);
             if (m_NextOnscreenMessageIndex == 0 || m_NextOnscreenMessageIndex > 0 && OpenTibiaUnity.TicksMillis > m_MinTimeForNextOnscreenMessage) {

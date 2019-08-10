@@ -14,7 +14,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
 
         protected void UpdateLayout() {
             var parent = transform.parent;
-            var gameWindowLayout = parent.GetComponent<GameWindowLayout>();
+            var gameWindowLayout = parent.GetComponent<GameInterface>();
             if (!!gameWindowLayout)
                 gameWindowLayout.UpdateLayout();
         }

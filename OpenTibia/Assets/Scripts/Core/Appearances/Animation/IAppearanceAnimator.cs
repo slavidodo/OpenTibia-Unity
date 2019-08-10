@@ -1,6 +1,6 @@
 ﻿namespace OpenTibiaUnity.Core.Appearances.Animation
 {
-    public interface IAppearanceAnimator
+    internal interface IAppearanceAnimator
     {
         bool Finished { get; set; }
         int Phase { get; set; }
@@ -15,13 +15,13 @@
         IAppearanceAnimator Clone();
     }
 
-    public interface IAppearanceFrameStategy
+    internal interface IAppearanceFrameStategy
     {
         int NextFrame(int phase, int phaseCount);
         void Reset();
     }
 
-    public class PingPongFrameStrategy : IAppearanceFrameStategy
+    internal class PingPongFrameStrategy : IAppearanceFrameStategy
     {
         private const int PhaseForward = 0;
         private const int PhaseBackword = 1;
@@ -45,12 +45,12 @@
         }
     }
 
-    public class LoopFrameStrategy : IAppearanceFrameStategy
+    internal class LoopFrameStrategy : IAppearanceFrameStategy
     {
         private readonly uint m_LoopCount;
         private uint m_CurrentLoop = 0;
 
-        public LoopFrameStrategy(uint loopCount) {
+        internal LoopFrameStrategy(uint loopCount) {
             m_LoopCount = loopCount;
         }
 

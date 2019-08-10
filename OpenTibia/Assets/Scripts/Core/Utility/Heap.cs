@@ -38,8 +38,8 @@ namespace OpenTibiaUnity.Core.Utility
 
         public void MinHeapify(int len, bool param2 = true) {
             int index = len;
-            while (param2 && index > 0) {
-                int nextIndex = index + 1 << 1 - 1;
+            while (param2 && index > 0 && index < m_Heap.Count - 2) {
+                int nextIndex = index + 1;
                 if (m_Heap[index].HeapKey < m_Heap[nextIndex].HeapKey) {
                     var nextHeap = m_Heap[nextIndex];
                     m_Heap[nextIndex] = m_Heap[index];
@@ -53,7 +53,7 @@ namespace OpenTibiaUnity.Core.Utility
             }
 
             while (true) {
-                int loc5 = index + 1 << 1 - 1;
+                int loc5 = index + 1;
                 int loc6 = loc5 + 1;
                 int loc7 = index;
                 if (loc5 < Length && m_Heap[loc5].HeapKey < m_Heap[loc7].HeapKey)

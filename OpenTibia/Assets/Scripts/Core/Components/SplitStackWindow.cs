@@ -1,38 +1,36 @@
-﻿using OpenTibiaUnity.Core.InputManagment;
+﻿using OpenTibiaUnity.Core.Input;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Core.Components
 {
-    public class SplitStackWindow : Base.Window
+    internal class SplitStackWindow : Base.Window
     {
-        public class SplitStackWindowButtonEvent : UnityEvent<SplitStackWindow> { }
-
-        private static RenderTexture s_RenderTexture;
-
-#pragma warning disable CS0649 // never assigned to
-        [SerializeField] private Button m_OKButton;
-        [SerializeField] private Button m_CancelButton;
-        [SerializeField] private SliderWrapper m_SliderWrapper;
-        [SerializeField] private RawImage m_ItemImage;
-#pragma warning restore CS0649 // never assigned to
+        internal class SplitStackWindowButtonEvent : UnityEvent<SplitStackWindow> { }
+        
+        [SerializeField] private Button m_OKButton = null;
+        [SerializeField] private Button m_CancelButton = null;
+        [SerializeField] private SliderWrapper m_SliderWrapper = null;
+        [SerializeField] private RawImage m_ItemImage = null;
 
         private Appearances.AppearanceType m_ObjectType = null;
         private Appearances.ObjectInstance m_ObjectInstance = null;
         private int m_ObjectAmount = 0;
         private int m_SelectedAmount = 0;
+        
+        private RenderTexture m_RenderTexture = null;
 
-        public SplitStackWindowButtonEvent onOk;
+        internal SplitStackWindowButtonEvent onOk;
 
-        public Appearances.AppearanceType ObjectType {
+        internal Appearances.AppearanceType ObjectType {
             get => m_ObjectType;
             set {
                 m_ObjectType = value;
             }
         }
 
-        public int ObjectAmount {
+        internal int ObjectAmount {
             get => m_ObjectAmount;
             set {
                 if (m_ObjectAmount != value) {
@@ -42,7 +40,7 @@ namespace OpenTibiaUnity.Core.Components
             }
         }
 
-        public int SelectedAmount {
+        internal int SelectedAmount {
             get => m_SelectedAmount;
             set {
                 if (m_SelectedAmount != value) {
@@ -98,38 +96,32 @@ namespace OpenTibiaUnity.Core.Components
             m_SelectedAmount = (int)newValue;
         }
 
-        public void Show() {
+        internal override void ShowWindow() {
+            base.ShowWindow();
+
             SelectedAmount = 1;
-
-            gameObject.SetActive(true);
-            LockToOverlay();
-            ResetLocalPosition();
         }
-
-        public void HideWindow() {
-            UnlockFromOverlay();
-            gameObject.SetActive(false);
-        }
-
+        
         protected void OnGUI() {
             if (Event.current.type != EventType.Repaint)
                 return;
 
-            if (s_RenderTexture == null) {
-                s_RenderTexture = new RenderTexture(Constants.FieldSize, Constants.FieldSize, 0, RenderTextureFormat.ARGB32);
-                s_RenderTexture.filterMode = FilterMode.Point;
+            if (m_RenderTexture == null) {
+                m_RenderTexture = new RenderTexture(Constants.FieldSize, Constants.FieldSize, 0, RenderTextureFormat.ARGB32);
+                m_RenderTexture.filterMode = FilterMode.Point;
+                m_ItemImage.texture = m_RenderTexture;
             } else {
-                s_RenderTexture.Release();
+                m_RenderTexture.Release();
             }
 
-            RenderTexture.active = s_RenderTexture;
+            RenderTexture.active = m_RenderTexture;
             GL.Clear(false, true, new Color(0, 0, 0, 0));
 
-            if (m_ObjectType != null) {
+            if (!!m_ObjectType) {
                 if (m_ObjectInstance == null || m_ObjectInstance.ID != m_ObjectType.ID)
                     m_ObjectInstance = OpenTibiaUnity.AppearanceStorage.CreateObjectInstance(m_ObjectType.ID, m_ObjectAmount);
 
-                Vector2 zoom = new Vector2(Screen.width / (float)s_RenderTexture.width, Screen.height / (float)s_RenderTexture.height);
+                var zoom = new Vector2(Screen.width / (float)m_RenderTexture.width, Screen.height / (float)m_RenderTexture.height);
                 m_ObjectInstance.DrawTo(new Vector2(0, 0), zoom, 0, 0, 0);
             }
 

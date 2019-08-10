@@ -3,25 +3,25 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Appearances
 {
-    public abstract class AppearanceInstance {
-        public const int UnknownCreature = 97;
-        public const int OutdatedCreature = 98;
-        public const int Creature = 99;
+    internal abstract class AppearanceInstance {
+        internal const int UnknownCreature = 97;
+        internal const int OutdatedCreature = 98;
+        internal const int Creature = 99;
 
-        public const int HookEast = 19;
-        public const int HookSouth = 20;
+        internal const int HookEast = 19;
+        internal const int HookSouth = 20;
 
-        public static Vector2 s_TempPoint = Vector2.zero;
-        public static Rect s_TempRect = Rect.zero;
-        public static Vector2 s_FieldVector = new Vector2(Constants.FieldSize, Constants.FieldSize);
+        internal static Vector2 s_TempPoint = Vector2.zero;
+        internal static Rect s_TempRect = Rect.zero;
+        internal static Vector2 s_FieldVector = new Vector2(Constants.FieldSize, Constants.FieldSize);
 
-        public int MapData = -1; // stack position
-        public int MapField = -1; // field index in cached map
+        internal int MapData = -1; // stack position
+        internal int MapField = -1; // field index in cached map
 
         protected bool m_CacheDirty = false;
         protected uint m_ID;
         protected int m_LastPhase = -1;
-        protected int m_LastpublicPhase = -1;
+        protected int m_LastinternalPhase = -1;
         protected int m_LastCachedSpriteIndex = -1;
         protected int m_LastInternalPhase = -1;
         protected int m_ActiveFrameGroupIndex = 0;
@@ -31,11 +31,10 @@ namespace OpenTibiaUnity.Core.Appearances
 
 
         protected AppearanceType m_Type;
-        protected List<uint> m_TempAlternativePhases;
         protected Animation.IAppearanceAnimator[] m_Animators;
         protected List<CachedSpriteInformation[]> m_CachedSpriteInformations;
 
-        protected Proto.Appearances.FrameGroup m_ActiveFrameGroup {
+        protected Protobuf.Appearances.FrameGroup m_ActiveFrameGroup {
             get {
                 if (m_ActiveFrameGroupIndex < 0)
                     return null;
@@ -50,18 +49,18 @@ namespace OpenTibiaUnity.Core.Appearances
         }
 
         private int m_ActiveFrameGroupIndexInternal = -1;
-        private Proto.Appearances.FrameGroup m_ActiveFrameGroupInternal = null;
+        private Protobuf.Appearances.FrameGroup m_ActiveFrameGroupInternal = null;
 
         protected CachedSpriteInformation m_CachedSpriteInformation = null;
 
-        public uint ID {
+        internal uint ID {
             get => m_ID;
         }
-        public AppearanceType Type {
+        internal AppearanceType Type {
             get => m_Type;
         }
 
-        public int Phase {
+        internal virtual int Phase {
             set {
                 var animator = m_Animators?[m_ActiveFrameGroupIndex];
                 if (animator != null)
@@ -74,14 +73,14 @@ namespace OpenTibiaUnity.Core.Appearances
             }
         }
 
-        public AppearanceInstance(uint id, AppearanceType type) {
+        internal AppearanceInstance(uint id, AppearanceType type) {
             m_ID = id;
             m_Type = type;
 
             if (!!m_Type && m_Type.FrameGroups != null) {
                 m_Animators = new Animation.IAppearanceAnimator[m_Type.FrameGroups.Count];
                 for (int i = 0; i < m_Animators.Length; i++) {
-                    var animator = type.FrameGroups[i].Animator?.Clone();
+                    var animator = type.FrameGroups[i].SpriteInfo.Animator?.Clone();
                     if (animator is Animation.LegacyAnimator legacyAnimator)
                         legacyAnimator.Initialise(type);
 
@@ -90,27 +89,21 @@ namespace OpenTibiaUnity.Core.Appearances
             }
         }
 
-        public virtual int GetSpriteIndex(int layer, int patternX, int patternY, int patternZ) {
-            int phase = Phase % (int)m_ActiveFrameGroup.Phases;
+        internal virtual int GetSpriteIndex(int layer, int patternX, int patternY, int patternZ) {
+            int phase = Phase % (int)m_ActiveFrameGroup.SpriteInfo.Phases;
             if (!(phase == m_LastInternalPhase && patternX == m_LastPatternX && patternX >= 0 && patternY == m_LastPatternY && patternY >= 0 && patternZ == m_LastPatternZ && patternZ >= 0)) {
                 m_LastInternalPhase = phase;
                 m_LastPatternX = patternX;
                 m_LastPatternY = patternY;
                 m_LastPatternZ = patternZ;
-                
-                int z = patternZ >= 0 ? patternZ % (int)m_ActiveFrameGroup.PatternDepth : 0;
-                int y = patternY >= 0 ? patternY % (int)m_ActiveFrameGroup.PatternHeight : 0;
-                int x = patternX >= 0 ? patternX % (int)m_ActiveFrameGroup.PatternWidth : 0;
-                
-                m_LastCachedSpriteIndex = (((phase * (int)m_ActiveFrameGroup.PatternDepth + z)
-                                                   * (int)m_ActiveFrameGroup.PatternHeight + y)
-                                                   * (int)m_ActiveFrameGroup.PatternWidth + x) * (int)m_ActiveFrameGroup.Layers;
+
+                m_LastCachedSpriteIndex = m_ActiveFrameGroup.SpriteInfo.CalculateSpriteIndex(phase, patternX, patternY, patternZ);
             }
 
-            return m_LastCachedSpriteIndex + (layer >= 0 ? layer % (int)m_ActiveFrameGroup.Layers : 0);
+            return m_LastCachedSpriteIndex + (layer >= 0 ? layer % (int)m_ActiveFrameGroup.SpriteInfo.Layers : 0);
         }
 
-        public CachedSpriteInformation GetSprite(int layer, int patternX, int patternY, int patternZ, bool animation) {
+        internal CachedSpriteInformation GetSprite(int layer, int patternX, int patternY, int patternZ, bool animation) {
             if (m_Type.FrameGroups == null)
                 return null;
 
@@ -120,31 +113,34 @@ namespace OpenTibiaUnity.Core.Appearances
             if (m_CachedSpriteInformations == null) {
                 m_CachedSpriteInformations = new List<CachedSpriteInformation[]>();
                 foreach (var frameGroup in m_Type.FrameGroups)
-                    m_CachedSpriteInformations.Add(new CachedSpriteInformation[frameGroup.Sprites.Count]);
+                    m_CachedSpriteInformations.Add(new CachedSpriteInformation[frameGroup.SpriteInfo.SpriteIDs.Count]);
                 
-                uint spriteId = m_ActiveFrameGroup.Sprites[spriteIndex];
+                uint spriteId = m_ActiveFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
                 m_CachedSpriteInformations[m_ActiveFrameGroupIndex][spriteIndex] = appearanceStorage.GetSprite(spriteId);
             } else if (m_CachedSpriteInformations[m_ActiveFrameGroupIndex][spriteIndex] == null) {
-                var spriteId = m_ActiveFrameGroup.Sprites[spriteIndex];
+                var spriteId = m_ActiveFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
                 m_CachedSpriteInformations[m_ActiveFrameGroupIndex][spriteIndex] = appearanceStorage.GetSprite(spriteId);
             }
 
             return m_CachedSpriteInformations[m_ActiveFrameGroupIndex][spriteIndex];
         }
         
-        public virtual void DrawTo(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
-            for (int layer = 0; layer < m_ActiveFrameGroup.Layers; layer++) {
-                var cachedInformation = GetSprite(layer, patternX, patternY, patternZ, m_ActiveFrameGroup.IsAnimation);
+        internal virtual void DrawTo(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+            // this requires a bit of explanation
+            // on outfits, layers are not useful, instead it relies on phases
+            // while on the rest of categories, layers are treated as indepedant sprites..
+            // the phase is used to determine the initial sprite index (at the animation property)
+            // then the amount of layers based on that index is drawn
+            // mostly you'd see this in objects like doors, or in effects like assassin outfit
+            for (int layer = 0; layer < m_ActiveFrameGroup.SpriteInfo.Layers; layer++) {
+                var cachedInformation = GetSprite(layer, patternX, patternY, patternZ, m_ActiveFrameGroup.SpriteInfo.IsAnimation);
                 InternalDrawTo(screenPosition.x, screenPosition.y, zoom, highlighted, highlightOpacity, cachedInformation);
             }
         }
         
         protected void InternalDrawTo(float screenX, float screenY, Vector2 zoom, bool highlighted, float highlightOpacity,
             CachedSpriteInformation cachedSpriteInfo, Material material = null) {
-            if (cachedSpriteInfo == null) // TODO; if this is null, then this call should probably never be called
-                return;
-            
-            s_TempPoint.Set(screenX - m_Type.DisplacementX, screenY - m_Type.DisplacementY);
+            s_TempPoint.Set(screenX - m_Type.OffsetX, screenY - m_Type.OffsetY);
             s_TempRect.position = (s_TempPoint - cachedSpriteInfo.spriteSize + s_FieldVector) * zoom;
             s_TempRect.size = cachedSpriteInfo.spriteSize * zoom;
 
@@ -155,17 +151,17 @@ namespace OpenTibiaUnity.Core.Appearances
             Graphics.DrawTexture(s_TempRect, cachedSpriteInfo.texture, cachedSpriteInfo.rect, 0, 0, 0, 0, material);
         }
 
-        public virtual void SwitchFrameGroup(int _, int __) { }
+        internal virtual void SwitchFrameGroup(int _, int __) { }
 
-        public virtual bool Animate(int ticks, int delay = 0) {
-            Animation.IAppearanceAnimator animator = m_Animators?[m_ActiveFrameGroupIndex];
+        internal virtual bool Animate(int ticks, int delay = 0) {
+            var animator = m_Animators?[m_ActiveFrameGroupIndex];
             if (animator != null) {
                 animator.Animate(ticks, delay);
                 return !animator.Finished;
             }
             return false;
         }
-        
+
         public static bool operator !(AppearanceInstance instance) {
             return instance == null;
         }

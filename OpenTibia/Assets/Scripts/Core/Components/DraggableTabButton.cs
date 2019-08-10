@@ -51,12 +51,10 @@ namespace OpenTibiaUnity.Core.Components
 
         protected void UpdateSiblingIndex() {
             int currentIndex = m_ShadowGameObject.transform.GetSiblingIndex();
-            Vector3 localPosition = transform.localPosition;
-
-            var parentRectTransform = draggableComponent.parentRectTransform;
+            var localPosition = transform.localPosition;
+            
             int childCount = parentRectTransform.childCount;
-
-            var foundIndex = -1;
+            int foundIndex = -1;
 
             // check for next elements (starting from the end)
             for (int i = childCount - 1; i > currentIndex; i--) {

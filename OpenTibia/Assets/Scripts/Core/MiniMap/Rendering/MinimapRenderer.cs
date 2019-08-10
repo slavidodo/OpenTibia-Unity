@@ -3,37 +3,37 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.MiniMap.Rendering
 {
-    public sealed class MiniMapRenderer
+    internal sealed class MiniMapRenderer
     {
         private int m_Zoom = 0;
         private float m_ZoomScale = 1f;
 
         private Rect m_PositionRect = Rect.zero;
 
-        public int m_PositionX = 0;
-        public int m_PositionY = 0;
-        public int m_PositionZ = 0;
+        internal int m_PositionX = 0;
+        internal int m_PositionY = 0;
+        internal int m_PositionZ = 0;
 
-        public int PositionX {
+        internal int PositionX {
             get { return m_PositionX; }
             set {
                 m_PositionX = Mathf.Clamp(value, Constants.MapMinX, Constants.MapMaxX);
             }
         }
-        public int PositionY {
+        internal int PositionY {
             get { return m_PositionY; }
             set {
                 m_PositionY = Mathf.Clamp(value, Constants.MapMinY, Constants.MapMaxY);
             }
         }
-        public int PositionZ {
+        internal int PositionZ {
             get { return m_PositionZ; }
             set {
                 m_PositionZ = Mathf.Clamp(value, Constants.MapMinZ, Constants.MapMaxZ);
             }
         }
 
-        public Vector3Int Position {
+        internal Vector3Int Position {
             get { return new Vector3Int(PositionX, PositionY, PositionZ); }
             set {
                 PositionX = value.x;
@@ -45,7 +45,7 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
         private MiniMapStorage MiniMapStorage { get { return OpenTibiaUnity.MiniMapStorage; } }
         private WorldMap.WorldMapStorage WorldMapStorage { get { return OpenTibiaUnity.WorldMapStorage; } }
 
-        public int Zoom {
+        internal int Zoom {
             get { return m_Zoom; }
             set {
                 value = Mathf.Clamp(value, Constants.MiniMapSideBarZoomMin, Constants.MiniMapSideBarZoomMax);
@@ -56,13 +56,13 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
             }
         }
 
-        public MiniMapRenderer() {
+        internal MiniMapRenderer() {
             MiniMapStorage.onPositionChange.AddListener((_, position, __) => {
                 Position = position;
             });
         }
 
-        public RenderError Render(Material material) {
+        internal RenderError Render(Material material) {
             if (MiniMapStorage == null || !OpenTibiaUnity.GameManager.IsGameRunning || !WorldMapStorage.Valid)
                 return RenderError.MiniMapNotValid;
 
@@ -122,7 +122,7 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
             return RenderError.None;
         }
 
-        public void TranslatePosition(int x, int y, int z) {
+        internal void TranslatePosition(int x, int y, int z) {
             var renderer = OpenTibiaUnity.MiniMapRenderer;
             var scale = 3 * Mathf.Pow(2, Constants.MiniMapSideBarZoomMax - renderer.Zoom);
             renderer.PositionX += (int)(x * scale);
@@ -130,7 +130,7 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
             renderer.PositionZ += z;
         }
 
-        public static Rect Intersection(Rect r1, Rect r2) {
+        internal static Rect Intersection(Rect r1, Rect r2) {
             float r1x = r1.x;
             float r1y = r1.y;
             float r2x = r2.x;

@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Appearances.Rendering
 {
-    public class MarksView
+    internal class MarksView
     {
         private static Color[] s_FrameColors;
         private static Material s_Material;
@@ -28,16 +28,16 @@ namespace OpenTibiaUnity.Core.Appearances.Rendering
         private List<MarksViewInformation> m_MarksViewInformations;
         private uint m_MarksStartSize;
 
-        public uint MarksStartSize { get => m_MarksStartSize; set => m_MarksStartSize = value; }
+        internal uint MarksStartSize { get => m_MarksStartSize; set => m_MarksStartSize = value; }
 
-        public MarksView(uint marksStartSize = 0) {
+        internal MarksView(uint marksStartSize = 0) {
             if (marksStartSize >= FrameSizesCount)
                 throw new System.Exception("MarksView.MarksView: Invalid marks start size.");
             m_MarksStartSize = marksStartSize;
             m_MarksViewInformations = new List<MarksViewInformation>();
         }
 
-        public void AddMarkToView(MarkTypes markType, uint thinkness) {
+        internal void AddMarkToView(MarkType markType, uint thinkness) {
             if (thinkness != Constants.MarkThicknessThin && thinkness != Constants.MarkThicknessBold) {
                 throw new System.Exception("MarksView.addMarkToView: Invalid marks thickness: " + thinkness);
             }
@@ -56,7 +56,7 @@ namespace OpenTibiaUnity.Core.Appearances.Rendering
             m_MarksViewInformations.Add(information);
         }
 
-        public void DrawMarks(Marks marks, float screenX, float screenY, Vector2 zoom) {
+        internal void DrawMarks(Marks marks, float screenX, float screenY, Vector2 zoom) {
             Rect screenRect = new Rect() {
                 x = screenX * zoom.x,
                 y = screenY * zoom.y,
@@ -95,9 +95,9 @@ namespace OpenTibiaUnity.Core.Appearances.Rendering
         }
     }
 
-    public class MarksViewInformation
+    internal class MarksViewInformation
     {
-        public MarkTypes MarkType { get; set; } = MarkTypes.None;
-        public uint MarkThickness { get; set; } = 1;
+        internal MarkType MarkType { get; set; } = MarkType.None;
+        internal uint MarkThickness { get; set; } = 1;
     }
 }

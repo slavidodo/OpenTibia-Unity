@@ -3,13 +3,11 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Core.Components
 {
-    public sealed class ExitWindow : Base.Window
+    internal sealed class ExitWindow : Base.Window
     {
-#pragma warning disable CS0649 // never assigned to
-        [SerializeField] Button m_CancelButton;
-        [SerializeField] Button m_LogoutButton;
-        [SerializeField] Button m_ForceExitButton;
-#pragma warning restore CS0649 // never assigned to
+        [SerializeField] Button m_CancelButton = null;
+        [SerializeField] Button m_LogoutButton = null;
+        [SerializeField] Button m_ForceExitButton = null;
 
         protected override void Start() {
             base.Start();

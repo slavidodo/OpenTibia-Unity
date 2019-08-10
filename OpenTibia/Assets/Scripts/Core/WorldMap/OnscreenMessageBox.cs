@@ -2,9 +2,9 @@
 
 namespace OpenTibiaUnity.Core.WorldMap
 {
-    public class OnscreenMessageBox
+    internal class OnscreenMessageBox
     {
-        public Utility.RingBuffer<OnscreenMessage> m_Messages;
+        internal Utility.RingBuffer<OnscreenMessage> m_Messages;
         private Vector3Int? m_Position;
         private int m_SpeakerLevel;
         private int m_VisibleMessages = 0;
@@ -13,24 +13,24 @@ namespace OpenTibiaUnity.Core.WorldMap
         private float m_Width = 0;
         private float m_Height = 0;
 
-        public Vector3Int? Position {
+        internal Vector3Int? Position {
             get { return m_Position; }
         }
 
-        public MessageModes Mode { get; }
-        public string Speaker { get; }
-        public bool Visible {
+        internal MessageModeType Mode { get; }
+        internal string Speaker { get; }
+        internal bool Visible {
             get { return m_TextMesh != null ? m_TextMesh.gameObject.activeSelf : false; }
             set { if (m_TextMesh) m_TextMesh.gameObject.SetActive(value); }
         }
-        public int VisibleMessages {
+        internal int VisibleMessages {
             get { return !!Visible ? m_VisibleMessages : 0; }
         }
-        public bool Empty {
+        internal bool Empty {
             get { return m_Messages.Length - GetFirstNonHeaderIndex() <= 0; }
         }
 
-        public int MinExpirationTime {
+        internal int MinExpirationTime {
             get {
                 var min = int.MaxValue;
                 var riskIndex = GetFirstNonHeaderIndex();
@@ -45,7 +45,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             }
         }
 
-        public OnscreenMessageBox(Vector3Int? position, string speaker, int speakerLevel,MessageModes mode, int messagesSize, TMPro.TextMeshProUGUI textMesh = null) {
+        internal OnscreenMessageBox(Vector3Int? position, string speaker, int speakerLevel,MessageModeType mode, int messagesSize, TMPro.TextMeshProUGUI textMesh = null) {
             m_Position = position;
             Speaker = speaker;
             m_SpeakerLevel = speakerLevel;
@@ -54,18 +54,18 @@ namespace OpenTibiaUnity.Core.WorldMap
             m_TextMesh = textMesh;
         }
 
-        public void DestroyTextMesh() {
+        internal void DestroyTextMesh() {
             if (m_TextMesh != null) {
                 Object.Destroy(m_TextMesh.gameObject);
                 m_TextMesh = null;
             }
         }
 
-        public void RemoveMessages() {
+        internal void RemoveMessages() {
             m_Messages.RemoveAll();
         }
 
-        public int ExpireMessages(int ticks) {
+        internal int ExpireMessages(int ticks) {
             int totalExprired = 0;
             if (Visible) {
                 int index = GetFirstNonHeaderIndex();
@@ -83,7 +83,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             return totalExprired;
         }
 
-        public void ArrangeMessages() {
+        internal void ArrangeMessages() {
             m_VisibleMessages = 0;
             m_Height = 0;
             m_Width = 0;
@@ -92,13 +92,13 @@ namespace OpenTibiaUnity.Core.WorldMap
                 return;
             
             switch (Mode) {
-                case MessageModes.Say:
-                case MessageModes.Whisper:
-                case MessageModes.Yell:
-                case MessageModes.Spell:
-                case MessageModes.NpcFrom:
-                case MessageModes.BarkLoud:
-                case MessageModes.BarkLow:
+                case MessageModeType.Say:
+                case MessageModeType.Whisper:
+                case MessageModeType.Yell:
+                case MessageModeType.Spell:
+                case MessageModeType.NpcFrom:
+                case MessageModeType.BarkLoud:
+                case MessageModeType.BarkLow:
                     int i = 0;
                     while (m_VisibleMessages < m_Messages.Length) {
                         var onscreenMessage = m_Messages.GetItemAt(m_VisibleMessages);
@@ -132,13 +132,13 @@ namespace OpenTibiaUnity.Core.WorldMap
             m_TextMesh.ForceMeshUpdate();
         }
 
-        public void AppendMessage(OnscreenMessage message) {
+        internal void AppendMessage(OnscreenMessage message) {
             if (m_Messages.Length >= m_Messages.Size)
                 m_Messages.RemoveItemAt(GetFirstNonHeaderIndex());
             m_Messages.AddItem(message);
         }
 
-        public int ExpireOldestMessage() {
+        internal int ExpireOldestMessage() {
             if (Visible) {
                 var riskIndex = GetFirstNonHeaderIndex();
                 if (m_Messages.Length > riskIndex) {
@@ -150,7 +150,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             return 0;
         }
 
-        public int GetFirstNonHeaderIndex() {
+        internal int GetFirstNonHeaderIndex() {
             int i = 0;
             while (m_Messages.Length > i) {
                 var message = m_Messages.GetItemAt(i);
@@ -162,17 +162,17 @@ namespace OpenTibiaUnity.Core.WorldMap
             return i;
         }
 
-        public void ResetTextMesh() {
+        internal void ResetTextMesh() {
             m_TextMesh.text = string.Empty;
         }
 
-        public void UpdateTextMeshPosition(float x, float y) {
-            var rectTransform = m_TextMesh.transform as RectTransform;
+        internal void UpdateTextMeshPosition(float x, float y) {
+            var rectTransform = m_TextMesh.rectTransform;
 
             float width = Mathf.Min(m_TextMesh.preferredWidth, Constants.OnscreenMessageWidth);
             float height = m_TextMesh.preferredHeight;
             
-            var parentRT = rectTransform.transform.parent as RectTransform;
+            var parentRT = rectTransform.parent as RectTransform;
             
             x = Mathf.Clamp(x, width / 2, parentRT.rect.width - width / 2);
             y = Mathf.Clamp(y, -parentRT.rect.height + height / 2, -height / 2);

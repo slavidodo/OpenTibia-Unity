@@ -3,24 +3,24 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.WorldMap
 {
-    public class Field
+    internal class Field
     {
-        public List<Appearances.AppearanceInstance> Effects { get; } = new List<Appearances.AppearanceInstance>();
-        public Appearances.ObjectInstance[] ObjectsRenderer { get; } = new Appearances.ObjectInstance[Constants.MapSizeW];
-        public Appearances.ObjectInstance[] ObjectsNetwork { get; } = new Appearances.ObjectInstance[Constants.MapSizeW];
-        public bool CacheTranslucent { get; private set; } = false;
-        public bool CacheObjectsDirty { get; private set; } = false;
-        public bool CacheUnsight { get; private set; } = false;
-        public bool MiniMapDirty { get; private set; } = false;
+        internal List<Appearances.AppearanceInstance> Effects { get; } = new List<Appearances.AppearanceInstance>();
+        internal Appearances.ObjectInstance[] ObjectsRenderer { get; } = new Appearances.ObjectInstance[Constants.MapSizeW];
+        internal Appearances.ObjectInstance[] ObjectsNetwork { get; } = new Appearances.ObjectInstance[Constants.MapSizeW];
+        internal bool CacheTranslucent { get; private set; } = false;
+        internal bool CacheObjectsDirty { get; private set; } = false;
+        internal bool CacheUnsight { get; private set; } = false;
+        internal bool MiniMapDirty { get; private set; } = false;
 
-        public uint MiniMapColor { get; private set; } = 0;
-        public int EffectsCount { get; private set; } = 0;
-        public int ObjectsCount { get; private set; } = 0;
-        public int MiniMapCost { get; private set; } = int.MaxValue;
+        internal uint MiniMapColor { get; private set; } = 0;
+        internal int EffectsCount { get; private set; } = 0;
+        internal int ObjectsCount { get; private set; } = 0;
+        internal int MiniMapCost { get; private set; } = int.MaxValue;
 
-        public Appearances.ObjectInstance EnvironmentalEffect { get; set; } = null;
+        internal Appearances.ObjectInstance EnvironmentalEffect { get; set; } = null;
         
-        public int GetObjectPriority(Appearances.ObjectInstance objectInstance) {
+        internal int GetObjectPriority(Appearances.ObjectInstance objectInstance) {
             Appearances.AppearanceType appearanceType = objectInstance.Type;
             if (appearanceType.IsGround) {
                 return 0;
@@ -37,10 +37,10 @@ namespace OpenTibiaUnity.Core.WorldMap
             }
         }
 
-        public Appearances.AppearanceInstance GetEffect(int stackPos) {
+        internal Appearances.AppearanceInstance GetEffect(int stackPos) {
             return Effects[stackPos];
         }
-        public void AppendEffect(Appearances.AppearanceInstance effect) {
+        internal void AppendEffect(Appearances.AppearanceInstance effect) {
             if (!effect || (!(effect is Appearances.TextualEffectInstance) && !effect.Type))
                 throw new System.ArgumentException("Field.AppendEffect: Invalid effect.");
 
@@ -55,7 +55,7 @@ namespace OpenTibiaUnity.Core.WorldMap
 
             EffectsCount++;
         }
-        public void DeleteEffect(int effectIndex) {
+        internal void DeleteEffect(int effectIndex) {
             if (effectIndex < 0 || effectIndex >= EffectsCount) // TODO: this has been troublesome for a while, find why..
                 return; //throw new System.ArgumentException("Field.DeleteEffect: index " + effectIndex + " is out of range");
             
@@ -68,7 +68,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             }
         }
 
-        public Appearances.ObjectInstance PutObject(Appearances.ObjectInstance objectInstance, int stackPos) {
+        internal Appearances.ObjectInstance PutObject(Appearances.ObjectInstance objectInstance, int stackPos) {
             if (!objectInstance)
                 return null;
             
@@ -112,7 +112,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             MiniMapDirty = true;
             return otherObject;
         }
-        public Appearances.ObjectInstance ChangeObject(Appearances.ObjectInstance objectInstance, int stackPos) {
+        internal Appearances.ObjectInstance ChangeObject(Appearances.ObjectInstance objectInstance, int stackPos) {
             if (!objectInstance || stackPos < 0 || stackPos >= ObjectsCount) {
                 return null;
             }
@@ -127,46 +127,46 @@ namespace OpenTibiaUnity.Core.WorldMap
             return myObject;
         }
         
-        public Appearances.ObjectInstance GetObject(int stackPos) {
+        internal Appearances.ObjectInstance GetObject(int stackPos) {
             if (stackPos < 0 || stackPos >= ObjectsCount || (stackPos == 0 && ObjectsCount == 0))
                 return null;
             return ObjectsNetwork[stackPos];
         }
-        public int GetTopLookObject(out Appearances.ObjectInstance topLookObj) {
+        internal int GetTopLookObject(out Appearances.ObjectInstance topLookObj) {
             topLookObj = null;
             int index = -1;
 
             for (int i = 0; i < ObjectsCount; i++) {
-                var obj = ObjectsNetwork[i];
-                if (topLookObj == null || !obj.Type.IsIgnoreLook) {
+                var @object = ObjectsNetwork[i];
+                if (topLookObj == null || !@object.Type.IsIgnoreLook) {
                     index = i;
-                    topLookObj = obj;
+                    topLookObj = @object;
 
-                    if (!obj.Type.IsGround && !obj.Type.IsGroundBorder && !obj.Type.IsBottom && !obj.Type.IsTop)
+                    if (!@object.Type.IsGround && !@object.Type.IsGroundBorder && !@object.Type.IsBottom && !@object.Type.IsTop)
                         break;
                 }
             }
 
             return index;
         }
-        public int GetTopLookObject() {
+        internal int GetTopLookObject() {
             Appearances.ObjectInstance _;
             return GetTopLookObject(out _);
         }
-        public int GetTopMultiUseObject(out Appearances.ObjectInstance topMultiUseObj) {
+        internal int GetTopMultiUseObject(out Appearances.ObjectInstance topMultiUseObj) {
             if (ObjectsCount > 0) {
                 int index = 0;
-                Appearances.ObjectInstance obj;
+                Appearances.ObjectInstance @object;
                 for (; index < ObjectsCount; index++) {
-                    obj = ObjectsNetwork[index];
-                    if (obj.Type.IsForceUse)
+                    @object = ObjectsNetwork[index];
+                    if (@object.Type.IsForceUse)
                         break;
 
-                    if (!obj.Type.IsGround && !obj.Type.IsGroundBorder && !obj.Type.IsBottom && !obj.Type.IsTop)
+                    if (!@object.Type.IsGround && !@object.Type.IsGroundBorder && !@object.Type.IsBottom && !@object.Type.IsTop)
                         break;
                 }
 
-                if (index > 0 && !(obj = ObjectsNetwork[index]).Type.IsForceUse && obj.Type.IsSplash)
+                if (index > 0 && !(@object = ObjectsNetwork[index]).Type.IsForceUse && @object.Type.IsSplash)
                     index--;
 
                 topMultiUseObj = ObjectsNetwork[index];
@@ -176,42 +176,42 @@ namespace OpenTibiaUnity.Core.WorldMap
             topMultiUseObj = null;
             return -1;
         }
-        public int GetTopMultiUseObject() {
+        internal int GetTopMultiUseObject() {
             Appearances.ObjectInstance _;
             return GetTopMultiUseObject(out _);
         }
-        public int GetTopUseObject(out Appearances.ObjectInstance obj) {
-            obj = null;
+        internal int GetTopUseObject(out Appearances.ObjectInstance @object) {
+            @object = null;
             if (ObjectsCount == 0)
                 return -1;
 
             int index = 0;
             for (; index < ObjectsCount - 1; index++) {
-                obj = ObjectsNetwork[index];
-                if (obj.Type.IsForceUse || (!obj.Type.IsGround && !obj.Type.IsGroundBorder && !obj.Type.IsBottom && !obj.Type.IsTop && !obj.IsCreature))
+                @object = ObjectsNetwork[index];
+                if (@object.Type.IsForceUse || (!@object.Type.IsGround && !@object.Type.IsGroundBorder && !@object.Type.IsBottom && !@object.Type.IsTop && !@object.IsCreature))
                     break;
             }
 
             try {
-                while (index > 0 && ((obj = ObjectsNetwork[index]).IsCreature || obj.Type.IsSplash))
+                while (index > 0 && ((@object = ObjectsNetwork[index]).IsCreature || @object.Type.IsSplash))
                     index--;
             } catch (System.NullReferenceException) {
                 throw new System.Exception("Field.GetTopUseObject: Invalid network of objects (index=" + index + ", count=" + ObjectsCount + ").");
             }
 
-            obj = ObjectsNetwork[index];
+            @object = ObjectsNetwork[index];
             return index;
         }
-        public int GetTopUseObject() {
+        internal int GetTopUseObject() {
             Appearances.ObjectInstance _;
             return GetTopUseObject(out _);
         }
-        public int GetTopMoveObject(out Appearances.ObjectInstance topMoveObj) {
+        internal int GetTopMoveObject(out Appearances.ObjectInstance topMoveObj) {
             if (ObjectsCount > 0) {
                 int index = 0;
                 for (; index < ObjectsCount - 1; index++) {
-                    var obj = ObjectsNetwork[index];
-                    if (!obj.Type.IsGround && !obj.Type.IsGroundBorder && !obj.Type.IsBottom && !obj.Type.IsTop && !obj.IsCreature)
+                    var @object = ObjectsNetwork[index];
+                    if (!@object.Type.IsGround && !@object.Type.IsGroundBorder && !@object.Type.IsBottom && !@object.Type.IsTop && !@object.IsCreature)
                         break;
                 }
 
@@ -225,11 +225,11 @@ namespace OpenTibiaUnity.Core.WorldMap
             topMoveObj = null;
             return -1;
         }
-        public int GetTopMoveObject() {
+        internal int GetTopMoveObject() {
             Appearances.ObjectInstance _;
             return GetTopMoveObject(out _);
         }
-        public int GetTopCreatureObject(out Appearances.ObjectInstance topCreatureObj) {
+        internal int GetTopCreatureObject(out Appearances.ObjectInstance topCreatureObj) {
             int topLookIndex = GetTopLookObject(out topCreatureObj);
             if (!!topCreatureObj) {
                 if (topCreatureObj.IsCreature) {
@@ -241,13 +241,13 @@ namespace OpenTibiaUnity.Core.WorldMap
             }
             return -1;
         }
-        public int GetTopCreatureObject() {
+        internal int GetTopCreatureObject() {
             Appearances.ObjectInstance _ = null;
             return GetTopCreatureObject(out _);
         }
-        public int GetCreatureObjectForCreatureID(uint creatureID, out Appearances.ObjectInstance obj) {
+        internal int GetCreatureObjectForCreatureID(uint creatureID, out Appearances.ObjectInstance @object) {
             if (creatureID == 0 || ObjectsCount == 0) {
-                obj = null;
+                @object = null;
                 return -1;
             }
 
@@ -255,53 +255,54 @@ namespace OpenTibiaUnity.Core.WorldMap
                 var otherObj = ObjectsNetwork[i];
                 var type = otherObj.Type;
                 if (type.IsCreature && otherObj.Data == creatureID) {
-                    obj = otherObj;
+                    @object = otherObj;
                     return i;
                 }
             }
 
-            obj = null;
+            @object = null;
             return -1;
         }
 
-        public void UpdateObjectsCache() {
+        internal void UpdateObjectsCache() {
             int index = 0;
             if (ObjectsCount > 0) {
                 // ground, borders, bottom items
                 for (int i = 0; i < ObjectsCount; i++) {
-                    var obj = ObjectsNetwork[i];
-                    var type = obj.Type;
+                    var @object = ObjectsNetwork[i];
+                    var type = @object.Type;
                     if (type.IsGround || type.IsGroundBorder || type.IsBottom)
-                        ObjectsRenderer[index++] = obj;
+                        ObjectsRenderer[index++] = @object;
                 }
 
                 // common items
                 for (int i = ObjectsCount - 1; i >= 0; i--) {
-                    var obj = ObjectsNetwork[i];
-                    var type = obj.Type;
+                    var @object = ObjectsNetwork[i];
+                    var type = @object.Type;
                     if (!type.IsGround && !type.IsGroundBorder && !type.IsBottom && !type.IsTop && !type.IsCreature)
-                        ObjectsRenderer[index++] = obj;
+                        ObjectsRenderer[index++] = @object;
                 }
 
                 // creatures
                 for (int i = ObjectsCount - 1; i >= 0; i--) {
-                    var obj = ObjectsNetwork[i];
-                    var type = obj.Type;
-                    if (obj.IsCreature)
-                        ObjectsRenderer[index++] = obj;
+                    var @object = ObjectsNetwork[i];
+                    var type = @object.Type;
+                    if (@object.IsCreature)
+                        ObjectsRenderer[index++] = @object;
                 }
 
                 // top items
                 for (int i = 0; i < ObjectsCount; i++) {
-                    var obj = ObjectsNetwork[i];
-                    var type = obj.Type;
+                    var @object = ObjectsNetwork[i];
+                    var type = @object.Type;
                     if (type.IsTop)
-                        ObjectsRenderer[index++] = obj;
+                        ObjectsRenderer[index++] = @object;
                 }
             }
             
             while (index < Constants.MapSizeW)
                 ObjectsRenderer[index++] = null;
+
 
             CacheTranslucent = false;
             CacheUnsight = false;
@@ -332,7 +333,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             OpenTibiaUnity.WorldMapStorage.CacheUnsight = OpenTibiaUnity.WorldMapStorage.CacheUnsight && !CacheUnsight;
         }
 
-        public void ResetObjects() {
+        internal void ResetObjects() {
             for (int i = 0; i < Constants.MapSizeW; i++) {
                 ObjectsNetwork[i] = null;
                 ObjectsRenderer[i] = null;
@@ -347,11 +348,11 @@ namespace OpenTibiaUnity.Core.WorldMap
             MiniMapDirty = false;
         }
 
-        public Appearances.ObjectInstance DeleteObject(int stackPos) {
+        internal Appearances.ObjectInstance DeleteObject(int stackPos) {
             if (stackPos < 0 || stackPos > ObjectsCount)
                 return null;
 
-            Appearances.ObjectInstance obj = ObjectsNetwork[stackPos];
+            Appearances.ObjectInstance @object = ObjectsNetwork[stackPos];
             ObjectsCount = System.Math.Max(ObjectsCount - 1, 0);
             while (stackPos < ObjectsCount) {
                 ObjectsNetwork[stackPos] = ObjectsNetwork[stackPos + 1];
@@ -361,10 +362,10 @@ namespace OpenTibiaUnity.Core.WorldMap
             ObjectsNetwork[ObjectsCount] = null;
             CacheObjectsDirty = true;
             MiniMapDirty = true;
-            return obj;
+            return @object;
         }
         
-        public void Reset() {
+        internal void Reset() {
             ResetObjects();
             ResetEffects();
         }
@@ -373,13 +374,13 @@ namespace OpenTibiaUnity.Core.WorldMap
 
         }
 
-        public void ResetEffects() {
+        internal void ResetEffects() {
             Effects.Clear();
             EffectsCount = 0;
             EnvironmentalEffect = null;
         }
         
-        public void UpdateMiniMap() {
+        internal void UpdateMiniMap() {
             if (!MiniMapDirty)
                 return;
 

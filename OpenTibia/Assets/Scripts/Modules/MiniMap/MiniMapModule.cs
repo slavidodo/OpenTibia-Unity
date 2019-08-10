@@ -6,15 +6,13 @@ namespace OpenTibiaUnity.Modules.MiniMap
 {
     public class MiniMapModule : Core.Components.Base.AbstractComponent
     {
-#pragma warning disable CS0649 // never assigned to
-        [SerializeField] private RawImage m_MiniMapRenderingRawImage;
+        [SerializeField] private RawImage m_MiniMapRenderingRawImage = null;
 
-        [SerializeField] private Button m_ZLayerUpButton;
-        [SerializeField] private Button m_ZLayerDownButton;
-        [SerializeField] private Button m_ZoomOutButton;
-        [SerializeField] private Button m_ZoomInButton;
-        [SerializeField] private Button m_CenterButton;
-#pragma warning restore CS0649 // never assigned to
+        [SerializeField] private Button m_ZLayerUpButton = null;
+        [SerializeField] private Button m_ZLayerDownButton = null;
+        [SerializeField] private Button m_ZoomOutButton = null;
+        [SerializeField] private Button m_ZoomInButton = null;
+        [SerializeField] private Button m_CenterButton = null;
 
         private RectTransform m_MiniMapRenderingRectTransform;
 

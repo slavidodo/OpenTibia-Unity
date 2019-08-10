@@ -1,11 +1,11 @@
 ﻿using OpenTibiaUnity.Core.Appearances;
-using OpenTibiaUnity.Core.InputManagment.GameAction;
-using OpenTibiaUnity.Core.InputManagment.StaticAction;
+using OpenTibiaUnity.Core.Input.GameAction;
+using OpenTibiaUnity.Core.Input.StaticAction;
 using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Components
 {
-    public class ObjectContextMenu : ContextMenuBase 
+    internal class ObjectContextMenu : ContextMenuBase 
     {
         private Vector3Int m_Absolute;
 
@@ -16,7 +16,7 @@ namespace OpenTibiaUnity.Core.Components
         private int m_LookObjectStackPos;
         private int m_UseObjectStackPos;
 
-        public void Set(Vector3Int absolutePosition, ObjectInstance lookObject, int lookObjectIndex, ObjectInstance useObject, int useObjectIndex, Creatures.Creature creature) {
+        internal void Set(Vector3Int absolutePosition, ObjectInstance lookObject, int lookObjectIndex, ObjectInstance useObject, int useObjectIndex, Creatures.Creature creature) {
             m_Absolute = absolutePosition;
             m_LookObject = lookObject;
             m_LookObjectStackPos = lookObjectIndex;
@@ -27,8 +27,10 @@ namespace OpenTibiaUnity.Core.Components
             m_Creature = creature;
         }
 
-        public override void InitialiseOptions() {
+        internal override void InitialiseOptions() {
+            var gameManager = OpenTibiaUnity.GameManager;
             var optionStorage = OpenTibiaUnity.OptionStorage;
+            var player = OpenTibiaUnity.Player;
             bool isClassic = optionStorage.MousePreset == MousePresets.Classic;
             bool isRegular = optionStorage.MousePreset == MousePresets.Regular;
             bool isLeftSmartClick = optionStorage.MousePreset == MousePresets.LeftSmartClick;
@@ -42,21 +44,21 @@ namespace OpenTibiaUnity.Core.Components
 
             // Tibia 11 (CTX_OBJECT_INSPECT_OBJECT)
 
-            if (!!m_UseObject && (m_UseObject.Type.IsContainer || m_UseObject.Type.DefaultAction == Proto.Appearances.PlayerAction.Open)) {
+            if (!!m_UseObject && (m_UseObject.Type.IsContainer || m_UseObject.Type.DefaultAction == Protobuf.Shared.PlayerAction.Open)) {
                 if (m_Absolute.x == 65535 && m_Absolute.y >= 64) {
                     CreateTextItem(TextResources.CTX_OBJECT_OPEN, () => {
                         if (!!m_UseObject)
-                            GameActionFactory.CreateUseAction(m_Absolute, m_UseObject, m_UseObjectStackPos, UseActionTarget.Auto).Perform();
+                            GameActionFactory.CreateUseAction(m_Absolute, m_UseObject, m_UseObjectStackPos, Vector3Int.zero, null, 0, UseActionTarget.Auto).Perform();
                     });
 
                     CreateTextItem(TextResources.CTX_OBJECT_OPEN_NEW_WINDOW, () => {
                         if (!!m_UseObject)
-                            GameActionFactory.CreateUseAction(m_Absolute, m_UseObject, m_UseObjectStackPos, UseActionTarget.NewWindow).Perform();
+                            GameActionFactory.CreateUseAction(m_Absolute, m_UseObject, m_UseObjectStackPos, Vector3Int.zero, null, 0, UseActionTarget.NewWindow).Perform();
                     });
                 } else {
                     CreateTextItem(TextResources.CTX_OBJECT_OPEN, () => {
                         if (!!m_UseObject)
-                            GameActionFactory.CreateUseAction(m_Absolute, m_UseObject, m_UseObjectStackPos, UseActionTarget.NewWindow).Perform();
+                            GameActionFactory.CreateUseAction(m_Absolute, m_UseObject, m_UseObjectStackPos, Vector3Int.zero, null, 0, UseActionTarget.NewWindow).Perform();
                     });
                 }
             }
@@ -72,8 +74,8 @@ namespace OpenTibiaUnity.Core.Components
                 }
 
                 CreateTextItem(text, shortcut, () => {
-                    if (!!m_UseObject)
-                        GameActionFactory.CreateUseAction(m_Absolute, m_UseObject, m_UseObjectStackPos, UseActionTarget.Auto).Perform();
+                    //if (!!m_UseObject)
+                    //    GameActionFactory.CreateUseAction(m_Absolute, m_UseObject, m_UseObjectStackPos, UseActionTarget.Auto).Perform();
                 });
             }
 
@@ -97,17 +99,33 @@ namespace OpenTibiaUnity.Core.Components
                         new TurnActionImpl(m_Absolute, m_UseObject, m_UseObjectStackPos).Perform();
                 });
             }
-
-            var worldMapStorage = OpenTibiaUnity.WorldMapStorage;
-            if (m_Absolute.x != 65535) {
+            
+            if (gameManager.ClientVersion >= 984 && m_Absolute.x != 65535) {
+                var worldMapStorage = OpenTibiaUnity.WorldMapStorage;
                 var mapPosition = worldMapStorage.ToMap(m_Absolute);
-                var obj = worldMapStorage.GetObject(mapPosition, 0);
-                if (!!obj && obj.Type.IsGround) {
+                var @object = worldMapStorage.GetObject(mapPosition, 0);
+                if (!!@object && @object.Type.IsGround) {
                     CreateTextItem(TextResources.CTX_OBJECT_BROWSE_FIELD, () => new BrowseFieldActionImpl(m_Absolute).Perform());
                 }
             }
 
             CreateSeparatorItem();
+
+            if (m_Absolute.x != 65535 && OpenTibiaUnity.GameManager.ProtocolGame.BugReportsAllowed) {
+                CreateTextItem(TextResources.CTX_OBJECT_REPORT_FIELD, () => {
+                    // TODO: Report Coordinate
+                });
+
+                CreateSeparatorItem();
+            }
+
+            if (!!m_LookObject && m_Absolute.x == 65535 && m_Absolute.y >= 64 && OpenTibiaUnity.ContainerStorage.GetContainerView(m_Absolute.y - 64).IsSubContainer) {
+                CreateTextItem(TextResources.CTX_OBJECT_MOVE_UP, () => {
+                    if (!!m_LookObject)
+                        GameActionFactory.CreateMoveAction(m_Absolute, m_LookObject, m_LookObjectStackPos,
+                            new Vector3Int(m_Absolute.x, m_Absolute.y, 254), MoveActionImpl.MoveAll).Perform();
+                });
+            }
 
             if (!!m_LookObject && !m_LookObject.IsCreature && !m_LookObject.Type.IsUnmovable && m_LookObject.Type.IsPickupable) {
                 CreateTextItem(TextResources.CTX_OBJECT_TRADE, () => {
@@ -117,17 +135,45 @@ namespace OpenTibiaUnity.Core.Components
                 });
             }
 
-            // TODO
-            //if (!!m_LookObject && m_Absolute.x == 65535 && m_Absolute.y >= 64 && OpenTibiaUnity.ContainerStorage.GetContainerView(m_Absolute.y - 64).IsSubContainer) {
-            //    CreateTextItem(TextResources.CTX_OBJECT_MOVE_UP, () => {
-            //        if (!!m_LookObject)
-            //            GameActionFactory.CreateMoveAction(m_Absolute, m_LookObject, m_LookObjectStackPos,
-            //                new Vector3Int(m_Absolute.x, m_Absolute.y, 254), MoveActionImpl.MoveAll).Perform();
-            //    });
-            //}
+            if (!!m_LookObject && !m_LookObject.IsCreature && m_LookObject.Type.IsMarket && player.IsInDepot) {
+                CreateTextItem(TextResources.CTX_OBJECT_SHOW_IN_MARKET, () => {
+                    // TODO, show in market
+                });
+            }
+
+            if (gameManager.GetFeature(GameFeature.GameQuickLoot) && !!m_LookObject && !m_LookObject.IsCreature && !m_LookObject.Type.IsUnmovable && m_LookObject.Type.IsPickupable) {
+                CreateSeparatorItem();
+
+                if (m_LookObject.Type.IsContainer && m_Absolute.x == 65535) {
+                    CreateTextItem(TextResources.CTX_OBJECT_MANAGE_LOOT_CONTAINERS, () => {
+                        // TODO, manage loot containers
+                    });
+                } else {
+                    CreateTextItem(TextResources.CTX_OBJECT_QUICK_LOOT, () => {
+                        // TODO, quick loot
+                    });
+                }
+            }
+            
+            if (gameManager.GetFeature(GameFeature.GameStash) && !!m_LookObject && !m_LookObject.IsCreature && !m_LookObject.Type.IsUnmovable && m_LookObject.Type.IsPickupable && (m_LookObject.Type.IsStackable || m_LookObject.Type.IsContainer)) {
+                CreateSeparatorItem();
+
+                if (m_LookObject.Type.IsStackable) {
+                    CreateTextItem(TextResources.CTX_OBJECT_STOW, () => {
+                        // TODO, stow
+                    });
+
+                    CreateTextItem(TextResources.CTX_OBJECT_STOW_ALL, () => {
+                        // TODO, stow all
+                    });
+                } else {
+                    CreateTextItem(TextResources.CTX_OBJECT_STOW_CONTENT, () => {
+                        // TODO, stow all
+                    });
+                }
+            }
 
             var creatureStorage = OpenTibiaUnity.CreatureStorage;
-            var player = OpenTibiaUnity.Player;
             if (!!m_Creature && m_Creature.ID != player.ID) {
                 if (m_Creature.IsNPC) {
                     CreateTextItem(TextResources.CTX_CREATURE_TALK, () => {
@@ -186,23 +232,23 @@ namespace OpenTibiaUnity.Core.Components
                     //}
 
                     switch (player.PartyFlag) {
-                        case PartyFlags.Leader:
+                        case PartyFlag.Leader:
                             CreateTextItem(TextResources.CTX_PARTY_EXCLUDE, () => new PartyActionImpl(PartyActionType.Exclude, m_Creature).Perform());
                             break;
 
-                        case PartyFlags.Leader_SharedXP_Active:
-                        case PartyFlags.Leader_SharedXP_Inactive_Guilty:
-                        case PartyFlags.Leader_SharedXP_Inactive_Innocent:
-                        case PartyFlags.Leader_SharedXP_Off:
+                        case PartyFlag.Leader_SharedXP_Active:
+                        case PartyFlag.Leader_SharedXP_Inactive_Guilty:
+                        case PartyFlag.Leader_SharedXP_Inactive_Innocent:
+                        case PartyFlag.Leader_SharedXP_Off:
                             switch (m_Creature.PartyFlag) {
-                                case PartyFlags.Member:
+                                case PartyFlag.Member:
                                     CreateTextItem(string.Format(TextResources.CTX_PARTY_EXCLUDE, m_Creature.Name), () => new PartyActionImpl(PartyActionType.Exclude, m_Creature).Perform());
                                     break;
 
-                                case PartyFlags.Member_SharedXP_Active:
-                                case PartyFlags.Member_SharedXP_Inactive_Guilty:
-                                case PartyFlags.Member_SharedXP_Inactive_Innocent:
-                                case PartyFlags.Member_SharedXP_Off:
+                                case PartyFlag.Member_SharedXP_Active:
+                                case PartyFlag.Member_SharedXP_Inactive_Guilty:
+                                case PartyFlag.Member_SharedXP_Inactive_Innocent:
+                                case PartyFlag.Member_SharedXP_Off:
                                     CreateTextItem(string.Format(TextResources.CTX_PARTY_PASS_LEADERSHIP, m_Creature.Name), () => new PartyActionImpl(PartyActionType.PassLeadership, m_Creature).Perform());
                                     break;
 
@@ -213,17 +259,17 @@ namespace OpenTibiaUnity.Core.Components
 
                             break;
 
-                        case PartyFlags.Member_SharedXP_Active:
-                        case PartyFlags.Member_SharedXP_Inactive_Guilty:
-                        case PartyFlags.Member_SharedXP_Inactive_Innocent:
-                        case PartyFlags.Member_SharedXP_Off:
+                        case PartyFlag.Member_SharedXP_Active:
+                        case PartyFlag.Member_SharedXP_Inactive_Guilty:
+                        case PartyFlag.Member_SharedXP_Inactive_Innocent:
+                        case PartyFlag.Member_SharedXP_Off:
                             break;
 
-                        case PartyFlags.None:
-                        case PartyFlags.Member:
-                            if (m_Creature.PartyFlag == PartyFlags.Leader)
+                        case PartyFlag.None:
+                        case PartyFlag.Member:
+                            if (m_Creature.PartyFlag == PartyFlag.Leader)
                                 CreateTextItem(string.Format(TextResources.CTX_PARTY_JOIN, m_Creature.Name), () => new PartyActionImpl(PartyActionType.Join, m_Creature).Perform());
-                            else if (m_Creature.PartyFlag != PartyFlags.Other)
+                            else if (m_Creature.PartyFlag != PartyFlag.Other)
                                 CreateTextItem(string.Format(TextResources.CTX_PARTY_INVITE, m_Creature.Name), () => new PartyActionImpl(PartyActionType.Invite, m_Creature).Perform());
                             break;
                     }

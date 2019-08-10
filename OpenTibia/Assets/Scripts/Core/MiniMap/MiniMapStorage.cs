@@ -4,28 +4,28 @@ using UnityEngine.Events;
 
 namespace OpenTibiaUnity.Core.MiniMap
 {
-    public class MiniMapStorage
+    internal class MiniMapStorage
     {
-        public class PositionChangeEvent : UnityEvent<MiniMapStorage, Vector3Int, Vector3Int> { }
+        internal class PositionChangeEvent : UnityEvent<MiniMapStorage, Vector3Int, Vector3Int> { }
 
         private bool m_ChangedSector = false;
         private Vector3Int m_Sector = new Vector3Int(-1, -1, -1);
         private Vector3Int m_Position = new Vector3Int(-1, -1, -1);
-        private Priority_Queue.FastPriorityQueue<PathQueueNode> m_PathPriorityQueue;
+        private Utility.Heap m_PathHeap;
         private List<MiniMapSector> m_SectorCache = new List<MiniMapSector>();
         private List<MiniMapSector> m_LoadQueue = new List<MiniMapSector>();
         private List<MiniMapSector> m_SaveQueue = new List<MiniMapSector>();
-        private SortedList<int, PathQueueNode> m_PathMatrix;
-        private List<PathQueueNode> m_PathDirty = new List<PathQueueNode>();
+        private SortedList<int, PathItem> m_PathMatrix;
+        private List<PathItem> m_PathDirty = new List<PathItem>();
         private int m_CurrentIOCount = 0;
 
-        public int PositionX { get { return m_Position.x; } }
-        public int PositionY { get { return m_Position.y; } }
-        public int PositionZ { get { return m_Position.z; } }
+        internal int PositionX { get { return m_Position.x; } }
+        internal int PositionY { get { return m_Position.y; } }
+        internal int PositionZ { get { return m_Position.z; } }
 
-        public PositionChangeEvent onPositionChange = new PositionChangeEvent();
+        internal PositionChangeEvent onPositionChange = new PositionChangeEvent();
 
-        public Vector3Int Position {
+        internal Vector3Int Position {
             get { return m_Position; }
             set {
                 var oldPosition = m_Position;
@@ -56,20 +56,22 @@ namespace OpenTibiaUnity.Core.MiniMap
             }
         }
 
-        public MiniMapStorage() {
-            m_PathMatrix = new SortedList<int, PathQueueNode>(Constants.PathMatrixCenter * Constants.PathMatrixCenter);
+        internal MiniMapStorage() {
+            m_PathMatrix = new SortedList<int, PathItem>(Constants.PathMatrixCenter * Constants.PathMatrixCenter);
             for (int y = 0; y < Constants.PathMatrixSize; y++) {
-                for (int x = 0; x < Constants.PathMatrixSize; x++) {
-                    m_PathMatrix.Add(y * Constants.PathMatrixSize + x, new PathQueueNode(x - Constants.PathMatrixCenter, y- Constants.PathMatrixCenter));
-                }
+                for (int x = 0; x < Constants.PathMatrixSize; x++)
+                    m_PathMatrix.Add(y * Constants.PathMatrixSize + x, new PathItem(x - Constants.PathMatrixCenter, y- Constants.PathMatrixCenter));
             }
+
+            m_PathHeap = new Utility.Heap(50000);
+            m_PathDirty = new List<PathItem>();
         }
 
-        public MiniMapSector AcquireSector(Vector3Int position, bool cache) {
+        internal MiniMapSector AcquireSector(Vector3Int position, bool cache) {
             return AcquireSector(position.x, position.y, position.z, cache);
         }
 
-        public MiniMapSector AcquireSector(int x, int y, int z, bool cache) {
+        internal MiniMapSector AcquireSector(int x, int y, int z, bool cache) {
             x = System.Math.Max(Constants.MapMinX, System.Math.Min(x, Constants.MapMaxX));
             y = System.Math.Max(Constants.MapMinY, System.Math.Min(y, Constants.MapMaxY));
             z = System.Math.Max(Constants.MapMinZ, System.Math.Min(z, Constants.MapMaxZ));
@@ -136,7 +138,7 @@ namespace OpenTibiaUnity.Core.MiniMap
             return sector;
         }
 
-        public void UpdateField(Vector3Int position, uint color, int cost, bool fireChangeCall) {
+        internal void UpdateField(Vector3Int position, uint color, int cost, bool fireChangeCall) {
             var sector = AcquireSector(position, false);
             sector.UpdateField(position, color, cost);
             
@@ -149,15 +151,15 @@ namespace OpenTibiaUnity.Core.MiniMap
             }
         }
 
-        public int GetFieldCost(Vector3Int absolutePosition) {
+        internal int GetFieldCost(Vector3Int absolutePosition) {
             return GetFieldCost(absolutePosition.x, absolutePosition.y, absolutePosition.z);
         }
 
-        public int GetFieldCost(int x, int y, int z) {
+        internal int GetFieldCost(int x, int y, int z) {
             return AcquireSector(x, y, z, false).GetCost(x, y, z);
         }
 
-        public void RefreshSectors() {
+        internal void RefreshSectors() {
             if (m_ChangedSector) {
                 // TODO: dispatch change
                 int it = m_SectorCache.Count - 1;
@@ -173,20 +175,20 @@ namespace OpenTibiaUnity.Core.MiniMap
             }
         }
 
-        public void Enqueue(List<MiniMapSector> queue, MiniMapSector sector) {
+        internal void Enqueue(List<MiniMapSector> queue, MiniMapSector sector) {
             if (!queue.Find((sec) => sector.Equals(sec)))
                 queue.Add(sector);
         }
 
-        public void Dequeue(List<MiniMapSector> queue, MiniMapSector sector) {
+        internal void Dequeue(List<MiniMapSector> queue, MiniMapSector sector) {
             queue.Remove(sector);
         }
 
-        public PathState CalculatePath(Vector3Int start, Vector3Int target, bool diagonal, bool exact, List<int> steps) {
+        internal PathState CalculatePath(Vector3Int start, Vector3Int target, bool diagonal, bool exact, List<int> steps) {
             return CalculatePath(start.x, start.y, start.z, target.x, target.y, target.z, diagonal, exact, steps);
         }
 
-        public PathState CalculatePath(int startX, int startY, int startZ, int targetX, int targetY, int targetZ, bool forceDiagonal, bool forceExact, List<int> steps) {
+        internal PathState CalculatePath(int startX, int startY, int startZ, int targetX, int targetY, int targetZ, bool forceDiagonal, bool forceExact, List<int> steps) {
             int dX = targetX - startX;
             int dY = targetY - startY;
             if (steps == null)
@@ -253,9 +255,9 @@ namespace OpenTibiaUnity.Core.MiniMap
             int matrixSize = Constants.PathMatrixSize;
 
             // heuristic multiplier
-            var overallMinCost = int.MaxValue;
+            var minCost = int.MaxValue;
             foreach (var sector in tmpSectors)
-                overallMinCost = System.Math.Min(overallMinCost, sector.MinCost);
+                minCost = System.Math.Min(minCost, sector.MinCost);
 
             // initial sector position (start position in minimap storage)
             var sectorMaxX = tmpSectors[0].SectorX + Constants.MiniMapSectorSize;
@@ -263,99 +265,85 @@ namespace OpenTibiaUnity.Core.MiniMap
 
             // obtain the center of the grid, and resetting it
             // the center of the grid is matchin our initial position, so we will use MatrixCenter with offset as a workaround
-            PathQueueNode pathNode = m_PathMatrix[matrixCenter * matrixSize + matrixCenter];
-            pathNode.Reset();
-            pathNode.Predecessor = null;
-            pathNode.Cost = int.MaxValue;
-            pathNode.PathCost = int.MaxValue;
-            pathNode.PathHeuristic = 0;
-            
-            m_PathDirty.Add(pathNode); // push the initial position to the closed list
+            PathItem pathItem = m_PathMatrix[matrixCenter * matrixSize + matrixCenter];
+            pathItem.Reset();
+            pathItem.Predecessor = null;
+            pathItem.Cost = int.MaxValue;
+            pathItem.PathCost = int.MaxValue;
+            pathItem.PathHeuristic = 0;
+            m_PathDirty.Add(pathItem); // push the initial position to the closed list
 
             // obtain the final position at our grid
-            PathQueueNode lastPathNode = m_PathMatrix[(matrixCenter + dY) * Constants.PathMatrixSize + (matrixCenter + dX)];
+            PathItem lastPathNode = m_PathMatrix[(matrixCenter + dY) * Constants.PathMatrixSize + (matrixCenter + dX)];
             lastPathNode.Predecessor = null;
             lastPathNode.Reset();
 
             int tmpIndex;
-            if (targetX < sectorMaxX) {
-                if (targetY < sextorMaxY) {
-                    tmpIndex = (int)Directions.North;
-                } else {
-                    tmpIndex = (int)Directions.East;
-                }
-            } else if (targetY < sextorMaxY) {
-                tmpIndex = (int)Directions.West;
-            } else {
-                tmpIndex = (int)Directions.South;
-            }
+            if (targetX < sectorMaxX)
+                tmpIndex = targetY < sextorMaxY ? 0 : 1;
+            else
+                tmpIndex = targetY < sextorMaxY ? 3 : 2;
             
             lastPathNode.Cost = tmpSectors[tmpIndex].GetCost(targetX, targetY, targetZ);
             lastPathNode.PathCost = 0;
             // from the constructor, the distance is the manhattan distance from start_pos to target_pos
-            lastPathNode.PathHeuristic = lastPathNode.Cost + (lastPathNode.Distance - 1) * overallMinCost;
+            lastPathNode.PathHeuristic = lastPathNode.Cost + (lastPathNode.Distance - 1) * minCost;
 
             // now add that to our closed list
             m_PathDirty.Add(lastPathNode);
 
             // clear our heap and push the current node to it.
-            m_PathPriorityQueue = new Priority_Queue.FastPriorityQueue<PathQueueNode>(50000);
-            m_PathPriorityQueue.Enqueue(lastPathNode, lastPathNode.PathHeuristic);
+            m_PathHeap.Clear(false);
+            m_PathHeap.AddItem(lastPathNode, lastPathNode.PathHeuristic);
 
-            PathQueueNode currentPathNode = null;
-            PathQueueNode tmpPathNode = null;
+            PathItem currentPathItem = null;
+            PathItem tmpPathItem = null;
             
             // looping through the very first SQM in the heap
-            while (m_PathPriorityQueue.Count > 0) {
-                currentPathNode = m_PathPriorityQueue.Dequeue();
+            while ((currentPathItem = m_PathHeap.ExtractMinItem() as PathItem) != null) {
                 // check if the current move won't exceed our current shortest path, otherwise end it up
                 // if it exceeds, then we will loop again through our heap, if exists
                 // if not, then we are done searching if the current path is undefined that means we can't
                 // reach that field
-                if (currentPathNode.Priority < pathNode.PathCost) {
+                
+                if (currentPathItem.HeapKey < pathItem.PathCost) {
                     for (int i = -1; i <= 1; i++) {
                         for (int j = -1; j <= 1; j++) {
                             if (i != 0 || j != 0) {
-                                int gridX = currentPathNode.X + i;
-                                int gridY = currentPathNode.Y + j;
+                                int gridX = currentPathItem.X + i;
+                                int gridY = currentPathItem.Y + j;
 
                                 // check if that grid is in the range or validity
                                 if (!(gridX < -matrixCenter || gridX > matrixCenter || gridY < -matrixCenter || gridY > matrixCenter)) {
                                     int currentPathCost;
                                     if (i * j == 0) // straight movement (not diagonal)
-                                        currentPathCost = currentPathNode.PathCost + currentPathNode.Cost;
+                                        currentPathCost = currentPathItem.PathCost + currentPathItem.Cost;
                                     else // diagonal movements worth as 3 as a normal movement;
-                                        currentPathCost = currentPathNode.PathCost + 3 * currentPathNode.Cost;
+                                        currentPathCost = currentPathItem.PathCost + 3 * currentPathItem.Cost;
 
-                                    tmpPathNode = m_PathMatrix[(matrixCenter + gridY) * matrixSize + (matrixCenter + gridX)];
-                                    if (tmpPathNode.PathCost > currentPathCost) {
-                                        tmpPathNode.Predecessor = currentPathNode;
-                                        tmpPathNode.PathCost = currentPathCost;
-                                        if (tmpPathNode.Cost == int.MaxValue) {
-                                            int currentPosX = startX + tmpPathNode.X;
-                                            int currentPosY = startY + tmpPathNode.Y;
-                                            if (currentPosX < sectorMaxX) {
-                                                if (currentPosY < sextorMaxY)
-                                                    tmpIndex = (int)Directions.North;
-                                                else
-                                                    tmpIndex = (int)Directions.East;
-                                            } else if (currentPosY < sextorMaxY) {
-                                                tmpIndex = (int)Directions.West;
-                                            } else {
-                                                tmpIndex = (int)Directions.South;
-                                            }
+                                    tmpPathItem = m_PathMatrix[(matrixCenter + gridY) * matrixSize + (matrixCenter + gridX)];
+                                    if (tmpPathItem.PathCost > currentPathCost) {
+                                        tmpPathItem.Predecessor = currentPathItem;
+                                        tmpPathItem.PathCost = currentPathCost;
+                                        if (tmpPathItem.Cost == int.MaxValue) {
+                                            int currentPosX = startX + tmpPathItem.X;
+                                            int currentPosY = startY + tmpPathItem.Y;
+                                            if (currentPosX < sectorMaxX)
+                                                tmpIndex = currentPosY < sextorMaxY ? 0 : 1;
+                                            else
+                                                tmpIndex = currentPosY < sextorMaxY ? 3 : 2;
 
-                                            tmpPathNode.Cost = tmpSectors[tmpIndex].GetCost(currentPosX, currentPosY, startZ);
-                                            tmpPathNode.PathHeuristic = tmpPathNode.Cost + (tmpPathNode.Distance - 1) * overallMinCost;
-                                            m_PathDirty.Add(tmpPathNode);
+                                            tmpPathItem.Cost = tmpSectors[tmpIndex].GetCost(currentPosX, currentPosY, startZ);
+                                            tmpPathItem.PathHeuristic = tmpPathItem.Cost + (tmpPathItem.Distance - 1) * minCost;
+                                            m_PathDirty.Add(tmpPathItem);
                                         }
 
-                                        if (!(tmpPathNode == pathNode || tmpPathNode.Cost >= Constants.PathCostObstacle)) {
-                                            if (tmpPathNode.Queue == m_PathPriorityQueue) {
-                                                m_PathPriorityQueue.UpdatePriority(tmpPathNode, currentPathCost + tmpPathNode.PathHeuristic);
+                                        if (!(tmpPathItem == pathItem || tmpPathItem.Cost >= Constants.PathCostObstacle)) {
+                                            if (tmpPathItem.HeapParent != null) {
+                                                m_PathHeap.UpdateKey(tmpPathItem, currentPathCost + tmpPathItem.PathHeuristic);
                                             } else {
-                                                tmpPathNode.Reset();
-                                                m_PathPriorityQueue.Enqueue(tmpPathNode, currentPathCost + tmpPathNode.PathHeuristic);
+                                                tmpPathItem.Reset();
+                                                m_PathHeap.AddItem(tmpPathItem, currentPathCost + tmpPathItem.PathHeuristic);
                                             }
                                         }
                                     }
@@ -365,23 +353,23 @@ namespace OpenTibiaUnity.Core.MiniMap
                     }
                 }
             }
-            
+
             var ret = PathState.PathErrorInternal;
-            if (pathNode.PathCost < int.MaxValue) {
-                currentPathNode = pathNode;
-                tmpPathNode = null;
-                while (currentPathNode != null) {
-                    if (!forceExact && currentPathNode.X == lastPathNode.X && currentPathNode.Y == lastPathNode.Y && lastPathNode.Cost >= Constants.PathCostObstacle) {
-                        currentPathNode = null;
+            if (pathItem.PathCost < int.MaxValue) {
+                currentPathItem = pathItem;
+                tmpPathItem = null;
+                while (currentPathItem != null) {
+                    if (!forceExact && currentPathItem.X == lastPathNode.X && currentPathItem.Y == lastPathNode.Y && lastPathNode.Cost >= Constants.PathCostObstacle) {
+                        currentPathItem = null;
                         break;
                     }
                     
-                    if (currentPathNode.Cost == Constants.PathCostUndefined)
+                    if (currentPathItem.Cost == Constants.PathCostUndefined)
                         break;
 
-                    if (tmpPathNode != null) {
-                        dX = currentPathNode.X - tmpPathNode.X;
-                        dY = currentPathNode.Y - tmpPathNode.Y;
+                    if (tmpPathItem != null) {
+                        dX = currentPathItem.X - tmpPathItem.X;
+                        dY = currentPathItem.Y - tmpPathItem.Y;
                         if (dX == 1 && dY == 0) {
                             steps.Add((int)PathDirection.East);
                         } else if (dX == 1 && dY == -1) {
@@ -399,14 +387,14 @@ namespace OpenTibiaUnity.Core.MiniMap
                         } else if (dX == 1 && dY == 1) {
                             steps.Add((int)PathDirection.SouthEast);
                         }
-                        steps[steps.Count - 1] = steps[steps.Count - 1] | currentPathNode.Cost << 16;
+                        steps[steps.Count - 1] = steps[steps.Count - 1] | currentPathItem.Cost << 16;
                         if (steps.Count + 1 >= Constants.PathMaxSteps) {
                             break;
                         }
                     }
 
-                    tmpPathNode = currentPathNode;
-                    currentPathNode = currentPathNode.Predecessor;
+                    tmpPathItem = currentPathItem;
+                    currentPathItem = currentPathItem.Predecessor;
                 }
 
                 if (steps.Count == 0) {
@@ -426,7 +414,7 @@ namespace OpenTibiaUnity.Core.MiniMap
             return ret;
         }
 
-        public void OnIOTimer() {
+        internal void OnIOTimer() {
             m_CurrentIOCount++;
 
             if (m_LoadQueue != null && m_LoadQueue.Count > 0 && m_LoadQueue[0] != null)
@@ -436,7 +424,7 @@ namespace OpenTibiaUnity.Core.MiniMap
         }
 
         // used in export MiniMap
-        public void SaveSectors() {
+        internal void SaveSectors() {
             foreach (var sector in m_SaveQueue)
                 sector.SaveSharedObject();
 

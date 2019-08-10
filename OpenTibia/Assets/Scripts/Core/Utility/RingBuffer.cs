@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 
 namespace OpenTibiaUnity.Core.Utility
 {
-    public class RingBuffer<T>
+    public class RingBuffer<T> : IEnumerable<T>
     {
         private T[] m_Data;
         private int m_Offset;
@@ -127,6 +129,15 @@ namespace OpenTibiaUnity.Core.Utility
             T other = m_Data[localIndex];
             m_Data[localIndex] = other;
             return other;
+        }
+
+        public IEnumerator<T> GetEnumerator() {
+            for (int i = 0; i < m_Length; i++)
+                yield return GetItemAt(i);
+        }
+
+        IEnumerator IEnumerable.GetEnumerator() {
+            return GetEnumerator();
         }
     }
 }

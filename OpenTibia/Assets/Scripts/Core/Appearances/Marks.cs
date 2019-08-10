@@ -2,38 +2,38 @@
 
 namespace OpenTibiaUnity.Core.Appearances
 {
-    public class Marks
+    internal class Marks
     {
         
-        public class MarksChangeEvent : UnityEngine.Events.UnityEvent<Marks> { }
+        internal class MarksChangeEvent : UnityEngine.Events.UnityEvent<Marks> { }
 
-        public const uint MarkNumColors = 216;
-        public const uint MarkAim = MarkNumColors + 1;
-        public const uint MarkAimAttack = MarkNumColors + 2;
-        public const uint MarkAimFollow = MarkNumColors + 3;
-        public const uint MarkAttack = MarkNumColors + 4;
-        public const uint MarkFollow = MarkNumColors + 5;
-        public const uint MarksNumTotal = MarkFollow + 1;
-        public const uint MarkUnmarked = 255;
+        internal const uint MarkNumColors = 216;
+        internal const uint MarkAim = MarkNumColors + 1;
+        internal const uint MarkAimAttack = MarkNumColors + 2;
+        internal const uint MarkAimFollow = MarkNumColors + 3;
+        internal const uint MarkAttack = MarkNumColors + 4;
+        internal const uint MarkFollow = MarkNumColors + 5;
+        internal const uint MarksNumTotal = MarkFollow + 1;
+        internal const uint MarkUnmarked = 255;
 
-        public MarksChangeEvent onMarksChange = new MarksChangeEvent();
+        internal MarksChangeEvent onMarksChange = new MarksChangeEvent();
 
-        private Dictionary<MarkTypes, MarkBase> m_CurrentMarks;
+        private Dictionary<MarkType, MarkBase> m_CurrentMarks;
 
-        public Dictionary<MarkTypes, MarkBase> CurrentMarks { get => m_CurrentMarks; }
+        internal Dictionary<MarkType, MarkBase> CurrentMarks { get => m_CurrentMarks; }
 
-        public uint GetMarkColor(MarkTypes markTypes) {
+        internal uint GetMarkColor(MarkType markTypes) {
             if (m_CurrentMarks != null && m_CurrentMarks.TryGetValue(markTypes, out MarkBase markBase))
                 return markBase.MarkColor;
 
             return MarkUnmarked;
         }
 
-        public bool AreAnyMarksSet(IEnumerable<MarkTypes> markTypes) {
+        internal bool AreAnyMarksSet(IEnumerable<MarkType> markTypes) {
             if (m_CurrentMarks == null)
                 return false;
             
-            foreach (MarkTypes markType in markTypes) {
+            foreach (MarkType markType in markTypes) {
                 if (IsMarkSet(markType))
                     return true;
             }
@@ -41,11 +41,11 @@ namespace OpenTibiaUnity.Core.Appearances
             return false;
         }
 
-        public bool AreAllMarksSet(IEnumerable<MarkTypes> markTypes) {
+        internal bool AreAllMarksSet(IEnumerable<MarkType> markTypes) {
             if (m_CurrentMarks == null)
                 return false;
 
-            foreach (MarkTypes markType in markTypes) {
+            foreach (MarkType markType in markTypes) {
                 if (!IsMarkSet(markType))
                     return false;
             }
@@ -53,7 +53,7 @@ namespace OpenTibiaUnity.Core.Appearances
             return true;
         }
 
-        public bool IsMarkSet(MarkTypes markType) {
+        internal bool IsMarkSet(MarkType markType) {
             if (m_CurrentMarks == null)
                 return false;
 
@@ -65,7 +65,7 @@ namespace OpenTibiaUnity.Core.Appearances
             return false;
         }
 
-        public void Clear() {
+        internal void Clear() {
             if (m_CurrentMarks != null && m_CurrentMarks.Count > 0) {
                 m_CurrentMarks.Clear();
 
@@ -73,18 +73,18 @@ namespace OpenTibiaUnity.Core.Appearances
             }
         }
 
-        public void SetMark(MarkTypes markType, uint color) {
+        internal void SetMark(MarkType markType, uint color) {
             if (m_CurrentMarks == null) {
                 if (color == MarkUnmarked)
                     return;
                 else
-                    m_CurrentMarks = new Dictionary<MarkTypes, MarkBase>();
+                    m_CurrentMarks = new Dictionary<MarkType, MarkBase>();
             }
 
             MarkBase _;
             if (!m_CurrentMarks.TryGetValue(markType, out _)) {
-                if (markType == MarkTypes.OneSecondTemp)
-                    m_CurrentMarks.Add(MarkTypes.OneSecondTemp, new MarkTimeOut(1000));
+                if (markType == MarkType.OneSecondTemp)
+                    m_CurrentMarks.Add(MarkType.OneSecondTemp, new MarkTimeOut(1000));
                 else
                     m_CurrentMarks.Add(markType, new MarkBase());
             }
@@ -109,38 +109,38 @@ namespace OpenTibiaUnity.Core.Appearances
         }
     }
 
-    public class MarkBase
+    internal class MarkBase
     {
         protected uint m_MarkColor = 0;
-        public uint MarkColor { get { return m_MarkColor; } }
+        internal uint MarkColor { get { return m_MarkColor; } }
 
-        public virtual void Set(uint color) {
+        internal virtual void Set(uint color) {
             m_MarkColor = color;
         }
 
-        public virtual bool IsSet {
+        internal virtual bool IsSet {
             get {
                 return m_MarkColor != Marks.MarkUnmarked;
             }
         }
     }
 
-    public class MarkTimeOut : MarkBase
+    internal class MarkTimeOut : MarkBase
     {
         System.Timers.Timer m_Timer;
         int m_TimeoutMilliseconds;
         int m_SetTime;
 
-        public MarkTimeOut(int millis) {
+        internal MarkTimeOut(int millis) {
             m_TimeoutMilliseconds = millis;
         }
 
-        public override void Set(uint color) {
+        internal override void Set(uint color) {
             m_MarkColor = 0;
             m_SetTime = OpenTibiaUnity.TicksMillis;
         }
 
-        public override bool IsSet {
+        internal override bool IsSet {
             get {
                 return base.IsSet && m_SetTime + m_TimeoutMilliseconds > OpenTibiaUnity.TicksMillis;
             }

@@ -1,37 +1,72 @@
 ﻿namespace OpenTibiaUnity.Core.Utility
 {
-    public sealed class OperatingSystem
+    internal enum OperatingSystem
     {
-        public static readonly byte None = 0;
+        None = 0,
+        DeprecatedLinux = 1,
+        DeprecatedWindows = 2,
+        DeprecatedFlash = 3,
 
-        public static readonly byte DeprecatedLinux = 1;
-        public static readonly byte DeprecatedWindows = 2;
-        public static readonly byte DeprecatedFlash = 3;
+        CipsoftLinux = 4,
+        CipsoftWindows = 5,
+        CipsoftMacOS = 6,
 
-        public static readonly byte OTClientLinux = 10;
-        public static readonly byte OTClientWindows = 11;
-        public static readonly byte OTClientMac = 12;
+        OTClientLinux = 10,
+        OTClientWindows = 11,
+        OTClientMax = 12,
 
-        public static readonly byte UnityLinux = 20;
-        public static readonly byte UnityWindows = 21;
-        public static readonly byte UnityWindowsUniversal = 22;
-        public static readonly byte UnityOSX = 23;
-        public static readonly byte UnityIOS = 24;
-        public static readonly byte UnityAndroid = 25;
+        UnityLinux = 20,
+        UnityWindows = 21,
+        UnityWindowsUniversal = 22,
+        UnityOSX = 23,
+        UnityIOS = 24,
+        UnityAndroid = 25,
+        UnityUnknown = 26,
+    }
+    
+    internal static class Utility
+    {
+        internal static OperatingSystem GetCurrentOs() {
+            if (OpenTibiaUnity.GameManager.IsRealTibia || OpenTibiaUnity.GameManager.IsOpenTibia)
+                return GetRealTibiaOS();
 
-        public static byte GetCurrentOs() {
 #if UNITY_STANDALONE_LINUX
-            return UnityLinux;
+            return OperatingSystem.UnityLinux;
 #elif UNITY_STANDALONE_WIN
-            return OTClientWindows; // TODO UnityWindows
+            return OperatingSystem.UnityWindows;
 #elif UNITY_WSA
-            return UnityWindowsUniversal;
+            return OperatingSystem.UnityWindowsUniversal;
 #elif UNITY_STANDALONE_OSX
-            return UnityLinux;
+            return OperatingSystem.UnityLinux;
 #elif UNITY_IOS
-            return UnityIOS;
+            return OperatingSystem.UnityIOS;
 #elif UNITY_ANDROID
-            return UnityAndroid;
+            return OperatingSystem.UnityAndroid;
+#else
+            return OperatingSystem.UnityUnknown;
+#endif
+        }
+
+        private static OperatingSystem GetRealTibiaOS() {
+            if (OpenTibiaUnity.GameManager.ClientVersion < 1100)
+                return GetDeprecatedRealTibiaOS();
+
+#if UNITY_STANDALONE_LINUX
+            return OperatingSystem.CipsoftLinux;
+#elif UNITY_STANDALONE_WIN
+            return OperatingSystem.CipsoftWindows;
+#else
+            return OperatingSystem.CipsoftMacOS;
+#endif
+        }
+
+        private static OperatingSystem GetDeprecatedRealTibiaOS() {
+#if UNITY_STANDALONE_LINUX
+            return OperatingSystem.DeprecatedLinux;
+#elif UNITY_STANDALONE_WIN
+            return OperatingSystem.DeprecatedWindows;
+#else
+            return OperatingSystem.DeprecatedFlash;
 #endif
         }
     }
