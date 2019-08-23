@@ -4,12 +4,12 @@
     {
         protected const int NumDataPoints = 15;
 
-        protected double[] m_DataPoints;
-        protected uint[] m_DataTimestamps;
+        protected double[] _dataPoints;
+        protected uint[] _dataTimestamps;
 
         public SkillCounter() {
-            m_DataPoints = new double[SkillCounter.NumDataPoints];
-            m_DataTimestamps = new uint[SkillCounter.NumDataPoints];
+            _dataPoints = new double[SkillCounter.NumDataPoints];
+            _dataTimestamps = new uint[SkillCounter.NumDataPoints];
             Reset();
         }
 
@@ -19,11 +19,11 @@
 
             uint ticks = (uint)(OpenTibiaUnity.TicksMillis / 60000);
             int index = (int)(ticks % SkillCounter.NumDataPoints);
-            if (m_DataTimestamps[index] != ticks) {
-                m_DataTimestamps[index] = ticks;
-                m_DataPoints[index] = gain;
+            if (_dataTimestamps[index] != ticks) {
+                _dataTimestamps[index] = ticks;
+                _dataPoints[index] = gain;
             } else {
-                m_DataPoints[index] = m_DataPoints[index] + gain;
+                _dataPoints[index] = _dataPoints[index] + gain;
             }
         }
 
@@ -31,8 +31,8 @@
             double avg = 0;
             uint ticks = (uint)(OpenTibiaUnity.TicksMillis / 60000);
             for (int i = SkillCounter.NumDataPoints - 1; i >= 0; i--) {
-                if (m_DataTimestamps[i] + SkillCounter.NumDataPoints >= ticks)
-                    avg += m_DataPoints[i];
+                if (_dataTimestamps[i] + SkillCounter.NumDataPoints >= ticks)
+                    avg += _dataPoints[i];
             }
 
             return (avg * 60) / SkillCounter.NumDataPoints;
@@ -40,8 +40,8 @@
 
         public void Reset() {
             for (int i = 0; i < SkillCounter.NumDataPoints; i++) {
-                m_DataPoints[i] = 0;
-                m_DataTimestamps[i] = 0;
+                _dataPoints[i] = 0;
+                _dataTimestamps[i] = 0;
             }
         }
     }

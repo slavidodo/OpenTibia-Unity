@@ -8,20 +8,20 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Battle
 {
-    internal class BattleWindow : MiniWindow, IUseWidget, IMoveWidget
+    public class BattleWindow : MiniWindow, IUseWidget, IMoveWidget
     {
-        [SerializeField] private RectTransform m_FiltersPanel = null;
-        [SerializeField] private RectTransform m_BattleList = null;
-        [SerializeField] private BattleCreature m_BattleCreaturePrefab = null;
+        [SerializeField] private RectTransform _filtersPanel = null;
+        [SerializeField] private RectTransform _battleList = null;
+        [SerializeField] private BattleCreature _battleCreaturePrefab = null;
 
-        [SerializeField] private Button m_ShowSortTypesButton = null;
-        [SerializeField] private Toggle m_FiltersPanelToggle = null;
-        [SerializeField] private Toggle m_FilterPlayersToggle = null;
-        [SerializeField] private Toggle m_FilterNPCsToggle = null;
-        [SerializeField] private Toggle m_FilterMonstersToggle = null;
-        [SerializeField] private Toggle m_FilterNonSkulledToggle = null;
-        [SerializeField] private Toggle m_FilterPartyToggle = null;
-        [SerializeField] private Toggle m_FilterSummonsToggle = null;
+        [SerializeField] private Button _showSortTypesButton = null;
+        [SerializeField] private Toggle _filtersPanelToggle = null;
+        [SerializeField] private Toggle _filterPlayersToggle = null;
+        [SerializeField] private Toggle _filterNPCsToggle = null;
+        [SerializeField] private Toggle _filterMonstersToggle = null;
+        [SerializeField] private Toggle _filterNonSkulledToggle = null;
+        [SerializeField] private Toggle _filterPartyToggle = null;
+        [SerializeField] private Toggle _filterSummonsToggle = null;
 
         protected override void Start() {
             base.Start();
@@ -29,20 +29,20 @@ namespace OpenTibiaUnity.Modules.Battle
             OpenTibiaUnity.CreatureStorage.onOpponentsRefreshed.AddListener(OnOpponentsRefreshed);
             OpenTibiaUnity.CreatureStorage.onOpponentsRebuilt.AddListener(OnOpponentsRebuilt);
 
-            m_FiltersPanelToggle.onValueChanged.AddListener(OnToggleFilters);
-            m_FilterPlayersToggle.onValueChanged.AddListener((value) => ToggleOpponentsFilter(OpponentFilters.Players, value));
-            m_FilterNPCsToggle.onValueChanged.AddListener((value) => ToggleOpponentsFilter(OpponentFilters.NPCs, value));
-            m_FilterMonstersToggle.onValueChanged.AddListener((value) => ToggleOpponentsFilter(OpponentFilters.Monsters, value));
-            m_FilterNonSkulledToggle.onValueChanged.AddListener((value) => ToggleOpponentsFilter(OpponentFilters.NonSkulled, value));
-            m_FilterPartyToggle.onValueChanged.AddListener((value) => ToggleOpponentsFilter(OpponentFilters.Party, value));
-            m_FilterSummonsToggle.onValueChanged.AddListener((value) => ToggleOpponentsFilter(OpponentFilters.Summons, value));
+            _filtersPanelToggle.onValueChanged.AddListener(OnToggleFilters);
+            _filterPlayersToggle.onValueChanged.AddListener((value) => ToggleOpponentsFilter(OpponentFilters.Players, value));
+            _filterNPCsToggle.onValueChanged.AddListener((value) => ToggleOpponentsFilter(OpponentFilters.NPCs, value));
+            _filterMonstersToggle.onValueChanged.AddListener((value) => ToggleOpponentsFilter(OpponentFilters.Monsters, value));
+            _filterNonSkulledToggle.onValueChanged.AddListener((value) => ToggleOpponentsFilter(OpponentFilters.NonSkulled, value));
+            _filterPartyToggle.onValueChanged.AddListener((value) => ToggleOpponentsFilter(OpponentFilters.Party, value));
+            _filterSummonsToggle.onValueChanged.AddListener((value) => ToggleOpponentsFilter(OpponentFilters.Summons, value));
         }
 
         protected void OnOpponentsRefreshed(List<Creature> opponents) {
             var copy = new List<Creature>(opponents);
 
-            for (int i = 0; i < m_BattleList.childCount; i++) {
-                var child = m_BattleList.GetChild(i).GetComponent<BattleCreature>();
+            for (int i = 0; i < _battleList.childCount; i++) {
+                var child = _battleList.GetChild(i).GetComponent<BattleCreature>();
 
                 int index = opponents.IndexOf(child.Creature);
                 if (index == -1) {
@@ -56,8 +56,8 @@ namespace OpenTibiaUnity.Modules.Battle
 
         protected void OnOpponentsRebuilt(List<Creature> opponents) {
             Dictionary<Creature, BattleCreature> existingOpponents = new Dictionary<Creature, BattleCreature>();
-            for (int i = 0; i < m_BattleList.childCount; i++) {
-                var child = m_BattleList.GetChild(i).GetComponent<BattleCreature>();
+            for (int i = 0; i < _battleList.childCount; i++) {
+                var child = _battleList.GetChild(i).GetComponent<BattleCreature>();
                 if (opponents.Contains(child.Creature))
                     existingOpponents.Add(child.Creature, child);
                 else
@@ -68,7 +68,7 @@ namespace OpenTibiaUnity.Modules.Battle
             foreach (var creature in opponents) {
                 if (existingOpponents.TryGetValue(creature, out BattleCreature battleCreature))
                     battleCreature.transform.SetSiblingIndex(index);
-                else if (battleCreature = Instantiate(m_BattleCreaturePrefab, m_BattleList))
+                else if (battleCreature = Instantiate(_battleCreaturePrefab, _battleList))
                     battleCreature.UpdateDetails(creature);
                 
                 index++;
@@ -76,15 +76,15 @@ namespace OpenTibiaUnity.Modules.Battle
         }
 
         protected void OnToggleFilters(bool value) {
-            m_FiltersPanel.gameObject.SetActive(value);
+            _filtersPanel.gameObject.SetActive(value);
         }
 
         protected override void OnClientVersionChange(int _, int newVersion) {
             bool isTibia11 = newVersion >= 1100;
 
-            m_FiltersPanelToggle.gameObject.SetActive(isTibia11);
-            m_ShowSortTypesButton.gameObject.SetActive(isTibia11);
-            m_FiltersPanel.gameObject.SetActive(isTibia11 && m_FiltersPanelToggle.isOn);
+            _filtersPanelToggle.gameObject.SetActive(isTibia11);
+            _showSortTypesButton.gameObject.SetActive(isTibia11);
+            _filtersPanel.gameObject.SetActive(isTibia11 && _filtersPanelToggle.isOn);
         }
 
         protected void ToggleOpponentsFilter(OpponentFilters filter, bool value) {

@@ -11,12 +11,12 @@ namespace OpenTibiaUnity.Modules.GameWindow
         public UnityEvent onPointerEnter;
         public UnityEvent onPointerExit;
 
-        private RawImage m_RawImage;
+        private RawImage _rawImage;
         public RawImage rawImage {
             get {
-                if (!m_RawImage)
-                    m_RawImage = GetComponent<RawImage>();
-                return m_RawImage;
+                if (!_rawImage)
+                    _rawImage = GetComponent<RawImage>();
+                return _rawImage;
             }
         }
 

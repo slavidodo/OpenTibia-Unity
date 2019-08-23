@@ -1,7 +1,7 @@
 ﻿namespace OpenTibiaUnity.Core.Communication.Exceptions
 {
-    internal class ByteArrayInalidModeException : System.Exception
+    public class ByteArrayInalidModeException : System.Exception
     {
-        internal ByteArrayInalidModeException(string message) : base(message) { }
+        public ByteArrayInalidModeException(string message) : base(message) { }
     }
 }

@@ -1,55 +1,59 @@
 ﻿namespace OpenTibiaUnity.Core.Appearances
 {
-    internal class AppearanceTypeRef
+    public class AppearanceTypeRef
     {
-        protected int m_ID;
-        protected int m_Data;
-        private int m_Key;
+        protected ushort _id;
+        protected int _data;
+        private int _key;
 
-        internal AppearanceTypeRef(int id, int data) {
-            m_ID = id;
-            m_Data = data;
-            m_Key = (m_ID & 65535) << 8 | m_Data & 255;
+        public ushort Id { get => _id; }
+        public int Data { get => _data; }
+        public int Key { get => _key; }
+
+        public AppearanceTypeRef(ushort id, int data) {
+            _id = id;
+            _data = data;
+            _key = (_id & 65535) << 8 | _data & 255;
         }
 
-        internal bool Equals(AppearanceTypeRef other) {
+        public bool Equals(AppearanceTypeRef other) {
             return Equals(this, other);
         }
 
-        internal bool Equals(int id, int data) {
+        public bool Equals(int id, int data) {
             return Equals(this, id, data);
         }
 
-        internal int Compare(AppearanceTypeRef other) {
+        public int Compare(AppearanceTypeRef other) {
             return Compare(this, other);
         }
 
-        internal int Compare(int id, int data) {
+        public int Compare(int id, int data) {
             return Compare(this, id, data);
         }
 
-        internal static int Compare(AppearanceTypeRef a, AppearanceTypeRef other) {
+        public static int Compare(AppearanceTypeRef a, AppearanceTypeRef other) {
             if (a != null && other != null)
-                return a.m_Key - other.m_Key;
+                return a._key - other._key;
             return -1;
         }
 
-        internal static int Compare(AppearanceTypeRef a, int id, int data) {
+        public static int Compare(AppearanceTypeRef a, int id, int data) {
             if (a != null)
-                return a.m_Key - (id & 65535) << 8 | data & 255;
+                return a._key - (id & 65535) << 8 | data & 255;
             return -1;
         }
 
-        internal static bool Equals(AppearanceTypeRef a, AppearanceTypeRef other) {
-            return a != null && other != null && a.m_Key == other.m_Key;
+        public static bool Equals(AppearanceTypeRef a, AppearanceTypeRef other) {
+            return a != null && other != null && a._key == other._key;
         }
 
-        internal static bool Equals(AppearanceTypeRef a, int id, int data) {
-            return a != null && a.m_Key == ((id & 65535) << 8 | data & 255);
+        public static bool Equals(AppearanceTypeRef a, int id, int data) {
+            return a != null && a._key == ((id & 65535) << 8 | data & 255);
         }
 
-        internal virtual AppearanceTypeRef Clone() {
-            return new AppearanceTypeRef(m_ID, m_Data);
+        public virtual AppearanceTypeRef Clone() {
+            return new AppearanceTypeRef(_id, _data);
         }
     }
 }

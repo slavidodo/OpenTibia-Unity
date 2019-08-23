@@ -1,39 +1,39 @@
 ﻿namespace OpenTibiaUnity
 {
-    internal static class OpenTibiaUnity
+    public static class OpenTibiaUnity
     {
-        internal static int TicksMillis { get => (int)(UnityEngine.Time.time * 1000); }
-        internal static int TicksSeconds { get => (int)UnityEngine.Time.time; }
-        internal static System.Threading.Thread MainThread { get; set; }
-        internal static string GraphicsVendor { get; set; }
-        internal static string GraphicsDevice { get; set; }
-        internal static string GraphicsVersion { get; set; }
-        internal static int StartupTimeMillis { get; set; } = 0;
-        internal static int DeltaTimeMillis { get => (int)(UnityEngine.Time.deltaTime * 1000); }
-        internal static bool Quiting { get; set; }
+        public static int TicksMillis { get => (int)(UnityEngine.Time.time * 1000); }
+        public static int TicksSeconds { get => (int)UnityEngine.Time.time; }
+        public static System.Threading.Thread MainThread { get; set; }
+        public static string GraphicsVendor { get; set; }
+        public static string GraphicsDevice { get; set; }
+        public static string GraphicsVersion { get; set; }
+        public static int StartupTimeMillis { get; set; } = 0;
+        public static int DeltaTimeMillis { get => (int)(UnityEngine.Time.deltaTime * 1000); }
+        public static bool Quiting { get; set; }
 
-        internal static Core.GameManager GameManager { get => Core.GameManager.Instance; }
-        internal static Core.Communication.Game.ProtocolGame ProtocolGame {
+        public static Core.GameManager GameManager { get => Core.GameManager.Instance; }
+        public static Core.Communication.Game.ProtocolGame ProtocolGame {
             get => GameManager?.ProtocolGame;
             set { if (GameManager != null) GameManager.ProtocolGame = value; }
         }
-        internal static UnityEngine.UI.GraphicRaycaster ActiveRaycaster { get => GameManager?.ActiveRaycaster; }
-        internal static UnityEngine.EventSystems.EventSystem EventSystem { get => GameManager?.EventSystem; }
-        internal static Core.Creatures.CreatureStorage CreatureStorage { get => GameManager?.CreatureStorage; }
-        internal static Core.Creatures.Player Player { get => CreatureStorage?.Player; }
-        internal static Core.Appearances.AppearanceStorage AppearanceStorage { get => GameManager?.AppearanceStorage; }
-        internal static Core.WorldMap.WorldMapStorage WorldMapStorage { get => GameManager?.WorldMapStorage; }
-        internal static Core.WorldMap.Rendering.WorldMapRenderer WorldMapRenderer { get => GameManager?.WorldMapRenderer; }
-        internal static Core.MiniMap.MiniMapStorage MiniMapStorage { get => GameManager?.MiniMapStorage; }
-        internal static Core.MiniMap.Rendering.MiniMapRenderer MiniMapRenderer { get => GameManager?.MiniMapRenderer; }
-        internal static Core.Options.OptionStorage OptionStorage { get => GameManager?.OptionStorage; }
-        internal static Core.Input.InputHandler InputHandler { get => GameManager?.InputHandler; }
-        internal static Core.Chat.ChatStorage ChatStorage { get => GameManager?.ChatStorage; }
-        internal static Core.Chat.MessageStorage MessageStorage { get => GameManager?.MessageStorage; }
-        internal static Core.Container.ContainerStorage ContainerStorage { get => GameManager?.ContainerStorage; }
-        internal static Core.Magic.SpellStorage SpellStorage { get => GameManager?.SpellStorage; }
+        public static UnityEngine.UI.GraphicRaycaster ActiveRaycaster { get => GameManager?.ActiveRaycaster; }
+        public static UnityEngine.EventSystems.EventSystem EventSystem { get => GameManager?.EventSystem; }
+        public static Core.Creatures.CreatureStorage CreatureStorage { get => GameManager?.CreatureStorage; }
+        public static Core.Creatures.Player Player { get => CreatureStorage?.Player; }
+        public static Core.Appearances.AppearanceStorage AppearanceStorage { get => GameManager?.AppearanceStorage; }
+        public static Core.WorldMap.WorldMapStorage WorldMapStorage { get => GameManager?.WorldMapStorage; }
+        public static Core.WorldMap.Rendering.WorldMapRenderer WorldMapRenderer { get => GameManager?.WorldMapRenderer; }
+        public static Core.MiniMap.MiniMapStorage MiniMapStorage { get => GameManager?.MiniMapStorage; }
+        public static Core.MiniMap.Rendering.MiniMapRenderer MiniMapRenderer { get => GameManager?.MiniMapRenderer; }
+        public static Core.Options.OptionStorage OptionStorage { get => GameManager?.OptionStorage; }
+        public static Core.Input.InputHandler InputHandler { get => GameManager?.InputHandler; }
+        public static Core.Chat.ChatStorage ChatStorage { get => GameManager?.ChatStorage; }
+        public static Core.Chat.MessageStorage MessageStorage { get => GameManager?.MessageStorage; }
+        public static Core.Container.ContainerStorage ContainerStorage { get => GameManager?.ContainerStorage; }
+        public static Core.Magic.SpellStorage SpellStorage { get => GameManager?.SpellStorage; }
 
-        internal static int[] GetClientVersions() {
+        public static int[] GetClientVersions() {
             return new int[] {
             740, 741, 750, 760, 770, 772,
             780, 781, 782, 790, 792,
@@ -76,10 +76,10 @@
         };
         }
 
-        internal static int GetMinimumClientVersion() => 740;
-        internal static int GetMaximumClientVersion() => 1215;
+        public static int GetMinimumClientVersion() => 740;
+        public static int GetMaximumClientVersion() => 1215;
 
-        internal static int GetProtocolVersion(int clientVersion, int buildVersion) {
+        public static int GetProtocolVersion(int clientVersion, int buildVersion) {
             switch (clientVersion) {
                 case 980: return 971;
                 case 981: return 973;
@@ -108,10 +108,10 @@
             }
         }
 
-        internal static int GetMinimumProtocolVersion() => 740;
-        internal static int GetMaximumProtocolVersion() => 1215;
+        public static int GetMinimumProtocolVersion() => 740;
+        public static int GetMaximumProtocolVersion() => 1215;
 
-        internal static int[] GetBuildVersions(int clientVersion) {
+        public static int[] GetBuildVersions(int clientVersion) {
             if (clientVersion < 1100)
                 return null;
 
@@ -192,10 +192,10 @@
             }
         }
 
-        internal static int GetMinimumBuildVersion() => 3768;
-        internal static int GetMaximumBuildVersion() => 8823;
+        public static int GetMinimumBuildVersion() => 3768;
+        public static int GetMaximumBuildVersion() => 8823;
 
-        internal static ushort GetContentRevision(int clientVersion, int buildVersion) {
+        public static ushort GetContentRevision(int clientVersion, int buildVersion) {
             switch (clientVersion) {
                 case 1104: return 17718;
                 case 1110: return 17782;
@@ -232,7 +232,7 @@
             return 0;
         }
 
-        internal static bool IsTestBuildVersion(int buildVersion) {
+        public static bool IsTestBuildVersion(int buildVersion) {
             switch (buildVersion) {
                 case 8768:
                 case 8786:
@@ -246,7 +246,7 @@
             }
         }
 
-        internal static bool IsRunningInEditor {
+        public static bool IsRunningInEditor {
             get {
 #if UNITY_EDITOR
                 return true;
@@ -256,7 +256,7 @@
             }
         }
 
-        internal static Core.Components.ObjectContextMenu CreateObjectContextMenu(UnityEngine.Vector3Int absolute,
+        public static Core.Components.ObjectContextMenu CreateObjectContextMenu(UnityEngine.Vector3Int absolute,
             Core.Appearances.ObjectInstance lookObject, int lookObjectStackPos,
             Core.Appearances.ObjectInstance useObject, int useObjectStackPos,
             Core.Creatures.Creature creature) {

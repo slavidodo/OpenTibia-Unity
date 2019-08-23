@@ -1,7 +1,7 @@
 ﻿namespace OpenTibiaUnity.Core.Communication.Exceptions
 {
-    internal class ByteArrayEOFException : System.Exception
+    public class ByteArrayEOFException : System.Exception
     {
-        internal ByteArrayEOFException(string message) : base(message) { }
+        public ByteArrayEOFException(string message) : base(message) { }
     }
 }

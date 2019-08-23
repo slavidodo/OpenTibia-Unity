@@ -16,38 +16,38 @@ namespace OpenTibiaUnity.Core.Appearances.Provider
             new Vector2Int(2, 2)
         };
 
-        private uint m_FirstSpriteID = 0;
-        private uint m_LastSpriteID = 0;
-        private uint m_SpriteType = 0;
-        private string m_FileName = null;
+        private uint _firstSprite_id = 0;
+        private uint _lastSprite_id = 0;
+        private uint _spriteType = 0;
+        private string _fileName = null;
 
-        public uint FirstSpriteID { get => m_FirstSpriteID; }
-        public uint LastSpriteID { get => m_LastSpriteID; }
-        public uint SpriteType { get => m_SpriteType; }
-        public string FileName { get => m_FileName; }
+        public uint FirstSprite_id { get => _firstSprite_id; }
+        public uint LastSprite_id { get => _lastSprite_id; }
+        public uint SpriteType { get => _spriteType; }
+        public string FileName { get => _fileName; }
 
         public SpritesAsset(uint firstSpriteId, uint lastSpriteId, uint spriteType, string filename) {
-            m_FirstSpriteID = firstSpriteId;
-            m_LastSpriteID = lastSpriteId;
-            m_SpriteType = spriteType;
-            m_FileName = filename;
+            _firstSprite_id = firstSpriteId;
+            _lastSprite_id = lastSpriteId;
+            _spriteType = spriteType;
+            _fileName = filename;
         }
 
-        public Rendering.CachedSpriteInformation GetCachedSpriteInformation(uint spriteID, AssetBundle assetBundle) {
-            Texture2D tex2D = assetBundle.LoadAsset<Texture2D>(m_FileName);
+        public Rendering.CachedSpriteInformation GetCachedSpriteInformation(uint sprite_id, AssetBundle assetBundle) {
+            Texture2D tex2D = assetBundle.LoadAsset<Texture2D>(_fileName);
             if (!tex2D)
                 return null;
 
-            var realSpriteSize = s_SpritesAssetSizesRef[m_SpriteType - 1] * Constants.FieldSize;
-            uint realID = spriteID - m_FirstSpriteID;
+            var realSpriteSize = s_SpritesAssetSizesRef[_spriteType - 1] * Constants.FieldSize;
+            uint real_id = sprite_id - _firstSprite_id;
             int texPerRow = AtlasTexture_Width / realSpriteSize.x;
-            int x = (int)((realID % texPerRow) * realSpriteSize.x);
-            int y = (int)(realID / texPerRow * realSpriteSize.y);
+            int x = (int)((real_id % texPerRow) * realSpriteSize.x);
+            int y = (int)(real_id / texPerRow * realSpriteSize.y);
             y = AtlasTexture_Height - y - (int)realSpriteSize.y;
             
             var spriteRect = new Rect(x / (float)AtlasTexture_Width, y / (float)AtlasTexture_Height, realSpriteSize.x / AtlasTexture_Width, realSpriteSize.y / AtlasTexture_Height);
 
-            return new Rendering.CachedSpriteInformation(spriteID, tex2D, spriteRect, realSpriteSize);
+            return new Rendering.CachedSpriteInformation(sprite_id, tex2D, spriteRect, realSpriteSize);
         }
 
         public static List<SpritesAsset> ParseJsonContents(JArray jArray) {
@@ -58,14 +58,14 @@ namespace OpenTibiaUnity.Core.Appearances.Provider
 
                 if (!@object.TryGetValue("file", out JToken fileToken)
                    || !@object.TryGetValue("spritetype", out JToken spriteTypeToken)
-                   || !@object.TryGetValue("firstspriteid", out JToken firstSpriteIDToken)
-                   || !@object.TryGetValue("lastspriteid", out JToken lastSpriteIDToken))
+                   || !@object.TryGetValue("firstspriteid", out JToken firstSprite_idToken)
+                   || !@object.TryGetValue("lastspriteid", out JToken lastSprite_idToken))
                     continue;
 
                 try {
                     spritesAssets.Add(new SpritesAsset(
-                        (uint)firstSpriteIDToken,
-                        (uint)lastSpriteIDToken,
+                        (uint)firstSprite_idToken,
+                        (uint)lastSprite_idToken,
                         (uint)spriteTypeToken,
                         (string)fileToken));
                 } catch (System.InvalidCastException) { }

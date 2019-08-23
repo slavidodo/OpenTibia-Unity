@@ -4,18 +4,18 @@ namespace OpenTibiaUnity.Core.Input.GameAction
 {
     public class AutowalkActionImpl : IActionImpl
     {
-        Vector3Int m_Destination;
-        bool m_ForceDiagonal;
-        bool m_ForceExact;
+        Vector3Int _destination;
+        bool _forceDiagonal;
+        bool _forceExact;
 
         public AutowalkActionImpl(Vector3Int absolutePosition, bool diagonal, bool exact) {
-            m_Destination = absolutePosition;
-            m_ForceDiagonal = diagonal;
-            m_ForceExact = exact;
+            _destination = absolutePosition;
+            _forceDiagonal = diagonal;
+            _forceExact = exact;
         }
 
         public void Perform(bool _ = false) {
-            OpenTibiaUnity.Player.StartAutowalk(m_Destination, m_ForceDiagonal, m_ForceExact);
+            OpenTibiaUnity.Player.StartAutowalk(_destination, _forceDiagonal, _forceExact);
         }
     }
 }

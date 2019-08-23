@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Appearances.Rendering
 {
-    internal class MarksView
+    public class MarksView
     {
         private static Color[] s_FrameColors;
         private static Material s_Material;
@@ -25,25 +25,25 @@ namespace OpenTibiaUnity.Core.Appearances.Rendering
             s_Material = new Material(Shader.Find("Hidden/Internal-Colored"));
         }
 
-        private List<MarksViewInformation> m_MarksViewInformations;
-        private uint m_MarksStartSize;
+        private List<MarksViewInformation> _marksViewInformations;
+        private uint _marksStartSize;
 
-        internal uint MarksStartSize { get => m_MarksStartSize; set => m_MarksStartSize = value; }
+        public uint MarksStartSize { get => _marksStartSize; set => _marksStartSize = value; }
 
-        internal MarksView(uint marksStartSize = 0) {
+        public MarksView(uint marksStartSize = 0) {
             if (marksStartSize >= FrameSizesCount)
                 throw new System.Exception("MarksView.MarksView: Invalid marks start size.");
-            m_MarksStartSize = marksStartSize;
-            m_MarksViewInformations = new List<MarksViewInformation>();
+            _marksStartSize = marksStartSize;
+            _marksViewInformations = new List<MarksViewInformation>();
         }
 
-        internal void AddMarkToView(MarkType markType, uint thinkness) {
+        public void AddMarkToView(MarkType markType, uint thinkness) {
             if (thinkness != Constants.MarkThicknessThin && thinkness != Constants.MarkThicknessBold) {
                 throw new System.Exception("MarksView.addMarkToView: Invalid marks thickness: " + thinkness);
             }
 
-            uint size = m_MarksStartSize;
-            foreach (var markInformation in m_MarksViewInformations)
+            uint size = _marksStartSize;
+            foreach (var markInformation in _marksViewInformations)
                 size = size + markInformation.MarkThickness;
 
             if (size + thinkness >= FrameSizesCount)
@@ -53,10 +53,10 @@ namespace OpenTibiaUnity.Core.Appearances.Rendering
             information.MarkType = markType;
             information.MarkThickness = thinkness;
 
-            m_MarksViewInformations.Add(information);
+            _marksViewInformations.Add(information);
         }
 
-        internal void DrawMarks(Marks marks, float screenX, float screenY, Vector2 zoom) {
+        public void DrawMarks(Marks marks, float screenX, float screenY, Vector2 zoom) {
             Rect screenRect = new Rect() {
                 x = screenX * zoom.x,
                 y = screenY * zoom.y,
@@ -64,11 +64,11 @@ namespace OpenTibiaUnity.Core.Appearances.Rendering
                 height = Constants.FieldSize * zoom.y,
             };
 
-            var size = m_MarksStartSize;
+            var size = _marksStartSize;
             var tex2d = OpenTibiaUnity.GameManager.MarksViewTexture;
             var material = OpenTibiaUnity.GameManager.MarksViewMaterial;
 
-            foreach (var information in m_MarksViewInformations) {
+            foreach (var information in _marksViewInformations) {
                 if (!marks.IsMarkSet(information.MarkType))
                     continue;
 
@@ -95,9 +95,9 @@ namespace OpenTibiaUnity.Core.Appearances.Rendering
         }
     }
 
-    internal class MarksViewInformation
+    public class MarksViewInformation
     {
-        internal MarkType MarkType { get; set; } = MarkType.None;
-        internal uint MarkThickness { get; set; } = 1;
+        public MarkType MarkType { get; set; } = MarkType.None;
+        public uint MarkThickness { get; set; } = 1;
     }
 }

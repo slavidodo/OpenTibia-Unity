@@ -4,34 +4,34 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Game
 {
-    internal class ObjectDragImpl
+    public class ObjectDragImpl
     {
         protected static List<IWidgetContainerWidget> s_ObjectDragImpls;
 
-        internal static bool AnyDraggingObject = false;
+        public static bool AnyDraggingObject = false;
     }
 
-    internal sealed class ObjectDragImpl<T> : ObjectDragImpl where T : IMoveWidget, IWidgetContainerWidget
+    public sealed class ObjectDragImpl<T> : ObjectDragImpl where T : IMoveWidget, IWidgetContainerWidget
     {
-        private T m_MoveWidget = default;
+        private T _moveWidget = default;
 
-        private Appearances.ObjectInstance m_DragObject;
-        private int m_DragStackPos = -1;
-        private Vector3Int m_DragStart = Vector3Int.zero;
+        private Appearances.ObjectInstance _dragObject;
+        private int _dragStackPos = -1;
+        private Vector3Int _dragStart = Vector3Int.zero;
 
-        private bool m_DragStarted = false;
-        internal bool DragStarted {
-            get => m_DragStarted;
+        private bool _dragStarted = false;
+        public bool DragStarted {
+            get => _dragStarted;
         }
 
-        internal ObjectDragImpl(T moveWidget) {
+        public ObjectDragImpl(T moveWidget) {
             var inputHandler = OpenTibiaUnity.InputHandler;
             if (inputHandler != null) {
-                inputHandler.AddBeginDragListener(Utility.EventImplPriority.High, OnDragBegin);
-                inputHandler.AddEndDragListener(Utility.EventImplPriority.High, OnDragEnd);
+                inputHandler.AddBeginDragListener(Utils.EventImplPriority.High, OnDragBegin);
+                inputHandler.AddEndDragListener(Utils.EventImplPriority.High, OnDragEnd);
             }
 
-            m_MoveWidget = moveWidget;
+            _moveWidget = moveWidget;
 
             if (s_ObjectDragImpls == null)
                 s_ObjectDragImpls = new List<IWidgetContainerWidget>();
@@ -44,13 +44,13 @@ namespace OpenTibiaUnity.Core.Game
                 return;
             }
 
-            int stackPos = m_MoveWidget.GetMoveObjectUnderPoint(e.mousePosition, out m_DragObject);
+            int stackPos = _moveWidget.GetMoveObjectUnderPoint(e.mousePosition, out _dragObject);
             if (stackPos == -1)
                 return;
             
-            m_DragStart = m_MoveWidget.MousePositionToAbsolutePosition(e.mousePosition).Value;
-            m_DragStarted = true;
-            m_DragStackPos = stackPos;
+            _dragStart = _moveWidget.MousePositionToAbsolutePosition(e.mousePosition).Value;
+            _dragStarted = true;
+            _dragStackPos = stackPos;
             AnyDraggingObject = true;
 
             e.Use();
@@ -58,12 +58,12 @@ namespace OpenTibiaUnity.Core.Game
         }
 
         private void OnDragEnd(Event e, MouseButton mouseButton, bool repeated) {
-            if (!m_DragStarted)
+            if (!_dragStarted)
                 return;
 
             e.Use();
             OpenTibiaUnity.GameManager.CursorController.SetCursorState(CursorState.Default, CursorPriority.High);
-            m_DragStarted = false;
+            _dragStarted = false;
             AnyDraggingObject = false;
 
             Vector3Int? destAbsolute = null;
@@ -84,7 +84,7 @@ namespace OpenTibiaUnity.Core.Game
             else
                 moveAmount = MoveActionImpl.MoveAll;
 
-            new MoveActionImpl(m_DragStart, m_DragObject, m_DragStackPos, destAbsolute.Value, moveAmount).Perform();
+            new MoveActionImpl(_dragStart, _dragObject, _dragStackPos, destAbsolute.Value, moveAmount).Perform();
         }
     }
 }

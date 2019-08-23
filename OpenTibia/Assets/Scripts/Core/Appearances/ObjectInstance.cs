@@ -2,50 +2,50 @@
 
 namespace OpenTibiaUnity.Core.Appearances
 {
-    internal class ObjectInstance : AppearanceInstance
+    public class ObjectInstance : AppearanceInstance
     {
-        protected int m_Hang = 0;
-        protected int m_SpecialPatternX = 0;
-        protected int m_SpecialPatternY = 0;
-        protected Marks m_Marks = new Marks();
-        protected uint m_Data;
-        protected bool m_HasSpecialPattern = false;
+        protected int _hang = 0;
+        protected int _specialPatternX = 0;
+        protected int _specialPatternY = 0;
+        protected Marks _marks = new Marks();
+        protected uint _data;
+        protected bool _hasSpecialPattern = false;
 
-        internal uint Data {
-            get { return m_Data; }
-            set { if (m_Data != value) { m_Data = value; UpdateSpecialPattern(); } }
+        public uint Data {
+            get { return _data; }
+            set { if (_data != value) { _data = value; UpdateSpecialPattern(); } }
         }
 
-        internal int Hang {
-            get { return m_Hang; }
-            set { if (m_Hang != value) { m_Hang = value; UpdateSpecialPattern(); } }
+        public int Hang {
+            get { return _hang; }
+            set { if (_hang != value) { _hang = value; UpdateSpecialPattern(); } }
         }
 
-        internal Marks Marks {
-            get { return m_Marks; }
+        public Marks Marks {
+            get { return _marks; }
         }
 
-        internal bool HasMark {
+        public bool HasMark {
             get { return !!Marks && Marks.IsMarkSet(MarkType.Permenant); }
         }
 
-        internal bool IsCreature {
+        public bool IsCreature {
             get { return !!Type ? Type.IsCreature : false; }
         }
 
-        internal ObjectInstance(uint id, AppearanceType type, uint data) : base(id, type) {
-            m_Data = data;
+        public ObjectInstance(uint id, AppearanceType type, uint data) : base(id, type) {
+            _data = data;
             UpdateSpecialPattern();
         }
 
-        internal override int GetSpriteIndex(int layer, int patternX, int patternY, int patternZ) {
-            patternX = m_SpecialPatternX > 0 ? m_SpecialPatternX : patternX;
-            patternY = m_SpecialPatternY > 0 ? m_SpecialPatternY : patternY;
+        public override int GetSpriteIndex(int layer, int patternX, int patternY, int patternZ) {
+            patternX = _specialPatternX > 0 ? _specialPatternX : patternX;
+            patternY = _specialPatternY > 0 ? _specialPatternY : patternY;
             return base.GetSpriteIndex(layer, patternX, patternY, patternZ);
         }
 
-        internal override void DrawTo(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
-            if (m_HasSpecialPattern) {
+        public override void DrawTo(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+            if (_hasSpecialPattern) {
                 patternX = -1;
                 patternY = -1;
             }
@@ -54,45 +54,45 @@ namespace OpenTibiaUnity.Core.Appearances
         }
 
         protected void UpdateSpecialPattern() {
-            m_HasSpecialPattern = false;
-            if (!m_Type || m_Type.IsCreature)
+            _hasSpecialPattern = false;
+            if (!_type || _type.IsCreature)
                 return;
 
-            if (m_Type.IsStackable) {
-                m_HasSpecialPattern = true;
-                if (m_Data < 2) {
-                    m_SpecialPatternX = 0;
-                    m_SpecialPatternY = 0;
-                } else if (m_Data == 2) {
-                    m_SpecialPatternX = 1;
-                    m_SpecialPatternY = 0;
-                } else if (m_Data == 3) {
-                    m_SpecialPatternX = 2;
-                    m_SpecialPatternY = 0;
-                } else if (m_Data == 4) {
-                    m_SpecialPatternX = 3;
-                    m_SpecialPatternY = 0;
-                } else if (m_Data < 10) {
-                    m_SpecialPatternX = 0;
-                    m_SpecialPatternY = 1;
-                } else if (m_Data < 25) {
-                    m_SpecialPatternX = 1;
-                    m_SpecialPatternY = 1;
-                } else if (m_Data < 50) {
-                    m_SpecialPatternX = 2;
-                    m_SpecialPatternY = 1;
+            if (_type.IsStackable) {
+                _hasSpecialPattern = true;
+                if (_data < 2) {
+                    _specialPatternX = 0;
+                    _specialPatternY = 0;
+                } else if (_data == 2) {
+                    _specialPatternX = 1;
+                    _specialPatternY = 0;
+                } else if (_data == 3) {
+                    _specialPatternX = 2;
+                    _specialPatternY = 0;
+                } else if (_data == 4) {
+                    _specialPatternX = 3;
+                    _specialPatternY = 0;
+                } else if (_data < 10) {
+                    _specialPatternX = 0;
+                    _specialPatternY = 1;
+                } else if (_data < 25) {
+                    _specialPatternX = 1;
+                    _specialPatternY = 1;
+                } else if (_data < 50) {
+                    _specialPatternX = 2;
+                    _specialPatternY = 1;
                 } else {
-                    m_SpecialPatternX = 3;
-                    m_SpecialPatternY = 1;
+                    _specialPatternX = 3;
+                    _specialPatternY = 1;
                 }
 
-                m_SpecialPatternX = m_SpecialPatternX % (int)m_Type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternWidth;
-                m_SpecialPatternY = m_SpecialPatternY % (int)m_Type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternHeight;
-            } else if (m_Type.IsSplash || m_Type.IsFluidContainer) {
-                m_HasSpecialPattern = true;
+                _specialPatternX = _specialPatternX % (int)_type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternWidth;
+                _specialPatternY = _specialPatternY % (int)_type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternHeight;
+            } else if (_type.IsSplash || _type.IsFluidContainer) {
+                _hasSpecialPattern = true;
                 FluidsColor color = FluidsColor.Transparent;
                 if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameNewFluids)) {
-                    switch ((FluidsType)m_Data) {
+                    switch ((FluidsType)_data) {
                         case FluidsType.None:
                             color = FluidsColor.Transparent;
                             break;
@@ -152,22 +152,22 @@ namespace OpenTibiaUnity.Core.Appearances
                             break;
                     }
                 } else {
-                    color = (FluidsColor)m_Data;
+                    color = (FluidsColor)_data;
                 }
                 
-                m_SpecialPatternX = ((int)color & 3) % (int)m_Type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternWidth;
-                m_SpecialPatternY = ((int)color >> 2) % (int)m_Type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternHeight;
-            } else if (m_Type.IsHangable) {
-                m_HasSpecialPattern = true;
-                if (m_Hang == AppearanceInstance.HookSouth) {
-                    m_SpecialPatternX = m_Type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternWidth >= 2 ? 1 : 0;
-                    m_SpecialPatternY = 0;
-                } else if (m_Hang == AppearanceInstance.HookEast) {
-                    m_SpecialPatternX = m_Type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternWidth >= 3 ? 2 : 0;
-                    m_SpecialPatternY = 0;
+                _specialPatternX = ((int)color & 3) % (int)_type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternWidth;
+                _specialPatternY = ((int)color >> 2) % (int)_type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternHeight;
+            } else if (_type.IsHangable) {
+                _hasSpecialPattern = true;
+                if (_hang == AppearanceInstance.HookSouth) {
+                    _specialPatternX = _type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternWidth >= 2 ? 1 : 0;
+                    _specialPatternY = 0;
+                } else if (_hang == AppearanceInstance.HookEast) {
+                    _specialPatternX = _type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternWidth >= 3 ? 2 : 0;
+                    _specialPatternY = 0;
                 } else {
-                    m_SpecialPatternX = 0;
-                    m_SpecialPatternY = 0;
+                    _specialPatternX = 0;
+                    _specialPatternY = 0;
                 }
             }
         }

@@ -4,15 +4,15 @@ namespace OpenTibiaUnity.Modules.Skills
 {
     public class SkillRawPanel : SkillPanel
     {
-        [SerializeField] private TMPro.TextMeshProUGUI m_LabelText = null;
-        [SerializeField] private TMPro.TextMeshProUGUI m_LabelValue = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _labelText = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _labelValue = null;
 
-        internal override TMPro.TextMeshProUGUI labelText { get => m_LabelText; }
-        internal override TMPro.TextMeshProUGUI labelValue { get => m_LabelValue; }
+        public override TMPro.TextMeshProUGUI labelText { get => _labelText; }
+        public override TMPro.TextMeshProUGUI labelValue { get => _labelValue; }
 
-        public override void SetText(string text) => m_LabelText.SetText(text);
-        public override void SetValue(long value) => SetValueInternal(Utility.Commafy(value));
+        public override void SetText(string text) => _labelText.SetText(text);
+        public override void SetValue(long value) => SetValuepublic(Core.Utils.Utility.Commafy(value));
 
-        internal void SetValueInternal(string value) => m_LabelValue.SetText(value);
+        public void SetValuepublic(string value) => _labelValue.SetText(value);
     }
 }

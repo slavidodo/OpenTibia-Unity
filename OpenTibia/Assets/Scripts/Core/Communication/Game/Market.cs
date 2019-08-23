@@ -3,12 +3,12 @@ using System.Collections.Generic;
 
 namespace OpenTibiaUnity.Core.Communication.Game
 {
-    internal partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame : Internal.Protocol
     {
         private void ParseMarketStatistics(Internal.ByteArray message) {
             int count = message.ReadUnsignedShort();
             for (int i = 0; i < count; i++) {
-                ushort objectID = message.ReadUnsignedShort();
+                ushort object_id = message.ReadUnsignedShort();
                 uint objectPrice = message.ReadUnsignedInt();
             }
         }
@@ -27,7 +27,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             int offers = message.ReadUnsignedByte();
             int depotCount = message.ReadUnsignedByte();
             for (int i = 0; i < depotCount; i++) {
-                message.ReadUnsignedShort(); // objectID
+                message.ReadUnsignedShort(); // object_id
                 message.ReadUnsignedShort(); // objectCount
             }
         }
@@ -37,7 +37,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseMarketDetail(Internal.ByteArray message) {
-            ushort objectID = message.ReadUnsignedShort();
+            ushort object_id = message.ReadUnsignedShort();
 
             var last = MarketDetails.Weight;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameImbuing))
@@ -95,14 +95,14 @@ namespace OpenTibiaUnity.Core.Communication.Game
             uint timestamp = message.ReadUnsignedInt();
             ushort counter = message.ReadUnsignedShort();
 
-            ushort objectID;
+            ushort object_id;
             switch (var) {
                 case Constants.MarketRequestOwnOffers:
                 case Constants.MarketRequestOwnHistory:
-                    objectID = message.ReadUnsignedShort();
+                    object_id = message.ReadUnsignedShort();
                     break;
                 default:
-                    objectID = var;
+                    object_id = var;
                     break;
             }
 
@@ -123,7 +123,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     break;
             }
 
-            return new Market.Offer(new Market.OfferID(counter, timestamp), offerType, objectID, amount, piecePrice, character, state);
+            return new Market.Offer(new Market.OfferId(counter, timestamp), offerType, object_id, amount, piecePrice, character, state);
         }
     }
 }

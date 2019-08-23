@@ -6,63 +6,63 @@ namespace OpenTibiaUnity.Modules.MiniMap
     [RequireComponent(typeof(Button))]
     public class MinimapScrollButton : Core.Components.Base.AbstractComponent
     {
-        private Button m_ButtonComponent = null;
+        private Button _buttonComponent = null;
         public Button buttonComponent {
             get {
-                if (!m_ButtonComponent)
-                    m_ButtonComponent = GetComponent<Button>();
-                return m_ButtonComponent;
+                if (!_buttonComponent)
+                    _buttonComponent = GetComponent<Button>();
+                return _buttonComponent;
             }
         }
 
-        private RawImage m_RawImageComponent = null;
+        private RawImage _rawImageComponent = null;
         public RawImage rawImageComponent {
             get {
-                if (!m_RawImageComponent)
-                    m_RawImageComponent = GetComponent<RawImage>();
-                return m_RawImageComponent;
+                if (!_rawImageComponent)
+                    _rawImageComponent = GetComponent<RawImage>();
+                return _rawImageComponent;
             }
         }
         
-        [SerializeField] private Texture2D m_DefaultTexture = null;
-        [SerializeField] private Texture2D m_NorthClicked = null;
-        [SerializeField] private Texture2D m_EastClicked = null;
-        [SerializeField] private Texture2D m_SouthClicked = null;
-        [SerializeField] private Texture2D m_WestClicked = null;
-        [SerializeField] private Texture2D m_NorthEastClicked = null;
-        [SerializeField] private Texture2D m_NorthWestClicked = null;
-        [SerializeField] private Texture2D m_SouthWestClicked = null;
-        [SerializeField] private Texture2D m_SouthEastClicked = null;
+        [SerializeField] private Texture2D _defaultTexture = null;
+        [SerializeField] private Texture2D _northClicked = null;
+        [SerializeField] private Texture2D _eastClicked = null;
+        [SerializeField] private Texture2D _southClicked = null;
+        [SerializeField] private Texture2D _westClicked = null;
+        [SerializeField] private Texture2D _northEastClicked = null;
+        [SerializeField] private Texture2D _northWestClicked = null;
+        [SerializeField] private Texture2D _southWestClicked = null;
+        [SerializeField] private Texture2D _southEastClicked = null;
 
-        private Direction m_Direction = Direction.Stop;
-        private Direction m_LastDirection = Direction.Stop;
-        private bool m_MouseDown = false;
+        private Direction _direction = Direction.Stop;
+        private Direction _lastDirection = Direction.Stop;
+        private bool _mouseDown = false;
 
         private void OnGUI() {
             var e = Event.current;
             if (e.type == EventType.MouseMove || e.type == EventType.MouseDrag) {
-                if (!m_MouseDown)
+                if (!_mouseDown)
                     return;
 
                 var direction = CalculateDirection(e);
-                if (direction != m_Direction)
+                if (direction != _direction)
                     direction = Direction.Stop;
 
-                if (direction != m_LastDirection)
+                if (direction != _lastDirection)
                     ChangeTexture(direction);
                 else
-                    m_LastDirection = direction;
+                    _lastDirection = direction;
             } else if (e.type == EventType.MouseDown) {
-                m_MouseDown = true;
+                _mouseDown = true;
 
-                m_Direction = CalculateDirection(e);
-                ChangeTexture(m_Direction);
+                _direction = CalculateDirection(e);
+                ChangeTexture(_direction);
             } else if (e.type == EventType.MouseUp) {
-                m_MouseDown = false;
-                rawImageComponent.texture = m_DefaultTexture;
+                _mouseDown = false;
+                rawImageComponent.texture = _defaultTexture;
 
-                if (m_LastDirection == m_Direction) {
-                    switch (m_Direction) {
+                if (_lastDirection == _direction) {
+                    switch (_direction) {
                         case Direction.North:
                             OpenTibiaUnity.MiniMapRenderer.TranslatePosition(0, -1, 0);
                             break;
@@ -92,8 +92,8 @@ namespace OpenTibiaUnity.Modules.MiniMap
                     }
                 }
                 
-                m_LastDirection = Direction.Stop;
-                m_Direction = Direction.Stop;
+                _lastDirection = Direction.Stop;
+                _direction = Direction.Stop;
             }
         }
 
@@ -127,36 +127,36 @@ namespace OpenTibiaUnity.Modules.MiniMap
             Texture2D texture = null;
             switch (direction) {
                 case Direction.North:
-                    texture = m_NorthClicked;
+                    texture = _northClicked;
                     break;
                 case Direction.East:
-                    texture = m_EastClicked;
+                    texture = _eastClicked;
                     break;
                 case Direction.South:
-                    texture = m_SouthClicked;
+                    texture = _southClicked;
                     break;
                 case Direction.West:
-                    texture = m_WestClicked;
+                    texture = _westClicked;
                     break;
                 case Direction.NorthEast:
-                    texture = m_NorthEastClicked;
+                    texture = _northEastClicked;
                     break;
                 case Direction.SouthEast:
-                    texture = m_SouthEastClicked;
+                    texture = _southEastClicked;
                     break;
                 case Direction.SouthWest:
-                    texture = m_SouthWestClicked;
+                    texture = _southWestClicked;
                     break;
                 case Direction.NorthWest:
-                    texture = m_NorthWestClicked;
+                    texture = _northWestClicked;
                     break;
                 default:
-                    texture = m_DefaultTexture;
+                    texture = _defaultTexture;
                     break;
             }
 
             rawImageComponent.texture = texture;
-            m_LastDirection = direction;
+            _lastDirection = direction;
         }
     }
 }

@@ -8,11 +8,11 @@ namespace OpenTibiaUnity.Modules.HealthInfo
     {
         public const int BarWidth = 94;
         
-        [SerializeField] private RawImage m_HealthBarImageComponent = null;
-        [SerializeField] private RawImage m_ManaBarImageComponent = null;
+        [SerializeField] private RawImage _healthBarImageComponent = null;
+        [SerializeField] private RawImage _manaBarImageComponent = null;
 
-        [SerializeField] private TMPro.TextMeshProUGUI m_HealthValueText = null;
-        [SerializeField] private TMPro.TextMeshProUGUI m_ManaValueText = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _healthValueText = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _manaValueText = null;
 
         protected override void Awake() {
             base.Awake();
@@ -27,11 +27,11 @@ namespace OpenTibiaUnity.Modules.HealthInfo
             RawImage imageComponent;
             TMPro.TextMeshProUGUI textComponent;
             if (skillType == SkillType.Health) {
-                imageComponent = m_HealthBarImageComponent;
-                textComponent = m_HealthValueText;
+                imageComponent = _healthBarImageComponent;
+                textComponent = _healthValueText;
             } else {
-                imageComponent = m_ManaBarImageComponent;
-                textComponent = m_ManaValueText;
+                imageComponent = _manaBarImageComponent;
+                textComponent = _manaValueText;
             }
 
             var rectTransform = imageComponent.GetComponent<RectTransform>();

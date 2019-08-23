@@ -3,35 +3,35 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Components.Base
 {
-    internal class MiniWindowContainer : Module
+    public class MiniWindowContainer : Module
     {
-        [SerializeField] internal RectTransform contentPanel = null;
-        [SerializeField] internal RectTransform tmpContentPanel = null;
+        public RectTransform contentPanel = null;
+        public RectTransform tmpContentPanel = null;
 
-        private List<MiniWindow> m_MiniWindows;
+        private List<MiniWindow> _miniWindows;
 
         protected override void Awake() {
             base.Awake();
 
-            m_MiniWindows = new List<MiniWindow>();
+            _miniWindows = new List<MiniWindow>();
         }
 
 
-        internal void RegisterMiniWindow(MiniWindow miniWindow) {
-            if (m_MiniWindows.Contains(miniWindow))
+        public void RegisterMiniWindow(MiniWindow miniWindow) {
+            if (_miniWindows.Contains(miniWindow))
                 return;
 
-            m_MiniWindows.Add(miniWindow);
+            _miniWindows.Add(miniWindow);
         }
 
-        internal void UnregisterMiniWindow(MiniWindow miniWindow) {
-            if (!m_MiniWindows.Contains(miniWindow))
+        public void UnregisterMiniWindow(MiniWindow miniWindow) {
+            if (!_miniWindows.Contains(miniWindow))
                 return;
 
-            m_MiniWindows.Remove(miniWindow);
+            _miniWindows.Remove(miniWindow);
         }
         
-        internal T AddMiniWindow<T>(T miniWindow) where T : MiniWindow {
+        public T AddMiniWindow<T>(T miniWindow) where T : MiniWindow {
             miniWindow.rectTransform.SetParent(contentPanel);
             var remainingHeight = GetRemainingHeight(miniWindow);
             var sizeDelta = miniWindow.rectTransform.sizeDelta;
@@ -39,7 +39,7 @@ namespace OpenTibiaUnity.Core.Components.Base
             return miniWindow;
         }
 
-        internal float GetRemainingHeight(MiniWindow exclude = null) {
+        public float GetRemainingHeight(MiniWindow exclude = null) {
             float totalHeight = 0;
             foreach (RectTransform child in contentPanel) {
                 if (exclude == null || child.gameObject != exclude.gameObject)

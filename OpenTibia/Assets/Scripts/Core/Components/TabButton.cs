@@ -8,12 +8,12 @@ namespace OpenTibiaUnity.Core.Components
     public class TabButton : Base.AbstractComponent
     {
 
-        private LayoutElement m_LayoutElement;
+        private LayoutElement _layoutElement;
         public LayoutElement layoutElement {
             get {
-                if (!m_LayoutElement)
-                    m_LayoutElement = GetComponent<LayoutElement>();
-                return m_LayoutElement;
+                if (!_layoutElement)
+                    _layoutElement = GetComponent<LayoutElement>();
+                return _layoutElement;
             }
         }
     }

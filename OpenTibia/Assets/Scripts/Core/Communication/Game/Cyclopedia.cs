@@ -1,6 +1,6 @@
 ﻿namespace OpenTibiaUnity.Core.Communication.Game
 {
-    internal partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame : Internal.Protocol
     {
         private void ParseMonsterCyclopedia(Internal.ByteArray message) {
             

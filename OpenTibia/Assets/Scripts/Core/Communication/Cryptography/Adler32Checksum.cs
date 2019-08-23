@@ -2,11 +2,11 @@
 
 namespace OpenTibiaUnity.Core.Communication.Cryptography
 {
-    internal static class Adler32Checksum
+    public static class Adler32Checksum
     {
-        internal const int ModAdler = 65521;
+        public const int ModAdler = 65521;
 
-        internal static uint CalculateAdler32Checksum(Internal.ByteArray byteArray, int offset = 0, int length = 0) {
+        public static uint CalculateAdler32Checksum(Internal.ByteArray byteArray, int offset = 0, int length = 0) {
             if (byteArray == null)
                 throw new ArgumentNullException("Adler32Checksum.CalculateAdler32Checksum: Invalid input.");
 

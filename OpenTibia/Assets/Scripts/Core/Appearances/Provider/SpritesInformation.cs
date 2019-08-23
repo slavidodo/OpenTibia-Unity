@@ -7,28 +7,28 @@ namespace OpenTibiaUnity.Core.Appearances.Provider
 {
     class SpritesInformation
     {
-        private List<SpritesAsset> m_SpritesAssetInformations;
+        private List<SpritesAsset> _spritesAssetInformations;
 
         public SpritesInformation(string catalogContent) {
             if (JsonConvert.DeserializeObject(catalogContent) is JArray jArray)
-                m_SpritesAssetInformations = SpritesAsset.ParseJsonContents(jArray);
+                _spritesAssetInformations = SpritesAsset.ParseJsonContents(jArray);
             else
                 throw new Exception("SpritesInformation.SpritesInformation: Invalid catalog-content.json");
 
-            m_SpritesAssetInformations.Sort((SpritesAsset x, SpritesAsset y) => {
-                return x.FirstSpriteID.CompareTo(y.FirstSpriteID);
+            _spritesAssetInformations.Sort((SpritesAsset x, SpritesAsset y) => {
+                return x.FirstSprite_id.CompareTo(y.FirstSprite_id);
             });
         }
         
-        public SpritesAsset FindSpritesAsset(uint spriteID) {
-            int lastIndex = m_SpritesAssetInformations.Count - 1;
+        public SpritesAsset FindSpritesAsset(uint sprite_id) {
+            int lastIndex = _spritesAssetInformations.Count - 1;
             int index = 0;
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
-                var asset = m_SpritesAssetInformations[tmpIndex];
-                if (asset.FirstSpriteID > spriteID)
+                var asset = _spritesAssetInformations[tmpIndex];
+                if (asset.FirstSprite_id > sprite_id)
                     index = tmpIndex + 1;
-                else if (asset.LastSpriteID < spriteID)
+                else if (asset.LastSprite_id < sprite_id)
                     lastIndex = tmpIndex - 1;
                 else // first < id < last
                     return asset;

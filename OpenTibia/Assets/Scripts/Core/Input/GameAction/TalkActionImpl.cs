@@ -2,18 +2,18 @@
 {
     public class TalkActionImpl : IActionImpl
     {
-        protected bool m_AutoSend;
-        private int m_ChannelID;
-        protected string m_Text;
+        protected bool _autoSend;
+        private int _channel_id;
+        protected string _text;
 
-        public TalkActionImpl(string text, bool autoSend, int channelID = -1) {
-            m_Text = text;
-            m_AutoSend = autoSend;
-            m_ChannelID = channelID;
+        public TalkActionImpl(string text, bool autoSend, int channel_id = -1) {
+            _text = text;
+            _autoSend = autoSend;
+            _channel_id = channel_id;
         }
 
         public virtual void Perform(bool repeat = false) {
-            OpenTibiaUnity.GameManager.onRequestChatSend.Invoke(m_Text, m_AutoSend, m_ChannelID);
+            OpenTibiaUnity.GameManager.onRequestChatSend.Invoke(_text, _autoSend, _channel_id);
         }
     }
 }

@@ -12,17 +12,17 @@
         JoinAggression = 7,
     }
 
-    internal class PartyActionImpl : IActionImpl
+    public class PartyActionImpl : IActionImpl
     {
-        Creatures.Creature m_Creature;
-        PartyActionType m_ActionType;
+        Creatures.Creature _creature;
+        PartyActionType _actionType;
 
-        internal PartyActionImpl(PartyActionType actionType, Creatures.Creature creature) {
-            m_ActionType = actionType;
+        public PartyActionImpl(PartyActionType actionType, Creatures.Creature creature) {
+            _actionType = actionType;
             if (actionType == PartyActionType.Join || actionType == PartyActionType.Invite || actionType == PartyActionType.Exclude || actionType == PartyActionType.PassLeadership || actionType == PartyActionType.JoinAggression)
-                m_Creature = creature ?? throw new System.ArgumentNullException("PartyActionImpl.PartyActionImpl: invalid argument (null passed to creature).");
+                _creature = creature ?? throw new System.ArgumentNullException("PartyActionImpl.PartyActionImpl: invalid argument (null passed to creature).");
             else
-                m_Creature = creature;
+                _creature = creature;
         }
 
         public void Perform(bool _ = false) {
@@ -30,21 +30,21 @@
             if (!protocolGame || !protocolGame.IsGameRunning)
                 return;
 
-            switch (m_ActionType) {
+            switch (_actionType) {
                 case PartyActionType.Join:
-                    protocolGame.SendJoinParty(m_Creature.ID);
+                    protocolGame.SendJoinParty(_creature.Id);
                     break;
                 case PartyActionType.Leave:
                     protocolGame.SendLeaveParty();
                     break;
                 case PartyActionType.Invite:
-                    protocolGame.SendInviteToParty(m_Creature.ID);
+                    protocolGame.SendInviteToParty(_creature.Id);
                     break;
                 case PartyActionType.Exclude:
-                    protocolGame.SendRevokeInvitation(m_Creature.ID);
+                    protocolGame.SendRevokeInvitation(_creature.Id);
                     break;
                 case PartyActionType.PassLeadership:
-                    protocolGame.SendPassLeadership(m_Creature.ID);
+                    protocolGame.SendPassLeadership(_creature.Id);
                     break;
                 case PartyActionType.EnableSharedExperience:
                     protocolGame.SendShareExperience(true);
@@ -53,7 +53,7 @@
                     protocolGame.SendShareExperience(false);
                     break;
                 case PartyActionType.JoinAggression:
-                    protocolGame.SendJoinAggression(m_Creature.ID);
+                    protocolGame.SendJoinAggression(_creature.Id);
                     break;
             }
         }

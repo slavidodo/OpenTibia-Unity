@@ -2,9 +2,9 @@
 
 namespace OpenTibiaUnity.Core.Input.StaticAction
 {
-    internal class ChatDeletePrev : StaticAction
+    public class ChatDeletePrev : StaticAction
     {
-        internal ChatDeletePrev(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
+        public ChatDeletePrev(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
 
         public override bool Perform(bool repeat = false) {
             TMPro.TMP_InputField inputField = StaticAction.GetSelectedInputField();
@@ -31,7 +31,7 @@ namespace OpenTibiaUnity.Core.Input.StaticAction
         }
 
         public override IAction Clone() {
-            return new ChatDeletePrev(m_ID, m_Label, m_EventMask);
+            return new ChatDeletePrev(_id, _label, _eventMask);
         }
     }
 }

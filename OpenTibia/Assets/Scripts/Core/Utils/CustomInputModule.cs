@@ -3,16 +3,16 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.Serialization;
 
-namespace OpenTibiaUnity.Core.Utility
+namespace OpenTibiaUnity.Core.Utils
 {
     public class CustomInputModule : PointerInputModule
     {
-        private float m_PrevActionTime;
-        Vector2 m_LastMoveVector;
-        int m_ConsecutiveMoveCount = 0;
+        private float _prevActionTime;
+        Vector2 _lastMoveVector;
+        int _bonsecutiveMoveCount = 0;
 
-        private Vector2 m_LastMousePosition;
-        private Vector2 m_MousePosition;
+        private Vector2 _lastMousePosition;
+        private Vector2 _mousePosition;
 
         protected CustomInputModule() { }
 
@@ -29,7 +29,7 @@ namespace OpenTibiaUnity.Core.Utility
         }
 
         [SerializeField]
-        private string m_HorizontalAxis = "Horizontal";
+        private string _horizontalAxis = "Horizontal";
 
         /// <summary>
         /// Name of the vertical axis for movement (if axis events are used).
@@ -41,51 +41,51 @@ namespace OpenTibiaUnity.Core.Utility
         /// Name of the submit button.
         /// </summary>
         [SerializeField]
-        private string m_SubmitButton = "Submit";
+        private string _submitButton = "Submit";
 
         /// <summary>
         /// Name of the submit button.
         /// </summary>
         [SerializeField]
-        private string m_CancelButton = "Cancel";
+        private string _cancelButton = "Cancel";
 
         [SerializeField]
-        private float m_InputActionsPerSecond = 10;
+        private float _inputActionsPerSecond = 10;
 
         [SerializeField]
-        private float m_RepeatDelay = 0.5f;
+        private float _repeatDelay = 0.5f;
 
         [SerializeField]
-        [FormerlySerializedAs("m_AllowActivationOnMobileDevice")]
-        private bool m_ForceModuleActive;
+        [FormerlySerializedAs("_allowActivationOnMobileDevice")]
+        private bool _forceModuleActive;
 
         [Obsolete("allowActivationOnMobileDevice has been deprecated. Use forceModuleActive instead (UnityUpgradable) -> forceModuleActive")]
         public bool allowActivationOnMobileDevice {
-            get { return m_ForceModuleActive; }
-            set { m_ForceModuleActive = value; }
+            get { return _forceModuleActive; }
+            set { _forceModuleActive = value; }
         }
 
         public bool forceModuleActive {
-            get { return m_ForceModuleActive; }
-            set { m_ForceModuleActive = value; }
+            get { return _forceModuleActive; }
+            set { _forceModuleActive = value; }
         }
 
         public float inputActionsPerSecond {
-            get { return m_InputActionsPerSecond; }
-            set { m_InputActionsPerSecond = value; }
+            get { return _inputActionsPerSecond; }
+            set { _inputActionsPerSecond = value; }
         }
 
         public float repeatDelay {
-            get { return m_RepeatDelay; }
-            set { m_RepeatDelay = value; }
+            get { return _repeatDelay; }
+            set { _repeatDelay = value; }
         }
 
         /// <summary>
         /// Name of the horizontal axis for movement (if axis events are used).
         /// </summary>
         public string horizontalAxis {
-            get { return m_HorizontalAxis; }
-            set { m_HorizontalAxis = value; }
+            get { return _horizontalAxis; }
+            set { _horizontalAxis = value; }
         }
 
         /// <summary>
@@ -97,45 +97,45 @@ namespace OpenTibiaUnity.Core.Utility
         }
 
         public string submitButton {
-            get { return m_SubmitButton; }
-            set { m_SubmitButton = value; }
+            get { return _submitButton; }
+            set { _submitButton = value; }
         }
 
         public string cancelButton {
-            get { return m_CancelButton; }
-            set { m_CancelButton = value; }
+            get { return _cancelButton; }
+            set { _cancelButton = value; }
         }
 
         public override void UpdateModule() {
-            m_LastMousePosition = m_MousePosition;
-            m_MousePosition = UnityEngine.Input.mousePosition;
+            _lastMousePosition = _mousePosition;
+            _mousePosition = UnityEngine.Input.mousePosition;
         }
 
         public override bool IsModuleSupported() {
             // Check for mouse presence instead of whether touch is supported,
             // as you can connect mouse to a tablet and in that case we'd want
             // to use StandaloneInputModule for non-touch input events.
-            return m_ForceModuleActive || UnityEngine.Input.mousePresent;
+            return _forceModuleActive || UnityEngine.Input.mousePresent;
         }
 
         public override bool ShouldActivateModule() {
             if (!base.ShouldActivateModule())
                 return false;
 
-            var shouldActivate = m_ForceModuleActive;
-            UnityEngine.Input.GetButtonDown(m_SubmitButton);
-            shouldActivate |= UnityEngine.Input.GetButtonDown(m_CancelButton);
-            shouldActivate |= !Mathf.Approximately(UnityEngine.Input.GetAxisRaw(m_HorizontalAxis), 0.0f);
+            var shouldActivate = _forceModuleActive;
+            UnityEngine.Input.GetButtonDown(_submitButton);
+            shouldActivate |= UnityEngine.Input.GetButtonDown(_cancelButton);
+            shouldActivate |= !Mathf.Approximately(UnityEngine.Input.GetAxisRaw(_horizontalAxis), 0.0f);
             shouldActivate |= !Mathf.Approximately(UnityEngine.Input.GetAxisRaw(m_VerticalAxis), 0.0f);
-            shouldActivate |= (m_MousePosition - m_LastMousePosition).sqrMagnitude > 0.0f;
+            shouldActivate |= (_mousePosition - _lastMousePosition).sqrMagnitude > 0.0f;
             shouldActivate |= UnityEngine.Input.GetMouseButtonDown(0);
             return shouldActivate;
         }
 
         public override void ActivateModule() {
             base.ActivateModule();
-            m_MousePosition = UnityEngine.Input.mousePosition;
-            m_LastMousePosition = UnityEngine.Input.mousePosition;
+            _mousePosition = UnityEngine.Input.mousePosition;
+            _lastMousePosition = UnityEngine.Input.mousePosition;
 
             var toSelect = eventSystem.currentSelectedGameObject;
             if (toSelect == null)
@@ -171,20 +171,20 @@ namespace OpenTibiaUnity.Core.Utility
                 return false;
 
             var data = GetBaseEventData();
-            if (UnityEngine.Input.GetButtonDown(m_SubmitButton))
+            if (UnityEngine.Input.GetButtonDown(_submitButton))
                 ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.submitHandler);
 
-            if (UnityEngine.Input.GetButtonDown(m_CancelButton))
+            if (UnityEngine.Input.GetButtonDown(_cancelButton))
                 ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, data, ExecuteEvents.cancelHandler);
             return data.used;
         }
 
         private Vector2 GetRawMoveVector() {
             Vector2 move = Vector2.zero;
-            move.x = UnityEngine.Input.GetAxisRaw(m_HorizontalAxis);
+            move.x = UnityEngine.Input.GetAxisRaw(_horizontalAxis);
             move.y = UnityEngine.Input.GetAxisRaw(m_VerticalAxis);
 
-            if (UnityEngine.Input.GetButtonDown(m_HorizontalAxis)) {
+            if (UnityEngine.Input.GetButtonDown(_horizontalAxis)) {
                 if (move.x < 0)
                     move.x = -1f;
                 if (move.x > 0)
@@ -207,33 +207,33 @@ namespace OpenTibiaUnity.Core.Utility
 
             Vector2 movement = GetRawMoveVector();
             if (Mathf.Approximately(movement.x, 0f) && Mathf.Approximately(movement.y, 0f)) {
-                m_ConsecutiveMoveCount = 0;
+                _bonsecutiveMoveCount = 0;
                 return false;
             }
 
             // If user pressed key again, always allow event
-            bool allow = UnityEngine.Input.GetButtonDown(m_HorizontalAxis) || UnityEngine.Input.GetButtonDown(m_VerticalAxis);
-            bool similarDir = (Vector2.Dot(movement, m_LastMoveVector) > 0);
+            bool allow = UnityEngine.Input.GetButtonDown(_horizontalAxis) || UnityEngine.Input.GetButtonDown(m_VerticalAxis);
+            bool similarDir = (Vector2.Dot(movement, _lastMoveVector) > 0);
             if (!allow) {
                 // Otherwise, user held down key or axis.
                 // If direction didn't change at least 90 degrees, wait for delay before allowing consequtive event.
-                if (similarDir && m_ConsecutiveMoveCount == 1)
-                    allow = (time > m_PrevActionTime + m_RepeatDelay);
+                if (similarDir && _bonsecutiveMoveCount == 1)
+                    allow = (time > _prevActionTime + _repeatDelay);
                 // If direction changed at least 90 degree, or we already had the delay, repeat at repeat rate.
                 else
-                    allow = (time > m_PrevActionTime + 1f / m_InputActionsPerSecond);
+                    allow = (time > _prevActionTime + 1f / _inputActionsPerSecond);
             }
             if (!allow)
                 return false;
 
-            // Debug.Log(m_ProcessingEvent.rawType + " axis:" + m_AllowAxisEvents + " value:" + "(" + x + "," + y + ")");
+            // Debug.Log(_processingEvent.rawType + " axis:" + _allowAxisEvents + " value:" + "(" + x + "," + y + ")");
             var axisEventData = GetAxisEventData(movement.x, movement.y, 0.6f);
             ExecuteEvents.Execute(eventSystem.currentSelectedGameObject, axisEventData, ExecuteEvents.moveHandler);
             if (!similarDir)
-                m_ConsecutiveMoveCount = 0;
-            m_ConsecutiveMoveCount++;
-            m_PrevActionTime = time;
-            m_LastMoveVector = movement;
+                _bonsecutiveMoveCount = 0;
+            _bonsecutiveMoveCount++;
+            _prevActionTime = time;
+            _lastMoveVector = movement;
             return axisEventData.used;
         }
 

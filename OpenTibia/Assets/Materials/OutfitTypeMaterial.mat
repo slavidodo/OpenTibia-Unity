@@ -79,9 +79,9 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _Color: {r: 1, g: 1, b: 1, a: 1}
-    - _DetailColor: {r: 0, g: 1, b: 1, a: 1}
+    - _DetailColor: {r: 0.42857143, g: 0.42857143, b: 0.42857143, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
-    - _HeadColor: {r: 0.14285715, g: 0.14285715, b: 0.14285715, a: 1}
+    - _HeadColor: {r: 1, g: 0.6666667, b: 0, a: 1}
     - _HighlightColor: {r: 1, g: 0.88235295, b: 0.21568628, a: 1}
-    - _LegsColor: {r: 0.14285715, g: 0.14285715, b: 0.14285715, a: 1}
-    - _TorsoColor: {r: 0.14285715, g: 0.14285715, b: 0.14285715, a: 1}
+    - _LegsColor: {r: 0.75, g: 0.5, b: 0.375, a: 1}
+    - _TorsoColor: {r: 0.24975, g: 0.41650003, b: 0.75, a: 1}

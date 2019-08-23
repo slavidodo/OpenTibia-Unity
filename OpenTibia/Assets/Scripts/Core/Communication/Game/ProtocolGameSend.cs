@@ -3,18 +3,18 @@ using System.Collections.Generic;
 
 namespace OpenTibiaUnity.Core.Communication.Game
 {
-    internal partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame : Internal.Protocol
     {
         private void SendProxyWorldNameIdentification() {
             var message = new Internal.ByteArray();
             message.WriteString(WorldName + "\n", 0, true);
-            m_Connection.Send(message);
+            _connection.Send(message);
         }
 
-        internal void SendLogin(uint challengeTimestamp, byte challengeRandom) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendLogin(uint challengeTimestamp, byte challengeRandom) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.PendingGame);
-            message.WriteUnsignedShort((ushort)Utility.Utility.GetCurrentOs());
+            message.WriteUnsignedShort((ushort)Utils.Utility.GetCurrentOs());
 
             var gameManager = OpenTibiaUnity.GameManager;
             var optionStorage = OpenTibiaUnity.OptionStorage;
@@ -38,7 +38,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             message.WriteUnsignedByte(0); // first byte must be zero;
             
             if (gameManager.GetFeature(GameFeature.GameLoginPacketEncryption)) {
-                m_XTEA.WriteKey(message);
+                _xTEA.WriteKey(message);
                 message.WriteUnsignedByte(0x00); // gm
             }
 
@@ -66,36 +66,36 @@ namespace OpenTibiaUnity.Core.Communication.Game
             if (gameManager.GetFeature(GameFeature.GameLoginPacketEncryption))
                 Cryptography.PublicRSA.EncryptMessage(message, payloadStart, Cryptography.PublicRSA.RSABlockSize);
             
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
-        internal void SendEnterGame() {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendEnterGame() {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.EnterWorld);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
-        internal void SendQuitGame() {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendQuitGame() {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.QuitGame);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
-        private void InternalSendPing() {
+        private void publicSendPing() {
             // this function should only be called from protocolgame
-            var message = m_PacketWriter.CreateMessage();
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.Ping);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
-        internal void InternalSendPingBack() {
-            var message = m_PacketWriter.CreateMessage();
+        public void publicSendPingBack() {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.PingBack);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
         
-        internal void SendGo(List<int> pathSteps) {
+        public void SendGo(List<int> pathSteps) {
             if (pathSteps == null)
                 return;
             
             CreatureStorage.ClearTargets();
-            var message = m_PacketWriter.CreateMessage();
+            var message = _packetWriter.CreateMessage();
             if (pathSteps.Count == 1) {
                 switch ((PathDirection)(pathSteps[0] & 65535)) {
                     case PathDirection.East: message.WriteEnum(GameclientMessageType.GoEast); break;
@@ -120,133 +120,164 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 }
             }
 
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
-        internal void SendStop() {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendStop() {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.Stop);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
-        internal void SendTurnNorth() {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendTurnNorth() {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.TurnNorth);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
-        internal void SendTurnEast() {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendTurnEast() {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.TurnEast);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
-        internal void SendTurnSouth() {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendTurnSouth() {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.TurnSouth);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
-        internal void SendTurnWest() {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendTurnWest() {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.TurnWest);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendMoveObject(UnityEngine.Vector3Int sourceAbsolute, uint typeID, int stackPos, UnityEngine.Vector3Int destAbsolute, int moveAmount) {
+        public void SendMoveObject(UnityEngine.Vector3Int sourceAbsolute, ushort object_id, int stackPos, UnityEngine.Vector3Int destAbsolute, int moveAmount) {
             if (sourceAbsolute.x != 65535)
                 Player.StopAutowalk(false);
 
-            var message = m_PacketWriter.CreateMessage();
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.MoveObject);
             message.WritePosition(sourceAbsolute);
-            message.WriteUnsignedShort((ushort)typeID);
+            message.WriteUnsignedShort(object_id);
             message.WriteUnsignedByte((byte)stackPos);
             message.WritePosition(destAbsolute);
             message.WriteUnsignedByte((byte)moveAmount);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
+        }
+        public void SendInspectInNpcTrade(ushort object_id, int count) {
+            var message = _packetWriter.CreateMessage();
+            message.WriteEnum(GameclientMessageType.LookInNpcTrade);
+            message.WriteUnsignedShort(object_id);
+            message.WriteUnsignedByte((byte)count);
+            _packetWriter.FinishMessage();
+        }
+        public void SendBuyObject(ushort object_id, int subType, int amount, bool ignoreCapacity, bool buyWithBackpack) {
+            var message = _packetWriter.CreateMessage();
+            message.WriteEnum(GameclientMessageType.BuyObject);
+            message.WriteUnsignedShort(object_id);
+            message.WriteUnsignedByte((byte)subType);
+            message.WriteUnsignedByte((byte)amount);
+            message.WriteBoolean(ignoreCapacity);
+            message.WriteBoolean(buyWithBackpack);
+            _packetWriter.FinishMessage();
+        }
+        public void SendSellObject(ushort object_id, int subType, int amount, bool ignoreEquiped) {
+            var message = _packetWriter.CreateMessage();
+            message.WriteEnum(GameclientMessageType.SellObject);
+            message.WriteUnsignedShort(object_id);
+            message.WriteUnsignedByte((byte)subType);
+            message.WriteUnsignedByte((byte)amount);
+            message.WriteBoolean(ignoreEquiped);
+            _packetWriter.FinishMessage();
+        }
+        public void SendCloseNPCTrade() {
+            var message = _packetWriter.CreateMessage();
+            message.WriteEnum(GameclientMessageType.CloseNpcTrade);
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendUseObject(UnityEngine.Vector3Int absolute, uint typeID, int stackPosOrData, int window) {
+        public void SendUseObject(UnityEngine.Vector3Int absolute, uint type_id, int stackPosOrData, int window) {
             if (absolute.x != 65535)
                 Player.StopAutowalk(false);
 
-            var message = m_PacketWriter.CreateMessage();
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.UseObject);
             message.WritePosition(absolute);
-            message.WriteUnsignedShort((ushort)typeID);
+            message.WriteUnsignedShort((ushort)type_id);
             message.WriteUnsignedByte((byte)stackPosOrData);
             message.WriteUnsignedByte((byte)window); // for containers
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendUseTwoObjects(UnityEngine.Vector3Int firstAbsolute, uint firstID, int firstData, UnityEngine.Vector3Int secondAbsolute, uint secondID, int secondData) {
+        public void SendUseTwoObjects(UnityEngine.Vector3Int firstAbsolute, uint first_id, int firstData, UnityEngine.Vector3Int secondAbsolute, uint second_id, int secondData) {
             if (firstAbsolute.x != 65535 || secondAbsolute.x != 65535)
                 Player.StopAutowalk(false);
 
-            var message = m_PacketWriter.CreateMessage();
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.UseTwoObjects);
             message.WritePosition(firstAbsolute);
-            message.WriteUnsignedShort((ushort)firstID);
+            message.WriteUnsignedShort((ushort)first_id);
             message.WriteUnsignedByte((byte)firstData);
             message.WritePosition(secondAbsolute);
-            message.WriteUnsignedShort((ushort)secondID);
+            message.WriteUnsignedShort((ushort)second_id);
             message.WriteUnsignedByte((byte)secondData);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendUseOnCreature(UnityEngine.Vector3Int absolute, uint typeID, int stackPosOrData, uint creatureID) {
+        public void SendUseOnCreature(UnityEngine.Vector3Int absolute, uint type_id, int stackPosOrData, uint creature_id) {
             if (absolute.x != 65535)
                 Player.StopAutowalk(false);
 
-            var message = m_PacketWriter.CreateMessage();
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.UseOnCreature);
             message.WritePosition(absolute);
-            message.WriteUnsignedShort((ushort)typeID);
+            message.WriteUnsignedShort((ushort)type_id);
             message.WriteUnsignedByte((byte)stackPosOrData);
-            message.WriteUnsignedInt(creatureID);
-            m_PacketWriter.FinishMessage();
+            message.WriteUnsignedInt(creature_id);
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendTurnObject(UnityEngine.Vector3Int absolute, uint typeID, int stackPos) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendTurnObject(UnityEngine.Vector3Int absolute, uint type_id, int stackPos) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.TurnObject);
             message.WritePosition(absolute);
-            message.WriteUnsignedShort((ushort)typeID);
+            message.WriteUnsignedShort((ushort)type_id);
             message.WriteUnsignedByte((byte)stackPos);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendToggleWrapState(UnityEngine.Vector3Int absolute, uint typeID, int stackPos) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendToggleWrapState(UnityEngine.Vector3Int absolute, uint type_id, int stackPos) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.ToggleWrapState);
             message.WriteEnum(GameclientMessageType.ToggleWrapState);
             message.WritePosition(absolute);
-            message.WriteUnsignedShort((ushort)typeID);
+            message.WriteUnsignedShort((ushort)type_id);
             message.WriteUnsignedByte((byte)stackPos);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendLook(UnityEngine.Vector3Int absolute, uint typeID, int stackPos) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendLook(UnityEngine.Vector3Int absolute, uint type_id, int stackPos) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.Look);
             message.WritePosition(absolute);
-            message.WriteUnsignedShort((ushort)typeID);
+            message.WriteUnsignedShort((ushort)type_id);
             message.WriteUnsignedByte((byte)stackPos);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendLookAtCreature(uint creatureID) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendLookAtCreature(uint creature_id) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.Look);
-            message.WriteUnsignedInt(creatureID);
-            m_PacketWriter.FinishMessage();
+            message.WriteUnsignedInt(creature_id);
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendJoinAggression(uint creatureID) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendJoinAggression(uint creature_id) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.JoinAggression);
-            message.WriteUnsignedInt(creatureID);
-            m_PacketWriter.FinishMessage();
+            message.WriteUnsignedInt(creature_id);
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendTalk(MessageModeType mode, int channelID, string receiver, string text) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendTalk(MessageModeType mode, int channel_id, string receiver, string text) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.Talk);
             message.WriteUnsignedByte(TranslateMessageModeToServer(mode));
 
@@ -260,170 +291,170 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 case MessageModeType.ChannelHighlight:
                 case MessageModeType.ChannelManagement:
                 case MessageModeType.GamemasterChannel:
-                    message.WriteUnsignedShort((ushort)channelID);
+                    message.WriteUnsignedShort((ushort)channel_id);
                     break;
                 default:
                     break;
             }
 
             message.WriteString(text);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
-        internal void SendGetChannels() {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendGetChannels() {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.GetChannels);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
-        internal void SendJoinChannel(int channelID) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendJoinChannel(int channel_id) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.JoinChannel);
-            message.WriteUnsignedShort((ushort)channelID);
-            m_PacketWriter.FinishMessage();
+            message.WriteUnsignedShort((ushort)channel_id);
+            _packetWriter.FinishMessage();
         }
-        internal void SendLeaveChannel(int channelID) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendLeaveChannel(int channel_id) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.LeaveChannel);
-            message.WriteUnsignedShort((ushort)channelID);
-            m_PacketWriter.FinishMessage();
+            message.WriteUnsignedShort((ushort)channel_id);
+            _packetWriter.FinishMessage();
         }
-        internal void SendPrivateChannel(string playerName) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendPrivateChannel(string playerName) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.PrivateChannel);
             message.WriteString(playerName);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendCloseNPCChannel() {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendCloseNPCChannel() {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.CloseNPCChannel);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendSetTactics() {
+        public void SendSetTactics() {
             var optionStorage = OpenTibiaUnity.OptionStorage;
 
-            var message = m_PacketWriter.CreateMessage();
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.SetTactics);
             message.WriteUnsignedByte((byte)optionStorage.CombatAttackMode);
             message.WriteUnsignedByte((byte)optionStorage.CombatChaseMode);
             message.WriteUnsignedByte(optionStorage.CombatSecureMode ? (byte)1 : (byte)0);
             message.WriteUnsignedByte((byte)optionStorage.CombatPvPMode);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendAttack(uint creatureID) {
-            if (creatureID != 0)
+        public void SendAttack(uint creature_id) {
+            if (creature_id != 0)
                 Player.StopAutowalk(false);
 
-            var message = m_PacketWriter.CreateMessage();
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.Attack);
-            message.WriteUnsignedInt(creatureID);
+            message.WriteUnsignedInt(creature_id);
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameAttackSeq))
-                message.WriteUnsignedInt(creatureID); // Sequence
-            m_PacketWriter.FinishMessage();
+                message.WriteUnsignedInt(creature_id); // Sequence
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendFollow(uint creatureID) {
-            if (creatureID != 0)
+        public void SendFollow(uint creature_id) {
+            if (creature_id != 0)
                 Player.StopAutowalk(false);
 
-            var message = m_PacketWriter.CreateMessage();
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.Follow);
-            message.WriteUnsignedInt(creatureID);
+            message.WriteUnsignedInt(creature_id);
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameAttackSeq))
-                message.WriteUnsignedInt(creatureID); // Sequence
-            m_PacketWriter.FinishMessage();
+                message.WriteUnsignedInt(creature_id); // Sequence
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendInviteToParty(uint creatureID) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendInviteToParty(uint creature_id) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.InviteToParty);
-            message.WriteUnsignedInt(creatureID);
-            m_PacketWriter.FinishMessage();
+            message.WriteUnsignedInt(creature_id);
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendJoinParty(uint creatureID) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendJoinParty(uint creature_id) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.JoinParty);
-            message.WriteUnsignedInt(creatureID);
-            m_PacketWriter.FinishMessage();
+            message.WriteUnsignedInt(creature_id);
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendRevokeInvitation(uint creatureID) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendRevokeInvitation(uint creature_id) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.RevokeInvitation);
-            message.WriteUnsignedInt(creatureID);
-            m_PacketWriter.FinishMessage();
+            message.WriteUnsignedInt(creature_id);
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendPassLeadership(uint creatureID) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendPassLeadership(uint creature_id) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.PassLeadership);
-            message.WriteUnsignedInt(creatureID);
-            m_PacketWriter.FinishMessage();
+            message.WriteUnsignedInt(creature_id);
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendLeaveParty() {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendLeaveParty() {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.LeaveParty);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendShareExperience(bool shared) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendShareExperience(bool shared) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.ShareExperience);
             message.WriteBoolean(shared);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendOpenChannel() {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendOpenChannel() {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.OpenChannel);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendInviteToChannel(string name, int channelID) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendInviteToChannel(string name, int channel_id) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.InviteToChannel);
             message.WriteString(name);
-            message.WriteUnsignedShort((ushort)channelID);
-            m_PacketWriter.FinishMessage();
+            message.WriteUnsignedShort((ushort)channel_id);
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendExcludeFromChannel(string name, int channelID) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendExcludeFromChannel(string name, int channel_id) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.ExcludeFromChannel);
             message.WriteString(name);
-            message.WriteUnsignedShort((ushort)channelID);
-            m_PacketWriter.FinishMessage();
+            message.WriteUnsignedShort((ushort)channel_id);
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendCancel() {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendCancel() {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.Cancel);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendBrowseField(UnityEngine.Vector3Int absolute) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendBrowseField(UnityEngine.Vector3Int absolute) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.BrowseField);
             message.WritePosition(absolute);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendGetOutfit() {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendGetOutfit() {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.GetOutfit);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendSetOutfit(Appearances.OutfitInstance outfit, Appearances.OutfitInstance mount) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendSetOutfit(Appearances.OutfitInstance outfit, Appearances.OutfitInstance mount) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.SetOutfit);
-            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameOutfitIDU16))
-                message.WriteUnsignedShort((ushort)outfit.ID);
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameOutfit_idU16))
+                message.WriteUnsignedShort((ushort)outfit.Id);
             else
-                message.WriteUnsignedByte((byte)outfit.ID);
+                message.WriteUnsignedByte((byte)outfit.Id);
             message.WriteUnsignedByte((byte)outfit.Head);
             message.WriteUnsignedByte((byte)outfit.Torso);
             message.WriteUnsignedByte((byte)outfit.Legs);
@@ -432,30 +463,30 @@ namespace OpenTibiaUnity.Core.Communication.Game
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerAddons))
                 message.WriteUnsignedByte((byte)outfit.AddOns);
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerMounts))
-                message.WriteUnsignedShort((ushort)mount?.ID);
+                message.WriteUnsignedShort((ushort)mount?.Id);
 
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendMount(bool toggle) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendMount(bool toggle) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.Mount);
             message.WriteBoolean(toggle);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendAddBuddyGroup(bool add, string name) {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendAddBuddyGroup(bool add, string name) {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.AddBuddyGroup);
             message.WriteBoolean(add); // 0 to remove
             message.WriteString(name);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
 
-        internal void SendGetQuestLog() {
-            var message = m_PacketWriter.CreateMessage();
+        public void SendGetQuestLog() {
+            var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.GetQuestLog);
-            m_PacketWriter.FinishMessage();
+            _packetWriter.FinishMessage();
         }
     }
 }

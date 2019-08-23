@@ -6,25 +6,25 @@ namespace OpenTibiaUnity.Modules.MiniMap
 {
     public class MiniMapModule : Core.Components.Base.AbstractComponent
     {
-        [SerializeField] private RawImage m_MiniMapRenderingRawImage = null;
+        [SerializeField] private RawImage _miniMapRenderingRawImage = null;
 
-        [SerializeField] private Button m_ZLayerUpButton = null;
-        [SerializeField] private Button m_ZLayerDownButton = null;
-        [SerializeField] private Button m_ZoomOutButton = null;
-        [SerializeField] private Button m_ZoomInButton = null;
-        [SerializeField] private Button m_CenterButton = null;
+        [SerializeField] private Button _zLayerUpButton = null;
+        [SerializeField] private Button _zLayerDownButton = null;
+        [SerializeField] private Button _zoomOutButton = null;
+        [SerializeField] private Button _zoomInButton = null;
+        [SerializeField] private Button _benterButton = null;
 
-        private RectTransform m_MiniMapRenderingRectTransform;
+        private RectTransform _miniMapRenderingRectTransform;
 
         protected override void Start() {
             base.Start();
-            m_MiniMapRenderingRectTransform = m_MiniMapRenderingRawImage.rectTransform;
+            _miniMapRenderingRectTransform = _miniMapRenderingRawImage.rectTransform;
 
-            m_ZLayerUpButton.onClick.AddListener(OnZLayerUpButtonClicked);
-            m_ZLayerDownButton.onClick.AddListener(OnZLayerDownButtonClicked);
-            m_ZoomOutButton.onClick.AddListener(OnZoomOutButtonClicked);
-            m_ZoomInButton.onClick.AddListener(OnZoomInButtonClicked);
-            m_CenterButton.onClick.AddListener(OnCenterButtonClicked);
+            _zLayerUpButton.onClick.AddListener(OnZLayerUpButtonClicked);
+            _zLayerDownButton.onClick.AddListener(OnZLayerDownButtonClicked);
+            _zoomOutButton.onClick.AddListener(OnZoomOutButtonClicked);
+            _zoomInButton.onClick.AddListener(OnZoomInButtonClicked);
+            _benterButton.onClick.AddListener(OnCenterButtonClicked);
         }
 
         protected void OnGUI() {

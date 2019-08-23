@@ -8,27 +8,27 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Container
 {
-    internal class ContainerWindow : Core.Components.Base.MiniWindow, IUseWidget, IMoveWidget, IWidgetContainerWidget
+    public class ContainerWindow : Core.Components.Base.MiniWindow, IUseWidget, IMoveWidget, IWidgetContainerWidget
     {
-        [SerializeField] private OTU_ScrollRect m_ItemsScrollRect = null;
-        [SerializeField] private Button m_UpButton = null;
+        [SerializeField] private OTU_ScrollRect _itemsScrollRect = null;
+        [SerializeField] private Button _upButton = null;
 
-        private ContainerView m_ContainerView = null;
-        private int m_Rows = -1;
-        private int m_NumberOfSlots = 0;
-        private int m_SlotUnderMouse = -1;
+        private ContainerView _containerView = null;
+        private int _rows = -1;
+        private int _numberOfSlots = 0;
+        private int _slotUnderMouse = -1;
 
-        private ItemView[] m_ItemViews;
-        private RenderTexture m_SlotsRenderTexture;
-        private ObjectDragImpl<ContainerWindow> m_DragHandler;
+        private ItemView[] _itemViews;
+        private RenderTexture _slotsRenderTexture;
+        private ObjectDragImpl<ContainerWindow> _dragHandler;
 
         protected override void Awake() {
             base.Awake();
 
-            m_DragHandler = new ObjectDragImpl<ContainerWindow>(this);
+            _dragHandler = new ObjectDragImpl<ContainerWindow>(this);
             ObjectMultiUseHandler.RegisterContainer(this);
 
-            OpenTibiaUnity.InputHandler.AddMouseUpListener(Core.Utility.EventImplPriority.Default, OnMouseUp);
+            OpenTibiaUnity.InputHandler.AddMouseUpListener(Core.Utils.EventImplPriority.Default, OnMouseUp);
         }
 
         protected void OnGUI() {
@@ -36,21 +36,21 @@ namespace OpenTibiaUnity.Modules.Container
                 return;
 
             var gameManager = OpenTibiaUnity.GameManager;
-            InternalStartMouseAction(Input.mousePosition, MouseButton.None, false, true);
+            publicStartMouseAction(Input.mousePosition, MouseButton.None, false, true);
 
-            if (!m_SlotsRenderTexture)
+            if (!_slotsRenderTexture)
                 return;
 
-            Vector2 zoom = new Vector2(Screen.width / (float)m_SlotsRenderTexture.width, Screen.height / (float)m_SlotsRenderTexture.height);
+            Vector2 zoom = new Vector2(Screen.width / (float)_slotsRenderTexture.width, Screen.height / (float)_slotsRenderTexture.height);
 
-            m_SlotsRenderTexture.Release();
-            RenderTexture.active = m_SlotsRenderTexture;
+            _slotsRenderTexture.Release();
+            RenderTexture.active = _slotsRenderTexture;
             for (int i = 0; i < 4; i++) {
-                for (int j = 0; j < m_Rows; j++) {
+                for (int j = 0; j < _rows; j++) {
                     int index = j * 4 + i;
 
-                    if (index < m_ContainerView.NumberOfTotalObjects) {
-                        var @object = m_ContainerView.GetObject(index + m_ContainerView.IndexOfFirstObject);
+                    if (index < _containerView.NumberOfTotalObjects) {
+                        var @object = _containerView.GetObject(index + _containerView.IndexOfFirstObject);
                         if (@object) {
                             @object.Animate(OpenTibiaUnity.TicksMillis);
                             @object.DrawTo(new Vector2(Constants.FieldSize * i, Constants.FieldSize * j), zoom, 0, 0, 0);
@@ -63,13 +63,13 @@ namespace OpenTibiaUnity.Modules.Container
         }
 
         protected void OnMouseUp(Event e, MouseButton mouseButton, bool repeat) {
-            if (InternalStartMouseAction(e.mousePosition, mouseButton, true, false))
+            if (publicStartMouseAction(e.mousePosition, mouseButton, true, false))
                 e.Use();
         }
 
-        private bool InternalStartMouseAction(Vector3 mousePosition, MouseButton mouseButton, bool applyAction = false, bool updateCursor = false) {
+        private bool publicStartMouseAction(Vector3 mousePosition, MouseButton mouseButton, bool applyAction = false, bool updateCursor = false) {
             var gameManager = OpenTibiaUnity.GameManager;
-            if (!m_MouseCursorOverRenderer || !gameManager.GameCanvas.gameObject.activeSelf || gameManager.GamePanelBlocker.gameObject.activeSelf)
+            if (!_mouseCursorOverRenderer || !gameManager.GameCanvas.gameObject.activeSelf || gameManager.GamePanelBlocker.gameObject.activeSelf)
                 return false;
 
             var @object = GetObjectUnderMouse();
@@ -153,7 +153,7 @@ namespace OpenTibiaUnity.Modules.Container
                 OpenTibiaUnity.GameManager.CursorController.SetCursorState(action, CursorPriority.Medium);
 
             if (applyAction) {
-                var absolutePosition = new Vector3Int(65535, 64 + m_ContainerView.ID, m_SlotUnderMouse);
+                var absolutePosition = new Vector3Int(65535, 64 + _containerView.Id, _slotUnderMouse);
                 switch (action) {
                     case AppearanceActions.None: break;
                     case AppearanceActions.ContextMenu:
@@ -180,53 +180,53 @@ namespace OpenTibiaUnity.Modules.Container
             return action;
         }
 
-        internal void UpdateProperties(ContainerView containerView) {
+        public void UpdateProperties(ContainerView containerView) {
             containerView.onObjectAdded.AddListener(OnAddedObject);
             containerView.onObjectRemoved.AddListener(OnRemovedObject);
 
-            m_NumberOfSlots = containerView.NumberOfSlotsPerPage;
-            m_Rows = (int)Mathf.Ceil(m_NumberOfSlots / 4f);
+            _numberOfSlots = containerView.NumberOfSlotsPerPage;
+            _rows = (int)Mathf.Ceil(_numberOfSlots / 4f);
 
-            m_SlotsRenderTexture = new RenderTexture(Constants.FieldSize * 4, Constants.FieldSize * m_Rows, 0, RenderTextureFormat.ARGB32);
+            _slotsRenderTexture = new RenderTexture(Constants.FieldSize * 4, Constants.FieldSize * _rows, 0, RenderTextureFormat.ARGB32);
 
-            m_ItemViews = new ItemView[m_NumberOfSlots];
+            _itemViews = new ItemView[_numberOfSlots];
 
-            m_ContainerView = containerView;
+            _containerView = containerView;
 
             int paginationHeight = 0;
             if (containerView.IsPaginationEnabled)
                 paginationHeight += 25;
 
-            m_MinContentHeight = 34 + paginationHeight;
-            m_MaxContentHeight = m_Rows * 34 + (m_Rows - 1) * 3 + paginationHeight;
+            _minContentHeight = 34 + paginationHeight;
+            _maxContentHeight = _rows * 34 + (_rows - 1) * 3 + paginationHeight;
 
             int activeRows = (containerView.NumberOfTotalObjects / 4);
-            m_PreferredContentHeight = activeRows * 34 + (activeRows - 1) * 3 + paginationHeight;
+            _preferredContentHeight = activeRows * 34 + (activeRows - 1) * 3 + paginationHeight;
             
-            m_UpButton.gameObject.SetActive(containerView.IsSubContainer);
+            _upButton.gameObject.SetActive(containerView.IsSubContainer);
 
-            m_TitleLabel.SetText(containerView.Name);
+            _titleLabel.SetText(containerView.Name);
 
-            for (int i = 0; i < m_NumberOfSlots; i++) {
-                var itemView = Instantiate(ModulesManager.Instance.ItemViewPrefab, m_ItemsScrollRect.content);
-                itemView.onPointerEnter.AddListener((ClothSlots _) => m_SlotUnderMouse = i);
-                itemView.onPointerExit.AddListener((ClothSlots _) => m_SlotUnderMouse = -1);
+            for (int i = 0; i < _numberOfSlots; i++) {
+                var itemView = Instantiate(ModulesManager.Instance.ItemViewPrefab, _itemsScrollRect.content);
+                itemView.onPointerEnter.AddListener((ClothSlots _) => _slotUnderMouse = i);
+                itemView.onPointerExit.AddListener((ClothSlots _) => _slotUnderMouse = -1);
 
                 itemView.itemImage.enabled = false;
-                itemView.itemImage.texture = m_SlotsRenderTexture;
-                float w = (float)Constants.FieldSize / m_SlotsRenderTexture.width;
-                float h = (float)Constants.FieldSize / m_SlotsRenderTexture.height;
+                itemView.itemImage.texture = _slotsRenderTexture;
+                float w = (float)Constants.FieldSize / _slotsRenderTexture.width;
+                float h = (float)Constants.FieldSize / _slotsRenderTexture.height;
                 itemView.itemImage.uvRect = new Rect(w * (i % 4), 1 - h * (i / 4 + 1), w, h);
-                m_ItemViews[i] = itemView;
+                _itemViews[i] = itemView;
             }
 
             UpdateLayout();
         }
 
         protected void OnAddedObject(ContainerView _, int index, ObjectInstance @object) {
-            index -= m_ContainerView.IndexOfFirstObject;
+            index -= _containerView.IndexOfFirstObject;
 
-            var itemView = m_ItemViews[index];
+            var itemView = _itemViews[index];
 
             itemView.itemImage.enabled = true;
             itemView.showAmount = @object.Data > 1;
@@ -234,32 +234,32 @@ namespace OpenTibiaUnity.Modules.Container
         }
         
         protected void OnRemovedObject(ContainerView _, int index, ObjectInstance appendObject) {
-            index -= m_ContainerView.IndexOfFirstObject;
-            m_ItemViews[index].itemImage.enabled = !!appendObject;
+            index -= _containerView.IndexOfFirstObject;
+            _itemViews[index].itemImage.enabled = !!appendObject;
         }
 
-        internal ObjectInstance GetObjectUnderMouse() {
-            if (m_SlotUnderMouse == -1)
+        public ObjectInstance GetObjectUnderMouse() {
+            if (_slotUnderMouse == -1)
                 return null;
 
-            if (m_SlotUnderMouse >= m_ContainerView.NumberOfTotalObjects)
+            if (_slotUnderMouse >= _containerView.NumberOfTotalObjects)
                 return null;
 
-            return m_ContainerView.GetObject(m_SlotUnderMouse + m_ContainerView.IndexOfFirstObject);
+            return _containerView.GetObject(_slotUnderMouse + _containerView.IndexOfFirstObject);
         }
 
-        internal bool Matches(ContainerView containerView) {
-            return m_ContainerView != null && m_ContainerView.ID == containerView.ID;
+        public bool Matches(ContainerView containerView) {
+            return _containerView != null && _containerView.Id == containerView.Id;
         }
 
         public int GetTopObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
             @object = GetObjectUnderMouse();
-            return m_SlotUnderMouse;
+            return _slotUnderMouse;
         }
 
         public int GetUseObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
             @object = GetObjectUnderMouse();
-            return m_SlotUnderMouse;
+            return _slotUnderMouse;
         }
 
         public int GetMultiUseObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
@@ -269,7 +269,7 @@ namespace OpenTibiaUnity.Modules.Container
                 return -1;
             }
 
-            return m_SlotUnderMouse;
+            return _slotUnderMouse;
         }
 
         public int GetMoveObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
@@ -277,10 +277,10 @@ namespace OpenTibiaUnity.Modules.Container
         }
 
         public Vector3Int? MousePositionToAbsolutePosition(Vector3 mousePosition) {
-            if (m_SlotUnderMouse == -1)
+            if (_slotUnderMouse == -1)
                 return null;
 
-            return new Vector3Int(65535, 64 + m_ContainerView.ID, m_SlotUnderMouse);
+            return new Vector3Int(65535, 64 + _containerView.Id, _slotUnderMouse);
         }
 
         public Vector3Int? MousePositionToMapPosition(Vector3 mousePosition) {

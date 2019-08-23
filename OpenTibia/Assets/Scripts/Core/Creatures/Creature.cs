@@ -2,354 +2,354 @@
 
 namespace OpenTibiaUnity.Core.Creatures
 {
-    internal struct Skill
+    public struct Skill
     {
-        internal long Level;
-        internal long BaseLevel;
-        internal float Percentage;
+        public long Level;
+        public long BaseLevel;
+        public float Percentage;
 
-        internal Skill(int level, int baseLevel, float percentage) {
+        public Skill(int level, int baseLevel, float percentage) {
             Level = level;
             BaseLevel = baseLevel;
             Percentage = percentage;
         }
     }
 
-    internal class Creature
+    public class Creature
     {
-        internal class StringCreatureChangeEvent : UnityEvent<Creature, string, string> {}
-        internal class UIntCreatureChangeEvent : UnityEvent<Creature, uint, uint> {}
-        internal class IntCreatureChangeEvent : UnityEvent<Creature, int, int> {}
-        internal class IntCreatureChangeEvent2 : UnityEvent<Creature, int> {}
-        internal class DirectionCreatureChangeEvent : UnityEvent<Creature, Direction, Direction> {}
-        internal class BoolCreatureChangeEvent : UnityEvent<Creature, bool> {};
-        internal class SkillsCreatureChangeEvent : UnityEvent<Creature, SkillType, Skill> {};
-        internal class LightCreatureChangeEvent : UnityEvent<Creature, UnityEngine.Color> {};
-        internal class PositionCreatureChangeEvent : UnityEvent<Creature, UnityEngine.Vector3Int, UnityEngine.Vector3Int> {};
-        internal class MarksCreatureChangeEvent : UnityEvent<Creature, Appearances.Marks> {};
-        internal class OutfitCreatureChangeEvent : UnityEvent<Creature, Appearances.AppearanceInstance> {};
+        public class StringCreatureChangeEvent : UnityEvent<Creature, string, string> {}
+        public class UIntCreatureChangeEvent : UnityEvent<Creature, uint, uint> {}
+        public class IntCreatureChangeEvent : UnityEvent<Creature, int, int> {}
+        public class IntCreatureChangeEvent2 : UnityEvent<Creature, int> {}
+        public class DirectionCreatureChangeEvent : UnityEvent<Creature, Direction, Direction> {}
+        public class BoolCreatureChangeEvent : UnityEvent<Creature, bool> {};
+        public class SkillsCreatureChangeEvent : UnityEvent<Creature, SkillType, Skill> {};
+        public class LightCreatureChangeEvent : UnityEvent<Creature, UnityEngine.Color> {};
+        public class PositionCreatureChangeEvent : UnityEvent<Creature, UnityEngine.Vector3Int, UnityEngine.Vector3Int> {};
+        public class MarksCreatureChangeEvent : UnityEvent<Creature, Appearances.Marks> {};
+        public class OutfitCreatureChangeEvent : UnityEvent<Creature, Appearances.AppearanceInstance> {};
 
-        internal class CreatureTypesCreatureChangeEvent : UnityEvent<Creature, CreatureType, CreatureType> {};
-        internal class PartyFlagsCreatureChangeEvent : UnityEvent<Creature, PartyFlag, PartyFlag> {};
-        internal class PKFlagsCreatureChangeEvent : UnityEvent<Creature, PKFlag, PKFlag> {};
-        internal class GuildFlagsCreatureChangeEvent : UnityEvent<Creature, GuildFlag, GuildFlag> {};
-        internal class SpeechCategoryCreatureChangeEvent : UnityEvent<Creature, SpeechCategory, SpeechCategory> {};
+        public class CreatureTypesCreatureChangeEvent : UnityEvent<Creature, CreatureType, CreatureType> {};
+        public class PartyFlagsCreatureChangeEvent : UnityEvent<Creature, PartyFlag, PartyFlag> {};
+        public class PKFlagsCreatureChangeEvent : UnityEvent<Creature, PKFlag, PKFlag> {};
+        public class GuildFlagsCreatureChangeEvent : UnityEvent<Creature, GuildFlag, GuildFlag> {};
+        public class SpeechCategoryCreatureChangeEvent : UnityEvent<Creature, SpeechCategory, SpeechCategory> {};
 
-        internal static UIntCreatureChangeEvent onIDChange = new UIntCreatureChangeEvent();
-        internal static StringCreatureChangeEvent onNameChange = new StringCreatureChangeEvent();
-        internal static CreatureTypesCreatureChangeEvent onTypeChange = new CreatureTypesCreatureChangeEvent();
-        internal static UIntCreatureChangeEvent onSummonerChange = new UIntCreatureChangeEvent();
-        internal static BoolCreatureChangeEvent onUnpassableChange = new BoolCreatureChangeEvent();
-        internal static DirectionCreatureChangeEvent onDirectionChange = new DirectionCreatureChangeEvent();
-        internal static PartyFlagsCreatureChangeEvent onPartyFlagChange = new PartyFlagsCreatureChangeEvent();
-        internal static PKFlagsCreatureChangeEvent onPKFlagChange = new PKFlagsCreatureChangeEvent();
-        internal static GuildFlagsCreatureChangeEvent onGuildFlagChange = new GuildFlagsCreatureChangeEvent();
-        internal static OutfitCreatureChangeEvent onOutfitChange = new OutfitCreatureChangeEvent(); // outfit
-        internal static OutfitCreatureChangeEvent onMountOutfitChange = new OutfitCreatureChangeEvent(); // mountOutfit
-        internal static IntCreatureChangeEvent2 onBrightnessChange = new IntCreatureChangeEvent2(); // brightness
-        internal static LightCreatureChangeEvent onLightColorChange = new LightCreatureChangeEvent(); // color
-        internal static IntCreatureChangeEvent onSpeedChange = new IntCreatureChangeEvent(); // newSpeed, oldSpeed
-        internal static SpeechCategoryCreatureChangeEvent onSpeechCategoryChange = new SpeechCategoryCreatureChangeEvent(); // speechType
-        internal static IntCreatureChangeEvent2 onNumberOfPvPHelpersChange = new IntCreatureChangeEvent2(); // helpers
-        internal static PositionCreatureChangeEvent onPositionChange = new PositionCreatureChangeEvent(); // newPosition, oldPosition
-        internal static MarksCreatureChangeEvent onMarksChange = new MarksCreatureChangeEvent(); // marks
-        internal static BoolCreatureChangeEvent onVisbilityChange = new BoolCreatureChangeEvent(); // visibility
-        internal static SkillsCreatureChangeEvent onSkillChange = new SkillsCreatureChangeEvent(); // skill, level, baseLevel, percentage
+        public static UIntCreatureChangeEvent on_idChange = new UIntCreatureChangeEvent();
+        public static StringCreatureChangeEvent onNameChange = new StringCreatureChangeEvent();
+        public static CreatureTypesCreatureChangeEvent onTypeChange = new CreatureTypesCreatureChangeEvent();
+        public static UIntCreatureChangeEvent onSummonerChange = new UIntCreatureChangeEvent();
+        public static BoolCreatureChangeEvent onUnpassableChange = new BoolCreatureChangeEvent();
+        public static DirectionCreatureChangeEvent onDirectionChange = new DirectionCreatureChangeEvent();
+        public static PartyFlagsCreatureChangeEvent onPartyFlagChange = new PartyFlagsCreatureChangeEvent();
+        public static PKFlagsCreatureChangeEvent onPKFlagChange = new PKFlagsCreatureChangeEvent();
+        public static GuildFlagsCreatureChangeEvent onGuildFlagChange = new GuildFlagsCreatureChangeEvent();
+        public static OutfitCreatureChangeEvent onOutfitChange = new OutfitCreatureChangeEvent(); // outfit
+        public static OutfitCreatureChangeEvent onMountOutfitChange = new OutfitCreatureChangeEvent(); // mountOutfit
+        public static IntCreatureChangeEvent2 onBrightnessChange = new IntCreatureChangeEvent2(); // brightness
+        public static LightCreatureChangeEvent onLightColorChange = new LightCreatureChangeEvent(); // color
+        public static IntCreatureChangeEvent onSpeedChange = new IntCreatureChangeEvent(); // newSpeed, oldSpeed
+        public static SpeechCategoryCreatureChangeEvent onSpeechCategoryChange = new SpeechCategoryCreatureChangeEvent(); // speechType
+        public static IntCreatureChangeEvent2 onNumberOfPvPHelpersChange = new IntCreatureChangeEvent2(); // helpers
+        public static PositionCreatureChangeEvent onPositionChange = new PositionCreatureChangeEvent(); // newPosition, oldPosition
+        public static MarksCreatureChangeEvent onMarksChange = new MarksCreatureChangeEvent(); // marks
+        public static BoolCreatureChangeEvent onVisbilityChange = new BoolCreatureChangeEvent(); // visibility
+        public static SkillsCreatureChangeEvent onSkillChange = new SkillsCreatureChangeEvent(); // skill, level, baseLevel, percentage
 
-        protected uint m_ID = 0;
-        internal uint ID {
-            get { return m_ID; }
-            set { if (m_ID != value) { var old = m_ID;  m_ID = value; onIDChange.Invoke(this, m_ID, old); } }
+        protected uint _id = 0;
+        public uint Id {
+            get { return _id; }
+            set { if (_id != value) { var old = _id;  _id = value; on_idChange.Invoke(this, _id, old); } }
         }
 
-        protected string m_Name;
-        internal string Name {
-            get { return m_Name; }
-            set { var old = m_Name; m_Name = value; onNameChange.Invoke(this, m_Name, old); }
+        protected string _name;
+        public string Name {
+            get { return _name; }
+            set { var old = _name; _name = value; onNameChange.Invoke(this, _name, old); }
         }
 
-        protected CreatureType m_Type = 0;
-        internal CreatureType Type {
-            get { return m_Type; }
-            set { if (m_Type != value) { var old = m_Type;  m_Type = value; onTypeChange.Invoke(this, m_Type, old); } }
+        protected CreatureType _type = 0;
+        public CreatureType Type {
+            get { return _type; }
+            set { if (_type != value) { var old = _type;  _type = value; onTypeChange.Invoke(this, _type, old); } }
         }
 
-        protected uint m_SummonerID = 0;
-        internal uint SummonerID {
-            get { return m_SummonerID; }
-            set { if (m_SummonerID != value) { var old = m_SummonerID;  m_SummonerID = value; onSummonerChange.Invoke(this, m_SummonerID, old); } }
+        protected uint _summoner_id = 0;
+        public uint Summoner_id {
+            get { return _summoner_id; }
+            set { if (_summoner_id != value) { var old = _summoner_id;  _summoner_id = value; onSummonerChange.Invoke(this, _summoner_id, old); } }
         }
 
-        protected bool m_Trapper = false;
-        internal bool Trapper {
-            get { return m_Trapper; }
-            set { if (m_Trapper != value) { m_Trapper = value; } }
+        protected bool _trapper = false;
+        public bool Trapper {
+            get { return _trapper; }
+            set { if (_trapper != value) { _trapper = value; } }
         }
 
-        protected bool m_Unpassable = false;
-        internal bool Unpassable {
-            get { return m_Unpassable; }
-            set { if (m_Unpassable != value) { m_Unpassable = value; onUnpassableChange.Invoke(this, m_Unpassable); } }
+        protected bool _unpassable = false;
+        public bool Unpassable {
+            get { return _unpassable; }
+            set { if (_unpassable != value) { _unpassable = value; onUnpassableChange.Invoke(this, _unpassable); } }
         }
 
-        protected Direction m_Direction = Direction.North;
-        internal Direction Direction {
-            get { return m_MovementRunning ? m_AnimationDirection : m_Direction; }
-            set { if (m_Direction != value) { var old = m_Direction; m_Direction = value; onDirectionChange.Invoke(this, m_Direction, old); } }
+        protected Direction _direction = Direction.North;
+        public Direction Direction {
+            get { return _movementRunning ? _animationDirection : _direction; }
+            set { if (_direction != value) { var old = _direction; _direction = value; onDirectionChange.Invoke(this, _direction, old); } }
         }
 
-        protected PartyFlag m_PartyFlag = PartyFlag.None;
-        internal PartyFlag PartyFlag {
-            get { return m_PartyFlag; }
-            set { if (m_PartyFlag != value) { var old = m_PartyFlag; m_PartyFlag = value; onPartyFlagChange.Invoke(this, m_PartyFlag, old); } }
+        protected PartyFlag _partyFlag = PartyFlag.None;
+        public PartyFlag PartyFlag {
+            get { return _partyFlag; }
+            set { if (_partyFlag != value) { var old = _partyFlag; _partyFlag = value; onPartyFlagChange.Invoke(this, _partyFlag, old); } }
         }
 
-        protected PKFlag m_PKFlag = PKFlag.None;
-        internal PKFlag PKFlag {
-            get { return m_PKFlag; }
-            set { if (m_PKFlag != value) { var old = m_PKFlag; m_PKFlag = value; onPKFlagChange.Invoke(this, m_PKFlag, old); } }
+        protected PKFlag _pKFlag = PKFlag.None;
+        public PKFlag PKFlag {
+            get { return _pKFlag; }
+            set { if (_pKFlag != value) { var old = _pKFlag; _pKFlag = value; onPKFlagChange.Invoke(this, _pKFlag, old); } }
         }
 
-        protected SummonTypeFlags m_SummonTypeFlag = SummonTypeFlags.None;
-        internal SummonTypeFlags SummonTypeFlag {
-            get { return m_SummonTypeFlag; }
-            set { if (m_SummonTypeFlag != value) { m_SummonTypeFlag = value; } }
+        protected SummonTypeFlags _summonTypeFlag = SummonTypeFlags.None;
+        public SummonTypeFlags SummonTypeFlag {
+            get { return _summonTypeFlag; }
+            set { if (_summonTypeFlag != value) { _summonTypeFlag = value; } }
         }
 
-        protected SpeechCategory m_SpeechCategory = SpeechCategory.None;
-        internal SpeechCategory SpeechCategory {
-            get { return m_SpeechCategory; }
-            set { if (m_SpeechCategory != value) { var old = m_SpeechCategory;  m_SpeechCategory = value; onSpeechCategoryChange.Invoke(this, m_SpeechCategory, old); } }
+        protected SpeechCategory _speechCategory = SpeechCategory.None;
+        public SpeechCategory SpeechCategory {
+            get { return _speechCategory; }
+            set { if (_speechCategory != value) { var old = _speechCategory;  _speechCategory = value; onSpeechCategoryChange.Invoke(this, _speechCategory, old); } }
         }
 
-        protected GuildFlag m_GuildFlag = GuildFlag.None;
-        internal GuildFlag GuildFlag {
-            get { return m_GuildFlag; }
-            set { if (m_GuildFlag != value) { var old = m_GuildFlag; m_GuildFlag = value; onGuildFlagChange.Invoke(this, m_GuildFlag, old); } }
+        protected GuildFlag _guildFlag = GuildFlag.None;
+        public GuildFlag GuildFlag {
+            get { return _guildFlag; }
+            set { if (_guildFlag != value) { var old = _guildFlag; _guildFlag = value; onGuildFlagChange.Invoke(this, _guildFlag, old); } }
         }
 
-        protected Appearances.AppearanceInstance m_Outfit = null;
-        internal Appearances.AppearanceInstance Outfit {
-            get { return m_Outfit; }
-            set { if (m_Outfit != value) { m_Outfit = value; onOutfitChange.Invoke(this, m_Outfit); } }
+        protected Appearances.AppearanceInstance _outfit = null;
+        public Appearances.AppearanceInstance Outfit {
+            get { return _outfit; }
+            set { if (_outfit != value) { _outfit = value; onOutfitChange.Invoke(this, _outfit); } }
         }
 
-        protected Appearances.AppearanceInstance m_MountOutfit = null;
-        internal Appearances.AppearanceInstance MountOutfit {
-            get { return m_MountOutfit; }
-            set { if (m_MountOutfit != value) { m_MountOutfit = value; onMountOutfitChange.Invoke(this, m_MountOutfit); } }
+        protected Appearances.AppearanceInstance _mountOutfit = null;
+        public Appearances.AppearanceInstance MountOutfit {
+            get { return _mountOutfit; }
+            set { if (_mountOutfit != value) { _mountOutfit = value; onMountOutfitChange.Invoke(this, _mountOutfit); } }
         }
 
-        protected int m_Brightness = 0;
-        internal int Brightness {
-            get { return m_Brightness; }
-            set { if (m_Brightness != value) { m_Brightness = value; onBrightnessChange.Invoke(this, m_Brightness); } }
+        protected int _brightness = 0;
+        public int Brightness {
+            get { return _brightness; }
+            set { if (_brightness != value) { _brightness = value; onBrightnessChange.Invoke(this, _brightness); } }
         }
 
-        protected UnityEngine.Color m_LightColor = UnityEngine.Color.black;
-        internal UnityEngine.Color LightColor {
-            get { return m_LightColor; }
-            set { if (m_LightColor != value) { m_LightColor = value; onLightColorChange.Invoke(this, m_LightColor); } }
+        protected UnityEngine.Color _lightColor = UnityEngine.Color.black;
+        public UnityEngine.Color LightColor {
+            get { return _lightColor; }
+            set { if (_lightColor != value) { _lightColor = value; onLightColorChange.Invoke(this, _lightColor); } }
         }
         
-        protected int m_NumberOfPvPHelpers = 0;
-        internal int NumberOfPvPHelpers {
-            get { return m_NumberOfPvPHelpers; }
-            set { if (m_NumberOfPvPHelpers != value) { m_NumberOfPvPHelpers = value; onNumberOfPvPHelpersChange.Invoke(this, m_NumberOfPvPHelpers); } }
+        protected int _numberOfPvPHelpers = 0;
+        public int NumberOfPvPHelpers {
+            get { return _numberOfPvPHelpers; }
+            set { if (_numberOfPvPHelpers != value) { _numberOfPvPHelpers = value; onNumberOfPvPHelpersChange.Invoke(this, _numberOfPvPHelpers); } }
         }
 
-        protected UnityEngine.Vector3Int m_Position = UnityEngine.Vector3Int.zero;
-        internal UnityEngine.Vector3Int Position {
-            get { return m_Position; }
-            set { if (m_Position != value) { var old = m_Position; m_Position = value; onPositionChange.Invoke(this, m_Position, old); } }
+        protected UnityEngine.Vector3Int _position = UnityEngine.Vector3Int.zero;
+        public UnityEngine.Vector3Int Position {
+            get { return _position; }
+            set { if (_position != value) { var old = _position; _position = value; onPositionChange.Invoke(this, _position, old); } }
         }
 
-        protected Appearances.Marks m_Marks = new Appearances.Marks();
-        internal Appearances.Marks Marks {
-            get { return m_Marks; }
-            set { if (m_Marks != value) { m_Marks = value;} }
+        protected Appearances.Marks _marks = new Appearances.Marks();
+        public Appearances.Marks Marks {
+            get { return _marks; }
+            set { if (_marks != value) { _marks = value;} }
         }
 
         protected bool m_Visible = false;
-        internal bool Visible {
+        public bool Visible {
             get { return m_Visible; }
             set { if (m_Visible != value) { m_Visible = value; onVisbilityChange.Invoke(this, m_Visible); } }
         }
 
-        protected int m_KnownSince = -1;
-        internal int KnownSince {
-            get { return m_KnownSince; }
-            set { if (m_KnownSince != value) { m_KnownSince = value; } }
+        protected int _knownSince = -1;
+        public int KnownSince {
+            get { return _knownSince; }
+            set { if (_knownSince != value) { _knownSince = value; } }
         }
 
-        internal virtual int HealthPercent {
+        public virtual int HealthPercent {
             get {
                 return (int)GetSkillValue(SkillType.HealthPercent);
             }
         }
 
-        internal virtual int ManaPercent {
+        public virtual int ManaPercent {
             get { return 100; }
         }
 
-        internal bool IsHuman {
-            get { return m_Type == CreatureType.Player; }
+        public bool IsHuman {
+            get { return _type == CreatureType.Player; }
         }
-        internal bool IsMonster {
-            get { return m_Type == CreatureType.Monster; }
+        public bool IsMonster {
+            get { return _type == CreatureType.Monster; }
         }
-        internal bool IsNPC {
-            get { return m_Type == CreatureType.NPC; }
+        public bool IsNPC {
+            get { return _type == CreatureType.NPC; }
         }
-        internal bool IsSummon {
-            get { return m_Type == CreatureType.Summon; }
+        public bool IsSummon {
+            get { return _type == CreatureType.Summon; }
         }
-        internal bool IsConfirmedPartyMember {
-            get => m_PartyFlag == PartyFlag.Leader_SharedXP_Active
-                || m_PartyFlag == PartyFlag.Leader_SharedXP_Inactive_Guilty
-                || m_PartyFlag == PartyFlag.Leader_SharedXP_Inactive_Innocent
-                || m_PartyFlag == PartyFlag.Leader_SharedXP_Off
-                || m_PartyFlag == PartyFlag.Member_SharedXP_Active
-                || m_PartyFlag == PartyFlag.Member_SharedXP_Inactive_Guilty
-                || m_PartyFlag == PartyFlag.Member_SharedXP_Inactive_Innocent
-                || m_PartyFlag == PartyFlag.Member_SharedXP_Off;
+        public bool IsConfirmedPartyMember {
+            get => _partyFlag == PartyFlag.Leader_SharedXP_Active
+                || _partyFlag == PartyFlag.Leader_SharedXP_Inactive_Guilty
+                || _partyFlag == PartyFlag.Leader_SharedXP_Inactive_Innocent
+                || _partyFlag == PartyFlag.Leader_SharedXP_Off
+                || _partyFlag == PartyFlag.Member_SharedXP_Active
+                || _partyFlag == PartyFlag.Member_SharedXP_Inactive_Guilty
+                || _partyFlag == PartyFlag.Member_SharedXP_Inactive_Innocent
+                || _partyFlag == PartyFlag.Member_SharedXP_Off;
         }
-        internal bool IsPartySharedExperienceActive {
-            get => m_PartyFlag == PartyFlag.Leader_SharedXP_Active
-                || m_PartyFlag == PartyFlag.Leader_SharedXP_Inactive_Guilty
-                || m_PartyFlag == PartyFlag.Leader_SharedXP_Inactive_Innocent
-                || m_PartyFlag == PartyFlag.Member_SharedXP_Active
-                || m_PartyFlag == PartyFlag.Member_SharedXP_Inactive_Guilty
-                || m_PartyFlag == PartyFlag.Member_SharedXP_Inactive_Innocent;
+        public bool IsPartySharedExperienceActive {
+            get => _partyFlag == PartyFlag.Leader_SharedXP_Active
+                || _partyFlag == PartyFlag.Leader_SharedXP_Inactive_Guilty
+                || _partyFlag == PartyFlag.Leader_SharedXP_Inactive_Innocent
+                || _partyFlag == PartyFlag.Member_SharedXP_Active
+                || _partyFlag == PartyFlag.Member_SharedXP_Inactive_Guilty
+                || _partyFlag == PartyFlag.Member_SharedXP_Inactive_Innocent;
         }
-        internal bool IsPartyLeader {
-            get => m_PartyFlag == PartyFlag.Leader
-                || m_PartyFlag == PartyFlag.Leader_SharedXP_Active
-                || m_PartyFlag == PartyFlag.Leader_SharedXP_Inactive_Guilty
-                || m_PartyFlag == PartyFlag.Leader_SharedXP_Inactive_Innocent
-                || m_PartyFlag == PartyFlag.Leader_SharedXP_Off;
+        public bool IsPartyLeader {
+            get => _partyFlag == PartyFlag.Leader
+                || _partyFlag == PartyFlag.Leader_SharedXP_Active
+                || _partyFlag == PartyFlag.Leader_SharedXP_Inactive_Guilty
+                || _partyFlag == PartyFlag.Leader_SharedXP_Inactive_Innocent
+                || _partyFlag == PartyFlag.Leader_SharedXP_Off;
         }
-        internal bool IsPartyMember {
-            get => m_PartyFlag == PartyFlag.Member
-                || m_PartyFlag == PartyFlag.Member_SharedXP_Active
-                || m_PartyFlag == PartyFlag.Member_SharedXP_Inactive_Guilty
-                || m_PartyFlag == PartyFlag.Member_SharedXP_Inactive_Innocent
-                || m_PartyFlag == PartyFlag.Member_SharedXP_Off;
-        }
-
-        internal UnityEngine.Vector3Int AnimationDelta {
-            get { return m_AnimationDelta; }
+        public bool IsPartyMember {
+            get => _partyFlag == PartyFlag.Member
+                || _partyFlag == PartyFlag.Member_SharedXP_Active
+                || _partyFlag == PartyFlag.Member_SharedXP_Inactive_Guilty
+                || _partyFlag == PartyFlag.Member_SharedXP_Inactive_Innocent
+                || _partyFlag == PartyFlag.Member_SharedXP_Off;
         }
 
-        protected int m_MovementEnd = 0;
-        protected Direction m_AnimationDirection = Direction.North;
-        protected int m_AnimationEnd = 0;
-        protected bool m_MovementRunning = false;
-        protected UnityEngine.Vector3Int m_AnimationDelta = UnityEngine.Vector3Int.zero;
-        protected UnityEngine.Vector3Int m_AnimationSpeed = UnityEngine.Vector3Int.zero;
-        protected Skill[] m_Skills;
+        public UnityEngine.Vector3Int AnimationDelta {
+            get { return _animationDelta; }
+        }
 
-        internal static double SpeedA = 0.0f;
-        internal static double SpeedB = 1.0f;
-        internal static double SpeedC = 1.0f;
+        protected int _movementEnd = 0;
+        protected Direction _animationDirection = Direction.North;
+        protected int _animationEnd = 0;
+        protected bool _movementRunning = false;
+        protected UnityEngine.Vector3Int _animationDelta = UnityEngine.Vector3Int.zero;
+        protected UnityEngine.Vector3Int _animationSpeed = UnityEngine.Vector3Int.zero;
+        protected Skill[] _skills;
 
-        internal Creature(uint id, CreatureType type = CreatureType.Monster, string name = null) {
-            m_ID = id;
-            m_Type = type;
-            m_Name = name;
+        public static double SpeedA = 0.0f;
+        public static double SpeedB = 1.0f;
+        public static double SpeedC = 1.0f;
 
-            m_Marks.onMarksChange.AddListener((marks) => { onMarksChange.Invoke(this, marks); });
+        public Creature(uint id, CreatureType type = CreatureType.Monster, string name = null) {
+            _id = id;
+            _type = type;
+            _name = name;
+
+            _marks.onMarksChange.AddListener((marks) => { onMarksChange.Invoke(this, marks); });
             ResetSkills();
         }
         
-        internal virtual void Reset() {
+        public virtual void Reset() {
             ResetSkills();
-            m_AnimationDelta = UnityEngine.Vector3Int.zero;
-            m_AnimationDirection = Direction.North;
-            m_AnimationEnd = 0;
-            m_AnimationSpeed = UnityEngine.Vector3Int.zero;
-            m_Brightness = 0;
-            m_Direction = Direction.North;
-            m_ID = 0;
-            m_Trapper = false;
-            m_Unpassable = false;
-            m_KnownSince = -1;
-            m_LightColor = UnityEngine.Color.black;
-            m_MovementEnd = 0;
-            m_MovementRunning = false;
+            _animationDelta = UnityEngine.Vector3Int.zero;
+            _animationDirection = Direction.North;
+            _animationEnd = 0;
+            _animationSpeed = UnityEngine.Vector3Int.zero;
+            _brightness = 0;
+            _direction = Direction.North;
+            _id = 0;
+            _trapper = false;
+            _unpassable = false;
+            _knownSince = -1;
+            _lightColor = UnityEngine.Color.black;
+            _movementEnd = 0;
+            _movementRunning = false;
             Name = null;
-            m_PartyFlag = PartyFlag.None;
-            m_PKFlag = PKFlag.Revenge;
-            m_Type = CreatureType.Monster;
+            _partyFlag = PartyFlag.None;
+            _pKFlag = PKFlag.Revenge;
+            _type = CreatureType.Monster;
             m_Visible = false;
-            m_GuildFlag = GuildFlag.None;
-            m_Marks.Clear();
-            m_MountOutfit = null;
-            m_Outfit = null;
-            m_Position = UnityEngine.Vector3Int.zero;
+            _guildFlag = GuildFlag.None;
+            _marks.Clear();
+            _mountOutfit = null;
+            _outfit = null;
+            _position = UnityEngine.Vector3Int.zero;
         }
 
-        internal virtual void ResetSkills() {
-            m_Skills = new Skill[(int)SkillType.Speed + 1];
+        public virtual void ResetSkills() {
+            _skills = new Skill[(int)SkillType.Speed + 1];
         }
 
-        internal virtual void SetSkill(SkillType skillType, long level, long baseLevel = 0, float percentage = 0) {
+        public virtual void SetSkill(SkillType skillType, long level, long baseLevel = 0, float percentage = 0) {
             int skill = (int)skillType;
-            if (skill >= m_Skills.Length)
+            if (skill >= _skills.Length)
                 return;
 
-            m_Skills[skill].Level = level;
-            m_Skills[skill].BaseLevel = baseLevel;
-            m_Skills[skill].Percentage = percentage;
-            onSkillChange.Invoke(this, skillType, m_Skills[skill]);
+            _skills[skill].Level = level;
+            _skills[skill].BaseLevel = baseLevel;
+            _skills[skill].Percentage = percentage;
+            onSkillChange.Invoke(this, skillType, _skills[skill]);
         }
 
-        internal virtual void SetSkillValue(SkillType skillType, int level) {
+        public virtual void SetSkillValue(SkillType skillType, int level) {
             int skill = (int)skillType;
-            if (skill >= m_Skills.Length)
+            if (skill >= _skills.Length)
                 return;
 
-            if (m_Skills[skill].Level != level) {
-                m_Skills[skill].Level = level;
-                onSkillChange.Invoke(this, skillType, m_Skills[skill]);
+            if (_skills[skill].Level != level) {
+                _skills[skill].Level = level;
+                onSkillChange.Invoke(this, skillType, _skills[skill]);
             }
         }
 
-        internal long GetSkillValue(SkillType skill) {
-            if ((int)skill >= m_Skills.Length)
+        public long GetSkillValue(SkillType skill) {
+            if ((int)skill >= _skills.Length)
                 return 0;
 
-            return m_Skills[(int)skill].Level;
+            return _skills[(int)skill].Level;
         }
 
-        internal long GetSkillbase(SkillType skill) {
-            if ((int)skill >= m_Skills.Length)
+        public long GetSkillbase(SkillType skill) {
+            if ((int)skill >= _skills.Length)
                 return 0;
 
-            return m_Skills[(int)skill].BaseLevel;
+            return _skills[(int)skill].BaseLevel;
         }
 
-        internal double GetSKillProgress(SkillType skill) {
-            if ((int)skill >= m_Skills.Length)
+        public double GetSKillProgress(SkillType skill) {
+            if ((int)skill >= _skills.Length)
                 return 0;
 
-            return m_Skills[(int)skill].Percentage;
+            return _skills[(int)skill].Percentage;
         }
 
-        internal virtual void StartMovementAnimation(int deltaX, int deltaY, int movementCost) {
+        public virtual void StartMovementAnimation(int deltaX, int deltaY, int movementCost) {
             if (deltaX > 0)
-                m_Direction = Direction.East;
+                _direction = Direction.East;
             else if (deltaX < 0)
-                m_Direction = Direction.West;
+                _direction = Direction.West;
             else if (deltaY < 0)
-                m_Direction = Direction.North;
+                _direction = Direction.North;
             else if (deltaY > 0)
-                m_Direction = Direction.South;
+                _direction = Direction.South;
 
-            m_AnimationDirection = m_Direction;
-            m_AnimationDelta.x = -deltaX * Constants.FieldSize;
-            m_AnimationDelta.y = -deltaY * Constants.FieldSize;
-            m_AnimationDelta.z = 0;
+            _animationDirection = _direction;
+            _animationDelta.x = -deltaX * Constants.FieldSize;
+            _animationDelta.y = -deltaY * Constants.FieldSize;
+            _animationDelta.z = 0;
             
             int beatDuration = OpenTibiaUnity.ProtocolGame.BeatDuration;
 
@@ -359,10 +359,10 @@ namespace OpenTibiaUnity.Core.Creatures
             if (OpenTibiaUnity.GameManager.ClientVersion >= 910)
                 interval = (int)System.Math.Ceiling(interval / (double)beatDuration) * beatDuration;
 
-            m_AnimationSpeed.x = m_AnimationDelta.x;
-            m_AnimationSpeed.y = m_AnimationDelta.y;
-            m_AnimationSpeed.z = interval;
-            m_AnimationEnd = OpenTibiaUnity.TicksMillis + interval;
+            _animationSpeed.x = _animationDelta.x;
+            _animationSpeed.y = _animationDelta.y;
+            _animationSpeed.z = interval;
+            _animationEnd = OpenTibiaUnity.TicksMillis + interval;
 
             float diagonalFactor = 3f;
             if (OpenTibiaUnity.GameManager.ClientVersion <= 810)
@@ -371,52 +371,52 @@ namespace OpenTibiaUnity.Core.Creatures
             if (deltaX != 0 && deltaY != 0)
                 interval = (int)System.Math.Floor(1000 * movementCost * diagonalFactor / movementSpeed);
 
-            m_MovementEnd = OpenTibiaUnity.TicksMillis + interval;
-            m_MovementRunning = true;
+            _movementEnd = OpenTibiaUnity.TicksMillis + interval;
+            _movementRunning = true;
         }
 
-        internal void StopMovementAnimation() {
-            m_AnimationDirection = m_Direction;
-            m_AnimationDelta = UnityEngine.Vector3Int.zero;
-            m_AnimationSpeed = UnityEngine.Vector3Int.zero;
-            m_AnimationEnd = 0;
-            m_MovementEnd = 0;
-            m_MovementRunning = false;
+        public void StopMovementAnimation() {
+            _animationDirection = _direction;
+            _animationDelta = UnityEngine.Vector3Int.zero;
+            _animationSpeed = UnityEngine.Vector3Int.zero;
+            _animationEnd = 0;
+            _movementEnd = 0;
+            _movementRunning = false;
         }
 
-        internal virtual void AnimateMovement(int ticks) {
-            m_AnimationDelta = UnityEngine.Vector3Int.zero;
-            if (m_MovementRunning) {
-                int diff = ticks - (m_AnimationEnd - m_AnimationSpeed.z);
+        public virtual void AnimateMovement(int ticks) {
+            _animationDelta = UnityEngine.Vector3Int.zero;
+            if (_movementRunning) {
+                int diff = ticks - (_animationEnd - _animationSpeed.z);
                 if (diff < 0) {
-                    m_AnimationDelta.x = m_AnimationSpeed.x;
-                    m_AnimationDelta.y = m_AnimationSpeed.y;
-                } else if (diff >= m_AnimationSpeed.z) {
-                    m_AnimationDelta.x = 0;
-                    m_AnimationDelta.y = 0;
-                } else if (m_AnimationSpeed.z != 0) {
-                    m_AnimationDelta.x = m_AnimationSpeed.x - (int)System.Math.Round((double)m_AnimationSpeed.x * diff / m_AnimationSpeed.z);
-                    m_AnimationDelta.y = m_AnimationSpeed.y - (int)System.Math.Round((double)m_AnimationSpeed.y * diff / m_AnimationSpeed.z);
+                    _animationDelta.x = _animationSpeed.x;
+                    _animationDelta.y = _animationSpeed.y;
+                } else if (diff >= _animationSpeed.z) {
+                    _animationDelta.x = 0;
+                    _animationDelta.y = 0;
+                } else if (_animationSpeed.z != 0) {
+                    _animationDelta.x = _animationSpeed.x - (int)System.Math.Round((double)_animationSpeed.x * diff / _animationSpeed.z);
+                    _animationDelta.y = _animationSpeed.y - (int)System.Math.Round((double)_animationSpeed.y * diff / _animationSpeed.z);
                 }
             }
 
-            m_MovementRunning = ticks < m_MovementEnd || m_AnimationDelta.x != 0 || m_AnimationDelta.y != 0;
+            _movementRunning = ticks < _movementEnd || _animationDelta.x != 0 || _animationDelta.y != 0;
         }
 
-        internal void AnimateOutfit(int ticks) {
-            bool isIdle = !m_MovementRunning || m_MovementEnd != m_AnimationEnd && ticks >= m_AnimationEnd;
-            if (!!m_Outfit && !!m_Outfit.Type) {
-                m_Outfit.SwitchFrameGroup(ticks, isIdle ? (int)Protobuf.Shared.FrameGroupType.Idle : (int)Protobuf.Shared.FrameGroupType.Walking);
-                m_Outfit.Animate(ticks, isIdle ? 0 : m_AnimationSpeed.z);
+        public void AnimateOutfit(int ticks) {
+            bool isIdle = !_movementRunning || _movementEnd != _animationEnd && ticks >= _animationEnd;
+            if (!!_outfit && !!_outfit.Type) {
+                _outfit.SwitchFrameGroup(ticks, isIdle ? (int)Protobuf.Shared.FrameGroupType.Idle : (int)Protobuf.Shared.FrameGroupType.Walking);
+                _outfit.Animate(ticks, isIdle ? 0 : _animationSpeed.z);
             }
 
-            if (!!m_MountOutfit && !!m_MountOutfit.Type) {
-                m_MountOutfit.SwitchFrameGroup(ticks, isIdle ? (int)Protobuf.Shared.FrameGroupType.Idle : (int)Protobuf.Shared.FrameGroupType.Walking);
-                bool result = m_MountOutfit.Animate(ticks, isIdle ? 0 : m_AnimationSpeed.z);
+            if (!!_mountOutfit && !!_mountOutfit.Type) {
+                _mountOutfit.SwitchFrameGroup(ticks, isIdle ? (int)Protobuf.Shared.FrameGroupType.Idle : (int)Protobuf.Shared.FrameGroupType.Walking);
+                bool result = _mountOutfit.Animate(ticks, isIdle ? 0 : _animationSpeed.z);
             }
         }
 
-        internal int GetMovementSpeed() {
+        public int GetMovementSpeed() {
             int speed = (int)GetSkillValue(SkillType.Speed);
             if (!OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameNewSpeedLaw))
                 return speed;
@@ -427,46 +427,46 @@ namespace OpenTibiaUnity.Core.Creatures
             return (int)System.Math.Round(SpeedA * System.Math.Log(speed + SpeedB) + SpeedC);
         }
 
-        internal void SetPartyFlag(PartyFlag partyFlag) {
+        public void SetPartyFlag(PartyFlag partyFlag) {
             if (partyFlag < PartyFlag.First || partyFlag > PartyFlag.Last)
                 throw new System.ArgumentException("Creature.SetPartyFlag: Invalid party flag (" + (int)partyFlag + ").");
 
             PartyFlag = partyFlag;
         }
 
-        internal void SetPKFlag(PKFlag pkFlag) {
+        public void SetPKFlag(PKFlag pkFlag) {
             if (pkFlag < PKFlag.First || pkFlag > PKFlag.Last)
                 throw new System.ArgumentException("Creature.SetPKFlag: Invalid pkFlag (" + (int)pkFlag + ")");
 
             PKFlag = pkFlag;
         }
 
-        internal void SetSpeechCategory(SpeechCategory speechCategory) {
+        public void SetSpeechCategory(SpeechCategory speechCategory) {
             if (speechCategory < SpeechCategory.First || speechCategory > SpeechCategory.Last)
                 throw new System.Exception("Creature.SetSpeechCategory: Invalid speechCategory (" + (int)speechCategory + ")");
 
             SpeechCategory = speechCategory;
         }
 
-        internal void SetGuildFlag(GuildFlag guildFlag) {
+        public void SetGuildFlag(GuildFlag guildFlag) {
             if (guildFlag < GuildFlag.First || guildFlag > GuildFlag.Last)
                 throw new System.ArgumentException("Creature.SetGuildFlag: Invalid guildFlag (" + (int)guildFlag + ")");
 
             GuildFlag = guildFlag;
         }
 
-        internal void SetSummonerID(uint summonerID) {
-            if (summonerID == OpenTibiaUnity.Player.ID)
+        public void SetSummoner_id(uint summoner_id) {
+            if (summoner_id == OpenTibiaUnity.Player._id)
                 SummonTypeFlag = SummonTypeFlags.Own;
-            else if (summonerID != 0)
+            else if (summoner_id != 0)
                 SummonTypeFlag = SummonTypeFlags.Other;
             else
                 SummonTypeFlag = SummonTypeFlags.None;
 
-            SummonerID = summonerID;
+            Summoner_id = summoner_id;
         }
         
-        internal bool IsReportTypeAllowed(ReportTypes reportType) {
+        public bool IsReportTypeAllowed(ReportTypes reportType) {
             return IsHuman && (reportType == ReportTypes.Name || reportType == ReportTypes.Bot);
         }
 

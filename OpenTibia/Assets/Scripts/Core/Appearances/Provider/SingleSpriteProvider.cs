@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace OpenTibiaUnity.Core.Appearances.Provider
 {
-    internal class SingleSpriteProvider
+    public class SingleSpriteProvider
     {
     }
 }

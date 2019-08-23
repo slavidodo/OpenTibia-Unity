@@ -1,9 +1,9 @@
 ﻿namespace OpenTibiaUnity.Core.Input.StaticAction
 {
-    internal class PlayerMount : StaticAction
+    public class PlayerMount : StaticAction
     {
 
-        internal PlayerMount(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
+        public PlayerMount(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
 
         public override bool Perform(bool repeat = false) {
             var player = OpenTibiaUnity.Player;
@@ -17,7 +17,7 @@
         }
 
         public override IAction Clone() {
-            return new PlayerMount(m_ID, m_Label, m_EventMask);
+            return new PlayerMount(_id, _label, _eventMask);
         }
     }
 }

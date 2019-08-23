@@ -7,19 +7,19 @@ namespace OpenTibiaUnity.Core.Components
     [RequireComponent(typeof(Draggable))]
     public class DraggableTabButton : TabButton, IDragHandler, IEndDragHandler
     {
-        Draggable m_DraggableComponent;
+        Draggable _draggableComponent;
         public Draggable draggableComponent {
             get {
-                if (!m_DraggableComponent)
-                    m_DraggableComponent = GetComponent<Draggable>();
-                return m_DraggableComponent;
+                if (!_draggableComponent)
+                    _draggableComponent = GetComponent<Draggable>();
+                return _draggableComponent;
             }
         }
 
-        GameObject m_ShadowGameObject = null;
+        GameObject _shadowGameObject = null;
 
         public void OnDrag(PointerEventData eventData) {
-            if (!m_ShadowGameObject) {
+            if (!_shadowGameObject) {
                 InstantiateShadowGameObject(transform.GetSiblingIndex());
                 transform.SetAsLastSibling();
                 layoutElement.ignoreLayout = true;
@@ -29,28 +29,28 @@ namespace OpenTibiaUnity.Core.Components
         }
 
         public void OnEndDrag(PointerEventData eventData) {
-            if (!!m_ShadowGameObject) {
+            if (!!_shadowGameObject) {
                 layoutElement.ignoreLayout = false;
-                transform.SetSiblingIndex(m_ShadowGameObject.transform.GetSiblingIndex());
-                Destroy(m_ShadowGameObject);
+                transform.SetSiblingIndex(_shadowGameObject.transform.GetSiblingIndex());
+                Destroy(_shadowGameObject);
             }
         }
 
         protected void InstantiateShadowGameObject(int siblingIndex) {
-            m_ShadowGameObject = Instantiate(gameObject, transform.parent);
-            Destroy(m_ShadowGameObject.GetComponent<TabButton>()); // destroy tab button component
-            Destroy(m_ShadowGameObject.GetComponent<Selectable>()); // destroy any selectable component
-            Destroy(m_ShadowGameObject.GetComponent<Graphic>()); // destroy any graphic component
+            _shadowGameObject = Instantiate(gameObject, transform.parent);
+            Destroy(_shadowGameObject.GetComponent<TabButton>()); // destroy tab button component
+            Destroy(_shadowGameObject.GetComponent<Selectable>()); // destroy any selectable component
+            Destroy(_shadowGameObject.GetComponent<Graphic>()); // destroy any graphic component
 
-            var components = m_ShadowGameObject.GetComponentsInChildren<Graphic>();
+            var components = _shadowGameObject.GetComponentsInChildren<Graphic>();
             foreach (var component in components)
                 Destroy(component);
 
-            m_ShadowGameObject.transform.SetSiblingIndex(siblingIndex);
+            _shadowGameObject.transform.SetSiblingIndex(siblingIndex);
         }
 
         protected void UpdateSiblingIndex() {
-            int currentIndex = m_ShadowGameObject.transform.GetSiblingIndex();
+            int currentIndex = _shadowGameObject.transform.GetSiblingIndex();
             var localPosition = transform.localPosition;
             
             int childCount = parentRectTransform.childCount;
@@ -66,7 +66,7 @@ namespace OpenTibiaUnity.Core.Components
             }
             
             if (foundIndex != -1 && foundIndex != currentIndex) {
-                m_ShadowGameObject.transform.SetSiblingIndex(foundIndex);
+                _shadowGameObject.transform.SetSiblingIndex(foundIndex);
                 return;
             }
 
@@ -80,7 +80,7 @@ namespace OpenTibiaUnity.Core.Components
             }
 
             if (foundIndex != -1 && foundIndex != currentIndex) {
-                m_ShadowGameObject.transform.SetSiblingIndex(foundIndex);
+                _shadowGameObject.transform.SetSiblingIndex(foundIndex);
                 return;
             }
         }

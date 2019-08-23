@@ -4,162 +4,162 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Communication.Game
 {
-    internal partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame : Internal.Protocol
     {
-        private Dictionary<MessageModeType, int> m_MessageModesDict;
+        private Dictionary<MessageModeType, int> _messageModesDict;
 
         private void BuildMessageModesMap(int version) {
-            if (m_MessageModesDict == null)
-                m_MessageModesDict = new Dictionary<MessageModeType, int>();
+            if (_messageModesDict == null)
+                _messageModesDict = new Dictionary<MessageModeType, int>();
             else
-                m_MessageModesDict.Clear();
+                _messageModesDict.Clear();
 
             if (version >= 1094) {
-                m_MessageModesDict.Add(MessageModeType.Mana, 43);
+                _messageModesDict.Add(MessageModeType.Mana, 43);
             }
 
             if (version >= 1055) { // might be 1054
-                m_MessageModesDict.Add(MessageModeType.None, 0);
-                m_MessageModesDict.Add(MessageModeType.Say, 1);
-                m_MessageModesDict.Add(MessageModeType.Whisper, 2);
-                m_MessageModesDict.Add(MessageModeType.Yell, 3);
-                m_MessageModesDict.Add(MessageModeType.PrivateFrom, 4);
-                m_MessageModesDict.Add(MessageModeType.PrivateTo, 5);
-                m_MessageModesDict.Add(MessageModeType.ChannelManagement, 6);
-                m_MessageModesDict.Add(MessageModeType.Channel, 7);
-                m_MessageModesDict.Add(MessageModeType.ChannelHighlight, 8);
-                m_MessageModesDict.Add(MessageModeType.Spell, 9);
-                m_MessageModesDict.Add(MessageModeType.NpcFromStartBlock, 10);
-                m_MessageModesDict.Add(MessageModeType.NpcFrom, 11);
-                m_MessageModesDict.Add(MessageModeType.NpcTo, 12);
-                m_MessageModesDict.Add(MessageModeType.GamemasterBroadcast, 13);
-                m_MessageModesDict.Add(MessageModeType.GamemasterChannel, 14);
-                m_MessageModesDict.Add(MessageModeType.GamemasterPrivateFrom, 15);
-                m_MessageModesDict.Add(MessageModeType.GamemasterPrivateTo, 16);
-                m_MessageModesDict.Add(MessageModeType.Login, 17);
-                m_MessageModesDict.Add(MessageModeType.Admin, 18);
-                m_MessageModesDict.Add(MessageModeType.Game, 19);
-                m_MessageModesDict.Add(MessageModeType.GameHighlight, 20);
-                m_MessageModesDict.Add(MessageModeType.Failure, 21);
-                m_MessageModesDict.Add(MessageModeType.Look, 22);
-                m_MessageModesDict.Add(MessageModeType.DamageDealed, 23);
-                m_MessageModesDict.Add(MessageModeType.DamageReceived, 24);
-                m_MessageModesDict.Add(MessageModeType.Heal, 25);
-                m_MessageModesDict.Add(MessageModeType.Exp, 26);
-                m_MessageModesDict.Add(MessageModeType.DamageOthers, 27);
-                m_MessageModesDict.Add(MessageModeType.HealOthers, 28);
-                m_MessageModesDict.Add(MessageModeType.ExpOthers, 29);
-                m_MessageModesDict.Add(MessageModeType.Status, 30);
-                m_MessageModesDict.Add(MessageModeType.Loot, 31);
-                m_MessageModesDict.Add(MessageModeType.TradeNpc, 32);
-                m_MessageModesDict.Add(MessageModeType.Guild, 33);
-                m_MessageModesDict.Add(MessageModeType.PartyManagement, 34);
-                m_MessageModesDict.Add(MessageModeType.Party, 35);
-                m_MessageModesDict.Add(MessageModeType.BarkLow, 36);
-                m_MessageModesDict.Add(MessageModeType.BarkLoud, 37);
-                m_MessageModesDict.Add(MessageModeType.Report, 38);
-                m_MessageModesDict.Add(MessageModeType.HotkeyUse, 39);
-                m_MessageModesDict.Add(MessageModeType.TutorialHint, 40);
-                m_MessageModesDict.Add(MessageModeType.Thankyou, 41);
-                m_MessageModesDict.Add(MessageModeType.Market, 42);
+                _messageModesDict.Add(MessageModeType.None, 0);
+                _messageModesDict.Add(MessageModeType.Say, 1);
+                _messageModesDict.Add(MessageModeType.Whisper, 2);
+                _messageModesDict.Add(MessageModeType.Yell, 3);
+                _messageModesDict.Add(MessageModeType.PrivateFrom, 4);
+                _messageModesDict.Add(MessageModeType.PrivateTo, 5);
+                _messageModesDict.Add(MessageModeType.ChannelManagement, 6);
+                _messageModesDict.Add(MessageModeType.Channel, 7);
+                _messageModesDict.Add(MessageModeType.ChannelHighlight, 8);
+                _messageModesDict.Add(MessageModeType.Spell, 9);
+                _messageModesDict.Add(MessageModeType.NpcFromStartBlock, 10);
+                _messageModesDict.Add(MessageModeType.NpcFrom, 11);
+                _messageModesDict.Add(MessageModeType.NpcTo, 12);
+                _messageModesDict.Add(MessageModeType.GamemasterBroadcast, 13);
+                _messageModesDict.Add(MessageModeType.GamemasterChannel, 14);
+                _messageModesDict.Add(MessageModeType.GamemasterPrivateFrom, 15);
+                _messageModesDict.Add(MessageModeType.GamemasterPrivateTo, 16);
+                _messageModesDict.Add(MessageModeType.Login, 17);
+                _messageModesDict.Add(MessageModeType.Admin, 18);
+                _messageModesDict.Add(MessageModeType.Game, 19);
+                _messageModesDict.Add(MessageModeType.GameHighlight, 20);
+                _messageModesDict.Add(MessageModeType.Failure, 21);
+                _messageModesDict.Add(MessageModeType.Look, 22);
+                _messageModesDict.Add(MessageModeType.DamageDealed, 23);
+                _messageModesDict.Add(MessageModeType.DamageReceived, 24);
+                _messageModesDict.Add(MessageModeType.Heal, 25);
+                _messageModesDict.Add(MessageModeType.Exp, 26);
+                _messageModesDict.Add(MessageModeType.DamageOthers, 27);
+                _messageModesDict.Add(MessageModeType.HealOthers, 28);
+                _messageModesDict.Add(MessageModeType.ExpOthers, 29);
+                _messageModesDict.Add(MessageModeType.Status, 30);
+                _messageModesDict.Add(MessageModeType.Loot, 31);
+                _messageModesDict.Add(MessageModeType.TradeNpc, 32);
+                _messageModesDict.Add(MessageModeType.Guild, 33);
+                _messageModesDict.Add(MessageModeType.PartyManagement, 34);
+                _messageModesDict.Add(MessageModeType.Party, 35);
+                _messageModesDict.Add(MessageModeType.BarkLow, 36);
+                _messageModesDict.Add(MessageModeType.BarkLoud, 37);
+                _messageModesDict.Add(MessageModeType.Report, 38);
+                _messageModesDict.Add(MessageModeType.HotkeyUse, 39);
+                _messageModesDict.Add(MessageModeType.TutorialHint, 40);
+                _messageModesDict.Add(MessageModeType.Thankyou, 41);
+                _messageModesDict.Add(MessageModeType.Market, 42);
             } else if (version >= 1036) {
                 for (var i = MessageModeType.None; i <= MessageModeType.BeyondLast; ++i) {
                     if (i >= MessageModeType.NpcTo)
-                        m_MessageModesDict.Add(i, (int)i + 1);
+                        _messageModesDict.Add(i, (int)i + 1);
                     else
-                        m_MessageModesDict.Add(i, (int)i);
+                        _messageModesDict.Add(i, (int)i);
                 }
             } else if (version >= 900) {
                 for (var i = MessageModeType.None; i <= MessageModeType.BeyondLast; ++i)
-                    m_MessageModesDict.Add(i, (int)i);
+                    _messageModesDict.Add(i, (int)i);
             } else if (version >= 861) {
-                m_MessageModesDict.Add(MessageModeType.None, 0);
-                m_MessageModesDict.Add(MessageModeType.Say, 1);
-                m_MessageModesDict.Add(MessageModeType.Whisper, 2);
-                m_MessageModesDict.Add(MessageModeType.Yell, 3);
-                m_MessageModesDict.Add(MessageModeType.NpcTo, 4);
-                m_MessageModesDict.Add(MessageModeType.NpcFrom, 5);
-                m_MessageModesDict.Add(MessageModeType.PrivateFrom, 6);
-                m_MessageModesDict.Add(MessageModeType.PrivateTo, 6);
-                m_MessageModesDict.Add(MessageModeType.Channel, 7);
-                m_MessageModesDict.Add(MessageModeType.ChannelManagement, 8);
-                m_MessageModesDict.Add(MessageModeType.GamemasterBroadcast, 9);
-                m_MessageModesDict.Add(MessageModeType.GamemasterChannel, 10);
-                m_MessageModesDict.Add(MessageModeType.GamemasterPrivateFrom, 11);
-                m_MessageModesDict.Add(MessageModeType.GamemasterPrivateTo, 11);
-                m_MessageModesDict.Add(MessageModeType.ChannelHighlight, 12);
-                m_MessageModesDict.Add(MessageModeType.MonsterSay, 13);
-                m_MessageModesDict.Add(MessageModeType.MonsterYell, 14);
-                m_MessageModesDict.Add(MessageModeType.Admin, 15);
-                m_MessageModesDict.Add(MessageModeType.Game, 16);
-                m_MessageModesDict.Add(MessageModeType.Login, 17);
-                m_MessageModesDict.Add(MessageModeType.Status, 18);
-                m_MessageModesDict.Add(MessageModeType.Look, 19);
-                m_MessageModesDict.Add(MessageModeType.Failure, 20);
-                m_MessageModesDict.Add(MessageModeType.Blue, 21);
-                m_MessageModesDict.Add(MessageModeType.Red, 22);
+                _messageModesDict.Add(MessageModeType.None, 0);
+                _messageModesDict.Add(MessageModeType.Say, 1);
+                _messageModesDict.Add(MessageModeType.Whisper, 2);
+                _messageModesDict.Add(MessageModeType.Yell, 3);
+                _messageModesDict.Add(MessageModeType.NpcTo, 4);
+                _messageModesDict.Add(MessageModeType.NpcFrom, 5);
+                _messageModesDict.Add(MessageModeType.PrivateFrom, 6);
+                _messageModesDict.Add(MessageModeType.PrivateTo, 6);
+                _messageModesDict.Add(MessageModeType.Channel, 7);
+                _messageModesDict.Add(MessageModeType.ChannelManagement, 8);
+                _messageModesDict.Add(MessageModeType.GamemasterBroadcast, 9);
+                _messageModesDict.Add(MessageModeType.GamemasterChannel, 10);
+                _messageModesDict.Add(MessageModeType.GamemasterPrivateFrom, 11);
+                _messageModesDict.Add(MessageModeType.GamemasterPrivateTo, 11);
+                _messageModesDict.Add(MessageModeType.ChannelHighlight, 12);
+                _messageModesDict.Add(MessageModeType.MonsterSay, 13);
+                _messageModesDict.Add(MessageModeType.MonsterYell, 14);
+                _messageModesDict.Add(MessageModeType.Admin, 15);
+                _messageModesDict.Add(MessageModeType.Game, 16);
+                _messageModesDict.Add(MessageModeType.Login, 17);
+                _messageModesDict.Add(MessageModeType.Status, 18);
+                _messageModesDict.Add(MessageModeType.Look, 19);
+                _messageModesDict.Add(MessageModeType.Failure, 20);
+                _messageModesDict.Add(MessageModeType.Blue, 21);
+                _messageModesDict.Add(MessageModeType.Red, 22);
             } else if (version >= 840) {
-                m_MessageModesDict.Add(MessageModeType.None, 0);
-                m_MessageModesDict.Add(MessageModeType.Say, 1);
-                m_MessageModesDict.Add(MessageModeType.Whisper, 2);
-                m_MessageModesDict.Add(MessageModeType.Yell, 3);
-                m_MessageModesDict.Add(MessageModeType.NpcTo, 4);
-                m_MessageModesDict.Add(MessageModeType.NpcFromStartBlock, 5);
-                m_MessageModesDict.Add(MessageModeType.PrivateFrom, 6);
-                m_MessageModesDict.Add(MessageModeType.PrivateTo, 6);
-                m_MessageModesDict.Add(MessageModeType.Channel, 7);
-                m_MessageModesDict.Add(MessageModeType.ChannelManagement, 8);
-                m_MessageModesDict.Add(MessageModeType.RVRChannel, 9);
-                m_MessageModesDict.Add(MessageModeType.RVRAnswer, 10);
-                m_MessageModesDict.Add(MessageModeType.RVRContinue, 11);
-                m_MessageModesDict.Add(MessageModeType.GamemasterBroadcast, 12);
-                m_MessageModesDict.Add(MessageModeType.GamemasterChannel, 13);
-                m_MessageModesDict.Add(MessageModeType.GamemasterPrivateFrom, 14);
-                m_MessageModesDict.Add(MessageModeType.GamemasterPrivateTo, 14);
-                m_MessageModesDict.Add(MessageModeType.ChannelHighlight, 15);
+                _messageModesDict.Add(MessageModeType.None, 0);
+                _messageModesDict.Add(MessageModeType.Say, 1);
+                _messageModesDict.Add(MessageModeType.Whisper, 2);
+                _messageModesDict.Add(MessageModeType.Yell, 3);
+                _messageModesDict.Add(MessageModeType.NpcTo, 4);
+                _messageModesDict.Add(MessageModeType.NpcFromStartBlock, 5);
+                _messageModesDict.Add(MessageModeType.PrivateFrom, 6);
+                _messageModesDict.Add(MessageModeType.PrivateTo, 6);
+                _messageModesDict.Add(MessageModeType.Channel, 7);
+                _messageModesDict.Add(MessageModeType.ChannelManagement, 8);
+                _messageModesDict.Add(MessageModeType.RVRChannel, 9);
+                _messageModesDict.Add(MessageModeType.RVRAnswer, 10);
+                _messageModesDict.Add(MessageModeType.RVRContinue, 11);
+                _messageModesDict.Add(MessageModeType.GamemasterBroadcast, 12);
+                _messageModesDict.Add(MessageModeType.GamemasterChannel, 13);
+                _messageModesDict.Add(MessageModeType.GamemasterPrivateFrom, 14);
+                _messageModesDict.Add(MessageModeType.GamemasterPrivateTo, 14);
+                _messageModesDict.Add(MessageModeType.ChannelHighlight, 15);
                 // 16, 17 ??
-                m_MessageModesDict.Add(MessageModeType.Red, 18);
-                m_MessageModesDict.Add(MessageModeType.MonsterSay, 19);
-                m_MessageModesDict.Add(MessageModeType.MonsterYell, 20);
-                m_MessageModesDict.Add(MessageModeType.Admin, 21);
-                m_MessageModesDict.Add(MessageModeType.Game, 22);
-                m_MessageModesDict.Add(MessageModeType.Login, 23);
-                m_MessageModesDict.Add(MessageModeType.Status, 24);
-                m_MessageModesDict.Add(MessageModeType.Look, 25);
-                m_MessageModesDict.Add(MessageModeType.Failure, 26);
-                m_MessageModesDict.Add(MessageModeType.Blue, 27);
+                _messageModesDict.Add(MessageModeType.Red, 18);
+                _messageModesDict.Add(MessageModeType.MonsterSay, 19);
+                _messageModesDict.Add(MessageModeType.MonsterYell, 20);
+                _messageModesDict.Add(MessageModeType.Admin, 21);
+                _messageModesDict.Add(MessageModeType.Game, 22);
+                _messageModesDict.Add(MessageModeType.Login, 23);
+                _messageModesDict.Add(MessageModeType.Status, 24);
+                _messageModesDict.Add(MessageModeType.Look, 25);
+                _messageModesDict.Add(MessageModeType.Failure, 26);
+                _messageModesDict.Add(MessageModeType.Blue, 27);
             } else if (version >= 760) {
-                m_MessageModesDict.Add(MessageModeType.None, 0);
-                m_MessageModesDict.Add(MessageModeType.Say, 1);
-                m_MessageModesDict.Add(MessageModeType.Whisper, 2);
-                m_MessageModesDict.Add(MessageModeType.Yell, 3);
-                m_MessageModesDict.Add(MessageModeType.PrivateFrom, 4);
-                m_MessageModesDict.Add(MessageModeType.PrivateTo, 4);
-                m_MessageModesDict.Add(MessageModeType.Channel, 5);
-                m_MessageModesDict.Add(MessageModeType.RVRChannel, 6);
-                m_MessageModesDict.Add(MessageModeType.RVRAnswer, 7);
-                m_MessageModesDict.Add(MessageModeType.RVRContinue, 8);
-                m_MessageModesDict.Add(MessageModeType.GamemasterBroadcast, 9);
-                m_MessageModesDict.Add(MessageModeType.GamemasterChannel, 10);
-                m_MessageModesDict.Add(MessageModeType.GamemasterPrivateFrom, 11);
-                m_MessageModesDict.Add(MessageModeType.GamemasterPrivateTo, 11);
-                m_MessageModesDict.Add(MessageModeType.ChannelHighlight, 12);
+                _messageModesDict.Add(MessageModeType.None, 0);
+                _messageModesDict.Add(MessageModeType.Say, 1);
+                _messageModesDict.Add(MessageModeType.Whisper, 2);
+                _messageModesDict.Add(MessageModeType.Yell, 3);
+                _messageModesDict.Add(MessageModeType.PrivateFrom, 4);
+                _messageModesDict.Add(MessageModeType.PrivateTo, 4);
+                _messageModesDict.Add(MessageModeType.Channel, 5);
+                _messageModesDict.Add(MessageModeType.RVRChannel, 6);
+                _messageModesDict.Add(MessageModeType.RVRAnswer, 7);
+                _messageModesDict.Add(MessageModeType.RVRContinue, 8);
+                _messageModesDict.Add(MessageModeType.GamemasterBroadcast, 9);
+                _messageModesDict.Add(MessageModeType.GamemasterChannel, 10);
+                _messageModesDict.Add(MessageModeType.GamemasterPrivateFrom, 11);
+                _messageModesDict.Add(MessageModeType.GamemasterPrivateTo, 11);
+                _messageModesDict.Add(MessageModeType.ChannelHighlight, 12);
                 // 13, 14, 15 ??
-                m_MessageModesDict.Add(MessageModeType.MonsterSay, 16);
-                m_MessageModesDict.Add(MessageModeType.MonsterYell, 17);
-                m_MessageModesDict.Add(MessageModeType.Admin, 18);
-                m_MessageModesDict.Add(MessageModeType.Game, 19);
-                m_MessageModesDict.Add(MessageModeType.Login, 20);
-                m_MessageModesDict.Add(MessageModeType.Status, 21);
-                m_MessageModesDict.Add(MessageModeType.Look, 22);
-                m_MessageModesDict.Add(MessageModeType.Failure, 23);
-                m_MessageModesDict.Add(MessageModeType.Blue, 24);
-                m_MessageModesDict.Add(MessageModeType.Red, 25);
+                _messageModesDict.Add(MessageModeType.MonsterSay, 16);
+                _messageModesDict.Add(MessageModeType.MonsterYell, 17);
+                _messageModesDict.Add(MessageModeType.Admin, 18);
+                _messageModesDict.Add(MessageModeType.Game, 19);
+                _messageModesDict.Add(MessageModeType.Login, 20);
+                _messageModesDict.Add(MessageModeType.Status, 21);
+                _messageModesDict.Add(MessageModeType.Look, 22);
+                _messageModesDict.Add(MessageModeType.Failure, 23);
+                _messageModesDict.Add(MessageModeType.Blue, 24);
+                _messageModesDict.Add(MessageModeType.Red, 25);
             }
         }
         
         private MessageModeType TranslateMessageModeFromServer(int mode) {
-            foreach (var p in m_MessageModesDict) {
+            foreach (var p in _messageModesDict) {
                 if (p.Value == mode)
                     return p.Key;
             }
@@ -170,7 +170,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             if (mode < 0 || mode >= MessageModeType.LastMessage)
                 return (int)MessageModeType.Invalid;
 
-            foreach (var p in m_MessageModesDict) {
+            foreach (var p in _messageModesDict) {
                 if (p.Key == mode)
                     return (byte)p.Value;
             }
@@ -178,9 +178,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseTalk(Internal.ByteArray message) {
-            uint statementID = 0;
+            uint statement_id = 0;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameMessageStatements))
-                statementID = message.ReadUnsignedInt();
+                statement_id = message.ReadUnsignedInt();
 
             string speaker = message.ReadString();
             ushort speakerLevel = 0;
@@ -191,29 +191,29 @@ namespace OpenTibiaUnity.Core.Communication.Game
             MessageModeType mode = TranslateMessageModeFromServer(rawMode);
             
             Vector3Int? absolutePosition = null;
-            Utility.UnionStrInt channelID = null;
+            Utils.UnionStrInt channel_id = null;
 
             switch (mode) {
                 case MessageModeType.Say:
                 case MessageModeType.Whisper:
                 case MessageModeType.Yell:
                     absolutePosition = message.ReadPosition();
-                    channelID = Chat.ChatStorage.LocalChannelID;
+                    channel_id = Chat.ChatStorage.LocalChannel_id;
                     break;
 
                 case MessageModeType.PrivateFrom:
-                    channelID = speaker;
+                    channel_id = speaker;
                     break;
 
                 case MessageModeType.Channel:
                 case MessageModeType.ChannelManagement:
                 case MessageModeType.ChannelHighlight:
-                    channelID = message.ReadUnsignedShort();
+                    channel_id = message.ReadUnsignedShort();
                     break;
 
                 case MessageModeType.Spell:
                     absolutePosition = message.ReadPosition();
-                    channelID = Chat.ChatStorage.LocalChannelID;
+                    channel_id = Chat.ChatStorage.LocalChannel_id;
                     break;
 
                 case MessageModeType.NpcFromStartBlock:
@@ -227,11 +227,11 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     break;
 
                 case MessageModeType.GamemasterChannel:
-                    channelID = message.ReadUnsignedShort();
+                    channel_id = message.ReadUnsignedShort();
                     break;
 
                 case MessageModeType.GamemasterPrivateFrom:
-                    channelID = speaker;
+                    channel_id = speaker;
                     break;
 
                 case MessageModeType.BarkLow:
@@ -239,7 +239,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 case MessageModeType.MonsterSay:
                 case MessageModeType.MonsterYell:
                     absolutePosition = message.ReadPosition();
-                    channelID = -1;
+                    channel_id = -1;
                     break;
 
                 case MessageModeType.Game:
@@ -247,12 +247,12 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
                 case MessageModeType.RVRAnswer:
                 case MessageModeType.RVRContinue:
-                    channelID = Chat.ChatStorage.RVRChannelID;
+                    channel_id = Chat.ChatStorage.RVRChannel_id;
                     break;
 
                 case MessageModeType.RVRChannel:
                     message.ReadUnsignedInt();
-                    channelID = Chat.ChatStorage.RVRChannelID;
+                    channel_id = Chat.ChatStorage.RVRChannel_id;
                     break;
 
                 default:
@@ -263,8 +263,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
             string text = message.ReadString();
             if(mode != MessageModeType.NpcFromStartBlock && mode != MessageModeType.NpcFrom) {
                 try {
-                    WorldMapStorage.AddOnscreenMessage(absolutePosition, (int)statementID, speaker, speakerLevel, mode, text);
-                    ChatStorage.AddChannelMessage(channelID, (int)statementID, speaker, speakerLevel, mode, text);
+                    WorldMapStorage.AddOnscreenMessage(absolutePosition, (int)statement_id, speaker, speakerLevel, mode, text);
+                    ChatStorage.AddChannelMessage(channel_id, (int)statement_id, speaker, speakerLevel, mode, text);
                 } catch (System.Exception e) {
                     throw new System.Exception("ProtocolGame.ParseTalk: Failed to add message: " + e.Message + "\n" + e.StackTrace);
                 }
@@ -286,9 +286,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseOpenChannel(Internal.ByteArray message) {
-            int channelID = message.ReadUnsignedShort();
+            int channel_id = message.ReadUnsignedShort();
             string channelName = message.ReadString();
-            Chat.Channel channel = ChatStorage.AddChannel(channelID, channelName, MessageModeType.Channel);
+            Chat.Channel channel = ChatStorage.AddChannel(channel_id, channelName, MessageModeType.Channel);
             channel.CanModerate = true;
 
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameChannelPlayerList)) {
@@ -308,13 +308,13 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseOpenOwnChannel(Internal.ByteArray message) {
-            int channelID = message.ReadUnsignedShort();
+            int channel_id = message.ReadUnsignedShort();
             string channelName = message.ReadString();
-            var channel = ChatStorage.AddChannel(channelID, channelName, MessageModeType.Channel);
+            var channel = ChatStorage.AddChannel(channel_id, channelName, MessageModeType.Channel);
             channel.CanModerate = true;
 
             if (channel.IsPrivate)
-                ChatStorage.OwnPrivateChannelID = channelID;
+                ChatStorage.OwnPrivateChannel_id = channel_id;
 
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameChannelPlayerList)) {
                 int joinedUsers = message.ReadUnsignedShort();
@@ -328,8 +328,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseCloseChannel(Internal.ByteArray message) {
-            int channelID = message.ReadUnsignedShort();
-            ChatStorage.CloseChannel(channelID);
+            int channel_id = message.ReadUnsignedShort();
+            ChatStorage.CloseChannel(channel_id);
         }
 
         private void ParseTextMessage(Internal.ByteArray message) {
@@ -338,7 +338,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             try {
                 switch (mode) {
                     case MessageModeType.ChannelManagement:
-                        int channelID = message.ReadUnsignedShort();
+                        int channel_id = message.ReadUnsignedShort();
                         string text = message.ReadString();
                         // TODO name filter
                         //var regex = new System.Text.RegularExpressions.Regex(@"^(.+?) invites you to |^You have been excluded from the channel ([^']+)'s Channel\.$");
@@ -346,16 +346,16 @@ namespace OpenTibiaUnity.Core.Communication.Game
                         //string speaker = match != null && match.Success ? match.Value : null;
 
                         WorldMapStorage.AddOnscreenMessage(null, -1, null, 0, mode, text);
-                        ChatStorage.AddChannelMessage(channelID, -1, null, 0, mode, text);
+                        ChatStorage.AddChannelMessage(channel_id, -1, null, 0, mode, text);
                         break;
 
                     case MessageModeType.Guild:
                     case MessageModeType.PartyManagement:
                     case MessageModeType.Party:
-                        channelID = message.ReadUnsignedShort();
+                        channel_id = message.ReadUnsignedShort();
                         text = message.ReadString();
                         WorldMapStorage.AddOnscreenMessage(null, -1, null, 0, mode, text);
-                        ChatStorage.AddChannelMessage(channelID, -1, null, 0, mode, text);
+                        ChatStorage.AddChannelMessage(channel_id, -1, null, 0, mode, text);
                         break;
 
                     case MessageModeType.Login:
@@ -368,10 +368,10 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     case MessageModeType.Loot:
                     case MessageModeType.TradeNpc:
                     case MessageModeType.HotkeyUse:
-                        channelID = -1;
+                        channel_id = -1;
                         text = message.ReadString();
                         WorldMapStorage.AddOnscreenMessage(null, -1, null, 0, mode, text);
-                        ChatStorage.AddChannelMessage(channelID, -1, null, 0, mode, text);
+                        ChatStorage.AddChannelMessage(channel_id, -1, null, 0, mode, text);
                         break;
 
                     case MessageModeType.Market:
@@ -430,8 +430,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseChannelEvent(Internal.ByteArray message) {
-            int channelID = message.ReadUnsignedShort();
-            var channel = ChatStorage.GetChannel(channelID);
+            int channel_id = message.ReadUnsignedShort();
+            var channel = ChatStorage.GetChannel(channel_id);
             string playerName = message.ReadString();
             var eventType = message.ReadEnum<ChannelEvent>();
 

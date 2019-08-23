@@ -3,50 +3,50 @@ using System.Linq;
 
 namespace OpenTibiaUnity.Core.WorldMap
 {
-    internal class WorldMapStorage {
-        private List<int> m_CacheObjectsCount;
-        private int m_EffectsCount = 0;
-        private Field[] m_Fields = new Field[Constants.NumFields];
-        private Appearances.AppearanceInstance[] m_Effects = new Appearances.AppearanceInstance[Constants.NumEffects];
+    public class WorldMapStorage {
+        private List<int> _cacheObjectsCount;
+        private int _effectsCount = 0;
+        private Field[] _fields = new Field[Constants.NumFields];
+        private Appearances.AppearanceInstance[] _effects = new Appearances.AppearanceInstance[Constants.NumEffects];
 
-        private List<bool>[] m_LayerBrightnessInfos = new List<bool>[Constants.MapSizeZ];
-        private UnityEngine.Vector3Int m_Position = UnityEngine.Vector3Int.zero;
-        private UnityEngine.Vector3Int m_Origin = UnityEngine.Vector3Int.zero;
-        private int m_AmbientNextUpdate = 0;
-        private int m_ObjectNextUpdate = 0;
-        private UnityEngine.Vector3Int m_HelperCoordinate = UnityEngine.Vector3Int.zero;
-        private readonly TMPro.TextMeshProUGUI m_TextBoxPrefab;
+        private List<bool>[] _layerBrightnessInfos = new List<bool>[Constants.MapSizeZ];
+        private UnityEngine.Vector3Int _position = UnityEngine.Vector3Int.zero;
+        private UnityEngine.Vector3Int _origin = UnityEngine.Vector3Int.zero;
+        private int _ambientNextUpdate = 0;
+        private int _objectNextUpdate = 0;
+        private UnityEngine.Vector3Int _helperCoordinate = UnityEngine.Vector3Int.zero;
+        private readonly TMPro.TextMeshProUGUI _textBoxPrefab;
 
-        internal int AmbientCurrentBrightness = -1;
-        internal int AmbientTargetBrightness = -1;
-        internal UnityEngine.Color32 AmbientCurrentColor = UnityEngine.Color.black;
-        internal UnityEngine.Color32 AmbientTargetColor = UnityEngine.Color.black;
+        public int AmbientCurrentBrightness = -1;
+        public int AmbientTargetBrightness = -1;
+        public UnityEngine.Color32 AmbientCurrentColor = UnityEngine.Color.black;
+        public UnityEngine.Color32 AmbientTargetColor = UnityEngine.Color.black;
 
-        internal UnityEngine.Vector3Int Position {
-            get { return m_Position; }
+        public UnityEngine.Vector3Int Position {
+            get { return _position; }
             set {
-                m_Position = value;
+                _position = value;
                 PlayerZPlane = value.z <= Constants.GroundLayer ? (Constants.MapSizeZ - 1 - value.z) : Constants.UndergroundLayer;
             }
         }
-        internal bool Valid { get; set; } = false;
-        internal bool CacheFullbank { get; set; } = false;
-        internal bool CacheUnsight { get; set; } = false;
-        internal int PlayerZPlane { get; private set; } = 0;
-        internal bool LayoutOnscreenMessages { get; set; } = false;
-        internal List<OnscreenMessageBox> MessageBoxes { get; } = new List<OnscreenMessageBox>();
+        public bool Valid { get; set; } = false;
+        public bool CacheFullbank { get; set; } = false;
+        public bool CacheUnsight { get; set; } = false;
+        public int PlayerZPlane { get; private set; } = 0;
+        public bool LayoutOnscreenMessages { get; set; } = false;
+        public List<OnscreenMessageBox> MessageBoxes { get; } = new List<OnscreenMessageBox>();
 
-        internal WorldMapStorage(TMPro.TextMeshProUGUI textBoxBottom,
+        public WorldMapStorage(TMPro.TextMeshProUGUI textBoxBottom,
             TMPro.TextMeshProUGUI textBoxLow,
             TMPro.TextMeshProUGUI textBoxHigh,
             TMPro.TextMeshProUGUI textBoxTop,
             TMPro.TextMeshProUGUI textBoxPrefab) {
 
-            for (int i = 0; i < m_Fields.Length; i++) {
-                m_Fields[i] = new Field();
+            for (int i = 0; i < _fields.Length; i++) {
+                _fields[i] = new Field();
             }
 
-            m_TextBoxPrefab = textBoxPrefab;
+            _textBoxPrefab = textBoxPrefab;
 
             //MessageScreenTarget.BoxBottom
             MessageBoxes.Add(new OnscreenMessageBox(null, null, 0, MessageModeType.None, 1, textBoxBottom));
@@ -57,20 +57,20 @@ namespace OpenTibiaUnity.Core.WorldMap
             //MessageScreenTarget.BoxTop
             MessageBoxes.Add(new OnscreenMessageBox(null, null, 0, MessageModeType.None, 1, textBoxTop));
 
-            m_CacheObjectsCount = new List<int>(Enumerable.Repeat(0, Constants.MapSizeZ));
-            for (int i = 0; i < m_LayerBrightnessInfos.Length; i++) {
-                m_LayerBrightnessInfos[i] = new List<bool>(Constants.MapSizeX * Constants.MapSizeY);
-                for (int j = 0; j < m_LayerBrightnessInfos[i].Capacity; j++)
-                    m_LayerBrightnessInfos[i].Add(false);
+            _cacheObjectsCount = new List<int>(Enumerable.Repeat(0, Constants.MapSizeZ));
+            for (int i = 0; i < _layerBrightnessInfos.Length; i++) {
+                _layerBrightnessInfos[i] = new List<bool>(Constants.MapSizeX * Constants.MapSizeY);
+                for (int j = 0; j < _layerBrightnessInfos[i].Capacity; j++)
+                    _layerBrightnessInfos[i].Add(false);
             }
             
         }
 
-        internal Appearances.ObjectInstance GetEnvironmentalEffect(UnityEngine.Vector3Int mapPosition) {
+        public Appearances.ObjectInstance GetEnvironmentalEffect(UnityEngine.Vector3Int mapPosition) {
             return GetField(mapPosition).EnvironmentalEffect;
         }
 
-        internal void SetEnvironmentalEffect(UnityEngine.Vector3Int mapPosition, Appearances.ObjectInstance effectObject) {
+        public void SetEnvironmentalEffect(UnityEngine.Vector3Int mapPosition, Appearances.ObjectInstance effectObject) {
             GetField(mapPosition).EnvironmentalEffect = effectObject;
         }
 
@@ -79,37 +79,37 @@ namespace OpenTibiaUnity.Core.WorldMap
             if (!@object)
                 throw new System.ArgumentNullException(string.Format("%s: %s", functor, "@object can't be null."));
         }
-        internal Appearances.ObjectInstance AppendObject(UnityEngine.Vector3Int mapPosition, Appearances.ObjectInstance @object) {
+        public Appearances.ObjectInstance AppendObject(UnityEngine.Vector3Int mapPosition, Appearances.ObjectInstance @object) {
             AssertNullObject(@object, "WorldMapStorage.AppendObject");
             var otherObj = GetField(mapPosition).PutObject(@object, Constants.MapSizeW);
             if (!!otherObj && otherObj.IsCreature)
                 OpenTibiaUnity.CreatureStorage.MarkOpponentVisible(otherObj.Data, false);
             else if (otherObj == null)
-                m_CacheObjectsCount[(m_Origin.z + mapPosition.z) % Constants.MapSizeZ]++;
+                _cacheObjectsCount[(_origin.z + mapPosition.z) % Constants.MapSizeZ]++;
             
             if (!!@object.Type && @object.Type.IsFullGround)
                 CacheFullbank = false;
 
             return otherObj;
         }
-        internal Appearances.ObjectInstance PutObject(UnityEngine.Vector3Int mapPosition, Appearances.ObjectInstance @object) {
+        public Appearances.ObjectInstance PutObject(UnityEngine.Vector3Int mapPosition, Appearances.ObjectInstance @object) {
             AssertNullObject(@object, "WorldMapStorage.PutObject");
             return InsertObject(mapPosition, -1, @object);
         }
-        internal Appearances.ObjectInstance InsertObject(UnityEngine.Vector3Int mapPosition, int stackPos, Appearances.ObjectInstance @object) {
+        public Appearances.ObjectInstance InsertObject(UnityEngine.Vector3Int mapPosition, int stackPos, Appearances.ObjectInstance @object) {
             AssertNullObject(@object, "WorldMapStorage.InsertObject");
             var otherObj = GetField(mapPosition).PutObject(@object, stackPos);
             if (!!otherObj && otherObj.IsCreature)
                 OpenTibiaUnity.CreatureStorage.MarkOpponentVisible(otherObj.Data, false);
             else if (!otherObj)
-                m_CacheObjectsCount[(m_Origin.z + mapPosition.z) % Constants.MapSizeZ]++;
+                _cacheObjectsCount[(_origin.z + mapPosition.z) % Constants.MapSizeZ]++;
 
             if (!!otherObj && otherObj.Type.IsFullGround || @object.Type.IsFullGround)
                 CacheFullbank = false;
 
             return otherObj;
         }
-        internal Appearances.ObjectInstance ChangeObject(UnityEngine.Vector3Int mapPosition, int stackPos, Appearances.ObjectInstance @object) {
+        public Appearances.ObjectInstance ChangeObject(UnityEngine.Vector3Int mapPosition, int stackPos, Appearances.ObjectInstance @object) {
             AssertNullObject(@object, "WorldMapStorage.ChangeObject");
             Appearances.ObjectInstance otherObj = GetField(mapPosition).ChangeObject(@object, stackPos);
             if (!!otherObj && otherObj.IsCreature &&
@@ -121,13 +121,13 @@ namespace OpenTibiaUnity.Core.WorldMap
 
             return otherObj;
         }
-        internal Appearances.ObjectInstance DeleteObject(UnityEngine.Vector3Int mapPosition, int stackPos) {
+        public Appearances.ObjectInstance DeleteObject(UnityEngine.Vector3Int mapPosition, int stackPos) {
             Appearances.ObjectInstance otherObj = GetField(mapPosition).DeleteObject(stackPos);
             if (!!otherObj && otherObj.IsCreature)
                 OpenTibiaUnity.CreatureStorage.MarkOpponentVisible(otherObj.Data, false);
 
             if (!!otherObj)
-                m_CacheObjectsCount[(m_Origin.z + mapPosition.z) % Constants.MapSizeZ]--;
+                _cacheObjectsCount[(_origin.z + mapPosition.z) % Constants.MapSizeZ]--;
 
             if (!!otherObj && otherObj.Type.IsFullGround)
                 CacheFullbank = false;
@@ -135,14 +135,14 @@ namespace OpenTibiaUnity.Core.WorldMap
             return otherObj;
         }
 
-        internal void AppendEffect(UnityEngine.Vector3Int absolutePosition, Appearances.AppearanceInstance effect) {
-            UnityEngine.Vector3Int? mapPosition = ToMapInternal(absolutePosition);
+        public void AppendEffect(UnityEngine.Vector3Int absolutePosition, Appearances.AppearanceInstance effect) {
+            UnityEngine.Vector3Int? mapPosition = ToMappublic(absolutePosition);
 
             int index = -1;
             Field field = null;
             if (mapPosition != null) {
-                index = ToIndexInternal(mapPosition.Value);
-                field = m_Fields[index];
+                index = ToIndexpublic(mapPosition.Value);
+                field = _fields[index];
             }
 
             if (!!field && effect is Appearances.TextualEffectInstance textualEffect) {
@@ -153,31 +153,31 @@ namespace OpenTibiaUnity.Core.WorldMap
                 }
             }
 
-            if (m_EffectsCount < Constants.NumEffects) {
+            if (_effectsCount < Constants.NumEffects) {
                 effect.MapField = index;
                 effect.MapData = 0;
                 if (!!field)
                     field.AppendEffect(effect);
 
-                m_Effects[m_EffectsCount] = effect;
-                m_EffectsCount++;
+                _effects[_effectsCount] = effect;
+                _effectsCount++;
             }
         }
-        internal void MoveEffect(UnityEngine.Vector3Int absolutePosition, int effectIndex) {
-            if (effectIndex < 0 || effectIndex >= m_EffectsCount)
+        public void MoveEffect(UnityEngine.Vector3Int absolutePosition, int effectIndex) {
+            if (effectIndex < 0 || effectIndex >= _effectsCount)
                 return;
 
-            UnityEngine.Vector3Int? mapPosition = ToMapInternal(absolutePosition);
+            UnityEngine.Vector3Int? mapPosition = ToMappublic(absolutePosition);
             int index = -1;
             if (mapPosition != null)
-                index = ToIndexInternal(mapPosition.Value);
+                index = ToIndexpublic(mapPosition.Value);
 
-            var effect = m_Effects[effectIndex];
+            var effect = _effects[effectIndex];
             if (effect.MapField == index)
                 return;
 
             if (effect.MapField > -1) {
-                m_Fields[effect.MapField].DeleteEffect(effect.MapData);
+                _fields[effect.MapField].DeleteEffect(effect.MapData);
                 effect.MapField = -1;
                 effect.MapData = 0;
             }
@@ -185,93 +185,93 @@ namespace OpenTibiaUnity.Core.WorldMap
             if (index > -1) {
                 effect.MapField = index;
                 effect.MapData = 0;
-                m_Fields[index].AppendEffect(effect);
+                _fields[index].AppendEffect(effect);
             }
         }
         private void DeleteEffect(int effectIndex) {
-            if (effectIndex < 0 || effectIndex >= m_EffectsCount)
+            if (effectIndex < 0 || effectIndex >= _effectsCount)
                 throw new System.Exception("WorldMapStorage.DeleteEffect: effect is out of range.");
 
-            var effect = m_Effects[effectIndex];
+            var effect = _effects[effectIndex];
             if (effect.MapField != -1)
-                m_Fields[effect.MapField].DeleteEffect(effect.MapData);
+                _fields[effect.MapField].DeleteEffect(effect.MapData);
 
             effect.MapData = -1;
             effect.MapField = -1;
-            m_EffectsCount--;
+            _effectsCount--;
 
-            if (effectIndex < m_EffectsCount)
-                m_Effects[effectIndex] = m_Effects[m_EffectsCount];
+            if (effectIndex < _effectsCount)
+                _effects[effectIndex] = _effects[_effectsCount];
             
-            m_Effects[m_EffectsCount] = null;
+            _effects[_effectsCount] = null;
         }
 
-        internal int GetTopLookObject(UnityEngine.Vector3Int mapPosition, out Appearances.ObjectInstance @object) {
+        public int GetTopLookObject(UnityEngine.Vector3Int mapPosition, out Appearances.ObjectInstance @object) {
             return GetField(mapPosition).GetTopLookObject(out @object);
         }
-        internal int GetTopLookObject(UnityEngine.Vector3Int mapPosition) {
+        public int GetTopLookObject(UnityEngine.Vector3Int mapPosition) {
             return GetField(mapPosition).GetTopLookObject(out Appearances.ObjectInstance @object);
         }
-        internal int GetTopMultiUseObject(UnityEngine.Vector3Int mapPosition, out Appearances.ObjectInstance @object) {
+        public int GetTopMultiUseObject(UnityEngine.Vector3Int mapPosition, out Appearances.ObjectInstance @object) {
             return GetField(mapPosition).GetTopMultiUseObject(out @object);
         }
-        internal int GetTopMultiUseObject(UnityEngine.Vector3Int mapPosition) {
+        public int GetTopMultiUseObject(UnityEngine.Vector3Int mapPosition) {
             return GetField(mapPosition).GetTopMultiUseObject(out Appearances.ObjectInstance @object);
         }
-        internal int GetTopUseObject(UnityEngine.Vector3Int mapPosition, out Appearances.ObjectInstance @object) {
+        public int GetTopUseObject(UnityEngine.Vector3Int mapPosition, out Appearances.ObjectInstance @object) {
             return GetField(mapPosition).GetTopUseObject(out @object);
         }
-        internal int GetTopUseObject(UnityEngine.Vector3Int mapPosition) {
+        public int GetTopUseObject(UnityEngine.Vector3Int mapPosition) {
             return GetField(mapPosition).GetTopUseObject(out Appearances.ObjectInstance @object);
         }
-        internal int GetTopMoveObject(UnityEngine.Vector3Int mapPosition, out Appearances.ObjectInstance @object) {
+        public int GetTopMoveObject(UnityEngine.Vector3Int mapPosition, out Appearances.ObjectInstance @object) {
             return GetField(mapPosition).GetTopMoveObject(out @object);
         }
-        internal int GetTopMoveObject(UnityEngine.Vector3Int mapPosition) {
+        public int GetTopMoveObject(UnityEngine.Vector3Int mapPosition) {
             return GetField(mapPosition).GetTopMoveObject(out Appearances.ObjectInstance @object);
         }
-        internal int GetTopCreatureObject(UnityEngine.Vector3Int mapPosition, out Appearances.ObjectInstance @object) {
+        public int GetTopCreatureObject(UnityEngine.Vector3Int mapPosition, out Appearances.ObjectInstance @object) {
             return GetField(mapPosition).GetTopCreatureObject(out @object);
         }
-        internal int GetTopCreatureObject(UnityEngine.Vector3Int mapPosition) {
+        public int GetTopCreatureObject(UnityEngine.Vector3Int mapPosition) {
             return GetField(mapPosition).GetTopCreatureObject(out Appearances.ObjectInstance @object);
         }
         
-        internal Appearances.ObjectInstance GetObject(UnityEngine.Vector3Int mapPosition, int stackPos) {
+        public Appearances.ObjectInstance GetObject(UnityEngine.Vector3Int mapPosition, int stackPos) {
             return GetField(mapPosition).GetObject(stackPos);
         }
-        internal Appearances.ObjectInstance GetObject(int mapX, int mapY, int mapZ, int stackPos) {
-            return m_Fields[ToIndexInternal(mapX, mapY, mapZ)].GetObject(stackPos);
+        public Appearances.ObjectInstance GetObject(int mapX, int mapY, int mapZ, int stackPos) {
+            return _fields[ToIndexpublic(mapX, mapY, mapZ)].GetObject(stackPos);
         }
-        internal int GetObjectPerLayer(int z) {
+        public int GetObjectPerLayer(int z) {
             if (z < 0 || z > Constants.MapSizeZ)
                 throw new System.Exception("WorldMapStorage.GetObjectPerLayer: z=" + z + " is out of range");
 
-            return m_CacheObjectsCount[(m_Origin.z + z) % Constants.MapSizeZ];
+            return _cacheObjectsCount[(_origin.z + z) % Constants.MapSizeZ];
         }
-        internal int GetCreatureObjectForCreature(Creatures.Creature creature, out Appearances.ObjectInstance @object) {
+        public int GetCreatureObjectForCreature(Creatures.Creature creature, out Appearances.ObjectInstance @object) {
             if (!!creature) {
                 var mapPosition = ToMap(creature.Position);
-                return GetField(mapPosition).GetCreatureObjectForCreatureID(creature.ID, out @object);
+                return GetField(mapPosition).GetCreatureObjectForCreature_id(creature.Id, out @object);
             }
 
             @object = null;
             return -1;
         }
-        internal int GetCreatureObjectForCreature(Creatures.Creature creature) {
+        public int GetCreatureObjectForCreature(Creatures.Creature creature) {
             Appearances.ObjectInstance _;
             return GetCreatureObjectForCreature(creature, out _);
         }
 
-        internal OnscreenMessageBox AddOnscreenMessage(MessageModeType mode, string text) {
+        public OnscreenMessageBox AddOnscreenMessage(MessageModeType mode, string text) {
             return AddOnscreenMessage(null, -1, null, 0, mode, text, int.MaxValue);
         }
 
-        internal OnscreenMessageBox AddOnscreenMessage(UnityEngine.Vector3Int? absolutePosition, int statementID, string speaker, int speakerLevel, MessageModeType mode, string text) {
-            return AddOnscreenMessage(absolutePosition, statementID, speaker, speakerLevel, mode, text, int.MaxValue);
+        public OnscreenMessageBox AddOnscreenMessage(UnityEngine.Vector3Int? absolutePosition, int statement_id, string speaker, int speakerLevel, MessageModeType mode, string text) {
+            return AddOnscreenMessage(absolutePosition, statement_id, speaker, speakerLevel, mode, text, int.MaxValue);
         }
 
-        internal OnscreenMessageBox AddOnscreenMessage(UnityEngine.Vector3Int? absolutePosition, int statementID, string speaker, int speakerLevel, MessageModeType mode, Utility.UnionStrInt text, int color) {
+        public OnscreenMessageBox AddOnscreenMessage(UnityEngine.Vector3Int? absolutePosition, int statement_id, string speaker, int speakerLevel, MessageModeType mode, Utils.UnionStrInt text, int color) {
             var messageFilterSet = OpenTibiaUnity.OptionStorage.GetMessageFilterSet(Chat.MessageFilterSet.DefaultSet);
             var messageMode = messageFilterSet.GetMessageMode(mode);
             if (messageMode == null || !messageMode.ShowOnScreen || messageMode.ScreenTarget == MessageScreenTargets.None)
@@ -312,7 +312,7 @@ namespace OpenTibiaUnity.Core.WorldMap
                 }
 
                 if (messageBox == null) {
-                    var textMesh = UnityEngine.Object.Instantiate(m_TextBoxPrefab, OpenTibiaUnity.GameManager.OnscreenMessagesContainer);
+                    var textMesh = UnityEngine.Object.Instantiate(_textBoxPrefab, OpenTibiaUnity.GameManager.OnscreenMessagesContainer);
                     messageBox = new OnscreenMessageBox(absolutePosition, speaker, speakerLevel, mode, Constants.NumOnscreenMessages, textMesh) {
                         Visible = visible
                     };
@@ -331,7 +331,7 @@ namespace OpenTibiaUnity.Core.WorldMap
                 messageBox = MessageBoxes[(int)screenTarget];
             }
 
-            message = new OnscreenMessage(statementID, speaker, speakerLevel, mode, text);
+            message = new OnscreenMessage(statement_id, speaker, speakerLevel, mode, text);
             message.FormatMessage(messageMode.GetOnscreenMessagePrefix(speaker, speakerLevel), messageMode.TextARGB, messageMode.HighlightARGB);
             messageBox.AppendMessage(message);
             messageBox.Visible = true;
@@ -339,13 +339,13 @@ namespace OpenTibiaUnity.Core.WorldMap
             return messageBox;
         }
 
-        internal void AddTextualEffect(UnityEngine.Vector3Int absolutePosition, int color, string text, bool mergable = true) {
-            var textMesh = UnityEngine.Object.Instantiate(m_TextBoxPrefab, OpenTibiaUnity.GameManager.OnscreenMessagesContainer);
+        public void AddTextualEffect(UnityEngine.Vector3Int absolutePosition, int color, string text, bool mergable = true) {
+            var textMesh = UnityEngine.Object.Instantiate(_textBoxPrefab, OpenTibiaUnity.GameManager.OnscreenMessagesContainer);
             var textualEffect = OpenTibiaUnity.AppearanceStorage.CreateTextualEffect(color, text, textMesh);
             AppendEffect(absolutePosition, textualEffect);
         }
 
-        internal void ExpireOldestMessages() {
+        public void ExpireOldestMessages() {
             int minExpirationTime = int.MaxValue;
             int minExpirationStartIndex = -1;
 
@@ -378,26 +378,26 @@ namespace OpenTibiaUnity.Core.WorldMap
             }
         }
 
-        private int ToIndexInternal(UnityEngine.Vector3Int mapPosition) {
-            return ToIndexInternal(mapPosition.x, mapPosition.y, mapPosition.z);
+        private int ToIndexpublic(UnityEngine.Vector3Int mapPosition) {
+            return ToIndexpublic(mapPosition.x, mapPosition.y, mapPosition.z);
         }
 
-        private int ToIndexInternal(int mapX, int mapY, int mapZ) {
+        private int ToIndexpublic(int mapX, int mapY, int mapZ) {
             if (mapX < 0 || mapX >= Constants.MapSizeX || mapY < 0 || mapY >= Constants.MapSizeY || mapZ < 0 || mapZ >= Constants.MapSizeZ)
-                throw new System.ArgumentException($"WorldMapStorage.ToIndexInternal: Input co-oridnate ({mapX}, {mapY}, {mapZ}) is out of range.");
+                throw new System.ArgumentException($"WorldMapStorage.ToIndexpublic: Input co-oridnate ({mapX}, {mapY}, {mapZ}) is out of range.");
 
-            return ((mapZ + m_Origin.z) % Constants.MapSizeZ * Constants.MapSizeX + (mapX + m_Origin.x) % Constants.MapSizeX) * Constants.MapSizeY + (mapY + m_Origin.y) % Constants.MapSizeY;
+            return ((mapZ + _origin.z) % Constants.MapSizeZ * Constants.MapSizeX + (mapX + _origin.x) % Constants.MapSizeX) * Constants.MapSizeY + (mapY + _origin.y) % Constants.MapSizeY;
         }
 
-        internal Field GetField(UnityEngine.Vector3Int mapPosition) {
+        public Field GetField(UnityEngine.Vector3Int mapPosition) {
             return GetField(mapPosition.x, mapPosition.y, mapPosition.z);
         }
 
-        internal Field GetField(int mapX, int mapY, int mapZ) {
-            return m_Fields[ToIndexInternal(mapX, mapY, mapZ)];
+        public Field GetField(int mapX, int mapY, int mapZ) {
+            return _fields[ToIndexpublic(mapX, mapY, mapZ)];
         }
 
-        internal void SetAmbientLight(UnityEngine.Color color, int intensity) {
+        public void SetAmbientLight(UnityEngine.Color color, int intensity) {
             var mustUpdateAmbient = AmbientTargetBrightness < 0;
             AmbientTargetColor = color;
             AmbientTargetBrightness = intensity;
@@ -407,36 +407,36 @@ namespace OpenTibiaUnity.Core.WorldMap
             }
         }
 
-        internal void Reset() {
+        public void Reset() {
             ResetMap();
             InvalidateOnscreenMessages();
         }
 
-        internal void ResetMap() {
-            m_Position = UnityEngine.Vector3Int.zero;
+        public void ResetMap() {
+            _position = UnityEngine.Vector3Int.zero;
             PlayerZPlane = 0;
-            m_Origin = UnityEngine.Vector3Int.zero;
+            _origin = UnityEngine.Vector3Int.zero;
 
-            for (int i = 0; i < m_Fields.Length; i++)
-                m_Fields[i].Reset();
+            for (int i = 0; i < _fields.Length; i++)
+                _fields[i].Reset();
 
-            m_Effects = new Appearances.AppearanceInstance[Constants.NumEffects];
-            m_EffectsCount = 0;
+            _effects = new Appearances.AppearanceInstance[Constants.NumEffects];
+            _effectsCount = 0;
 
-            m_CacheObjectsCount.Clear();
-            m_CacheObjectsCount.AddRange(Enumerable.Repeat(0, Constants.MapSizeZ));
+            _cacheObjectsCount.Clear();
+            _cacheObjectsCount.AddRange(Enumerable.Repeat(0, Constants.MapSizeZ));
 
             CacheFullbank = false;
             Valid = false;
-            m_AmbientNextUpdate = 0;
-            m_ObjectNextUpdate = 0;
+            _ambientNextUpdate = 0;
+            _objectNextUpdate = 0;
         }
 
-        internal void ResetField(UnityEngine.Vector3Int mapPosition, bool resetCreatures = true, bool resetEffects = true) {
-            int index = ToIndexInternal(mapPosition);
-            Field field = m_Fields[index];
-            m_CacheObjectsCount[(m_Origin.z + mapPosition.z) % Constants.MapSizeZ] = 
-                m_CacheObjectsCount[(m_Origin.z + mapPosition.z) % Constants.MapSizeZ] - field.ObjectsCount;
+        public void ResetField(UnityEngine.Vector3Int mapPosition, bool resetCreatures = true, bool resetEffects = true) {
+            int index = ToIndexpublic(mapPosition);
+            Field field = _fields[index];
+            _cacheObjectsCount[(_origin.z + mapPosition.z) % Constants.MapSizeZ] = 
+                _cacheObjectsCount[(_origin.z + mapPosition.z) % Constants.MapSizeZ] - field.ObjectsCount;
             CacheFullbank = false;
 
             if (resetCreatures) {
@@ -463,11 +463,11 @@ namespace OpenTibiaUnity.Core.WorldMap
             }
         }
 
-        internal void ResetField(int x, int y, int z, bool resetCreatures = true, bool resetEffects = true) {
+        public void ResetField(int x, int y, int z, bool resetCreatures = true, bool resetEffects = true) {
             ResetField(new UnityEngine.Vector3Int(x, y, z), resetCreatures, resetEffects);
         }
 
-        internal void RefreshFields() {
+        public void RefreshFields() {
             for (int z = 0; z < Constants.MapSizeZ; z++) {
                 for (int x = 0; x < Constants.MapSizeX; x++) {
                     for (int y = 0; y < Constants.MapSizeY; y++) {
@@ -477,27 +477,27 @@ namespace OpenTibiaUnity.Core.WorldMap
             }
         }
 
-        internal void InvalidateOnscreenMessages() {
+        public void InvalidateOnscreenMessages() {
             LayoutOnscreenMessages = true;
         }
 
-        internal void UpdateMiniMap(UnityEngine.Vector3Int mapPosition) {
+        public void UpdateMiniMap(UnityEngine.Vector3Int mapPosition) {
             GetField(mapPosition).UpdateMiniMap();
         }
 
-        internal uint GetMiniMapColour(UnityEngine.Vector3Int mapPosition) {
+        public uint GetMiniMapColour(UnityEngine.Vector3Int mapPosition) {
             return GetField(mapPosition).MiniMapColor;
         }
 
-        internal int GetMiniMapCost(UnityEngine.Vector3Int mapPosition) {
+        public int GetMiniMapCost(UnityEngine.Vector3Int mapPosition) {
             return GetField(mapPosition).MiniMapCost;
         }
 
-        internal int GetMiniMapCost(int mapX, int mapY, int mapZ) {
+        public int GetMiniMapCost(int mapX, int mapY, int mapZ) {
             return GetField(mapX, mapY, mapZ).MiniMapCost;
         }
 
-        internal void ScrollMap(int dx, int dy, int dz = 0) {
+        public void ScrollMap(int dx, int dy, int dz = 0) {
             if (dx < -Constants.MapSizeX || dx > Constants.MapSizeX)
                 throw new System.ArgumentException("WorldMapStorage.ScrollMap: X=" + dx + " is out of range.");
             else if (dy < -Constants.MapSizeY || dy > Constants.MapSizeY)
@@ -526,11 +526,11 @@ namespace OpenTibiaUnity.Core.WorldMap
                     }
                 }
 
-                m_Origin.x -= dx;
-                if (m_Origin.x < 0)
-                    m_Origin.x += Constants.MapSizeX;
+                _origin.x -= dx;
+                if (_origin.x < 0)
+                    _origin.x += Constants.MapSizeX;
 
-                m_Origin.x %= Constants.MapSizeX;
+                _origin.x %= Constants.MapSizeX;
             }
 
             if (dy != 0) {
@@ -551,11 +551,11 @@ namespace OpenTibiaUnity.Core.WorldMap
                     }
                 }
 
-                m_Origin.y -= dy;
-                if (m_Origin.y < 0)
-                    m_Origin.y += Constants.MapSizeY;
+                _origin.y -= dy;
+                if (_origin.y < 0)
+                    _origin.y += Constants.MapSizeY;
 
-                m_Origin.y %= Constants.MapSizeY;
+                _origin.y %= Constants.MapSizeY;
             }
 
             if (dz != 0) {
@@ -576,11 +576,11 @@ namespace OpenTibiaUnity.Core.WorldMap
                     }
                 }
 
-                m_Origin.z -= dz;
-                if (m_Origin.z < 0)
-                    m_Origin.z += Constants.MapSizeZ;
+                _origin.z -= dz;
+                if (_origin.z < 0)
+                    _origin.z += Constants.MapSizeZ;
 
-                m_Origin.z %= Constants.MapSizeZ;
+                _origin.z %= Constants.MapSizeZ;
                 if (dz > 0) {
                     for (int tmpx = 0; tmpx < Constants.MapSizeX; tmpx++) {
                         for (int tmpy = 0; tmpy < Constants.MapSizeY; tmpy++) {
@@ -592,39 +592,39 @@ namespace OpenTibiaUnity.Core.WorldMap
             }
         }
 
-        internal UnityEngine.Vector3Int ToMap(UnityEngine.Vector3Int absolutePosition) {
-            UnityEngine.Vector3Int? mapPosition = ToMapInternal(absolutePosition);
+        public UnityEngine.Vector3Int ToMap(UnityEngine.Vector3Int absolutePosition) {
+            UnityEngine.Vector3Int? mapPosition = ToMappublic(absolutePosition);
             if (mapPosition == null)
-                throw new System.ArgumentException("WorldMapStorage.ToMap: Input co-ordinate " + absolutePosition + " is out of range (m=" + m_Position + ").");
+                throw new System.ArgumentException("WorldMapStorage.ToMap: Input co-ordinate " + absolutePosition + " is out of range (m=" + _position + ").");
 
             return mapPosition.Value;
         }
 
-        internal void ToMap(UnityEngine.Vector3Int absolutePosition, out UnityEngine.Vector3Int outPosition) {
+        public void ToMap(UnityEngine.Vector3Int absolutePosition, out UnityEngine.Vector3Int outPosition) {
             outPosition = ToMap(absolutePosition);
         }
 
-        internal UnityEngine.Vector3Int ToMapClosest(UnityEngine.Vector3Int absolutePosition) {
-            int dZ = m_Position.z - absolutePosition.z;
-            int x = UnityEngine.Mathf.Max(0, UnityEngine.Mathf.Min(absolutePosition.x - (m_Position.x - Constants.PlayerOffsetX) - dZ, Constants.MapSizeX - 1));
-            int y = UnityEngine.Mathf.Max(0, UnityEngine.Mathf.Min(absolutePosition.y - (m_Position.y - Constants.PlayerOffsetY) - dZ, Constants.MapSizeY - 1));
+        public UnityEngine.Vector3Int ToMapClosest(UnityEngine.Vector3Int absolutePosition) {
+            int dZ = _position.z - absolutePosition.z;
+            int x = UnityEngine.Mathf.Max(0, UnityEngine.Mathf.Min(absolutePosition.x - (_position.x - Constants.PlayerOffsetX) - dZ, Constants.MapSizeX - 1));
+            int y = UnityEngine.Mathf.Max(0, UnityEngine.Mathf.Min(absolutePosition.y - (_position.y - Constants.PlayerOffsetY) - dZ, Constants.MapSizeY - 1));
             int z = UnityEngine.Mathf.Max(0, UnityEngine.Mathf.Min(PlayerZPlane + dZ, Constants.MapSizeZ - 1));
 
             return new UnityEngine.Vector3Int(x, y, z);
         }
 
-        internal void ToMapClosest(UnityEngine.Vector3Int absolutePosition, out UnityEngine.Vector3Int outPosition) {
+        public void ToMapClosest(UnityEngine.Vector3Int absolutePosition, out UnityEngine.Vector3Int outPosition) {
             outPosition = ToMapClosest(absolutePosition);
         }
 
-        private UnityEngine.Vector3Int? ToMapInternal(UnityEngine.Vector3Int absolutePosition) {
-            return ToMapInternal(absolutePosition.x, absolutePosition.y, absolutePosition.z);
+        private UnityEngine.Vector3Int? ToMappublic(UnityEngine.Vector3Int absolutePosition) {
+            return ToMappublic(absolutePosition.x, absolutePosition.y, absolutePosition.z);
         }
 
-        private UnityEngine.Vector3Int? ToMapInternal(int absoluteX, int absoluteY, int absoluteZ) {
-            int dZ = m_Position.z - absoluteZ;
-            absoluteX -= (m_Position.x - Constants.PlayerOffsetX) + dZ;
-            absoluteY -= (m_Position.y - Constants.PlayerOffsetY) + dZ;
+        private UnityEngine.Vector3Int? ToMappublic(int absoluteX, int absoluteY, int absoluteZ) {
+            int dZ = _position.z - absoluteZ;
+            absoluteX -= (_position.x - Constants.PlayerOffsetX) + dZ;
+            absoluteY -= (_position.y - Constants.PlayerOffsetY) + dZ;
             absoluteZ = PlayerZPlane + dZ;
 
             if (absoluteX < 0 || absoluteX >= Constants.MapSizeX || absoluteY < 0 || absoluteY >= Constants.MapSizeY || absoluteZ < 0 || absoluteZ >= Constants.MapSizeZ)
@@ -633,54 +633,54 @@ namespace OpenTibiaUnity.Core.WorldMap
             return new UnityEngine.Vector3Int(absoluteX, absoluteY, absoluteZ);
         }
 
-        internal UnityEngine.Vector3Int ToAbsolute(UnityEngine.Vector3Int mapPosition) {
+        public UnityEngine.Vector3Int ToAbsolute(UnityEngine.Vector3Int mapPosition) {
             return ToAbsolute(mapPosition.x, mapPosition.y, mapPosition.z);
         }
 
-        internal UnityEngine.Vector3Int ToAbsolute(int mapX, int mapY, int mapZ) {
+        public UnityEngine.Vector3Int ToAbsolute(int mapX, int mapY, int mapZ) {
             if (mapX < 0 || mapX >= Constants.MapSizeX || mapY < 0 || mapY >= Constants.MapSizeY || mapZ < 0 || mapZ >= Constants.MapSizeZ)
                 throw new System.ArgumentException($"WorldMapStorage.ToAbsolute: Input co-oridnate ({mapX}, {mapY}, {mapZ}) is out of range.");
 
             int diffz = mapZ - PlayerZPlane;
 
             return new UnityEngine.Vector3Int() {
-                x = mapX + (m_Position.x - Constants.PlayerOffsetX) + diffz,
-                y = mapY + (m_Position.y - Constants.PlayerOffsetY) + diffz,
-                z = m_Position.z - diffz
+                x = mapX + (_position.x - Constants.PlayerOffsetX) + diffz,
+                y = mapY + (_position.y - Constants.PlayerOffsetY) + diffz,
+                z = _position.z - diffz
             };
         }
 
-        internal void ToAbsolute(UnityEngine.Vector3Int mapPosition, out UnityEngine.Vector3Int absolutePosition) {
+        public void ToAbsolute(UnityEngine.Vector3Int mapPosition, out UnityEngine.Vector3Int absolutePosition) {
             absolutePosition = ToAbsolute(mapPosition);
         }
 
-        internal void ToAbsolute(int x, int y, int z, out UnityEngine.Vector3Int absolutePosition) {
+        public void ToAbsolute(int x, int y, int z, out UnityEngine.Vector3Int absolutePosition) {
             absolutePosition = ToAbsolute(x, y, z);
         }
 
-        internal bool IsVisible(UnityEngine.Vector3Int absolutePosition, bool param4) {
-            UnityEngine.Vector3Int? mapPosition = ToMapInternal(absolutePosition);
-            return mapPosition.HasValue && (param4 || m_Position.z == absolutePosition.z);
+        public bool IsVisible(UnityEngine.Vector3Int absolutePosition, bool param4) {
+            UnityEngine.Vector3Int? mapPosition = ToMappublic(absolutePosition);
+            return mapPosition.HasValue && (param4 || _position.z == absolutePosition.z);
         }
 
-        internal bool IsVisible(int x, int y, int z, bool param4) {
-            UnityEngine.Vector3Int? mapPosition = ToMapInternal(x, y, z);
-            return mapPosition.HasValue && (param4 || m_Position.z == z);
+        public bool IsVisible(int x, int y, int z, bool param4) {
+            UnityEngine.Vector3Int? mapPosition = ToMappublic(x, y, z);
+            return mapPosition.HasValue && (param4 || _position.z == z);
         }
 
-        internal bool IsLookPossible(int x, int y, int z) {
-            return !m_Fields[ToIndexInternal(x, y, z)].CacheUnsight;
+        public bool IsLookPossible(int x, int y, int z) {
+            return !_fields[ToIndexpublic(x, y, z)].CacheUnsight;
         }
 
-        internal bool IsTranslucent(int x, int y, int z) {
-            return m_Fields[ToIndexInternal(x, y, z)].CacheTranslucent;
+        public bool IsTranslucent(int x, int y, int z) {
+            return _fields[ToIndexpublic(x, y, z)].CacheTranslucent;
         }
         
-        internal void Animate() {
+        public void Animate() {
             var ticks = OpenTibiaUnity.TicksMillis;
-            if (ticks >= m_ObjectNextUpdate) {
-                for (int i = m_EffectsCount - 1; i >= 0; i--) {
-                    var effect = m_Effects[i];
+            if (ticks >= _objectNextUpdate) {
+                for (int i = _effectsCount - 1; i >= 0; i--) {
+                    var effect = _effects[i];
                     if (!effect.Animate(ticks)) {
                         if (effect is Appearances.TextualEffectInstance textualEffect)
                             textualEffect.DestroyTextMesh(); // make sure to destroy resources associated with this effect :)
@@ -691,7 +691,7 @@ namespace OpenTibiaUnity.Core.WorldMap
                 }
 
                 for (int i = Constants.NumFields - 1; i >= 0; i--) {
-                    var field = m_Fields[i];
+                    var field = _fields[i];
                     for (int j = field.ObjectsCount - 1; j >= 0; j--)
                         field.ObjectsNetwork[j].Animate(ticks);
 
@@ -724,10 +724,10 @@ namespace OpenTibiaUnity.Core.WorldMap
                     }
                 }
 
-                m_ObjectNextUpdate = ticks + Constants.ObjectsUpdateInterval;
+                _objectNextUpdate = ticks + Constants.ObjectsUpdateInterval;
             }
 
-            if (ticks >= m_AmbientNextUpdate) {
+            if (ticks >= _ambientNextUpdate) {
                 if (AmbientCurrentColor.r < AmbientTargetColor.r)
                     AmbientCurrentColor.r++;
                 else if (AmbientCurrentColor.r < AmbientTargetColor.r)
@@ -748,11 +748,11 @@ namespace OpenTibiaUnity.Core.WorldMap
                 else if (AmbientCurrentBrightness > AmbientTargetBrightness)
                     AmbientCurrentBrightness--;
                 
-                m_AmbientNextUpdate = ticks + Constants.AmbientUpdateInterval;
+                _ambientNextUpdate = ticks + Constants.AmbientUpdateInterval;
             }
         }
 
-        internal int GetFieldHeight(int x, int y, int z) {
+        public int GetFieldHeight(int x, int y, int z) {
             int height = 0;
             var field = GetField(x, y, z);
             for (int i = field.ObjectsCount -1; i >= 0; i--) {
@@ -764,7 +764,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             return height;
         }
 
-        internal EnterPossibleFlag GetEnterPossibleFlag(int x, int y, int z, bool param4) {
+        public EnterPossibleFlag GetEnterPossibleFlag(int x, int y, int z, bool param4) {
             var field = GetField(x, y, z);
             if (param4 && x < Constants.MapSizeX - 1 && y < Constants.MapSizeY - 1 && z > 0 && field.ObjectsCount > 0 && !field.ObjectsNetwork[0].Type.IsGround && GetFieldHeight(x + 1, y + 1, z - 1) > 2)
                 return EnterPossibleFlag.Possible;
@@ -791,20 +791,20 @@ namespace OpenTibiaUnity.Core.WorldMap
             return EnterPossibleFlag.Possible;
         }
 
-        internal List<bool> GetLightBlockingTilesForZLayer(int z) {
+        public List<bool> GetLightBlockingTilesForZLayer(int z) {
             if (z < 0 || z >= Constants.MapSizeZ)
                 throw new System.ArgumentException("WorldMapStorage.GetLightBlockingTilesForZLayer: Input Z co-oridnate (" + z + ") is out of range.");
 
-            var list = m_LayerBrightnessInfos[z];
+            var list = _layerBrightnessInfos[z];
             for (int y = 0; y < Constants.MapSizeY; y++) {
                 for (int x = 0; x < Constants.MapSizeX; x++) {
-                    int fieldIndex = ((z + m_Origin.z) % Constants.MapSizeZ * Constants.MapSizeX
-                        + (x + m_Origin.x) % Constants.MapSizeX) * Constants.MapSizeY
-                        + (y + m_Origin.y) % Constants.MapSizeY;
+                    int fieldIndex = ((z + _origin.z) % Constants.MapSizeZ * Constants.MapSizeX
+                        + (x + _origin.x) % Constants.MapSizeX) * Constants.MapSizeY
+                        + (y + _origin.y) % Constants.MapSizeY;
 
                     int index = y * Constants.MapSizeX + x;
 
-                    var field = m_Fields[fieldIndex];
+                    var field = _fields[fieldIndex];
                     var @object = field.GetObject(0);
 
                     if (@object == null || !@object.Type.IsGround)

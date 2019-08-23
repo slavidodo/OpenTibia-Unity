@@ -5,99 +5,99 @@ namespace OpenTibiaUnity.Core.Communication.Internal
 {
     public sealed class ByteArray
     {
-        internal const int MaxByteArraySize = ushort.MaxValue;
+        public const int MaxByteArraySize = ushort.MaxValue;
         
-        private int m_Length;
-        private int m_Position = 0;
+        private int _length;
+        private int _position = 0;
 
-        private byte[] m_Buffer;
+        private byte[] _buffer;
 
-        internal int Length {
-            get => m_Length;
-            set => m_Length = value;
+        public int Length {
+            get => _length;
+            set => _length = value;
         }
 
-        internal int Position {
-            get => m_Position;
-            set => m_Position = value;
+        public int Position {
+            get => _position;
+            set => _position = value;
         }
 
-        internal int BytesAvailable {
-            get => m_Length - m_Position;
+        public int BytesAvailable {
+            get => _length - _position;
         }
         
-        internal byte[] Buffer {
-            get => m_Buffer;
+        public byte[] Buffer {
+            get => _buffer;
         }
 
-        internal byte this[int index] {
-            get => m_Buffer[index];
-            set => m_Buffer[index] = value;
+        public byte this[int index] {
+            get => _buffer[index];
+            set => _buffer[index] = value;
         }
 
-        internal ByteArray(byte[] buffer = null) {
+        public ByteArray(byte[] buffer = null) {
             if (buffer != null) { // initialized for read //
-                m_Buffer = buffer;
-                m_Length = buffer.Length;
+                _buffer = buffer;
+                _length = buffer.Length;
             } else {
-                m_Buffer = new byte[MaxByteArraySize];
-                m_Length = 0;
+                _buffer = new byte[MaxByteArraySize];
+                _length = 0;
             }
         }
 
         #region ByteArray: InputStreamFns
-        internal int ReadBytes(byte[] buffer, int offset, int length) {
+        public int ReadBytes(byte[] buffer, int offset, int length) {
             if (buffer == null)
                 throw new ArgumentNullException("ByteArray.ReadBytes: Destination ByteArray can't be null.");
             else if (offset < 0 || length < 0 || length > buffer.Length - offset)
                 throw new ArgumentOutOfRangeException("ByteArray.ReadBytes: Data to be read exceeds the size of the array.");
 
-            if (m_Position >= m_Length)
+            if (_position >= _length)
                 throw new ByteArrayEOFException("ByteArray.ReadBytes: EOF reached.");
 
-            int available = m_Length - m_Position;
+            int available = _length - _position;
             if (length > available)
                 length = available;
 
             if (length <= 0)
                 return 0;
 
-            Array.Copy(m_Buffer, Position, buffer, offset, length);
-            m_Position += length;
+            Array.Copy(_buffer, Position, buffer, offset, length);
+            _position += length;
             return length;
         }
 
-        internal int PeekBytes(byte[] buffer, int offset, int length) {
+        public int PeekBytes(byte[] buffer, int offset, int length) {
             length = ReadBytes(buffer, offset, length);
-            m_Position -= length;
+            _position -= length;
             return length;
         }
 
-        internal int ReadBytes(ByteArray other, int offset, int length) {
+        public int ReadBytes(ByteArray other, int offset, int length) {
             return ReadBytes(other.Buffer, offset, length);
         }
 
-        internal int PeekBytes(ByteArray other, int offset, int length) {
+        public int PeekBytes(ByteArray other, int offset, int length) {
             return PeekBytes(other.Buffer, offset, length);
         }
 
-        internal byte ReadUnsignedByte() {
-            if (m_Position >= m_Length)
+        public byte ReadUnsignedByte() {
+            if (_position >= _length)
                 throw new ByteArrayEOFException("ByteArray.ReadU8: EOF reached.");
-            return m_Buffer[m_Position++];
+            return _buffer[_position++];
         }
 
-        internal byte PeekUnsignedByte() {
+        public byte PeekUnsignedByte() {
             byte res = ReadUnsignedByte();
-            m_Position--;
+            _position--;
             return res;
         }
 
-        internal bool ReadBoolean() {
+        public bool ReadBoolean() {
             return ReadUnsignedByte() != 0;
         }
 
-        internal bool PeekBoolean() {
+        public bool PeekBoolean() {
             return PeekUnsignedByte() != 0;
         }
 
@@ -108,7 +108,7 @@ namespace OpenTibiaUnity.Core.Communication.Internal
         /// <returns>enum value of type (T)</returns>
         /// <exception cref="ByteArrayEOFException">the message has no available bytes to read</exception>
         /// <exception cref="ByteArrayInvalidEnumValue">the read value isn't defined in the enum</exception>
-        internal T ReadEnum<T>() where T : Enum {
+        public T ReadEnum<T>() where T : Enum {
             var type = typeof(T);
             var value = ReadUnsignedByte();
             if (!Enum.IsDefined(type, value))
@@ -116,109 +116,109 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             return (T)Enum.ToObject(type, value);
         }
         
-        internal T PeekEnum<T>() where T : Enum {
+        public T PeekEnum<T>() where T : Enum {
             var value = ReadEnum<T>();
-            m_Position--;
+            _position--;
             return value;
         }
         
-        internal sbyte ReadSignedByte() {
-            if (m_Position >= m_Length)
+        public sbyte ReadSignedByte() {
+            if (_position >= _length)
                 throw new ByteArrayEOFException("ByteArray.ReadSignedByte: EOF reached.");
-            return (sbyte)m_Buffer[m_Position++];
+            return (sbyte)_buffer[_position++];
         }
 
-        internal sbyte PeekSignedByte() {
+        public sbyte PeekSignedByte() {
             sbyte res = ReadSignedByte();
-            m_Position -= sizeof(sbyte);
+            _position -= sizeof(sbyte);
             return res;
         }
 
-        internal ushort ReadUnsignedShort() {
+        public ushort ReadUnsignedShort() {
             byte[] buf = new byte[sizeof(ushort)];
             if (ReadBytes(buf, 0, buf.Length) != buf.Length)
                 throw new ByteArrayEOFException("ByteArray.ReadUnsignedShort: EOF reached.");
             return BitConverter.ToUInt16(buf, 0);
         }
 
-        internal ushort PeekUnsignedShort() {
+        public ushort PeekUnsignedShort() {
             ushort res = ReadUnsignedShort();
-            m_Position -= sizeof(ushort);
+            _position -= sizeof(ushort);
             return res;
         }
 
-        internal short ReadShort() {
+        public short ReadShort() {
             byte[] buf = new byte[sizeof(short)];
             if (ReadBytes(buf, 0, buf.Length) != buf.Length)
                 throw new ByteArrayEOFException("ByteArray.ReadShort: EOF reached.");
             return BitConverter.ToInt16(buf, 0);
         }
 
-        internal short PeekShort() {
+        public short PeekShort() {
             short res = ReadShort();
-            m_Position -= sizeof(short);
+            _position -= sizeof(short);
             return res;
         }
 
-        internal uint ReadUnsignedInt() {
+        public uint ReadUnsignedInt() {
             byte[] buf = new byte[sizeof(uint)];
             if (ReadBytes(buf, 0, buf.Length) != buf.Length)
                 throw new ByteArrayEOFException("ByteArray.ReadUnsignedInt: EOF reached.");
             return BitConverter.ToUInt32(buf, 0);
         }
 
-        internal uint PeekUnsignedInt() {
+        public uint PeekUnsignedInt() {
             uint res = ReadUnsignedInt();
-            m_Position -= sizeof(uint);
+            _position -= sizeof(uint);
             return res;
         }
 
-        internal int ReadInt() {
+        public int ReadInt() {
             byte[] buf = new byte[sizeof(int)];
             if (ReadBytes(buf, 0, buf.Length) != buf.Length)
                 throw new ByteArrayEOFException("ByteArray.ReadInt: EOF reached.");
             return BitConverter.ToInt32(buf, 0);
         }
 
-        internal int PeekInt() {
+        public int PeekInt() {
             int res = ReadInt();
-            m_Position -= sizeof(int);
+            _position -= sizeof(int);
             return res;
         }
 
-        internal ulong ReadUnsignedLong() {
+        public ulong ReadUnsignedLong() {
             byte[] buf = new byte[sizeof(ulong)];
             if (ReadBytes(buf, 0, buf.Length) != buf.Length)
                 throw new ByteArrayEOFException("ByteArray.ReadUnsignedLong: EOF reached.");
             return BitConverter.ToUInt64(buf, 0);
         }
 
-        internal ulong PeekUnsignedLong() {
+        public ulong PeekUnsignedLong() {
             ulong res = ReadUnsignedLong();
-            m_Position -= sizeof(ulong);
+            _position -= sizeof(ulong);
             return res;
         }
 
-        internal long ReadLong() {
+        public long ReadLong() {
             byte[] buf = new byte[sizeof(long)];
             if (ReadBytes(buf, 0, buf.Length) != buf.Length)
                 throw new ByteArrayEOFException("ByteArray.ReadUnsignedLong: EOF reached.");
             return BitConverter.ToInt64(buf, 0);
         }
 
-        internal long PeekLong() {
+        public long PeekLong() {
             long res = ReadLong();
-            m_Position -= sizeof(long);
+            _position -= sizeof(long);
             return res;
         }
 
-        internal double ReadDouble() {
+        public double ReadDouble() {
             byte precision = ReadUnsignedByte();
             int v = ReadInt() - int.MaxValue;
             return v / Math.Pow(10f, precision);
         }
 
-        internal string ReadString(int length = -1) {
+        public string ReadString(int length = -1) {
             if (length == -1)
                 length = ReadUnsignedShort();
 
@@ -231,13 +231,13 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             return System.Text.Encoding.ASCII.GetString(buf);
         }
 
-        internal string PeekString() {
+        public string PeekString() {
             string str = ReadString();
-            m_Position -= str.Length + sizeof(ushort);
+            _position -= str.Length + sizeof(ushort);
             return str;
         }
 
-        internal UnityEngine.Vector3Int ReadPosition(int x = -1) {
+        public UnityEngine.Vector3Int ReadPosition(int x = -1) {
             if (x == -1)
                 x = ReadUnsignedShort();
             int y = ReadUnsignedShort();
@@ -246,94 +246,94 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             return new UnityEngine.Vector3Int(x, y, z);
         }
 
-        internal UnityEngine.Vector3Int PeekPosition(int x = -1) {
+        public UnityEngine.Vector3Int PeekPosition(int x = -1) {
             var position = ReadPosition(x);
-            m_Position -= 2 * sizeof(ushort) + 1;
+            _position -= 2 * sizeof(ushort) + 1;
             return position;
         }
 
-        internal int Skip(int n) {
-            if (m_Position + n > m_Length)
-                n = m_Length - m_Position;
+        public int Skip(int n) {
+            if (_position + n > _length)
+                n = _length - _position;
 
-            m_Position += n;
+            _position += n;
             return n;
         }
         #endregion
 
         #region OutputStreamFns
-        internal void WriteBytes(ByteArray byteArray, int offset = 0, int length = -1) {
+        public void WriteBytes(ByteArray byteArray, int offset = 0, int length = -1) {
             WriteBytes(byteArray.Buffer, offset, length);
         }
 
-        internal void WriteBytes(byte[] buffer, int offset = 0, int length = -1) {
+        public void WriteBytes(byte[] buffer, int offset = 0, int length = -1) {
             if (length == -1)
                 length = buffer.Length;
 
-            Array.Copy(buffer, offset, m_Buffer, m_Position, length);
-            m_Position += length;
+            Array.Copy(buffer, offset, _buffer, _position, length);
+            _position += length;
 
-            if (m_Position > m_Length)
-                m_Length = m_Position;
+            if (_position > _length)
+                _length = _position;
         }
         
-        internal void WriteUnsignedByte(byte value, int offset = 0) {
+        public void WriteUnsignedByte(byte value, int offset = 0) {
             WriteBytes(new byte[] { value }, offset);
         }
         
-        internal void WriteSignedByte(sbyte value, int offset = 0) {
+        public void WriteSignedByte(sbyte value, int offset = 0) {
             WriteBytes(new byte[] { (byte)value }, offset);
         }
 
-        internal void WriteBoolean(bool value, int offset = 0) {
+        public void WriteBoolean(bool value, int offset = 0) {
             WriteUnsignedByte(value ? (byte)1 : (byte)0, offset);
         }
         
-        internal void WriteEnum<T>(T value, int offset = 0) where T : System.Enum {
+        public void WriteEnum<T>(T value, int offset = 0) where T : System.Enum {
             WriteUnsignedByte(Convert.ToByte(value), offset);
         }
 
-        internal void WriteUnsignedShort(ushort value, int offset = 0) {
+        public void WriteUnsignedShort(ushort value, int offset = 0) {
             WriteBytes(BitConverter.GetBytes(value), offset);
         }
 
-        internal void WriteShort(short value, int offset = 0) {
+        public void WriteShort(short value, int offset = 0) {
             WriteBytes(BitConverter.GetBytes(value), offset);
         }
 
-        internal void WriteUnsignedInt(uint value, int offset = 0) {
+        public void WriteUnsignedInt(uint value, int offset = 0) {
             WriteBytes(BitConverter.GetBytes(value), offset);
         }
 
-        internal void WriteInt(int value, int offset = 0) {
+        public void WriteInt(int value, int offset = 0) {
             WriteBytes(BitConverter.GetBytes(value), offset);
         }
 
-        internal void WriteUnsignedLong(ulong value, int offset = 0) {
+        public void WriteUnsignedLong(ulong value, int offset = 0) {
             WriteBytes(BitConverter.GetBytes(value), offset);
         }
 
-        internal void WriteLong(long value, int offset = 0) {
+        public void WriteLong(long value, int offset = 0) {
             WriteBytes(BitConverter.GetBytes(value), offset);
         }
 
-        internal void WriteString(string value, int offset = 0, bool raw = false) {
+        public void WriteString(string value, int offset = 0, bool raw = false) {
             if (!raw)
                 WriteUnsignedShort((ushort)value.Length, offset);
             WriteBytes(System.Text.Encoding.ASCII.GetBytes(value), offset);
         }
 
-        internal void WritePosition(UnityEngine.Vector3Int value, int offset = 0) {
+        public void WritePosition(UnityEngine.Vector3Int value, int offset = 0) {
             WriteUnsignedShort((ushort)value.x, offset);
             WriteUnsignedShort((ushort)value.y, offset);
             WriteUnsignedByte((byte)value.z, offset);
         }
         #endregion
         
-        internal ByteArray Clone() {
-            var clone = new ByteArray(m_Buffer.Clone() as byte[]);
-            clone.m_Position = m_Position;
-            clone.m_Length = m_Length;
+        public ByteArray Clone() {
+            var clone = new ByteArray(_buffer.Clone() as byte[]);
+            clone._position = _position;
+            clone._length = _length;
             return clone;
         }
     }

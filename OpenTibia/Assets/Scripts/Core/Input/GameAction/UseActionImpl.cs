@@ -4,52 +4,52 @@ using UnityEngine.EventSystems;
 
 namespace OpenTibiaUnity.Core.Input.GameAction
 {
-    internal class UseActionImpl : IActionImpl
+    public class UseActionImpl : IActionImpl
     {
-        private Vector3Int m_AbsolutePosition;
-        private Appearances.AppearanceType m_AppearanceType;
-        private int m_StackPosOrData;
-        private Vector3Int m_TargetAbsolutePosition;
-        private Appearances.ObjectInstance m_TargetObject;
-        private int m_TargetStackPosOrData;
-        private UseActionTarget m_UseActionTarget;
+        private Vector3Int _absolutePosition;
+        private Appearances.AppearanceType _appearanceType;
+        private int _stackPosOrData;
+        private Vector3Int _targetAbsolutePosition;
+        private Appearances.ObjectInstance _targetObject;
+        private int _targetStackPosOrData;
+        private UseActionTarget _useActionTarget;
 
-        internal UseActionImpl(Vector3Int absolutePosition, Appearances.ObjectInstance objectInstance, int stackPosOrData, Vector3Int targetAbsolute, Appearances.ObjectInstance targetObject, int targetPosition, UseActionTarget useTarget) {
+        public UseActionImpl(Vector3Int absolutePosition, Appearances.ObjectInstance objectInstance, int stackPosOrData, Vector3Int targetAbsolute, Appearances.ObjectInstance targetObject, int targetPosition, UseActionTarget useTarget) {
             Init(absolutePosition, objectInstance?.Type, stackPosOrData, targetAbsolute, targetObject, targetPosition, useTarget);
         }
 
-        internal UseActionImpl(Vector3Int absolutePosition, Appearances.AppearanceType appearanceType, int stackPosOrData, Vector3Int targetAbsolute, Appearances.ObjectInstance targetObject, int targetPosition, UseActionTarget useTarget) {
+        public UseActionImpl(Vector3Int absolutePosition, Appearances.AppearanceType appearanceType, int stackPosOrData, Vector3Int targetAbsolute, Appearances.ObjectInstance targetObject, int targetPosition, UseActionTarget useTarget) {
             Init(absolutePosition, appearanceType, stackPosOrData, targetAbsolute, targetObject, targetPosition, useTarget);
         }
 
-        internal UseActionImpl(Vector3Int absolutePosition, uint objectID, int stackPosOrData, Vector3Int targetAbsolute, Appearances.ObjectInstance targetObject, int targetPosition, UseActionTarget useTarget) {
-            var appearnceType = OpenTibiaUnity.AppearanceStorage.GetObjectType(objectID);
+        public UseActionImpl(Vector3Int absolutePosition, uint object_id, int stackPosOrData, Vector3Int targetAbsolute, Appearances.ObjectInstance targetObject, int targetPosition, UseActionTarget useTarget) {
+            var appearnceType = OpenTibiaUnity.AppearanceStorage.GetObjectType(object_id);
             Init(absolutePosition, appearnceType, stackPosOrData, targetAbsolute, targetObject, targetPosition, useTarget);
         }
         
         protected void Init(Vector3Int absolutePosition, Appearances.AppearanceType appearanceType, int stackPosOrData, Vector3Int targetAbsolute, Appearances.ObjectInstance targetObject, int targetStackPosOrData, UseActionTarget useTarget) {
-            m_AppearanceType = appearanceType;
-            if (!m_AppearanceType)
+            _appearanceType = appearanceType;
+            if (!_appearanceType)
                 throw new System.ArgumentException("UseActionImpl.UseActionImpl: Invalid type: " + appearanceType);
 
-            m_AbsolutePosition = absolutePosition;
-            if (m_AbsolutePosition.x == 65535 && m_AbsolutePosition.y == 0)
-                m_StackPosOrData = stackPosOrData;
-            else if (m_AbsolutePosition.x == 65535 && m_AbsolutePosition.y != 0)
-                m_StackPosOrData = m_AbsolutePosition.z;
+            _absolutePosition = absolutePosition;
+            if (_absolutePosition.x == 65535 && _absolutePosition.y == 0)
+                _stackPosOrData = stackPosOrData;
+            else if (_absolutePosition.x == 65535 && _absolutePosition.y != 0)
+                _stackPosOrData = _absolutePosition.z;
             else
-                m_StackPosOrData = stackPosOrData;
+                _stackPosOrData = stackPosOrData;
 
-            m_TargetObject = targetObject;
-            m_TargetAbsolutePosition = absolutePosition;
-            if (m_TargetAbsolutePosition.x == 65535 && m_TargetAbsolutePosition.y == 0)
-                m_TargetStackPosOrData = targetStackPosOrData;
-            else if (m_TargetAbsolutePosition.x == 65535 && m_TargetAbsolutePosition.y != 0)
-                m_TargetStackPosOrData = m_TargetAbsolutePosition.z;
+            _targetObject = targetObject;
+            _targetAbsolutePosition = absolutePosition;
+            if (_targetAbsolutePosition.x == 65535 && _targetAbsolutePosition.y == 0)
+                _targetStackPosOrData = targetStackPosOrData;
+            else if (_targetAbsolutePosition.x == 65535 && _targetAbsolutePosition.y != 0)
+                _targetStackPosOrData = _targetAbsolutePosition.z;
             else
-                m_TargetStackPosOrData = targetStackPosOrData;
+                _targetStackPosOrData = targetStackPosOrData;
 
-            m_UseActionTarget = useTarget;
+            _useActionTarget = useTarget;
         }
 
         public void Perform(bool repeat = false) {
@@ -62,42 +62,42 @@ namespace OpenTibiaUnity.Core.Input.GameAction
             var player = OpenTibiaUnity.Player;
 
             // aimbot check!
-            if (m_AbsolutePosition.x == 65535 && m_AbsolutePosition.y == 0) {
+            if (_absolutePosition.x == 65535 && _absolutePosition.y == 0) {
                 if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameEquipHotkey)) {
-                    if (containerStorage.GetAvailableInventory(m_AppearanceType.ID, m_StackPosOrData) < 1)
+                    if (containerStorage.GetAvailableInventory(_appearanceType._id, _stackPosOrData) < 1)
                         return;
                 }
 
-                if (m_AppearanceType.IsMultiUse) {
+                if (_appearanceType.IsMultiUse) {
                     // todo verify what version the client receives profession details (basic data)
-                    var rune = Magic.SpellStorage.GetRune((int)m_AppearanceType.ID);
+                    var rune = Magic.SpellStorage.GetRune((int)_appearanceType._id);
                     if (rune != null && player.GetRuneUses(rune) < 1)
                         return;
                 }
             }
 
-            if (m_AppearanceType.IsContainer) {
+            if (_appearanceType.IsContainer) {
                 int index = 0;
-                if (m_UseActionTarget == UseActionTarget.NewWindow || m_AbsolutePosition.x < 65535 || m_AbsolutePosition.y >= (int)ClothSlots.First && m_AbsolutePosition.y <= (int)ClothSlots.Last)
-                    index = containerStorage.GetFreeContainerViewID();
-                else if (64 <= m_AbsolutePosition.y && m_AbsolutePosition.y < 64 + Constants.MaxContainerViews)
-                    index = m_AbsolutePosition.y - 64;
+                if (_useActionTarget == UseActionTarget.NewWindow || _absolutePosition.x < 65535 || _absolutePosition.y >= (int)ClothSlots.First && _absolutePosition.y <= (int)ClothSlots.Last)
+                    index = containerStorage.GetFreeContainerView_id();
+                else if (64 <= _absolutePosition.y && _absolutePosition.y < 64 + Constants.MaxContainerViews)
+                    index = _absolutePosition.y - 64;
 
-                protocolGame.SendUseObject(m_AbsolutePosition, m_AppearanceType.ID, m_StackPosOrData, index);
-            } else if (!m_AppearanceType.IsMultiUse) {
-                protocolGame.SendUseObject(m_AbsolutePosition, m_AppearanceType.ID, m_StackPosOrData, 0);
-            } else if (m_UseActionTarget == UseActionTarget.Self) {
-                protocolGame.SendUseOnCreature(m_AbsolutePosition, m_AppearanceType.ID, m_StackPosOrData, player.ID);
-            } else if (m_UseActionTarget == UseActionTarget.Target && creatureStorage.AttackTarget != null) {
-                protocolGame.SendUseOnCreature(m_AbsolutePosition, m_AppearanceType.ID, m_StackPosOrData, creatureStorage.AttackTarget.ID);
+                protocolGame.SendUseObject(_absolutePosition, _appearanceType._id, _stackPosOrData, index);
+            } else if (!_appearanceType.IsMultiUse) {
+                protocolGame.SendUseObject(_absolutePosition, _appearanceType._id, _stackPosOrData, 0);
+            } else if (_useActionTarget == UseActionTarget.Self) {
+                protocolGame.SendUseOnCreature(_absolutePosition, _appearanceType._id, _stackPosOrData, player.Id);
+            } else if (_useActionTarget == UseActionTarget.Target && creatureStorage.AttackTarget != null) {
+                protocolGame.SendUseOnCreature(_absolutePosition, _appearanceType._id, _stackPosOrData, creatureStorage.AttackTarget.Id);
             } else {
-                if (m_AbsolutePosition.x < 65535)
-                    GameActionFactory.CreateAutowalkAction(m_AbsolutePosition, false, false).Perform();
+                if (_absolutePosition.x < 65535)
+                    GameActionFactory.CreateAutowalkAction(_absolutePosition, false, false).Perform();
 
-                if (m_TargetObject.ID == Appearances.AppearanceInstance.Creature)
-                    protocolGame.SendUseOnCreature(m_AbsolutePosition, m_AppearanceType.ID, m_StackPosOrData, m_TargetObject.Data);
+                if (_targetObject.Id == Appearances.AppearanceInstance.Creature)
+                    protocolGame.SendUseOnCreature(_absolutePosition, _appearanceType._id, _stackPosOrData, _targetObject.Data);
                 else
-                    protocolGame.SendUseTwoObjects(m_AbsolutePosition, m_AppearanceType.ID, m_StackPosOrData, m_TargetAbsolutePosition, m_TargetObject.ID, m_TargetStackPosOrData);
+                    protocolGame.SendUseTwoObjects(_absolutePosition, _appearanceType._id, _stackPosOrData, _targetAbsolutePosition, _targetObject.Id, _targetStackPosOrData);
             }
         }
     }

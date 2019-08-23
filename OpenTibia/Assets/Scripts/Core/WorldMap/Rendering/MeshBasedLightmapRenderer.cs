@@ -3,28 +3,28 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.WorldMap.Rendering
 {
-    internal sealed class MeshBasedLightmapRenderer : ILightmapRenderer
+    public sealed class MeshBasedLightmapRenderer : LightmapRenderer
     {
-        private RenderTexture m_RenderTexture = new RenderTexture(Constants.WorldMapScreenWidth, Constants.WorldMapScreenHeight, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
-        private Mesh m_LightMesh = new Mesh();
-        private Material m_LightMaterial;
-        private Matrix4x4 m_LightTransformationMatrix = new Matrix4x4();
-        private Color32[] m_ColorData = new Color32[(Constants.MapSizeX + 1) * (Constants.MapSizeY + 1)];
+        private RenderTexture _renderTexture = new RenderTexture(Constants.WorldMapScreenWidth, Constants.WorldMapScreenHeight, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
+        private Mesh _lightMesh = new Mesh();
+        private Material _lightMaterial;
+        private Matrix4x4 _lightTransformationMatrix = new Matrix4x4();
+        private Color32[] _colorData = new Color32[(Constants.MapSizeX + 1) * (Constants.MapSizeY + 1)];
         
-        private int m_CachedScreenWidth = -1;
-        private int m_CachedScreenHeight = -1;
+        private int _cachedScreenWidth = -1;
+        private int _cachedScreenHeight = -1;
 
-        internal override Color32 this[int index] {
-            get => m_ColorData[index];
-            set => m_ColorData[index] = value;
+        public override Color32 this[int index] {
+            get => _colorData[index];
+            set => _colorData[index] = value;
         }
 
-        internal MeshBasedLightmapRenderer() {
+        public MeshBasedLightmapRenderer() {
             CreateMeshBuffers();
-            m_LightMaterial = new Material(Shader.Find("Hidden/Internal-Colored"));
+            _lightMaterial = new Material(Shader.Find("Hidden/Internal-Colored"));
 
-            for (int i = 0; i < m_ColorData.Length; i++)
-                m_ColorData[i] = new Color32(255, 255, 255, 255);
+            for (int i = 0; i < _colorData.Length; i++)
+                _colorData[i] = new Color32(255, 255, 255, 255);
         }
 
         private void CreateMeshBuffers() {
@@ -48,45 +48,45 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                 }
             }
 
-            m_LightMesh.vertices = verticies.ToArray();
-            m_LightMesh.triangles = indicies.ToArray();
+            _lightMesh.vertices = verticies.ToArray();
+            _lightMesh.triangles = indicies.ToArray();
         }
 
-        internal override Texture CreateLightmap() {
+        public override Texture CreateLightmap() {
             for (int x = 0; x < Constants.MapSizeX + 1; x++)
-                m_ColorData[x] = m_ColorData[x + Constants.MapSizeX + 1];
+                _colorData[x] = _colorData[x + Constants.MapSizeX + 1];
             
             for (int y = 0; y < Constants.MapSizeY + 1; y++) {
                 int destIndex = y * (Constants.MapSizeX + 1);
-                m_ColorData[destIndex] = m_ColorData[destIndex + 1];
+                _colorData[destIndex] = _colorData[destIndex + 1];
             }
 
-            m_LightMesh.colors32 = m_ColorData;
-            if (m_CachedScreenHeight != Screen.height || m_CachedScreenWidth != Screen.width) {
-                m_CachedScreenWidth = Screen.width;
-                m_CachedScreenHeight = Screen.height;
+            _lightMesh.colors32 = _colorData;
+            if (_cachedScreenHeight != Screen.height || _cachedScreenWidth != Screen.width) {
+                _cachedScreenWidth = Screen.width;
+                _cachedScreenHeight = Screen.height;
 
-                float zoomX = m_CachedScreenWidth / (float)Constants.MapSizeX;
-                float zoomY = m_CachedScreenHeight / (float)Constants.MapSizeY;
+                float zoomX = _cachedScreenWidth / (float)Constants.MapSizeX;
+                float zoomY = _cachedScreenHeight / (float)Constants.MapSizeY;
 
                 var scaleVector = new Vector3(zoomX, zoomY, 1);
-                m_LightTransformationMatrix = Matrix4x4.Scale(scaleVector);
+                _lightTransformationMatrix = Matrix4x4.Scale(scaleVector);
             }
 
             var previousRenderTexture = RenderTexture.active;
-            m_RenderTexture.Release();
-            RenderTexture.active = m_RenderTexture;
+            _renderTexture.Release();
+            RenderTexture.active = _renderTexture;
 
-            m_LightMaterial.SetPass(0);
-            Graphics.DrawMeshNow(m_LightMesh, m_LightTransformationMatrix);
+            _lightMaterial.SetPass(0);
+            Graphics.DrawMeshNow(_lightMesh, _lightTransformationMatrix);
 
             RenderTexture.active = previousRenderTexture;
             for (int z = 0; z < Constants.MapSizeZ; z++)
-                m_CachedLayerBrightnessInfo[z] = null;
-            return m_RenderTexture;
+                CachedLayerBrightnessInfo[z] = null;
+            return _renderTexture;
         }
 
-        internal override void SetLightSource(int x, int y, int z, uint brightness, Color32 defaultColor32) {
+        public override void SetLightSource(int x, int y, int z, uint brightness, Color32 defaultColor32) {
             if (x < 0 || x > Constants.MapSizeX || y < 0 || y > Constants.MapSizeY || brightness <= 0)
                 return;
 
@@ -106,53 +106,53 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 
                     float magnitude = (brightness - Mathf.Sqrt(dX + dY)) / 5f;
                     if (magnitude >= 0) {
-                        var color32 = MulColor32(defaultColor32, Mathf.Min(magnitude, 1f));
+                        var color32 = Utils.Utility.MulColor32(defaultColor32, Mathf.Min(magnitude, 1f));
                         int index = j * Constants.MapSizeX + i;
                         if (layerInformation[index])
-                            color32 = MulColor32(color32, OpenTibiaUnity.OptionStorage.FixedLightLevelSeparator / 100f);
+                            color32 = Utils.Utility.MulColor32(color32, OpenTibiaUnity.OptionStorage.FixedLightLevelSeparator / 100f);
 
                         var colorIndex = ToColorIndex(i, j);
-                        var currentColor32 = m_ColorData[colorIndex];
+                        var currentColor32 = _colorData[colorIndex];
 
                         if (color32.r > currentColor32.r || color32.g > currentColor32.g || color32.b > currentColor32.b) {
                             currentColor32.r = System.Math.Max(currentColor32.r, color32.r);
                             currentColor32.g = System.Math.Max(currentColor32.g, color32.g);
                             currentColor32.b = System.Math.Max(currentColor32.b, color32.b);
-                            m_ColorData[colorIndex] = currentColor32;
+                            _colorData[colorIndex] = currentColor32;
                         }
                     }
                 }
             }
         }
 
-        internal override void SetFieldBrightness(int x, int y, int brightness, bool aboveGround) {
+        public override void SetFieldBrightness(int x, int y, int brightness, bool aboveGround) {
             var ambient = OpenTibiaUnity.WorldMapStorage.AmbientCurrentColor;
             brightness = Mathf.Clamp(brightness, 0, 255);
 
-            Color32 color32 = MulColor32(ambient, brightness / 255f);
+            Color32 color32 = Utils.Utility.MulColor32(ambient, brightness / 255f);
             Color32 staticColor = aboveGround ? Constants.ColorAboveGround : Constants.ColorBelowGround;
 
-            float internalFactor = (OpenTibiaUnity.OptionStorage.AmbientBrightness / 100f) * ((255f - color32.r) / 255f);
-            color32 = (Color)color32 + MulColor32(staticColor, internalFactor);
+            float publicFactor = (OpenTibiaUnity.OptionStorage.AmbientBrightness / 100f) * ((255f - color32.r) / 255f);
+            color32 = (Color)color32 + Utils.Utility.MulColor32(staticColor, publicFactor);
 
             int index = ToColorIndex(x, y);
-            m_ColorData[index] = color32;
+            _colorData[index] = color32;
         }
 
-        internal override int GetFieldBrightness(int x, int y) {
+        public override int GetFieldBrightness(int x, int y) {
             if (x >= 0 && x < Constants.MapSizeX && y >= 0 && y < Constants.MapSizeY) {
-                var color32 = m_ColorData[ToColorIndex(x, y)];
+                var color32 = _colorData[ToColorIndex(x, y)];
                 return (color32.r + color32.g + color32.b) / 3;
             }
 
             return int.MaxValue;
         }
 
-        internal override int ToColorIndex(int x, int y) {
+        public override int ToColorIndex(int x, int y) {
             return (y + 1) * (Constants.MapSizeX + 1) + (x + 1);
         }
 
-        internal override float CalculateCreatureBrightnessFactor(Creatures.Creature creature, bool isLocalPlayer) {
+        public override float CalculateCreatureBrightnessFactor(Creatures.Creature creature, bool isLocalPlayer) {
             var mapPosition = OpenTibiaUnity.WorldMapStorage.ToMapClosest(creature.Position);
             var brightness = GetFieldBrightness(mapPosition.x, mapPosition.y);
             if (isLocalPlayer)

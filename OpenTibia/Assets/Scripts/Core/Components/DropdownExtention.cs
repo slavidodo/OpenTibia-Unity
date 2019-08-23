@@ -8,38 +8,38 @@ namespace OpenTibiaUnity.Core.Components
     public class DropdownExtention : Base.AbstractComponent
     {
         [Header("Panel Wrapper")]
-        [SerializeField] private Sprite m_PanelWrapperNormalSprite = null;
-        [SerializeField] private Sprite m_PanelWrapperHighlightedSprite = null;
+        [SerializeField] private Sprite _panelWrapperNormalSprite = null;
+        [SerializeField] private Sprite _panelWrapperHighlightedSprite = null;
 
         [Header("Panel Arrow")]
-        [SerializeField] private Sprite m_PanelArrowNormalSprite = null;
-        [SerializeField] private Sprite m_PanelArrowHighlightedSprite = null;
+        [SerializeField] private Sprite _panelArrowNormalSprite = null;
+        [SerializeField] private Sprite _panelArrowHighlightedSprite = null;
 
         [Header("Panels")]
-        [SerializeField] private Image m_PanelWrapperImage = null;
-        [SerializeField] private Image m_PanelArrowImage = null;
+        [SerializeField] private Image _panelWrapperImage = null;
+        [SerializeField] private Image _panelArrowImage = null;
 
-        bool m_TemplateVisible = false;
+        bool _templateVisible = false;
 
-        private TMPro.TMP_Dropdown m_Dropdown;
+        private TMPro.TMP_Dropdown _dropdown;
         public TMPro.TMP_Dropdown dropdown {
             get {
-                if (m_Dropdown == null)
-                    m_Dropdown = GetComponent<TMPro.TMP_Dropdown>();
+                if (_dropdown == null)
+                    _dropdown = GetComponent<TMPro.TMP_Dropdown>();
 
-                return m_Dropdown;
+                return _dropdown;
             }
         }
         
         protected void LateUpdate() {
-            if (dropdown.IsExpanded != m_TemplateVisible) {
+            if (dropdown.IsExpanded != _templateVisible) {
                 // highlight the dropdown
                 if (!dropdown.IsExpanded) {
-                    m_PanelWrapperImage.sprite = m_PanelWrapperNormalSprite;
-                    m_PanelArrowImage.sprite = m_PanelArrowNormalSprite;
+                    _panelWrapperImage.sprite = _panelWrapperNormalSprite;
+                    _panelArrowImage.sprite = _panelArrowNormalSprite;
                 } else {
-                    m_PanelWrapperImage.sprite = m_PanelWrapperHighlightedSprite;
-                    m_PanelArrowImage.sprite = m_PanelArrowHighlightedSprite;
+                    _panelWrapperImage.sprite = _panelWrapperHighlightedSprite;
+                    _panelArrowImage.sprite = _panelArrowHighlightedSprite;
                 }
 
                 if (dropdown.IsExpanded) {
@@ -57,7 +57,7 @@ namespace OpenTibiaUnity.Core.Components
                 // scroll to selection
                 //EnsureChildVisible();
 
-                m_TemplateVisible = dropdown.IsExpanded;
+                _templateVisible = dropdown.IsExpanded;
             }
         }
     }

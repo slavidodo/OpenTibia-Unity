@@ -13,26 +13,26 @@
     {
         public const int ChatChannelNoChannel = -1;
 
-        PrivateChatActionType m_ActionType;
-        int m_ChannelID;
-        string m_Name;
+        PrivateChatActionType _actionType;
+        int _channel_id;
+        string _name;
 
-        public PrivateChatActionImpl(PrivateChatActionType actionType, int channelID, string name) {
-            m_ActionType = actionType;
-            m_ChannelID = channelID;
-            m_Name = name;
+        public PrivateChatActionImpl(PrivateChatActionType actionType, int channel_id, string name) {
+            _actionType = actionType;
+            _channel_id = channel_id;
+            _name = name;
         }
 
         public void Perform(bool _ = false) {
-            if (m_ActionType == PrivateChatActionType.OpenChatChannel || m_Name != null) {
-                PerformInternal(m_ActionType, m_Name);
+            if (_actionType == PrivateChatActionType.OpenChatChannel || _name != null) {
+                Performpublic(_actionType, _name);
                 return;
             }
 
             // Todo? request name? idk about this :)
         }
 
-        private void PerformInternal(PrivateChatActionType actionType, string playerName) {
+        private void Performpublic(PrivateChatActionType actionType, string playerName) {
             if (!OpenTibiaUnity.GameManager.IsGameRunning)
                 return;
 
@@ -41,7 +41,7 @@
 
             switch (actionType) {
                 case PrivateChatActionType.OpenChatChannel: {
-                    var channel = chatStorage.GetChannel(chatStorage.OwnPrivateChannelID);
+                    var channel = chatStorage.GetChannel(chatStorage.OwnPrivateChannel_id);
                     if (channel == null) {
                         protocolGame.SendOpenChannel();
                     } else {
@@ -51,13 +51,13 @@
                     break;
                 }
                 case PrivateChatActionType.ChatChannelInvite: {
-                    if (m_ChannelID > -1)
-                        protocolGame.SendInviteToChannel(m_Name, m_ChannelID);
+                    if (_channel_id > -1)
+                        protocolGame.SendInviteToChannel(_name, _channel_id);
                     break;
                 }
                 case PrivateChatActionType.ChatChannelExclude: {
-                    if (m_ChannelID > -1)
-                        protocolGame.SendExcludeFromChannel(m_Name, m_ChannelID);
+                    if (_channel_id > -1)
+                        protocolGame.SendExcludeFromChannel(_name, _channel_id);
                     break;
                 }
                 case PrivateChatActionType.OpenMessageChannel: {

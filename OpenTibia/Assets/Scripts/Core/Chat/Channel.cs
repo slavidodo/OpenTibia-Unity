@@ -3,92 +3,91 @@ using UnityEngine.Events;
 
 namespace OpenTibiaUnity.Core.Chat
 {
-    internal class Channel
+    public class Channel
     {
-        internal class ChannelMessageAddEvent : UnityEvent<Channel, ChannelMessage> { }
+        public class ChannelMessageAddEvent : UnityEvent<Channel, ChannelMessage> { }
 
         protected const int MessagesSize = 50000;
-        internal const int MaxNameLength = 30;
+        public const int MaxNameLength = 30;
 
-        protected Utility.UnionStrInt m_ID = null;
-        protected string m_Name = null;
+        protected Utils.UnionStrInt _id = null;
+        protected string _name = null;
         
-        protected bool m_SendAllowed = true;
-        protected bool m_Closable = true;
-        protected MessageModeType m_SendMode = 0;
+        protected bool _sendAllowed = true;
+        protected bool _closable = true;
+        protected MessageModeType _sendMode = 0;
 
-        protected List<object> m_NicklistItems = null;
-        protected List<ChannelMessage> m_Messages = null;
+        protected List<object> _nicklistItems = null;
+        protected List<ChannelMessage> _messages = null;
 
-        internal ChannelMessageAddEvent onAddChannelMessage = new ChannelMessageAddEvent();
-
-
-        internal string Name {
-            get { return m_Name; }
-            set { m_Name = value; }
+        public ChannelMessageAddEvent onAddChannelMessage = new ChannelMessageAddEvent();
+        
+        public string Name {
+            get { return _name; }
+            set { _name = value; }
         }
 
-        internal bool SendAllowed {
-            get { return m_SendAllowed; }
-            set { m_SendAllowed = value; }
+        public bool SendAllowed {
+            get { return _sendAllowed; }
+            set { _sendAllowed = value; }
         }
 
-        internal bool Closable {
-            get { return m_Closable; }
-            set { m_Closable = value; }
+        public bool Closable {
+            get { return _closable; }
+            set { _closable = value; }
         }
 
-        internal Utility.UnionStrInt ID {
-            get { return m_ID; }
-            set { m_ID = value; }
+        public Utils.UnionStrInt Id {
+            get { return _id; }
+            set { _id = value; }
         }
 
-        internal MessageModeType SendMode {
-            get { return m_SendMode; }
+        public MessageModeType SendMode {
+            get { return _sendMode; }
         }
 
-        internal bool CanModerate { get; set; } = false;
+        public bool CanModerate { get; set; } = false;
 
-        internal bool IsPrivate {
-            get { return ChatStorage.s_IsPrivateChannel(ID); }
+        public bool IsPrivate {
+            get { return ChatStorage.s_IsPrivateChannel(_id); }
         }
 
-        internal Channel(Utility.UnionStrInt ID, string name, MessageModeType sendMode) {
-            m_ID = ID;
-            m_Name = name;
-            m_SendMode = sendMode;
-            m_Closable = true;
-            m_SendAllowed = true;
-            m_NicklistItems = new List<object>();
-            m_Messages = new List<ChannelMessage>(MessagesSize);
+        public Channel(Utils.UnionStrInt _id, string name, MessageModeType sendMode) {
+            _id = _id;
+            _name = name;
+            _sendMode = sendMode;
+            _closable = true;
+            _sendAllowed = true;
+            _nicklistItems = new List<object>();
+            _messages = new List<ChannelMessage>(MessagesSize);
         }
 
-        internal void ClearMessages() {
-            m_Messages.Clear();
+        public void ClearMessages() {
+            _messages.Clear();
         }
 
-        internal void AppendMessage(ChannelMessage message) {
-            m_Messages.Add(message);
+        public void AppendMessage(ChannelMessage message) {
+            _messages.Add(message);
             onAddChannelMessage.Invoke(this, message);
         }
 
-        internal void PlayerJoined(string name) {
+        public void PlayerJoined(string name) {
             // TODO
         }
 
-        internal void PlayerLeft(string name) {
+        public void PlayerLeft(string name) {
             // TODO
         }
 
-        internal void PlayerInvited(string name) {
+        public void PlayerInvited(string name) {
             // TODO
         }
 
-        internal void PlayerExcluded(string name) {
+        public void PlayerExcluded(string name) {
             // TODO
         }
 
-        internal void PlayerPending(string name) {
+        public void PlayerPending(string name) {
             // TODO
         }
     }

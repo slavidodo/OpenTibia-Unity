@@ -6,48 +6,48 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Skills
 {
-    internal class SkillsWindow : MiniWindow
+    public class SkillsWindow : MiniWindow
     {
-        [SerializeField] private SkillRawPanel m_SkillRawPanelPrefab = null;
-        [SerializeField] private SkillProgressPanel m_SkillProgressPanelPrefab = null;
-        [SerializeField] private SkillProgressIconPanel m_SkillProgressIconPanelPrefab = null;
+        [SerializeField] private SkillRawPanel _skillRawPanelPrefab = null;
+        [SerializeField] private SkillProgressPanel _skillProgressPanelPrefab = null;
+        [SerializeField] private SkillProgressIconPanel _skillProgressIconPanelPrefab = null;
 
-        [SerializeField] private Sprite m_MagicIcon = null;
-        [SerializeField] private Sprite m_FistIcon = null;
-        [SerializeField] private Sprite m_ClubIcon = null;
-        [SerializeField] private Sprite m_SwordIcon = null;
-        [SerializeField] private Sprite m_AxeIcon = null;
-        [SerializeField] private Sprite m_DistIcon = null;
-        [SerializeField] private Sprite m_ShieldingIcon = null;
-        [SerializeField] private Sprite m_FishingIcon = null;
+        [SerializeField] private Sprite _magicIcon = null;
+        [SerializeField] private Sprite _fistIcon = null;
+        [SerializeField] private Sprite _blubIcon = null;
+        [SerializeField] private Sprite _swordIcon = null;
+        [SerializeField] private Sprite _axeIcon = null;
+        [SerializeField] private Sprite _distIcon = null;
+        [SerializeField] private Sprite _shieldingIcon = null;
+        [SerializeField] private Sprite _fishingIcon = null;
 
-        private SkillPanel m_ExpPanel = null;
-        private SkillPanel m_LevelPanel = null;
-        private SkillPanel m_ExpGainRatePanel = null;
-        private SkillPanel m_HitPointsPanel = null;
-        private SkillPanel m_ManaPanel = null;
-        private SkillPanel m_SoulPointsPanel = null;
-        private SkillPanel m_CapacityPanel = null;
-        private SkillPanel m_SpeedPanel = null;
-        private SkillPanel m_RegenerationPanel = null;
-        private SkillPanel m_StaminaPanel = null;
+        private SkillPanel _expPanel = null;
+        private SkillPanel _levelPanel = null;
+        private SkillPanel _expGainRatePanel = null;
+        private SkillPanel _hitPointsPanel = null;
+        private SkillPanel _manaPanel = null;
+        private SkillPanel _soulPointsPanel = null;
+        private SkillPanel _capacityPanel = null;
+        private SkillPanel _speedPanel = null;
+        private SkillPanel _regenerationPanel = null;
+        private SkillPanel _staminaPanel = null;
 
         // known skills
-        private SkillPanel m_MagicPanel = null;
-        private SkillPanel m_FistPanel = null;
-        private SkillPanel m_ClubPanel = null;
-        private SkillPanel m_SwordPanel = null;
-        private SkillPanel m_AxePanel = null;
-        private SkillPanel m_DistancePanel = null;
-        private SkillPanel m_ShieldingPanel = null;
-        private SkillPanel m_FishingPanel = null;
+        private SkillPanel _magicPanel = null;
+        private SkillPanel _fistPanel = null;
+        private SkillPanel _clubPanel = null;
+        private SkillPanel _swordPanel = null;
+        private SkillPanel _axePanel = null;
+        private SkillPanel _distancePanel = null;
+        private SkillPanel _shieldingPanel = null;
+        private SkillPanel _fishingPanel = null;
 
-        private SkillPanel m_CriticalChancePanel = null;
-        private SkillPanel m_CriticalExtraDamagePanel = null;
-        private SkillPanel m_LifeLeechChancePanel = null;
-        private SkillPanel m_LifeLeechAmountPanel = null;
-        private SkillPanel m_ManaLeechChancePanel = null;
-        private SkillPanel m_ManaLeechAmountPanel = null;
+        private SkillPanel _briticalChancePanel = null;
+        private SkillPanel _briticalExtraDamagePanel = null;
+        private SkillPanel _lifeLeechChancePanel = null;
+        private SkillPanel _lifeLeechAmountPanel = null;
+        private SkillPanel _manaLeechChancePanel = null;
+        private SkillPanel _manaLeechAmountPanel = null;
 
         protected override void Awake() {
             base.Awake();
@@ -71,70 +71,70 @@ namespace OpenTibiaUnity.Modules.Skills
             DestroyOldComponents();
 
             if (newVersion > 1000) {
-                m_LevelPanel = CreateSkillPanel(m_SkillProgressPanelPrefab, TextResources.SKILLS_LEVEL);
-                m_ExpPanel = CreateSkillPanel(m_SkillRawPanelPrefab, TextResources.SKILLS_EXPERIENCE_MINIMAL);
+                _levelPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_LEVEL);
+                _expPanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_EXPERIENCE_MINIMAL);
 
                 // exp panel is yellow if experienceBonus > 0 (10.54+ and was removed at some point)
             } else {
-                m_ExpPanel = CreateSkillPanel(m_SkillProgressPanelPrefab, TextResources.SKILLS_LEVEL);
-                m_LevelPanel = CreateSkillPanel(m_SkillProgressPanelPrefab, TextResources.SKILLS_EXPERIENCE);
+                _expPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_LEVEL);
+                _levelPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_EXPERIENCE);
             }
             
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameExperienceGain))
-                m_ExpGainRatePanel = CreateSkillPanel(m_SkillRawPanelPrefab, TextResources.SKILLS_XPGAIN);
+                _expGainRatePanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_XPGAIN);
 
-            m_HitPointsPanel = CreateSkillPanel(m_SkillRawPanelPrefab, TextResources.SKILLS_HITPOINTS);
-            m_ManaPanel = CreateSkillPanel(m_SkillRawPanelPrefab, TextResources.SKILLS_MANA);
-            m_SoulPointsPanel = CreateSkillPanel(m_SkillRawPanelPrefab, TextResources.SKILLS_SOULPOINTS);
-            m_CapacityPanel = CreateSkillPanel(m_SkillRawPanelPrefab, TextResources.SKILLS_CAPACITY);
+            _hitPointsPanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_HITPOINTS);
+            _manaPanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_MANA);
+            _soulPointsPanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_SOULPOINTS);
+            _capacityPanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_CAPACITY);
             
             if (gameManager.GetFeature(GameFeature.GameSkillsBase))
-                m_SpeedPanel = CreateSkillPanel(m_SkillRawPanelPrefab, TextResources.SKILLS_SPEED);
+                _speedPanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_SPEED);
 
             if (gameManager.GetFeature(GameFeature.GamePlayerRegenerationTime))
-                m_RegenerationPanel = CreateSkillPanel(m_SkillRawPanelPrefab, TextResources.SKILLS_REGENERATION);
+                _regenerationPanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_REGENERATION);
 
             if (gameManager.GetFeature(GameFeature.GamePlayerStamina))
-                m_StaminaPanel = CreateSkillPanel(m_SkillProgressPanelPrefab, TextResources.SKILLS_STAMINA);
+                _staminaPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_STAMINA);
             
             CreateSeparator();
             if (newVersion > 1150) {
-                m_MagicPanel = CreateSkillPanel(m_SkillProgressIconPanelPrefab, TextResources.SKILLS_MAGIC, 0, 0, greenColor, m_MagicIcon);
-                m_FistPanel = CreateSkillPanel(m_SkillProgressIconPanelPrefab, TextResources.SKILLS_FIST, 0, 0, greenColor, m_FistIcon);
-                m_ClubPanel = CreateSkillPanel(m_SkillProgressIconPanelPrefab, TextResources.SKILLS_CLUB, 0, 0, greenColor, m_ClubIcon);
-                m_SwordPanel = CreateSkillPanel(m_SkillProgressIconPanelPrefab, TextResources.SKILLS_SWORD, 0, 0, greenColor, m_SwordIcon);
-                m_AxePanel = CreateSkillPanel(m_SkillProgressIconPanelPrefab, TextResources.SKILLS_AXE, 0, 0, greenColor, m_AxeIcon);
-                m_DistancePanel = CreateSkillPanel(m_SkillProgressIconPanelPrefab, TextResources.SKILLS_DISTANCE, 0, 0, greenColor, m_DistIcon);
-                m_ShieldingPanel = CreateSkillPanel(m_SkillProgressIconPanelPrefab, TextResources.SKILLS_SHIELDING, 0, 0, greenColor, m_ShieldingIcon);
-                m_FishingPanel = CreateSkillPanel(m_SkillProgressIconPanelPrefab, TextResources.SKILLS_FISHING, 0, 0, greenColor, m_FishingIcon);
+                _magicPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_MAGIC, 0, 0, greenColor, _magicIcon);
+                _fistPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_FIST, 0, 0, greenColor, _fistIcon);
+                _clubPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_CLUB, 0, 0, greenColor, _blubIcon);
+                _swordPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_SWORD, 0, 0, greenColor, _swordIcon);
+                _axePanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_AXE, 0, 0, greenColor, _axeIcon);
+                _distancePanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_DISTANCE, 0, 0, greenColor, _distIcon);
+                _shieldingPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_SHIELDING, 0, 0, greenColor, _shieldingIcon);
+                _fishingPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_FISHING, 0, 0, greenColor, _fishingIcon);
             } else {
-                m_MagicPanel = CreateSkillPanel(m_SkillProgressPanelPrefab, TextResources.SKILLS_MAGIC, 0, 0, greenColor);
-                m_FistPanel = CreateSkillPanel(m_SkillProgressPanelPrefab, TextResources.SKILLS_FIST_LEGACY, 0, 0, greenColor);
-                m_ClubPanel = CreateSkillPanel(m_SkillProgressPanelPrefab, TextResources.SKILLS_CLUB_LEGACY, 0, 0, greenColor);
-                m_SwordPanel = CreateSkillPanel(m_SkillProgressPanelPrefab, TextResources.SKILLS_SWORD_LEGACY, 0, 0, greenColor);
-                m_AxePanel = CreateSkillPanel(m_SkillProgressPanelPrefab, TextResources.SKILLS_AXE_LEGACY, 0, 0, greenColor);
-                m_DistancePanel = CreateSkillPanel(m_SkillProgressPanelPrefab, TextResources.SKILLS_DISTANCE_LEGACY, 0, 0, greenColor);
-                m_ShieldingPanel = CreateSkillPanel(m_SkillProgressPanelPrefab, TextResources.SKILLS_SHIELDING, 0, 0, greenColor);
-                m_ShieldingPanel = CreateSkillPanel(m_SkillProgressPanelPrefab, TextResources.SKILLS_FISHING, 0, 0, greenColor);
+                _magicPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_MAGIC, 0, 0, greenColor);
+                _fistPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_FIST_LEGACY, 0, 0, greenColor);
+                _clubPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_CLUB_LEGACY, 0, 0, greenColor);
+                _swordPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_SWORD_LEGACY, 0, 0, greenColor);
+                _axePanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_AXE_LEGACY, 0, 0, greenColor);
+                _distancePanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_DISTANCE_LEGACY, 0, 0, greenColor);
+                _shieldingPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_SHIELDING, 0, 0, greenColor);
+                _shieldingPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_FISHING, 0, 0, greenColor);
             }
             
             if (gameManager.GetFeature(GameFeature.GameAdditionalSkills)) {
                 CreateSeparator();
 
                 CreateSkillLabel(TextResources.SKILLS_CRITICALHIT);
-                m_CriticalChancePanel = CreateSkillPanel(m_SkillRawPanelPrefab, TextResources.SKILLS_CRITICALHIT_CHANCE);
-                m_CriticalExtraDamagePanel = CreateSkillPanel(m_SkillRawPanelPrefab, TextResources.SKILLS_CRITICALHIT_EXTRADMG);
+                _briticalChancePanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_CRITICALHIT_CHANCE);
+                _briticalExtraDamagePanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_CRITICALHIT_EXTRADMG);
                 CreateSkillLabel(TextResources.SKILLS_LIFELEECH);
-                m_LifeLeechChancePanel = CreateSkillPanel(m_SkillRawPanelPrefab, TextResources.SKILLS_LIFELEECH_CHANCE);
-                m_LifeLeechAmountPanel = CreateSkillPanel(m_SkillRawPanelPrefab, TextResources.SKILLS_LIFELEECH_AMOUNT);
+                _lifeLeechChancePanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_LIFELEECH_CHANCE);
+                _lifeLeechAmountPanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_LIFELEECH_AMOUNT);
                 CreateSkillLabel(TextResources.SKILLS_MANALEECH);
-                m_ManaLeechChancePanel = CreateSkillPanel(m_SkillRawPanelPrefab, TextResources.SKILLS_MANALEECH_CHANCE);
-                m_ManaLeechAmountPanel = CreateSkillPanel(m_SkillRawPanelPrefab, TextResources.SKILLS_MANALEECH_AMOUNT);
+                _manaLeechChancePanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_MANALEECH_CHANCE);
+                _manaLeechAmountPanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_MANALEECH_AMOUNT);
 
                 var skillPanels = new SkillPanel[] {
-                    m_CriticalChancePanel, m_CriticalExtraDamagePanel,
-                    m_LifeLeechChancePanel, m_LifeLeechAmountPanel,
-                    m_ManaLeechChancePanel, m_ManaLeechAmountPanel
+                    _briticalChancePanel, _briticalExtraDamagePanel,
+                    _lifeLeechChancePanel, _lifeLeechAmountPanel,
+                    _manaLeechChancePanel, _manaLeechAmountPanel
                 };
 
                 foreach (var skillPanel in skillPanels) {
@@ -147,39 +147,39 @@ namespace OpenTibiaUnity.Modules.Skills
         }
 
         protected void DestroyOldComponents() {
-            if (m_ExpPanel) { Destroy(m_ExpPanel.gameObject); m_ExpPanel = null; }
-            if (m_LevelPanel) { Destroy(m_LevelPanel.gameObject); m_LevelPanel = null; }
-            if (m_ExpGainRatePanel) { Destroy(m_ExpGainRatePanel.gameObject); m_ExpGainRatePanel = null; }
-            if (m_HitPointsPanel) { Destroy(m_HitPointsPanel.gameObject); m_HitPointsPanel = null; }
-            if (m_ManaPanel) { Destroy(m_ManaPanel.gameObject); m_ManaPanel = null; }
-            if (m_SoulPointsPanel) { Destroy(m_SoulPointsPanel.gameObject); m_SoulPointsPanel = null; }
-            if (m_CapacityPanel) { Destroy(m_CapacityPanel.gameObject); m_CapacityPanel = null; }
-            if (m_SpeedPanel) { Destroy(m_SpeedPanel.gameObject); m_SpeedPanel = null; }
-            if (m_RegenerationPanel) { Destroy(m_RegenerationPanel.gameObject); m_RegenerationPanel = null; }
-            if (m_StaminaPanel) { Destroy(m_StaminaPanel.gameObject); m_StaminaPanel = null; }
+            if (_expPanel) { Destroy(_expPanel.gameObject); _expPanel = null; }
+            if (_levelPanel) { Destroy(_levelPanel.gameObject); _levelPanel = null; }
+            if (_expGainRatePanel) { Destroy(_expGainRatePanel.gameObject); _expGainRatePanel = null; }
+            if (_hitPointsPanel) { Destroy(_hitPointsPanel.gameObject); _hitPointsPanel = null; }
+            if (_manaPanel) { Destroy(_manaPanel.gameObject); _manaPanel = null; }
+            if (_soulPointsPanel) { Destroy(_soulPointsPanel.gameObject); _soulPointsPanel = null; }
+            if (_capacityPanel) { Destroy(_capacityPanel.gameObject); _capacityPanel = null; }
+            if (_speedPanel) { Destroy(_speedPanel.gameObject); _speedPanel = null; }
+            if (_regenerationPanel) { Destroy(_regenerationPanel.gameObject); _regenerationPanel = null; }
+            if (_staminaPanel) { Destroy(_staminaPanel.gameObject); _staminaPanel = null; }
 
-            if (m_MagicPanel) { Destroy(m_MagicPanel.gameObject); m_MagicPanel = null; }
-            if (m_FistPanel) { Destroy(m_FistPanel.gameObject); m_FistPanel = null; }
-            if (m_ClubPanel) { Destroy(m_ClubPanel.gameObject); m_ClubPanel = null; }
-            if (m_SwordPanel) { Destroy(m_SwordPanel.gameObject); m_SwordPanel = null; }
-            if (m_AxePanel) { Destroy(m_AxePanel.gameObject); m_AxePanel = null; }
-            if (m_DistancePanel) { Destroy(m_DistancePanel.gameObject); m_DistancePanel = null; }
-            if (m_ShieldingPanel) { Destroy(m_ShieldingPanel.gameObject); m_ShieldingPanel = null; }
+            if (_magicPanel) { Destroy(_magicPanel.gameObject); _magicPanel = null; }
+            if (_fistPanel) { Destroy(_fistPanel.gameObject); _fistPanel = null; }
+            if (_clubPanel) { Destroy(_clubPanel.gameObject); _clubPanel = null; }
+            if (_swordPanel) { Destroy(_swordPanel.gameObject); _swordPanel = null; }
+            if (_axePanel) { Destroy(_axePanel.gameObject); _axePanel = null; }
+            if (_distancePanel) { Destroy(_distancePanel.gameObject); _distancePanel = null; }
+            if (_shieldingPanel) { Destroy(_shieldingPanel.gameObject); _shieldingPanel = null; }
 
-            if (m_CriticalChancePanel) { Destroy(m_CriticalChancePanel.gameObject); m_CriticalChancePanel = null; }
-            if (m_CriticalExtraDamagePanel) { Destroy(m_CriticalExtraDamagePanel.gameObject); m_CriticalExtraDamagePanel = null; }
-            if (m_LifeLeechChancePanel) { Destroy(m_LifeLeechChancePanel.gameObject); m_LifeLeechChancePanel = null; }
-            if (m_LifeLeechAmountPanel) { Destroy(m_LifeLeechAmountPanel.gameObject); m_LifeLeechAmountPanel = null; }
-            if (m_ManaLeechChancePanel) { Destroy(m_ManaLeechChancePanel.gameObject); m_ManaLeechChancePanel = null; }
-            if (m_ManaLeechAmountPanel) { Destroy(m_ManaLeechAmountPanel.gameObject); m_ManaLeechAmountPanel = null; }
+            if (_briticalChancePanel) { Destroy(_briticalChancePanel.gameObject); _briticalChancePanel = null; }
+            if (_briticalExtraDamagePanel) { Destroy(_briticalExtraDamagePanel.gameObject); _briticalExtraDamagePanel = null; }
+            if (_lifeLeechChancePanel) { Destroy(_lifeLeechChancePanel.gameObject); _lifeLeechChancePanel = null; }
+            if (_lifeLeechAmountPanel) { Destroy(_lifeLeechAmountPanel.gameObject); _lifeLeechAmountPanel = null; }
+            if (_manaLeechChancePanel) { Destroy(_manaLeechChancePanel.gameObject); _manaLeechChancePanel = null; }
+            if (_manaLeechAmountPanel) { Destroy(_manaLeechAmountPanel.gameObject); _manaLeechAmountPanel = null; }
 
-            foreach (Transform child in m_PanelContent) {
+            foreach (Transform child in _panelContent) {
                 Destroy(child.gameObject);
             }
         }
 
         private SkillPanel CreateSkillPanel(SkillPanel prefab, string name, long value = 0, float percent = 0, Color? color = null, Sprite icon = null) {
-            var skillPanel = Instantiate(prefab, m_PanelContent);
+            var skillPanel = Instantiate(prefab, _panelContent);
             skillPanel.SetText(name);
             skillPanel.SetValue(value, percent);
             skillPanel.SetIcon(icon);
@@ -203,57 +203,57 @@ namespace OpenTibiaUnity.Modules.Skills
             hrRectTransform.anchoredPosition = Vector2.zero;
 
             newGameObject.AddComponent<LayoutElement>().minHeight = 10;
-            newGameObject.transform.parent = m_PanelContent;
+            newGameObject.transform.parent = _panelContent;
             newGameObject.name = "Separator_" + newGameObject.transform.GetSiblingIndex();
             return newGameObject;
         }
 
         private TMPro.TextMeshProUGUI CreateSkillLabel(string text) {
-            var label = Instantiate(OpenTibiaUnity.GameManager.DefaultLabel, m_PanelContent);
+            var label = Instantiate(OpenTibiaUnity.GameManager.DefaultLabel, _panelContent);
             label.SetText(string.Format("{0}:", text));
             return label;
         }
 
         private void UpdateMaxHeight() {
-            var conetntVerticalLayoutGroup = m_PanelContent.GetComponent<VerticalLayoutGroup>();
+            var conetntVerticalLayoutGroup = _panelContent.GetComponent<VerticalLayoutGroup>();
             if (!conetntVerticalLayoutGroup)
                 return;
 
-            float maxComtentHeight = (m_PanelContent.childCount - 1) * conetntVerticalLayoutGroup.spacing + 2;
-            foreach (Transform child in m_PanelContent) {
+            float maxComtentHeight = (_panelContent.childCount - 1) * conetntVerticalLayoutGroup.spacing + 2;
+            foreach (Transform child in _panelContent) {
                 var childLayoutElement = child.GetComponent<LayoutElement>();
                 if (childLayoutElement)
                     maxComtentHeight += childLayoutElement.minHeight;
             }
 
-            m_MaxContentHeight = maxComtentHeight;
+            _maxContentHeight = maxComtentHeight;
         }
 
         private SkillPanel GetSkillPanelForSkillType(SkillType skillType) {
             switch (skillType) {
-                case SkillType.Level: return m_LevelPanel;
-                case SkillType.Experience: return m_ExpPanel;
-                case SkillType.ExperienceGain: return m_ExpGainRatePanel;
-                case SkillType.Health: return m_HitPointsPanel;
-                case SkillType.Mana: return m_ManaPanel;
-                case SkillType.SoulPoints: return m_SoulPointsPanel;
-                case SkillType.Capacity: return m_CapacityPanel;
-                case SkillType.Speed: return m_SpeedPanel;
-                case SkillType.Food: return m_RegenerationPanel;
-                case SkillType.Stamina: return m_StaminaPanel;
-                case SkillType.MagLevel: return m_MagicPanel;
-                case SkillType.Fist: return m_FistPanel;
-                case SkillType.Club: return m_ClubPanel;
-                case SkillType.Sword: return m_SwordPanel;
-                case SkillType.Axe: return m_AxePanel;
-                case SkillType.Distance: return m_DistancePanel;
-                case SkillType.Shield: return m_ShieldingPanel;
-                case SkillType.CriticalHitChance: return m_CriticalChancePanel;
-                case SkillType.CriticalHitDamage: return m_CriticalExtraDamagePanel;
-                case SkillType.LifeLeechChance: return m_LifeLeechChancePanel;
-                case SkillType.LifeLeechAmount: return m_LifeLeechAmountPanel;
-                case SkillType.ManaLeechChance: return m_ManaLeechChancePanel;
-                case SkillType.ManaLeechAmount: return m_ManaLeechAmountPanel;
+                case SkillType.Level: return _levelPanel;
+                case SkillType.Experience: return _expPanel;
+                case SkillType.ExperienceGain: return _expGainRatePanel;
+                case SkillType.Health: return _hitPointsPanel;
+                case SkillType.Mana: return _manaPanel;
+                case SkillType.SoulPoints: return _soulPointsPanel;
+                case SkillType.Capacity: return _capacityPanel;
+                case SkillType.Speed: return _speedPanel;
+                case SkillType.Food: return _regenerationPanel;
+                case SkillType.Stamina: return _staminaPanel;
+                case SkillType.MagLevel: return _magicPanel;
+                case SkillType.Fist: return _fistPanel;
+                case SkillType.Club: return _clubPanel;
+                case SkillType.Sword: return _swordPanel;
+                case SkillType.Axe: return _axePanel;
+                case SkillType.Distance: return _distancePanel;
+                case SkillType.Shield: return _shieldingPanel;
+                case SkillType.CriticalHitChance: return _briticalChancePanel;
+                case SkillType.CriticalHitDamage: return _briticalExtraDamagePanel;
+                case SkillType.LifeLeechChance: return _lifeLeechChancePanel;
+                case SkillType.LifeLeechAmount: return _lifeLeechAmountPanel;
+                case SkillType.ManaLeechChance: return _manaLeechChancePanel;
+                case SkillType.ManaLeechAmount: return _manaLeechAmountPanel;
             }
 
             return null;

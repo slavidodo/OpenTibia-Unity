@@ -3,35 +3,35 @@ using System.Linq;
 
 namespace OpenTibiaUnity.Core.Creatures
 {
-    internal class CreatureStorage {
-        internal class OpponentsChangeEvent : UnityEngine.Events.UnityEvent<List<Creature>> {}
+    public class CreatureStorage {
+        public class OpponentsChangeEvent : UnityEngine.Events.UnityEvent<List<Creature>> {}
 
-        private int m_CreatureCount = 0;
-        private OpponentStates m_OpponentState = OpponentStates.NoAction;
-        private List<Creature> m_Opponents = new List<Creature>();
-        private int m_CreatureIndex = 0;
-        private readonly int m_MaxCreaturesCount = 1300;
-        private List<Creature> m_Creatures = new List<Creature>();
+        private int _creatureCount = 0;
+        private OpponentStates _opponentState = OpponentStates.NoAction;
+        private List<Creature> _opponents = new List<Creature>();
+        private int _creatureIndex = 0;
+        private readonly int _maxCreaturesCount = 1300;
+        private List<Creature> _creatures = new List<Creature>();
 
-        internal Creature Aim { get; set; } = null;
-        internal Creature AttackTarget { get; set; } = null;
-        internal Creature FollowTarget { get; set; } = null;
+        public Creature Aim { get; set; } = null;
+        public Creature AttackTarget { get; set; } = null;
+        public Creature FollowTarget { get; set; } = null;
         List<Creature> Trappers { get; set; } = null;
-        internal Player Player { get; set; }
+        public Player Player { get; set; }
 
-        internal OpponentsChangeEvent onOpponentsRefreshed {
+        public OpponentsChangeEvent onOpponentsRefreshed {
             get; private set;
         } = new OpponentsChangeEvent();
 
-        internal OpponentsChangeEvent onOpponentsRebuilt {
+        public OpponentsChangeEvent onOpponentsRebuilt {
             get; private set;
         } = new OpponentsChangeEvent();
 
-        internal CreatureStorage() {
+        public CreatureStorage() {
             Player = new Player(0);
         }
 
-        internal void SetAim(Creature aim) {
+        public void SetAim(Creature aim) {
             if (Aim != aim) {
                 var creature = Aim;
                 Aim = aim;
@@ -40,14 +40,14 @@ namespace OpenTibiaUnity.Core.Creatures
             }
         }
 
-        internal Creature GetNextAttackTarget(int step) {
+        public Creature GetNextAttackTarget(int step) {
             step = step < 0 ? -1 : 1;
 
-            int total = m_Opponents.Count;
+            int total = _opponents.Count;
             if (total < 1)
                 return null;
 
-            int attackedIndex = AttackTarget ? m_Opponents.FindIndex((x) => x == AttackTarget) : -1;
+            int attackedIndex = AttackTarget ? _opponents.FindIndex((x) => x == AttackTarget) : -1;
             
             for (int i = 0; i < total; i++) {
                 attackedIndex += step;
@@ -57,7 +57,7 @@ namespace OpenTibiaUnity.Core.Creatures
                 if (attackedIndex < 0)
                     attackedIndex = total - 1;
 
-                var creature = m_Opponents[attackedIndex];
+                var creature = _opponents[attackedIndex];
                 if (creature.Type != CreatureType.NPC)
                     return creature;
             }
@@ -65,46 +65,46 @@ namespace OpenTibiaUnity.Core.Creatures
             return null;
         }
         
-        internal void MarkAllOpponentsVisible(bool value) {
-            foreach (var opponent in m_Opponents) {
+        public void MarkAllOpponentsVisible(bool value) {
+            foreach (var opponent in _opponents) {
                 opponent.Visible = value;
             }
 
-            if (m_Opponents.Count > 0)
+            if (_opponents.Count > 0)
                 InvalidateOpponents();
         }
 
-        internal Creature ReplaceCreature(Creature creature, uint id = 0) {
+        public Creature ReplaceCreature(Creature creature, uint id = 0) {
             if (!creature)
                 throw new System.ArgumentException("CreatureStorage.replaceCreature: Invalid creature.");
             
             if (id != 0)
                 RemoveCreature(id);
 
-            if (m_CreatureCount >= m_MaxCreaturesCount)
-                throw new System.ArgumentException("CreatureStorage.replaceCreature: No space left to append " + creature.ID);
+            if (_creatureCount >= _maxCreaturesCount)
+                throw new System.ArgumentException("CreatureStorage.replaceCreature: No space left to append " + creature.Id);
             
             int index = 0;
-            int lastIndex = m_CreatureCount - 1;
+            int lastIndex = _creatureCount - 1;
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
-                var foundCreature = m_Creatures[tmpIndex];
-                if (foundCreature.ID < creature.ID)
+                var foundCreature = _creatures[tmpIndex];
+                if (foundCreature.Id < creature.Id)
                     index = tmpIndex + 1;
-                else if (foundCreature.ID > creature.ID)
+                else if (foundCreature.Id > creature.Id)
                     lastIndex = tmpIndex - 1;
                 else
                     return foundCreature;
             }
 
-            creature.KnownSince = ++m_CreatureIndex;
-            m_Creatures.Insert(index, creature);
-            m_CreatureCount++;
-            m_OpponentState = OpponentStates.Rebuild;
+            creature.KnownSince = ++_creatureIndex;
+            _creatures.Insert(index, creature);
+            _creatureCount++;
+            _opponentState = OpponentStates.Rebuild;
             return creature;
         }
 
-        internal void ToggleFollowTarget(Creature follow, bool send) {
+        public void ToggleFollowTarget(Creature follow, bool send) {
             if (follow == Player) {
                 throw new System.ArgumentException("CreatureStorage.ToggleFollowTarget: Cannot follow player.");
             }
@@ -118,7 +118,7 @@ namespace OpenTibiaUnity.Core.Creatures
             if (send) {
                 var protocolGame = OpenTibiaUnity.ProtocolGame;
                 if (protocolGame)
-                    protocolGame.SendFollow(FollowTarget ? FollowTarget.ID : 0);
+                    protocolGame.SendFollow(FollowTarget ? FollowTarget.Id : 0);
             }
 
             UpdateExtendedMark(creature);
@@ -131,31 +131,31 @@ namespace OpenTibiaUnity.Core.Creatures
             }
         }
 
-        internal Creature GetCreatureByName(string name) {
-            return m_Creatures.Find((x) => name == x.Name);
+        public Creature GetCreatureByName(string name) {
+            return _creatures.Find((x) => name == x.Name);
         }
 
-        internal void RefreshOpponents() {
-            switch (m_OpponentState) {
+        public void RefreshOpponents() {
+            switch (_opponentState) {
                 case OpponentStates.NoAction:
                     break;
 
                 case OpponentStates.Refresh:
                 case OpponentStates.Rebuild: {
-                    m_Opponents.Clear();
-                    for (int i = 0; i < m_CreatureCount; i++) {
-                        Creature creature = m_Creatures[i];
+                    _opponents.Clear();
+                    for (int i = 0; i < _creatureCount; i++) {
+                        Creature creature = _creatures[i];
                         if (IsOpponent(creature, true))
-                            m_Opponents.Add(creature);
+                            _opponents.Add(creature);
                     }
                     
-                    m_Opponents.Sort(OpponentComparator);
-                    onOpponentsRebuilt.Invoke(m_Opponents);
+                    _opponents.Sort(OpponentComparator);
+                    onOpponentsRebuilt.Invoke(_opponents);
                     break;
                 }
             }
             
-            m_OpponentState = OpponentStates.NoAction;
+            _opponentState = OpponentStates.NoAction;
         }
 
         protected int OpponentComparator(Creature a, Creature b) {
@@ -213,7 +213,7 @@ namespace OpenTibiaUnity.Core.Creatures
             return pos * (desc ? -1 : 1);
         }
 
-        internal void SetFollowTarget(Creature follow, bool send) {
+        public void SetFollowTarget(Creature follow, bool send) {
             if (follow == Player) {
                 throw new System.ArgumentException("CreatureStorage.ToggleFollowTarget: Cannot follow player.");
             }
@@ -225,7 +225,7 @@ namespace OpenTibiaUnity.Core.Creatures
                 if (send) {
                     var protocolGame = OpenTibiaUnity.ProtocolGame;
                     if (protocolGame)
-                        protocolGame.SendFollow(FollowTarget ? FollowTarget.ID : 0);
+                        protocolGame.SendFollow(FollowTarget ? FollowTarget.Id : 0);
                 }
 
                 UpdateExtendedMark(creature);
@@ -273,7 +273,7 @@ namespace OpenTibiaUnity.Core.Creatures
             }
         }
 
-        internal void SetTrappers(List<Creature> trappers) {
+        public void SetTrappers(List<Creature> trappers) {
             int index = Trappers != null ? Trappers.Count : -1;
             while (index >= 0) {
                 if (Trappers[index] != null)
@@ -290,15 +290,15 @@ namespace OpenTibiaUnity.Core.Creatures
             }
         }
 
-        internal Creature GetCreature(uint id) {
+        public Creature GetCreature(uint id) {
             int index = 0;
-            int lastIndex = m_CreatureCount - 1;
+            int lastIndex = _creatureCount - 1;
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
-                Creature foundCreature = m_Creatures[tmpIndex];
-                if (foundCreature.ID < id)
+                Creature foundCreature = _creatures[tmpIndex];
+                if (foundCreature.Id < id)
                     index = tmpIndex + 1;
-                else if (foundCreature.ID > id)
+                else if (foundCreature.Id > id)
                     lastIndex = tmpIndex - 1;
                 else
                     return foundCreature;
@@ -307,12 +307,12 @@ namespace OpenTibiaUnity.Core.Creatures
             return null;
         }
 
-        internal void InvalidateOpponents() {
-            if (m_OpponentState < OpponentStates.Refresh)
-                m_OpponentState = OpponentStates.Refresh;
+        public void InvalidateOpponents() {
+            if (_opponentState < OpponentStates.Refresh)
+                _opponentState = OpponentStates.Refresh;
         }
 
-        internal void MarkOpponentVisible(object param, bool visible) {
+        public void MarkOpponentVisible(object param, bool visible) {
             Creature creature;
             if (param is Creature) {
                 creature = param as Creature;
@@ -330,7 +330,7 @@ namespace OpenTibiaUnity.Core.Creatures
             }
         }
 
-        internal bool IsOpponent(Creature creature) {
+        public bool IsOpponent(Creature creature) {
             return IsOpponent(creature, false);
         }
 
@@ -369,39 +369,39 @@ namespace OpenTibiaUnity.Core.Creatures
             return true;
         }
 
-        internal void Reset(bool resetPlayer = true) {
+        public void Reset(bool resetPlayer = true) {
             if (resetPlayer)
                 Player.Reset();
 
-            m_Creatures.ForEach(creature => creature.Reset());
+            _creatures.ForEach(creature => creature.Reset());
 
-            m_Creatures.Clear();
-            m_CreatureCount = 0;
-            m_CreatureIndex = 0;
+            _creatures.Clear();
+            _creatureCount = 0;
+            _creatureIndex = 0;
 
             if (!resetPlayer)
                 ReplaceCreature(Player);
 
-            m_Opponents.Clear();
-            m_OpponentState = OpponentStates.NoAction;
+            _opponents.Clear();
+            _opponentState = OpponentStates.NoAction;
             Aim = null;
             AttackTarget = null;
             FollowTarget = null;
             Trappers = null;
         }
 
-        internal void RemoveCreature(uint id) {
+        public void RemoveCreature(uint id) {
             int currentIndex = 0;
-            int lastIndex = m_CreatureCount - 1;
+            int lastIndex = _creatureCount - 1;
 
             int foundIndex = -1;
             Creature foundCreature = null;
             while (currentIndex <= lastIndex) {
                 int tmpIndex = currentIndex + lastIndex >> 1;
-                foundCreature = m_Creatures[tmpIndex];
-                if (foundCreature.ID < id) {
+                foundCreature = _creatures[tmpIndex];
+                if (foundCreature.Id < id) {
                     currentIndex = tmpIndex + 1;
-                } else if (foundCreature.ID > id) {
+                } else if (foundCreature.Id > id) {
                     lastIndex = tmpIndex - 1;
                 } else {
                     foundIndex = tmpIndex;
@@ -438,15 +438,15 @@ namespace OpenTibiaUnity.Core.Creatures
             }
 
             foundCreature.Reset();
-            m_Creatures.RemoveAt(foundIndex);
-            m_CreatureCount--;
-            m_OpponentState = OpponentStates.Rebuild;
+            _creatures.RemoveAt(foundIndex);
+            _creatureCount--;
+            _opponentState = OpponentStates.Rebuild;
         }
 
-        internal void Animate() {
+        public void Animate() {
             int ticks = OpenTibiaUnity.TicksMillis;
 
-            foreach (var creature in m_Creatures) {
+            foreach (var creature in _creatures) {
                 if (creature) {
                     creature.AnimateMovement(ticks);
                     creature.AnimateOutfit(ticks);
@@ -454,7 +454,7 @@ namespace OpenTibiaUnity.Core.Creatures
             }
         }
 
-        internal void ToggleAttackTarget(Creature attack, bool send) {
+        public void ToggleAttackTarget(Creature attack, bool send) {
             if (attack == Player) {
                 throw new System.ArgumentException("CreatureStorage.ToggleAttackTarget: Cannot attack player.");
             }
@@ -468,7 +468,7 @@ namespace OpenTibiaUnity.Core.Creatures
             if (send) {
                 var protocolGame = OpenTibiaUnity.ProtocolGame;
                 if (protocolGame)
-                    protocolGame.SendAttack(AttackTarget ? AttackTarget.ID : 0);
+                    protocolGame.SendAttack(AttackTarget ? AttackTarget.Id : 0);
             }
 
             UpdateExtendedMark(creature);
@@ -481,7 +481,7 @@ namespace OpenTibiaUnity.Core.Creatures
             }
         }
 
-        internal void ClearTargets() {
+        public void ClearTargets() {
             var optionStorage = OpenTibiaUnity.OptionStorage;
             if (AttackTarget != null && optionStorage.AutoChaseOff && optionStorage.CombatChaseMode != CombatChaseModes.Off) {
                 optionStorage.CombatChaseMode = CombatChaseModes.Off;
@@ -494,7 +494,7 @@ namespace OpenTibiaUnity.Core.Creatures
                 SetFollowTarget(null, true);
         }
 
-        internal void SetAttackTarget(Creature attack, bool send) {
+        public void SetAttackTarget(Creature attack, bool send) {
             if (attack == Player)
                 throw new System.ArgumentException("CreatureStorage.SetAttackTarget: Cannot follow player.");
 
@@ -505,7 +505,7 @@ namespace OpenTibiaUnity.Core.Creatures
                 if (send) {
                     var protocolGame = OpenTibiaUnity.ProtocolGame;
                     if (protocolGame)
-                        protocolGame.SendAttack(AttackTarget ? AttackTarget.ID : 0);
+                        protocolGame.SendAttack(AttackTarget ? AttackTarget.Id : 0);
                 }
 
                 UpdateExtendedMark(creature);

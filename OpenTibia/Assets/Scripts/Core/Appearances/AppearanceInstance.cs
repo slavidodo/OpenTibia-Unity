@@ -3,144 +3,142 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Appearances
 {
-    internal abstract class AppearanceInstance {
-        internal const int UnknownCreature = 97;
-        internal const int OutdatedCreature = 98;
-        internal const int Creature = 99;
+    public abstract class AppearanceInstance {
+        public const int UnknownCreature = 97;
+        public const int OutdatedCreature = 98;
+        public const int Creature = 99;
 
-        internal const int HookEast = 19;
-        internal const int HookSouth = 20;
+        public const int HookEast = 19;
+        public const int HookSouth = 20;
 
-        internal static Vector2 s_TempPoint = Vector2.zero;
-        internal static Rect s_TempRect = Rect.zero;
-        internal static Vector2 s_FieldVector = new Vector2(Constants.FieldSize, Constants.FieldSize);
+        public static Vector2 s_TempPoint = Vector2.zero;
+        public static Rect s_TempRect = Rect.zero;
+        public static Vector2 s_FieldVector = new Vector2(Constants.FieldSize, Constants.FieldSize);
 
-        internal int MapData = -1; // stack position
-        internal int MapField = -1; // field index in cached map
+        public int MapData = -1; // stack position
+        public int MapField = -1; // field index in cached map
 
-        protected bool m_CacheDirty = false;
-        protected uint m_ID;
-        protected int m_LastPhase = -1;
-        protected int m_LastinternalPhase = -1;
-        protected int m_LastCachedSpriteIndex = -1;
-        protected int m_LastInternalPhase = -1;
-        protected int m_ActiveFrameGroupIndex = 0;
-        protected int m_LastPatternX = -1;
-        protected int m_LastPatternY = -1;
-        protected int m_LastPatternZ = -1;
+        protected bool _cachedirty = false;
+        protected uint _id;
+        protected int _lastCachedSpriteIndex = -1;
+        protected int _lastInternalPhase = -1;
+        protected int _activeFrameGroupIndex = 0;
+        protected int _lastPatternX = -1;
+        protected int _lastPatternY = -1;
+        protected int _lastPatternZ = -1;
 
 
-        protected AppearanceType m_Type;
-        protected Animation.IAppearanceAnimator[] m_Animators;
-        protected List<CachedSpriteInformation[]> m_CachedSpriteInformations;
+        protected AppearanceType _type;
+        protected Animation.IAppearanceAnimator[] _animators;
+        protected List<CachedSpriteInformation[]> _cachedSpriteInformations;
 
-        protected Protobuf.Appearances.FrameGroup m_ActiveFrameGroup {
+        protected Protobuf.Appearances.FrameGroup _activeFrameGroup {
             get {
-                if (m_ActiveFrameGroupIndex < 0)
+                if (_activeFrameGroupIndex < 0)
                     return null;
 
-                if (m_ActiveFrameGroupIndex != m_ActiveFrameGroupIndexInternal) {
-                    m_ActiveFrameGroupIndexInternal = m_ActiveFrameGroupIndex;
-                    m_ActiveFrameGroupInternal = m_Type.FrameGroups?[m_ActiveFrameGroupIndex];
+                if (_activeFrameGroupIndex != _activeFrameGroupIndexpublic) {
+                    _activeFrameGroupIndexpublic = _activeFrameGroupIndex;
+                    _activeFrameGrouppublic = _type.FrameGroups?[_activeFrameGroupIndex];
                 }
 
-                return m_ActiveFrameGroupInternal;
+                return _activeFrameGrouppublic;
             }
         }
 
-        private int m_ActiveFrameGroupIndexInternal = -1;
-        private Protobuf.Appearances.FrameGroup m_ActiveFrameGroupInternal = null;
+        private int _activeFrameGroupIndexpublic = -1;
+        private Protobuf.Appearances.FrameGroup _activeFrameGrouppublic = null;
 
-        protected CachedSpriteInformation m_CachedSpriteInformation = null;
+        protected CachedSpriteInformation _cachedSpriteInformation = null;
 
-        internal uint ID {
-            get => m_ID;
+        public uint Id {
+            get => _id;
         }
-        internal AppearanceType Type {
-            get => m_Type;
+        public AppearanceType Type {
+            get => _type;
         }
 
-        internal virtual int Phase {
+        public virtual int Phase {
             set {
-                var animator = m_Animators?[m_ActiveFrameGroupIndex];
+                var animator = _animators?[_activeFrameGroupIndex];
                 if (animator != null)
                     animator.Phase = value;
             }
             
             get {
-                var animator = m_Animators?[m_ActiveFrameGroupIndex];
+                var animator = _animators?[_activeFrameGroupIndex];
                 return animator != null ? animator.Phase : 0;
             }
         }
 
-        internal AppearanceInstance(uint id, AppearanceType type) {
-            m_ID = id;
-            m_Type = type;
+        public AppearanceInstance(uint id, AppearanceType type) {
+            _id = id;
+            _type = type;
 
-            if (!!m_Type && m_Type.FrameGroups != null) {
-                m_Animators = new Animation.IAppearanceAnimator[m_Type.FrameGroups.Count];
-                for (int i = 0; i < m_Animators.Length; i++) {
+            if (!!_type && _type.FrameGroups != null) {
+                _animators = new Animation.IAppearanceAnimator[_type.FrameGroups.Count];
+                for (int i = 0; i < _animators.Length; i++) {
                     var animator = type.FrameGroups[i].SpriteInfo.Animator?.Clone();
                     if (animator is Animation.LegacyAnimator legacyAnimator)
                         legacyAnimator.Initialise(type);
 
-                    m_Animators[i] = animator;
+                    _animators[i] = animator;
                 }
             }
         }
 
-        internal virtual int GetSpriteIndex(int layer, int patternX, int patternY, int patternZ) {
-            int phase = Phase % (int)m_ActiveFrameGroup.SpriteInfo.Phases;
-            if (!(phase == m_LastInternalPhase && patternX == m_LastPatternX && patternX >= 0 && patternY == m_LastPatternY && patternY >= 0 && patternZ == m_LastPatternZ && patternZ >= 0)) {
-                m_LastInternalPhase = phase;
-                m_LastPatternX = patternX;
-                m_LastPatternY = patternY;
-                m_LastPatternZ = patternZ;
+        public virtual int GetSpriteIndex(int layer, int patternX, int patternY, int patternZ) {
+            int phase = Phase % (int)_activeFrameGroup.SpriteInfo.Phases;
+            if (!(phase == _lastInternalPhase && patternX == _lastPatternX && patternX >= 0 && patternY == _lastPatternY && patternY >= 0 && patternZ == _lastPatternZ && patternZ >= 0)) {
+                _lastInternalPhase = phase;
+                _lastPatternX = patternX;
+                _lastPatternY = patternY;
+                _lastPatternZ = patternZ;
 
-                m_LastCachedSpriteIndex = m_ActiveFrameGroup.SpriteInfo.CalculateSpriteIndex(phase, patternX, patternY, patternZ);
+                _lastCachedSpriteIndex = _activeFrameGroup.SpriteInfo.CalculateSpriteIndex(phase, patternX, patternY, patternZ);
             }
 
-            return m_LastCachedSpriteIndex + (layer >= 0 ? layer % (int)m_ActiveFrameGroup.SpriteInfo.Layers : 0);
+            return _lastCachedSpriteIndex + (layer >= 0 ? layer % (int)_activeFrameGroup.SpriteInfo.Layers : 0);
         }
 
-        internal CachedSpriteInformation GetSprite(int layer, int patternX, int patternY, int patternZ, bool animation) {
-            if (m_Type.FrameGroups == null)
+        public CachedSpriteInformation GetSprite(int layer, int patternX, int patternY, int patternZ, bool animation) {
+            if (_type.FrameGroups == null)
                 return null;
 
             var appearanceStorage = OpenTibiaUnity.AppearanceStorage;
             
             var spriteIndex = GetSpriteIndex(layer, patternX, patternY, patternZ);
-            if (m_CachedSpriteInformations == null) {
-                m_CachedSpriteInformations = new List<CachedSpriteInformation[]>();
-                foreach (var frameGroup in m_Type.FrameGroups)
-                    m_CachedSpriteInformations.Add(new CachedSpriteInformation[frameGroup.SpriteInfo.SpriteIDs.Count]);
+            if (_cachedSpriteInformations == null) {
+                _cachedSpriteInformations = new List<CachedSpriteInformation[]>();
+                foreach (var frameGroup in _type.FrameGroups)
+                    _cachedSpriteInformations.Add(new CachedSpriteInformation[frameGroup.SpriteInfo.Sprite_ids.Count]);
                 
-                uint spriteId = m_ActiveFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
-                m_CachedSpriteInformations[m_ActiveFrameGroupIndex][spriteIndex] = appearanceStorage.GetSprite(spriteId);
-            } else if (m_CachedSpriteInformations[m_ActiveFrameGroupIndex][spriteIndex] == null) {
-                var spriteId = m_ActiveFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
-                m_CachedSpriteInformations[m_ActiveFrameGroupIndex][spriteIndex] = appearanceStorage.GetSprite(spriteId);
+                uint spriteId = _activeFrameGroup.SpriteInfo.Sprite_ids[spriteIndex];
+                _cachedSpriteInformations[_activeFrameGroupIndex][spriteIndex] = appearanceStorage.GetSprite(spriteId);
+            } else if (_cachedSpriteInformations[_activeFrameGroupIndex][spriteIndex] == null) {
+                var spriteId = _activeFrameGroup.SpriteInfo.Sprite_ids[spriteIndex];
+                _cachedSpriteInformations[_activeFrameGroupIndex][spriteIndex] = appearanceStorage.GetSprite(spriteId);
             }
 
-            return m_CachedSpriteInformations[m_ActiveFrameGroupIndex][spriteIndex];
+            return _cachedSpriteInformations[_activeFrameGroupIndex][spriteIndex];
         }
         
-        internal virtual void DrawTo(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+        public virtual void DrawTo(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
             // this requires a bit of explanation
             // on outfits, layers are not useful, instead it relies on phases
             // while on the rest of categories, layers are treated as indepedant sprites..
             // the phase is used to determine the initial sprite index (at the animation property)
             // then the amount of layers based on that index is drawn
             // mostly you'd see this in objects like doors, or in effects like assassin outfit
-            for (int layer = 0; layer < m_ActiveFrameGroup.SpriteInfo.Layers; layer++) {
-                var cachedInformation = GetSprite(layer, patternX, patternY, patternZ, m_ActiveFrameGroup.SpriteInfo.IsAnimation);
-                InternalDrawTo(screenPosition.x, screenPosition.y, zoom, highlighted, highlightOpacity, cachedInformation);
+            for (int layer = 0; layer < _activeFrameGroup.SpriteInfo.Layers; layer++) {
+                var cachedInformation = GetSprite(layer, patternX, patternY, patternZ, _activeFrameGroup.SpriteInfo.IsAnimation);
+                publicDrawTo(screenPosition.x, screenPosition.y, zoom, highlighted, highlightOpacity, cachedInformation);
             }
         }
         
-        protected void InternalDrawTo(float screenX, float screenY, Vector2 zoom, bool highlighted, float highlightOpacity,
+        protected void publicDrawTo(float screenX, float screenY, Vector2 zoom, bool highlighted, float highlightOpacity,
             CachedSpriteInformation cachedSpriteInfo, Material material = null) {
-            s_TempPoint.Set(screenX - m_Type.OffsetX, screenY - m_Type.OffsetY);
+            s_TempPoint.Set(screenX - _type.OffsetX, screenY - _type.OffsetY);
             s_TempRect.position = (s_TempPoint - cachedSpriteInfo.spriteSize + s_FieldVector) * zoom;
             s_TempRect.size = cachedSpriteInfo.spriteSize * zoom;
 
@@ -151,10 +149,10 @@ namespace OpenTibiaUnity.Core.Appearances
             Graphics.DrawTexture(s_TempRect, cachedSpriteInfo.texture, cachedSpriteInfo.rect, 0, 0, 0, 0, material);
         }
 
-        internal virtual void SwitchFrameGroup(int _, int __) { }
+        public virtual void SwitchFrameGroup(int _, int __) { }
 
-        internal virtual bool Animate(int ticks, int delay = 0) {
-            var animator = m_Animators?[m_ActiveFrameGroupIndex];
+        public virtual bool Animate(int ticks, int delay = 0) {
+            var animator = _animators?[_activeFrameGroupIndex];
             if (animator != null) {
                 animator.Animate(ticks, delay);
                 return !animator.Finished;

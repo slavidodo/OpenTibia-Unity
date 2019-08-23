@@ -2,21 +2,21 @@
 
 namespace OpenTibiaUnity.Core.Chat
 {
-    internal class MessageFilterSet
+    public class MessageFilterSet
     {
-        internal const int DefaultSet = 0;
-        internal const int NumSets = 1;
+        public const int DefaultSet = 0;
+        public const int NumSets = 1;
         
-        private int m_ID = 0;
-        private MessageMode[] m_MessageModes;
+        private int _id = 0;
+        private MessageMode[] _messageModes;
 
-        internal bool ShowTimeStamps { get; } = true;
-        internal bool ShowLevels { get; } = true;
+        public bool ShowTimeStamps { get; } = true;
+        public bool ShowLevels { get; } = true;
 
         // [TODO] Allowment to have custom filter sets (changing the default colors of anything)
-        internal MessageFilterSet(int id) {
-            m_ID = id;
-            m_MessageModes = new MessageMode[(int)MessageModeType.Invalid];
+        public MessageFilterSet(int id) {
+            _id = id;
+            _messageModes = new MessageMode[(int)MessageModeType.Invalid];
 
             for (MessageModeType i = MessageModeType.None; i < MessageModeType.BeyondLast; i++)
                 AddMessageMode(new MessageMode(i));
@@ -32,15 +32,15 @@ namespace OpenTibiaUnity.Core.Chat
             AddMessageMode(new MessageMode(MessageModeType.NpcFromStartBlock));
         }
 
-        internal MessageMode GetMessageMode(MessageModeType mode) {
+        public MessageMode GetMessageMode(MessageModeType mode) {
             if (!MessageMode.s_CheckMode((int)mode))
                 throw new System.ArgumentException("MessageModeSet.getMessageMode: Invalid mode: " + (int)mode + ".");
 
-            return m_MessageModes[(int)mode];
+            return _messageModes[(int)mode];
         }
 
-        internal void AddMessageMode(MessageMode messageMode) {
-            m_MessageModes[(int)messageMode.ID] = messageMode;
+        public void AddMessageMode(MessageMode messageMode) {
+            _messageModes[(int)messageMode.Id] = messageMode;
         }
     }
 }

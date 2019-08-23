@@ -1,8 +1,8 @@
 ﻿namespace OpenTibiaUnity.Core.Input.StaticAction
 {
-    internal class LogoutCharacter : StaticAction
+    public class LogoutCharacter : StaticAction
     {
-        internal LogoutCharacter(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
+        public LogoutCharacter(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
 
         public override bool Perform(bool repeat = false) {
             var protocolGame = OpenTibiaUnity.ProtocolGame;
@@ -15,7 +15,7 @@
         }
 
         public override IAction Clone() {
-            return new LogoutCharacter(m_ID, m_Label, m_EventMask);
+            return new LogoutCharacter(_id, _label, _eventMask);
         }
     }
 }

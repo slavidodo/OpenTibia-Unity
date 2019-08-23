@@ -5,31 +5,31 @@ namespace OpenTibiaUnity.Modules.Skills
 {
     public class SkillProgressIconPanel : SkillPanel
     {
-        [SerializeField] private TMPro.TextMeshProUGUI m_LabelText = null;
-        [SerializeField] private TMPro.TextMeshProUGUI m_LabelValue = null;
-        [SerializeField] private Image m_IconImage = null;
-        [SerializeField] private Slider m_ProgressBar = null;
-        [SerializeField] private RawImage m_FillAreaImage = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _labelText = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _labelValue = null;
+        [SerializeField] private Image _iconImage = null;
+        [SerializeField] private Slider _progressBar = null;
+        [SerializeField] private RawImage _fillAreaImage = null;
 
-        internal override TMPro.TextMeshProUGUI labelText { get => m_LabelText; }
-        internal override TMPro.TextMeshProUGUI labelValue { get => m_LabelValue; }
+        public override TMPro.TextMeshProUGUI labelText { get => _labelText; }
+        public override TMPro.TextMeshProUGUI labelValue { get => _labelValue; }
 
         protected override void Start() {
             base.Start();
 
-            m_ProgressBar.minValue = 0;
-            m_ProgressBar.maxValue = 100;
+            _progressBar.minValue = 0;
+            _progressBar.maxValue = 100;
         }
 
-        public override void SetProgressColor(Color color) => m_FillAreaImage.color = color;
-        public override void SetIcon(Sprite sprite) => m_IconImage.sprite = sprite;
-        public override void SetText(string text) => m_LabelText.SetText(text);
+        public override void SetProgressColor(Color color) => _fillAreaImage.color = color;
+        public override void SetIcon(Sprite sprite) => _iconImage.sprite = sprite;
+        public override void SetText(string text) => _labelText.SetText(text);
         public override void SetValue(long value) => SetValue(value, 0);
-        public override void SetValue(long value, float percent) => SetValue(Utility.Commafy(value), percent);
+        public override void SetValue(long value, float percent) => SetValue(Core.Utils.Utility.Commafy(value), percent);
 
         private void SetValue(string value, float percent) {
-            m_LabelValue.SetText(value);
-            m_ProgressBar.value = percent;
+            _labelValue.SetText(value);
+            _progressBar.value = percent;
         }
     }
 }

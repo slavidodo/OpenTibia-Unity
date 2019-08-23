@@ -2,9 +2,9 @@
 
 namespace OpenTibiaUnity.Core.Input.StaticAction
 {
-    internal class ChatMoveCursorEnd : StaticAction
+    public class ChatMoveCursorEnd : StaticAction
     {
-        internal ChatMoveCursorEnd(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
+        public ChatMoveCursorEnd(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
 
         public override bool Perform(bool repeat = false) {
             TMPro.TMP_InputField inputField = StaticAction.GetSelectedInputField();
@@ -16,7 +16,7 @@ namespace OpenTibiaUnity.Core.Input.StaticAction
             return false;
         }
 
-        internal override bool KeyCallback(uint eventMask, char _, KeyCode __, EventModifiers eventModifiers) {
+        public override bool KeyCallback(uint eventMask, char _, KeyCode __, EventModifiers eventModifiers) {
             TMPro.TMP_InputField inputField = StaticAction.GetSelectedInputField();
             if (!!inputField) {
                 inputField.MoveTextEnd((eventModifiers & EventModifiers.Shift) != 0);
@@ -27,7 +27,7 @@ namespace OpenTibiaUnity.Core.Input.StaticAction
         }
 
         public override IAction Clone() {
-            return new ChatMoveCursorEnd(m_ID, m_Label, m_EventMask);
+            return new ChatMoveCursorEnd(_id, _label, _eventMask);
         }
     }
 }

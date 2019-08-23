@@ -10,45 +10,45 @@ using PlayerAction = OpenTibiaUnity.Protobuf.Shared.PlayerAction;
 namespace OpenTibiaUnity.Modules.GameWindow
 {
     [ExecuteInEditMode]
-    internal class GameMapContainer : GamePanelContainer, IMoveWidget, IUseWidget, IWidgetContainerWidget
+    public class GameMapContainer : GamePanelContainer, IMoveWidget, IUseWidget, IWidgetContainerWidget
     {
-        [SerializeField] private GameWorldMap m_GameWorldMap = null;
-        [SerializeField] private TMPro.TextMeshProUGUI m_FramecounterText = null;
+        [SerializeField] private GameWorldMap _gameWorldMap = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _framecounterText = null;
         
-        private Rect m_CachedScreenRect = Rect.zero;
-        private bool m_ScreenRectCached = false;
-        private bool m_MouseCursorOverRenderer = false;
+        private Rect _cachedScreenRect = Rect.zero;
+        private bool _screenRectCached = false;
+        private bool _mouseCursorOverRenderer = false;
 
-        private int m_LastScreenWidth = 0;
-        private int m_LastScreenHeight = 0;
-        private int m_LastFramerate = 0;
-        private int m_LastPing = 9999;
+        private int _lastScreenWidth = 0;
+        private int _lastScreenHeight = 0;
+        private int _lastFramerate = 0;
+        private int _lastPing = 9999;
 
-        private ObjectDragImpl<GameMapContainer> m_DragHandler;
+        private ObjectDragImpl<GameMapContainer> _dragHandler;
         
         private RectTransform worldMapRectTransform {
-            get => m_GameWorldMap.rectTransform;
+            get => _gameWorldMap.rectTransform;
         }
 
         protected override void Start() {
             base.Start();
 
-            m_DragHandler = new ObjectDragImpl<GameMapContainer>(this);
+            _dragHandler = new ObjectDragImpl<GameMapContainer>(this);
             ObjectMultiUseHandler.RegisterContainer(this);
 
-            m_GameWorldMap.onPointerEnter.AddListener(OnWorldMapPointerEnter);
-            m_GameWorldMap.onPointerExit.AddListener(OnWorldMapPointerExit);
+            _gameWorldMap.onPointerEnter.AddListener(OnWorldMapPointerEnter);
+            _gameWorldMap.onPointerExit.AddListener(OnWorldMapPointerExit);
 
             if (OpenTibiaUnity.InputHandler != null)
-                OpenTibiaUnity.InputHandler.AddMouseUpListener(Core.Utility.EventImplPriority.Default, OnMouseUp);
+                OpenTibiaUnity.InputHandler.AddMouseUpListener(Core.Utils.EventImplPriority.Default, OnMouseUp);
         }
 
         protected void Update() {
-            if (m_LastScreenWidth != Screen.width || m_LastScreenHeight != Screen.height) {
+            if (_lastScreenWidth != Screen.width || _lastScreenHeight != Screen.height) {
                 InvalidateScreenRect();
 
-                m_LastScreenWidth = Screen.width;
-                m_LastScreenHeight = Screen.height;
+                _lastScreenWidth = Screen.width;
+                _lastScreenHeight = Screen.height;
             }
         }
 
@@ -58,11 +58,11 @@ namespace OpenTibiaUnity.Modules.GameWindow
         }
 
         protected void OnWorldMapPointerEnter() {
-            m_MouseCursorOverRenderer = true;
+            _mouseCursorOverRenderer = true;
         }
 
         protected void OnWorldMapPointerExit() {
-            m_MouseCursorOverRenderer = false;
+            _mouseCursorOverRenderer = false;
             OpenTibiaUnity.WorldMapRenderer.HighlightTile = null;
             OpenTibiaUnity.WorldMapRenderer.HighlightObject = OpenTibiaUnity.CreatureStorage.Aim;
             OpenTibiaUnity.GameManager.CursorController.SetCursorState(CursorState.Default, CursorPriority.Medium);
@@ -74,7 +74,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
                 return;
 #endif
 
-            if (!m_ScreenRectCached)
+            if (!_screenRectCached)
                 CacheScreenRect();
 
             var gameManager = OpenTibiaUnity.GameManager;
@@ -83,8 +83,8 @@ namespace OpenTibiaUnity.Modules.GameWindow
             var protocolGame = OpenTibiaUnity.ProtocolGame;
 
             if (gameManager != null && worldMapStorage != null && gameManager.IsGameRunning && worldMapStorage.Valid) {
-                if (m_MouseCursorOverRenderer && gameManager.GameCanvas.gameObject.activeSelf && !gameManager.GamePanelBlocker.gameObject.activeSelf) {
-                    InternalStartMouseAction(Input.mousePosition, MouseButton.None, false, true, true);
+                if (_mouseCursorOverRenderer && gameManager.GameCanvas.gameObject.activeSelf && !gameManager.GamePanelBlocker.gameObject.activeSelf) {
+                    publicStartMouseAction(Input.mousePosition, MouseButton.None, false, true, true);
                 } else {
                     worldMapRenderer.HighlightTile = null;
                     worldMapRenderer.HighlightObject = null;
@@ -99,15 +99,15 @@ namespace OpenTibiaUnity.Modules.GameWindow
                 RenderTexture.active = null;
 
                 // setting the clip area
-                m_GameWorldMap.rawImage.uvRect = worldMapRenderer.CalculateClipRect();
+                _gameWorldMap.rawImage.uvRect = worldMapRenderer.CalculateClipRect();
 
-                if (worldMapRenderer.Framerate != m_LastFramerate) {
-                    m_LastFramerate = worldMapRenderer.Framerate;
-                    m_LastPing = protocolGame.Ping;
-                    m_FramecounterText.text = string.Format("FPS: <color=#{0:X6}>{1}</color>\nPing:{2}", GetFramerateColor(m_LastFramerate), m_LastFramerate, m_LastPing);
+                if (worldMapRenderer.Framerate != _lastFramerate) {
+                    _lastFramerate = worldMapRenderer.Framerate;
+                    _lastPing = protocolGame.Ping;
+                    _framecounterText.text = string.Format("FPS: <color=#{0:X6}>{1}</color>\nPing:{2}", GetFramerateColor(_lastFramerate), _lastFramerate, _lastPing);
                 }
             } else {
-                m_FramecounterText.text = "";
+                _framecounterText.text = "";
             }
         }
 
@@ -124,29 +124,29 @@ namespace OpenTibiaUnity.Modules.GameWindow
             return 0x00EB00;
         }
         
-        internal void CacheScreenRect() {
-            if (!m_ScreenRectCached) {
+        public void CacheScreenRect() {
+            if (!_screenRectCached) {
                 Vector2 size = Vector2.Scale(worldMapRectTransform.rect.size, worldMapRectTransform.lossyScale);
-                m_CachedScreenRect = new Rect(worldMapRectTransform.position.x, Screen.height - worldMapRectTransform.position.y, size.x, size.y);
-                m_CachedScreenRect.x -= worldMapRectTransform.pivot.x * size.x;
-                m_CachedScreenRect.y -= (1.0f - worldMapRectTransform.pivot.y) * size.y;
+                _cachedScreenRect = new Rect(worldMapRectTransform.position.x, Screen.height - worldMapRectTransform.position.y, size.x, size.y);
+                _cachedScreenRect.x -= worldMapRectTransform.pivot.x * size.x;
+                _cachedScreenRect.y -= (1.0f - worldMapRectTransform.pivot.y) * size.y;
 
-                m_LastScreenWidth = Screen.width;
-                m_LastScreenHeight = Screen.height;
-                m_ScreenRectCached = true;
+                _lastScreenWidth = Screen.width;
+                _lastScreenHeight = Screen.height;
+                _screenRectCached = true;
             }
         }
 
-        internal void InvalidateScreenRect() => m_ScreenRectCached = false;
+        public void InvalidateScreenRect() => _screenRectCached = false;
 
-        internal void OnMouseUp(Event e, MouseButton mouseButton, bool repeat) {
-            if (InternalStartMouseAction(e.mousePosition, mouseButton, true, false, false))
+        public void OnMouseUp(Event e, MouseButton mouseButton, bool repeat) {
+            if (publicStartMouseAction(e.mousePosition, mouseButton, true, false, false))
                 e.Use();
         }
 
-        private bool InternalStartMouseAction(Vector3 mousePosition, MouseButton mouseButton, bool applyAction = false, bool updateCursor = false, bool updateHighlight = false) {
+        private bool publicStartMouseAction(Vector3 mousePosition, MouseButton mouseButton, bool applyAction = false, bool updateCursor = false, bool updateHighlight = false) {
             var gameManager = OpenTibiaUnity.GameManager;
-            if (!m_MouseCursorOverRenderer || !gameManager.GameCanvas.gameObject.activeSelf || gameManager.GamePanelBlocker.gameObject.activeSelf)
+            if (!_mouseCursorOverRenderer || !gameManager.GameCanvas.gameObject.activeSelf || gameManager.GamePanelBlocker.gameObject.activeSelf)
                 return false;
             
             var point = RawMousePositionToLocalMapPosition(mousePosition);
@@ -155,7 +155,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
             return action != AppearanceActions.None;
         }
         
-        internal AppearanceActions DetermineAction(Vector3 mousePosition, MouseButton mouseButton, EventModifiers eventModifiers, Vector2 point, bool applyAction = false, bool updateCursor = false, bool updateHighlight = false) {
+        public AppearanceActions DetermineAction(Vector3 mousePosition, MouseButton mouseButton, EventModifiers eventModifiers, Vector2 point, bool applyAction = false, bool updateCursor = false, bool updateHighlight = false) {
             if (updateCursor)
                 updateCursor = OpenTibiaUnity.GameManager.ClientVersion >= 1100;
 
@@ -209,7 +209,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
 
                             action = AppearanceActions.SmartClick;
                             if (!!creatureObject && !!(creature = creatureStorage.GetCreature(creatureObject.Data))) {
-                                if (creature.ID == player.ID || forceLook) {
+                                if (creature.Id == player.Id || forceLook) {
                                     topLookObjectStackPos = creatureObjectStackPos;
                                     topLookObject = creatureObject;
                                     action = AppearanceActions.Look;
@@ -236,7 +236,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
                         action = AppearanceActions.AutoWalk;
                     } else if (eventModifiers == EventModifiers.Alt) {
                         creature = worldMapRenderer.PointToCreature(point, true);
-                        if (!!creature && creature.ID != player.ID && (!creature.IsNPC || gameManager.ClientVersion < 1000))
+                        if (!!creature && creature.Id != player.Id && (!creature.IsNPC || gameManager.ClientVersion < 1000))
                             action = AppearanceActions.Attack;
 
                         }
@@ -245,7 +245,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
                 if (eventModifiers == EventModifiers.Alt) {
                     if (mouseButton == MouseButton.Left || mouseButton == MouseButton.None) {
                         creature = worldMapRenderer.PointToCreature(point, true);
-                        if (!!creature && creature.ID != player.ID && (!creature.IsNPC || gameManager.ClientVersion < 1000))
+                        if (!!creature && creature.Id != player.Id && (!creature.IsNPC || gameManager.ClientVersion < 1000))
                             action = AppearanceActions.Attack;
                     }
                 } else if (eventModifiers == EventModifiers.Control) {
@@ -281,7 +281,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
                 } else if (mouseButton == MouseButton.Right) {
                     if (eventModifiers == EventModifiers.None) {
                         creature = worldMapRenderer.PointToCreature(point, true);
-                        if (!!creature && creature.ID != player.ID && (!creature.IsNPC || gameManager.ClientVersion < 1000)) {
+                        if (!!creature && creature.Id != player.Id && (!creature.IsNPC || gameManager.ClientVersion < 1000)) {
                             action = AppearanceActions.Attack;
                         } else {
                             topUseObjectStackPos = worldMapStorage.GetTopUseObject(mapPosition.Value, out topUseObject);
@@ -344,7 +344,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
                 switch (action) {
                     case AppearanceActions.None: break;
                     case AppearanceActions.Attack:
-                        if (!!creature && creature.ID != player.ID)
+                        if (!!creature && creature.Id != player.Id)
                             OpenTibiaUnity.CreatureStorage.ToggleAttackTarget(creature, true);
                         break;
                     case AppearanceActions.AutoWalk:
@@ -382,7 +382,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
         }
 
         public int GetMoveObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
-            if (!m_MouseCursorOverRenderer) {
+            if (!_mouseCursorOverRenderer) {
                 @object = null;
                 return - 1;
             }
@@ -397,7 +397,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
         }
 
         public int GetTopObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
-            if (!m_MouseCursorOverRenderer) {
+            if (!_mouseCursorOverRenderer) {
                 @object = null;
                 return -1;
             }
@@ -412,7 +412,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
         }
 
         public int GetUseObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
-            if (!m_MouseCursorOverRenderer) {
+            if (!_mouseCursorOverRenderer) {
                 @object = null;
                 return -1;
             }
@@ -427,7 +427,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
         }
 
         public int GetMultiUseObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
-            if (!m_MouseCursorOverRenderer) {
+            if (!_mouseCursorOverRenderer) {
                 @object = null;
                 return -1;
             }
@@ -452,8 +452,8 @@ namespace OpenTibiaUnity.Modules.GameWindow
         private Vector2 RawMousePositionToLocalMapPosition(Vector3 mousePosition) {
             CacheScreenRect();
 
-            var mousePoint = new Vector2(Input.mousePosition.x, m_LastScreenHeight - Input.mousePosition.y);
-            return mousePoint - m_CachedScreenRect.position;
+            var mousePoint = new Vector2(Input.mousePosition.x, _lastScreenHeight - Input.mousePosition.y);
+            return mousePoint - _cachedScreenRect.position;
         }
     }
 }

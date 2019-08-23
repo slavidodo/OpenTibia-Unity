@@ -6,25 +6,23 @@ namespace OpenTibiaUnity.Modules.GameWindow
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
     [RequireComponent(typeof(Canvas))]
-    internal class GameInterface : Core.Components.Base.Module
+    public class GameInterface : Core.Components.Base.Module
     {
-        [SerializeField] internal GamePanelContainer GameRightContainer = null;
-        [SerializeField] internal GamePanelContainer GameLeftContainer = null;
-        [SerializeField] internal GamePanelContainer GameBottomContainer = null;
-        [SerializeField] internal GamePanelContainer GameMapContainer = null;
-
-        [SerializeField] private Camera m_Camera = null;
-
-        private Canvas m_GameCanvas;
-        internal Canvas gameCanvas {
+        public GamePanelContainer GameRightContainer = null;
+        public GamePanelContainer GameLeftContainer = null;
+        public GamePanelContainer GameBottomContainer = null;
+        public GamePanelContainer GameMapContainer = null;
+        
+        private Canvas _gameCanvas;
+        public Canvas gameCanvas {
             get {
-                if (!m_GameCanvas)
-                    m_GameCanvas = GetComponent<Canvas>();
-                return m_GameCanvas;
+                if (!_gameCanvas)
+                    _gameCanvas = GetComponent<Canvas>();
+                return _gameCanvas;
             }
         }
 
-        private bool m_LayoutIsUpdating = false;
+        private bool _layoutIsUpdating = false;
 
         protected override void Start() {
             base.Start();
@@ -32,11 +30,11 @@ namespace OpenTibiaUnity.Modules.GameWindow
             ScaleToScreen();
         }
         
-        internal void UpdateLayout() {
-            if (!GameRightContainer || !GameLeftContainer || !GameBottomContainer || !GameMapContainer || m_LayoutIsUpdating)
+        public void UpdateLayout() {
+            if (!GameRightContainer || !GameLeftContainer || !GameBottomContainer || !GameMapContainer || _layoutIsUpdating)
                 return;
 
-            m_LayoutIsUpdating = true;
+            _layoutIsUpdating = true;
             var rightTransform = GameRightContainer.rectTransform;
             var leftTransform = GameLeftContainer.rectTransform;
             var bottomTransform = GameBottomContainer.rectTransform;
@@ -54,27 +52,28 @@ namespace OpenTibiaUnity.Modules.GameWindow
             
             LayoutRebuilder.ForceRebuildLayoutImmediate(bottomTransform);
             LayoutRebuilder.ForceRebuildLayoutImmediate(mapTransform);
-            m_LayoutIsUpdating = false;
+            _layoutIsUpdating = false;
         }
 
-        internal void ScaleToScreen() {
-            float distance = Vector3.Distance(m_Camera.transform.position, transform.position);
+        public void ScaleToScreen() {
+            var camera = OpenTibiaUnity.GameManager.MainCamera;
+            float distance = Vector3.Distance(camera.transform.position, transform.position);
             float camHeight;
 
-            if (m_Camera.orthographic)
-                camHeight = m_Camera.orthographicSize * 2;
+            if (camera.orthographic)
+                camHeight = camera.orthographicSize * 2;
             else
-                camHeight = 2.0f * distance * Mathf.Tan(Mathf.Deg2Rad * m_Camera.fieldOfView * 0.5f);
+                camHeight = 2.0f * distance * Mathf.Tan(Mathf.Deg2Rad * camera.fieldOfView * 0.5f);
             
             float scale = (camHeight / Screen.height);
             transform.localScale = new Vector3(scale, scale, scale);
         }
 
-        internal T CreateMiniWindow<T>(T prefab) where T : Core.Components.Base.MiniWindow {
+        public T CreateMiniWindow<T>(T prefab) where T : Core.Components.Base.MiniWindow {
             return AddMiniWindow(Instantiate(prefab));
         }
 
-        internal T AddMiniWindow<T>(T miniWindow) where T : Core.Components.Base.MiniWindow {
+        public T AddMiniWindow<T>(T miniWindow) where T : Core.Components.Base.MiniWindow {
             Core.Components.Base.MiniWindowContainer suggestedContainer = null;
 
             float requiredMinHeight = miniWindow.MinHeight;

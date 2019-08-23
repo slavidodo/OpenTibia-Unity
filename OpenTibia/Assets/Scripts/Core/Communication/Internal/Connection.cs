@@ -6,87 +6,87 @@ using UnityEngine.Events;
 
 namespace OpenTibiaUnity.Core.Communication.Internal
 {
-    internal class AsyncStateHolder
+    public class AsyncStateHolder
     {
-        internal ByteArray AsyncBuffer;
-        internal int State = 0;
+        public ByteArray AsyncBuffer;
+        public int State = 0;
 
-        internal int Required {
+        public int Required {
             get => AsyncBuffer.Length - State;
         }
 
-        internal bool Finished {
+        public bool Finished {
             get => State == AsyncBuffer.Length;
         }
 
-        internal byte[] Buffer {
+        public byte[] Buffer {
             get => AsyncBuffer.Buffer;
         }
 
-        internal AsyncStateHolder(ByteArray asyncBuffer, int state = 0) {
+        public AsyncStateHolder(ByteArray asyncBuffer, int state = 0) {
             AsyncBuffer = asyncBuffer;
             State = state;
         }
     }
 
-    internal class Connection
+    public class Connection
     {
-        internal const int HeaderPos = 0;
+        public const int HeaderPos = 0;
 
-        internal const int PacketLengthPos = 0;
-        internal const int PacketLengthSize = sizeof(ushort);
+        public const int PacketLengthPos = 0;
+        public const int PacketLengthSize = sizeof(ushort);
 
-        internal const int ChecksumPos = PacketLengthPos + PacketLengthSize;
-        internal const int ChecksumSize = sizeof(uint);
+        public const int ChecksumPos = PacketLengthPos + PacketLengthSize;
+        public const int ChecksumSize = sizeof(uint);
 
-        internal const int SequenceNumberPos = PacketLengthPos + PacketLengthSize;
-        internal const int SequenceNumberSize = sizeof(uint);
+        public const int SequenceNumberPos = PacketLengthPos + PacketLengthSize;
+        public const int SequenceNumberSize = sizeof(uint);
         
-        internal class ConnectionStateEvent : UnityEvent { }
-        internal class ConnectionErrorEvent : UnityEvent<string, bool> { }
-        internal class ConnectionSocketErrorEvent : UnityEvent<SocketError, string> { }
-        internal class ConnectionCommunicationEvent : UnityEvent<ByteArray> { }
+        public class ConnectionStateEvent : UnityEvent { }
+        public class ConnectionErrorEvent : UnityEvent<string, bool> { }
+        public class ConnectionSocketErrorEvent : UnityEvent<SocketError, string> { }
+        public class ConnectionCommunicationEvent : UnityEvent<ByteArray> { }
 
-        protected Socket m_Socket = null;
-        protected string m_Address = null;
-        protected int m_Port = 0;
-        protected bool m_Established = false;
-        protected bool m_Terminated = false;
-        protected bool m_Sending = false;
-        protected bool m_Receiving = false;
-        protected Queue m_PacketQueue = null;
+        protected Socket _socket = null;
+        protected string _address = null;
+        protected int _port = 0;
+        protected bool _established = false;
+        protected bool _terminated = false;
+        protected bool _sending = false;
+        protected bool _receiving = false;
+        protected Queue _packetQueue = null;
 
-        internal ConnectionStateEvent onConnectionEstablished { get; } = new ConnectionStateEvent();
-        internal ConnectionStateEvent onConnectionTerminated { get; } = new ConnectionStateEvent();
-        internal ConnectionErrorEvent onConnectionError { get; } = new ConnectionErrorEvent();
-        internal ConnectionSocketErrorEvent onConnectionSocketError { get; } = new ConnectionSocketErrorEvent();
-        internal ConnectionCommunicationEvent onConnectionReceived { get; } = new ConnectionCommunicationEvent();
-        internal ConnectionCommunicationEvent onConnectionSent { get; } = new ConnectionCommunicationEvent();
+        public ConnectionStateEvent onConnectionEstablished { get; } = new ConnectionStateEvent();
+        public ConnectionStateEvent onConnectionTerminated { get; } = new ConnectionStateEvent();
+        public ConnectionErrorEvent onConnectionError { get; } = new ConnectionErrorEvent();
+        public ConnectionSocketErrorEvent onConnectionSocketError { get; } = new ConnectionSocketErrorEvent();
+        public ConnectionCommunicationEvent onConnectionReceived { get; } = new ConnectionCommunicationEvent();
+        public ConnectionCommunicationEvent onConnectionSent { get; } = new ConnectionCommunicationEvent();
 
-        internal bool Established { get => m_Established; }
-        internal bool Sending { get => m_Sending; }
-        internal bool Receiving { get => m_Receiving; }
-        internal bool Terminated { get => m_Terminated; }
+        public bool Established { get => _established; }
+        public bool Sending { get => _sending; }
+        public bool Receiving { get => _receiving; }
+        public bool Terminated { get => _terminated; }
 
-        internal void Connect(string address, int port) {
-            if (m_Socket != null || m_Established)
+        public void Connect(string address, int port) {
+            if (_socket != null || _established)
                 throw new InvalidOperationException("Connection.Connect: Trying to connect over an established connection.");
             
-            m_Terminated = false;
-            m_Address = address;
-            m_Port = port;
+            _terminated = false;
+            _address = address;
+            _port = port;
             
-            var addresses = Dns.GetHostAddresses(m_Address);
+            var addresses = Dns.GetHostAddresses(_address);
             if (addresses == null || addresses.Length == 0) {
                 onConnectionSocketError.Invoke(SocketError.AddressNotAvailable, "Invalid IP/Hostname given as a parameter.");
                 return;
             }
             
             var endPoint = new IPEndPoint(addresses[0], port);
-            m_Socket = new Socket(endPoint.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+            _socket = new Socket(endPoint.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
             try {
-                var asyncResult = m_Socket.BeginConnect(endPoint, null, null);
+                var asyncResult = _socket.BeginConnect(endPoint, null, null);
                 asyncResult.AsyncWaitHandle.WaitOne(Constants.ConnectionTimeout);
                 OnConnectionConnected(asyncResult);
             } catch (SocketException e) {
@@ -94,56 +94,56 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             }
         }
 
-        internal void Disconnect() {
-            if (m_Terminated || !m_Established)
+        public void Disconnect() {
+            if (_terminated || !_established)
                 return;
             
-            m_Socket.Disconnect(false);
+            _socket.Disconnect(false);
             HandleCommunicationTermination();
         }
 
-        internal void Send(ByteArray message) {
-            if (m_Terminated || !m_Established)
+        public void Send(ByteArray message) {
+            if (_terminated || !_established)
                 throw new InvalidOperationException("Connection.Send: Trying to send before connecting.");
 
             var clone = message.Clone();
-            lock (m_PacketQueue) {
-                if (m_Sending) {
-                    m_PacketQueue.Enqueue(clone);
+            lock (_packetQueue) {
+                if (_sending) {
+                    _packetQueue.Enqueue(clone);
                     return;
                 }
 
-                InternalSend(clone);
+                publicSend(clone);
             }
         }
 
-        internal void Receive() {
-            if (m_Terminated || !m_Established)
+        public void Receive() {
+            if (_terminated || !_established)
                 throw new InvalidOperationException("Connection.Send: Trying to receive before connecting.");
 
-            if (m_Receiving)
+            if (_receiving)
                 return;
             
-            m_Receiving = true;
-            InternalReceiveHeader();
+            _receiving = true;
+            publicReceiveHeader();
         }
 
-        protected void InternalSend(ByteArray message) {
+        protected void publicSend(ByteArray message) {
             // this function is guaranteed to be called only
             // when the connection is established
-            m_Sending = true;
+            _sending = true;
 
             var stateObject = new AsyncStateHolder(message);
-            m_Socket.BeginSend(stateObject.Buffer, stateObject.State, stateObject.Required, SocketFlags.None, OnConnectionSend, stateObject);
+            _socket.BeginSend(stateObject.Buffer, stateObject.State, stateObject.Required, SocketFlags.None, OnConnectionSend, stateObject);
         }
 
-        protected void InternalReceiveHeader() {
+        protected void publicReceiveHeader() {
             // this function is guaranteed to be called only
             // when the connection is established
             var buffer = new byte[PacketLengthSize];
             var byteArray = new ByteArray(buffer);
             var stateObject = new AsyncStateHolder(byteArray);
-            m_Socket.BeginReceive(stateObject.Buffer, stateObject.State, stateObject.Required, SocketFlags.None, OnConnectionRecvHeader, stateObject);
+            _socket.BeginReceive(stateObject.Buffer, stateObject.State, stateObject.Required, SocketFlags.None, OnConnectionRecvHeader, stateObject);
         }
 
         protected void InernalReceiveBody(int size) {
@@ -152,36 +152,36 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             var buffer = new byte[size];
             var byteArray = new ByteArray(buffer);
             var stateObject = new AsyncStateHolder(byteArray);
-            m_Socket.BeginReceive(stateObject.Buffer, stateObject.State, stateObject.Required, SocketFlags.None, OnConnectionRecvBody, stateObject);
+            _socket.BeginReceive(stateObject.Buffer, stateObject.State, stateObject.Required, SocketFlags.None, OnConnectionRecvBody, stateObject);
         }
 
         private void OnConnectionConnected(IAsyncResult asyncResult) {
-            if (m_Terminated)
+            if (_terminated)
                 return;
             
             try {
-                m_Socket.EndConnect(asyncResult);
+                _socket.EndConnect(asyncResult);
             } catch (SocketException e) {
                 onConnectionSocketError.Invoke(e.SocketErrorCode, e.Message);
                 HandleCommunicationTermination();
                 return;
             }
 
-            m_Established = true;
-            m_PacketQueue = new Queue();
+            _established = true;
+            _packetQueue = new Queue();
             onConnectionEstablished.Invoke();
         }
 
         private void OnConnectionSend(IAsyncResult asyncResult) {
-            if (m_Terminated)
+            if (_terminated)
                 return;
 
             var stateObject = asyncResult.AsyncState as AsyncStateHolder;
             int total = 0;
             try {
-                total = m_Socket.EndSend(asyncResult);
+                total = _socket.EndSend(asyncResult);
             } catch (SocketException e) {
-                if (!m_Terminated) {
+                if (!_terminated) {
                     onConnectionSocketError.Invoke(e.SocketErrorCode, e.Message);
                     HandleCommunicationTermination();
                 }
@@ -193,14 +193,14 @@ namespace OpenTibiaUnity.Core.Communication.Internal
                 return;
             }
 
-            m_Sending = false;
+            _sending = false;
 
             stateObject.State += total;
             if (stateObject.Finished) {
                 onConnectionSent.Invoke(stateObject.AsyncBuffer);
-                lock (m_PacketQueue) {
-                    if (m_PacketQueue.Count >= 0) {
-                        InternalSend(m_PacketQueue.Dequeue() as ByteArray);
+                lock (_packetQueue) {
+                    if (_packetQueue.Count >= 0) {
+                        publicSend(_packetQueue.Dequeue() as ByteArray);
                         return;
                     }
                 }
@@ -209,19 +209,19 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             }
 
             // send the packets left until the state object is finished
-            m_Socket.BeginSend(stateObject.Buffer, stateObject.State, stateObject.Required, SocketFlags.None, OnConnectionSend, stateObject);
+            _socket.BeginSend(stateObject.Buffer, stateObject.State, stateObject.Required, SocketFlags.None, OnConnectionSend, stateObject);
         }
 
         private void OnConnectionRecvHeader(IAsyncResult asyncResult) {
-            if (m_Terminated)
+            if (_terminated)
                 return;
 
             var stateObject = asyncResult.AsyncState as AsyncStateHolder;
             int total = 0;
             try {
-                total = m_Socket.EndReceive(asyncResult);
+                total = _socket.EndReceive(asyncResult);
             } catch (SocketException e) {
-                if (!m_Terminated) {
+                if (!_terminated) {
                     onConnectionSocketError.Invoke(e.SocketErrorCode, e.Message);
                     HandleCommunicationTermination();
                 }
@@ -241,19 +241,19 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             }
             
             // keep receiving until the state object is finished
-            m_Socket.BeginReceive(stateObject.Buffer, stateObject.State, stateObject.Required, SocketFlags.None, OnConnectionRecvHeader, stateObject);
+            _socket.BeginReceive(stateObject.Buffer, stateObject.State, stateObject.Required, SocketFlags.None, OnConnectionRecvHeader, stateObject);
         }
 
         private void OnConnectionRecvBody(IAsyncResult asyncResult) {
-            if (m_Terminated)
+            if (_terminated)
                 return;
 
             var stateObject = asyncResult.AsyncState as AsyncStateHolder;
             int total = 0;
             try {
-                total = m_Socket.EndReceive(asyncResult);
+                total = _socket.EndReceive(asyncResult);
             } catch (SocketException e) {
-                if (!m_Terminated) {
+                if (!_terminated) {
                     onConnectionSocketError.Invoke(e.SocketErrorCode, e.Message);
                     HandleCommunicationTermination();
                 }
@@ -269,23 +269,23 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             if (stateObject.Finished) {
                 onConnectionReceived.Invoke(stateObject.AsyncBuffer);
 
-                m_Receiving = false;
+                _receiving = false;
                 return;
             }
 
             // keep receiving until the state object is finished
-            m_Socket.BeginReceive(stateObject.Buffer, stateObject.State, stateObject.Required, SocketFlags.None, OnConnectionRecvBody, stateObject);
+            _socket.BeginReceive(stateObject.Buffer, stateObject.State, stateObject.Required, SocketFlags.None, OnConnectionRecvBody, stateObject);
         }
 
         private void HandleCommunicationTermination() {
-            m_Terminated = true;
-            m_Established = false;
-            m_Receiving = false;
-            m_Sending = false;
+            _terminated = true;
+            _established = false;
+            _receiving = false;
+            _sending = false;
 
-            m_Socket.Dispose();
-            m_Socket = null;
-            m_PacketQueue = null;
+            _socket.Dispose();
+            _socket = null;
+            _packetQueue = null;
 
             onConnectionTerminated.Invoke();
         }

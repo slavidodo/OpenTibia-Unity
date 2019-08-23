@@ -4,41 +4,41 @@ using UnityEngine.Events;
 
 namespace OpenTibiaUnity.Core.Container
 {
-    internal class ContainerView {
-        internal class ContainerViewObjectEvent : UnityEvent<ContainerView, int, ObjectInstance> {}
+    public class ContainerView {
+        public class ContainerViewObjectEvent : UnityEvent<ContainerView, int, ObjectInstance> {}
         
-        private int m_ID = 0;
-        private int m_NumberOfSlotsPerPage = 0;
-        private int m_NumberOfTotalObjects = 0;
-        private int m_IndexOfFirstObject = 0;
-        private bool m_IsSubContainer = false;
-        private bool m_IsDragAndDropEnabled = false;
-        private bool m_IsPaginationEnabled = false;
+        private int _id = 0;
+        private int _numberOfSlotsPerPage = 0;
+        private int _numberOfTotalObjects = 0;
+        private int _indexOfFirstObject = 0;
+        private bool _isSubContainer = false;
+        private bool _isDragAndDropEnabled = false;
+        private bool _isPaginationEnabled = false;
         
-        private string m_Name;
-        private ObjectInstance m_Icon;
-        private List<ObjectInstance> m_Objects;
+        private string _name;
+        private ObjectInstance _icon;
+        private List<ObjectInstance> _objects;
 
-        internal ContainerViewEvent onRemoveAll = new ContainerViewEvent();
+        public ContainerViewEvent onRemoveAll = new ContainerViewEvent();
 
-        internal ContainerViewObjectEvent onObjectAdded = new ContainerViewObjectEvent();
-        internal ContainerViewObjectEvent onObjectChanged = new ContainerViewObjectEvent();
-        internal ContainerViewObjectEvent onObjectRemoved = new ContainerViewObjectEvent();
+        public ContainerViewObjectEvent onObjectAdded = new ContainerViewObjectEvent();
+        public ContainerViewObjectEvent onObjectChanged = new ContainerViewObjectEvent();
+        public ContainerViewObjectEvent onObjectRemoved = new ContainerViewObjectEvent();
 
-        internal int ID { get => m_ID; }
-        internal int NumberOfSlotsPerPage { get => m_NumberOfSlotsPerPage; }
-        internal int NumberOfTotalObjects { get => m_NumberOfTotalObjects; }
-        internal int IndexOfFirstObject { get => m_IndexOfFirstObject; }
+        public int Id { get => _id; }
+        public int NumberOfSlotsPerPage { get => _numberOfSlotsPerPage; }
+        public int NumberOfTotalObjects { get => _numberOfTotalObjects; }
+        public int IndexOfFirstObject { get => _indexOfFirstObject; }
 
-        internal string Name { get => m_Name; }
+        public string Name { get => _name; }
 
-        internal bool IsSubContainer { get => m_IsSubContainer; }
-        internal bool IsDragAndDropEnabled { get => m_IsDragAndDropEnabled; }
-        internal bool IsPaginationEnabled { get => m_IsPaginationEnabled; }
+        public bool IsSubContainer { get => _isSubContainer; }
+        public bool IsDragAndDropEnabled { get => _isDragAndDropEnabled; }
+        public bool IsPaginationEnabled { get => _isPaginationEnabled; }
 
-        internal ContainerView(int id, ObjectInstance icon, string name, bool subContainer, bool isDragAndDropEnabled, bool isPaginatopnEnabled, int nOfSlots, int nOfObjects, int indexOfFirstObject) {
+        public ContainerView(int id, ObjectInstance icon, string name, bool subContainer, bool isDragAndDropEnabled, bool isPaginatopnEnabled, int nOfSlots, int nOfObjects, int indexOfFirstObject) {
             if (id < 0 || id >= Constants.MaxContainerViews)
-                throw new System.ArgumentException("ContainerView.ContainerView: Invalid ID: " + id);
+                throw new System.ArgumentException("ContainerView.ContainerView: Invalid _id: " + id);
 
             if (name == null || name.Length == 0 || name.Length >= Constants.MaxContainerNameLength)
                 throw new System.ArgumentException("ContainerView.ContainerView: Invalid name: " + name);
@@ -52,69 +52,69 @@ namespace OpenTibiaUnity.Core.Container
             if (isPaginatopnEnabled && indexOfFirstObject % nOfSlots != 0)
                 throw new System.ArgumentException("ContainerView.ContainerView: Invalid index of first object(2): " + indexOfFirstObject);
 
-            m_ID = id;
-            m_Icon = icon ?? throw new System.ArgumentException("ContainerView.ContainerView: Invalid icon for a container.");
-            m_Name = name;
-            m_IsSubContainer = subContainer;
-            m_IsDragAndDropEnabled = isDragAndDropEnabled;
-            m_IsPaginationEnabled = isPaginatopnEnabled;
-            m_NumberOfSlotsPerPage = nOfSlots;
-            m_NumberOfTotalObjects = nOfObjects;
-            m_IndexOfFirstObject = indexOfFirstObject;
+            _id = id;
+            _icon = icon ?? throw new System.ArgumentException("ContainerView.ContainerView: Invalid icon for a container.");
+            _name = name;
+            _isSubContainer = subContainer;
+            _isDragAndDropEnabled = isDragAndDropEnabled;
+            _isPaginationEnabled = isPaginatopnEnabled;
+            _numberOfSlotsPerPage = nOfSlots;
+            _numberOfTotalObjects = nOfObjects;
+            _indexOfFirstObject = indexOfFirstObject;
 
-            m_Objects = new List<ObjectInstance>();
+            _objects = new List<ObjectInstance>();
         }
 
-        internal ObjectInstance GetObject(int index) {
-            if (index < m_IndexOfFirstObject || index >= m_IndexOfFirstObject + m_Objects.Count)
+        public ObjectInstance GetObject(int index) {
+            if (index < _indexOfFirstObject || index >= _indexOfFirstObject + _objects.Count)
                 throw new System.IndexOutOfRangeException("ContainerView.changeObject: Index out of range: " + index);
 
-            return m_Objects[index - m_IndexOfFirstObject];
+            return _objects[index - _indexOfFirstObject];
         }
 
-        internal void AddObject(int index, ObjectInstance @object) {
+        public void AddObject(int index, ObjectInstance @object) {
             if (@object != null) {
-                if (index < m_IndexOfFirstObject || index > m_IndexOfFirstObject + m_Objects.Count)
+                if (index < _indexOfFirstObject || index > _indexOfFirstObject + _objects.Count)
                     throw new System.IndexOutOfRangeException("ContainerView.AddObject: Index out of range: " + index);
 
-                if (m_NumberOfSlotsPerPage <= m_Objects.Count)
-                    m_Objects.RemoveAt(0);
+                if (_numberOfSlotsPerPage <= _objects.Count)
+                    _objects.RemoveAt(0);
 
-                m_Objects.Insert(index - m_IndexOfFirstObject, @object);
+                _objects.Insert(index - _indexOfFirstObject, @object);
             }
 
-            m_NumberOfTotalObjects++;
+            _numberOfTotalObjects++;
 
             onObjectAdded.Invoke(this, index, @object);
         }
 
-        internal void ChangeObject(int index, ObjectInstance @object) {
-            if (index < m_IndexOfFirstObject || index >= m_IndexOfFirstObject + m_Objects.Count)
+        public void ChangeObject(int index, ObjectInstance @object) {
+            if (index < _indexOfFirstObject || index >= _indexOfFirstObject + _objects.Count)
                 throw new System.IndexOutOfRangeException("ContainerView.changeObject: Index out of range: " + index);
 
-            m_Objects[index - m_IndexOfFirstObject] = @object ?? throw new System.ArgumentNullException("ContainerView.changeObject: Invalid object: " + @object);
+            _objects[index - _indexOfFirstObject] = @object ?? throw new System.ArgumentNullException("ContainerView.changeObject: Invalid object: " + @object);
 
             onObjectChanged.Invoke(this, index, @object);
         }
         
-        internal void RemoveObject(int index, ObjectInstance appendObject) {
-            if (index < 0 || index >= m_NumberOfTotalObjects)
+        public void RemoveObject(int index, ObjectInstance appendObject) {
+            if (index < 0 || index >= _numberOfTotalObjects)
                 throw new System.IndexOutOfRangeException("ContainerView.removeObject: Index out of range: " + index);
 
-            if (index >= m_IndexOfFirstObject && index < m_IndexOfFirstObject + m_Objects.Count)
-                m_Objects.RemoveAt(index - m_IndexOfFirstObject);
+            if (index >= _indexOfFirstObject && index < _indexOfFirstObject + _objects.Count)
+                _objects.RemoveAt(index - _indexOfFirstObject);
 
             if (appendObject != null)
-                m_Objects.Add(appendObject);
+                _objects.Add(appendObject);
 
-            m_NumberOfTotalObjects--;
+            _numberOfTotalObjects--;
 
             onObjectRemoved.Invoke(this, index, appendObject);
         }
 
-        internal void RemoveAll() {
-            m_NumberOfTotalObjects -= m_Objects.Count;
-            m_Objects.Clear();
+        public void RemoveAll() {
+            _numberOfTotalObjects -= _objects.Count;
+            _objects.Clear();
 
             onRemoveAll.Invoke(this);
         }

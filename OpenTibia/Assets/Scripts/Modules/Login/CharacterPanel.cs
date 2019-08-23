@@ -6,33 +6,33 @@ using UnityEngine.UI;
 namespace OpenTibiaUnity.Modules.Login
 {
     [RequireComponent(typeof(Toggle))]
-    internal class CharacterPanel : Core.Components.Base.AbstractComponent, IPointerClickHandler
+    public class CharacterPanel : Core.Components.Base.AbstractComponent, IPointerClickHandler
     {
-        [SerializeField] internal TMPro.TextMeshProUGUI characterName = null;
-        [SerializeField] internal TMPro.TextMeshProUGUI worldName = null;
+        public TMPro.TextMeshProUGUI characterName = null;
+        public TMPro.TextMeshProUGUI worldName = null;
         
-        internal UnityEvent onDoubleClick { get; } = new UnityEvent();
-        internal Color normalColor = Core.Colors.ColorFromRGB(0x414141);
-        internal Color alternateColor = Core.Colors.ColorFromRGB(0x484848);
-        internal Color highlightColor = Core.Colors.ColorFromRGB(0x585858);
+        public UnityEvent onDoubleClick { get; } = new UnityEvent();
+        public Color normalColor = Core.Colors.ColorFromRGB(0x414141);
+        public Color alternateColor = Core.Colors.ColorFromRGB(0x484848);
+        public Color highlightColor = Core.Colors.ColorFromRGB(0x585858);
         
-        private Toggle m_ToggleComponent;
-        internal Toggle toggleComponent {
+        private Toggle _toggleComponent;
+        public Toggle toggleComponent {
             get {
-                if (!m_ToggleComponent)
-                    m_ToggleComponent = GetComponent<Toggle>();
+                if (!_toggleComponent)
+                    _toggleComponent = GetComponent<Toggle>();
 
-                return m_ToggleComponent;
+                return _toggleComponent;
             }
         }
 
-        private Image m_ImageComponent;
-        internal Image imageComponent {
+        private Image _imageComponent;
+        public Image imageComponent {
             get {
-                if (!m_ImageComponent)
-                    m_ImageComponent = GetComponent<Image>();
+                if (!_imageComponent)
+                    _imageComponent = GetComponent<Image>();
 
-                return m_ImageComponent;
+                return _imageComponent;
             }
         }
 
@@ -50,7 +50,7 @@ namespace OpenTibiaUnity.Modules.Login
                 imageComponent.color = (transform.GetSiblingIndex() & 1) == 0 ? alternateColor : normalColor;
         }
         
-        public void Select() {
+        public override void Select() {
             toggleComponent.isOn = true;
             toggleComponent.Select();
         }

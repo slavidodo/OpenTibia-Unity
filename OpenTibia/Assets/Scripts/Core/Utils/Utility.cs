@@ -1,6 +1,8 @@
-﻿namespace OpenTibiaUnity.Core.Utility
+﻿using UnityEngine;
+
+namespace OpenTibiaUnity.Core.Utils
 {
-    internal enum OperatingSystem
+    public enum OperatingSystem
     {
         None = 0,
         DeprecatedLinux = 1,
@@ -24,9 +26,44 @@
         UnityUnknown = 26,
     }
     
-    internal static class Utility
+    public static class Utility
     {
-        internal static OperatingSystem GetCurrentOs() {
+        public static int ManhattanDistance(Vector3Int position, Vector3Int other) {
+            return System.Math.Abs(position.x - other.x) + System.Math.Abs(position.y - other.y);
+        }
+
+        public static float Distance(Vector3Int position, Vector3Int other) {
+            return (float)System.Math.Sqrt(System.Math.Pow(position.x - other.x, 2) + System.Math.Pow(position.y - other.y, 2));
+        }
+
+        public static Color32 MulColor32(Color32 c, byte f) {
+            c.r = (byte)Mathf.Clamp(c.r * f, 0, 255);
+            c.g = (byte)Mathf.Clamp(c.g * f, 0, 255);
+            c.b = (byte)Mathf.Clamp(c.b * f, 0, 255);
+            return c;
+        }
+
+        public static Color32 MulColor32(Color32 c, float f) {
+            c.r = (byte)Mathf.Clamp(c.r * f, 0, 255);
+            c.g = (byte)Mathf.Clamp(c.g * f, 0, 255);
+            c.b = (byte)Mathf.Clamp(c.b * f, 0, 255);
+            return c;
+        }
+
+        public static Color32 MulColor32(Color32 c, int f) {
+            c.r = (byte)Mathf.Clamp(c.r * f, 0, 255);
+            c.g = (byte)Mathf.Clamp(c.g * f, 0, 255);
+            c.b = (byte)Mathf.Clamp(c.b * f, 0, 255);
+            return c;
+        }
+
+        public static string Commafy(long value) {
+            if (value == 0)
+                return "0";
+            return string.Format(System.Globalization.CultureInfo.InvariantCulture, "{0:0,0}", value);
+        }
+
+        public static OperatingSystem GetCurrentOs() {
             if (OpenTibiaUnity.GameManager.IsRealTibia || OpenTibiaUnity.GameManager.IsOpenTibia)
                 return GetRealTibiaOS();
 
@@ -40,7 +77,7 @@
             return OperatingSystem.UnityLinux;
 #elif UNITY_IOS
             return OperatingSystem.UnityIOS;
-#elif UNITY_ANDROID
+#elif UNITY_ANDRO_id
             return OperatingSystem.UnityAndroid;
 #else
             return OperatingSystem.UnityUnknown;

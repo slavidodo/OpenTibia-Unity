@@ -5,214 +5,214 @@ using System.Linq;
 
 namespace OpenTibiaUnity.Core.WorldMap.Rendering
 {
-    internal class WorldMapRenderer {
-        private int m_DrawnCreaturesCount = 0;
-        private int m_DrawnTextualEffectsCount = 0;
-        private int m_MaxZPlane = 0;
-        private int m_PlayerZPlane = 0;
-        private float m_HangPixelX = 0;
-        private float m_HangPixelY = 0;
-        private int m_HangPatternX = 0;
-        private int m_HangPatternY = 0;
-        private int m_HangPatternZ = 0;
-        private float m_HighlightOpacity = Constants.HighlightMinOpacity;
-        private Vector3Int m_HelperCoordinate;
-        private Vector2Int m_HelperPoint;
-        private readonly int[] m_MinZPlane;
-        private float[] m_CachedHighlightOpacities;
+    public class WorldMapRenderer {
+        private int _drawnCreaturesCount = 0;
+        private int _drawnTextualEffectsCount = 0;
+        private int _maxZPlane = 0;
+        private int _playerZPlane = 0;
+        private float _hangPixelX = 0;
+        private float _hangPixelY = 0;
+        private int _hangPatternX = 0;
+        private int _hangPatternY = 0;
+        private int _hangPatternZ = 0;
+        private float _highlightOpacity = Constants.HighlightMinOpacity;
+        private Vector3Int _helperCoordinate;
+        private Vector2Int _helperPoint;
+        private readonly int[] _minZPlane;
+        private float[] _cachedHighlightOpacities;
 
-        private Vector2 m_ScreenZoom = new Vector2();
-        private Vector2 m_LayerZoom = new Vector2();
+        private Vector2 _screenZoom = new Vector2();
+        private Vector2 _layerZoom = new Vector2();
 
-        private int[] m_CreatureCount;
-        private readonly RenderAtom[][] m_CreatureField;
-        private readonly RenderAtom[] m_DrawnCreatures;
-        private readonly RenderAtom[] m_DrawnTextualEffects;
-        private List<Components.CreatureStatusPanel> m_CreaturesStatus;
-        private Creatures.Creature m_HighlightCreature;
+        private int[] _creatureCount;
+        private readonly RenderAtom[][] _creatureField;
+        private readonly RenderAtom[] _drawnCreatures;
+        private readonly RenderAtom[] _drawnTextualEffects;
+        private List<Components.CreatureStatusPanel> _creaturesStatus;
+        private Creatures.Creature _highlightCreature;
         
-        private TileCursor m_TileCursor = new TileCursor();
-        private Appearances.ObjectInstance m_PreviousHang = null;
-        private ILightmapRenderer m_LightmapRenderer = new MeshBasedLightmapRenderer();
-        private Appearances.Rendering.MarksView m_CreaturesMarksView = new Appearances.Rendering.MarksView(0);
+        private TileCursor _tileCursor = new TileCursor();
+        private Appearances.ObjectInstance _previousHang = null;
+        private LightmapRenderer _lightmapRenderer = new MeshBasedLightmapRenderer();
+        private Appearances.Rendering.MarksView _creaturesMarksView = new Appearances.Rendering.MarksView(0);
         
-        private WorldMapStorage m_WorldMapStorage { get => OpenTibiaUnity.WorldMapStorage; }
-        private Creatures.CreatureStorage m_CreatureStorage { get => OpenTibiaUnity.CreatureStorage; }
-        private Creatures.Player m_Player { get => OpenTibiaUnity.Player; }
-        private Options.OptionStorage m_OptionStorage { get => OpenTibiaUnity.OptionStorage; }
+        private WorldMapStorage _worldMapStorage { get => OpenTibiaUnity.WorldMapStorage; }
+        private Creatures.CreatureStorage _creatureStorage { get => OpenTibiaUnity.CreatureStorage; }
+        private Creatures.Player _player { get => OpenTibiaUnity.Player; }
+        private Options.OptionStorage _optionStorage { get => OpenTibiaUnity.OptionStorage; }
         
-        private Rect m_LastWorldMapLayerRect = Rect.zero;
-        private Rect m_ClipRect = Rect.zero;
-        private Rect m_UnclamppedClipRect = Rect.zero;
+        private Rect _lastWorldMapLayerRect = Rect.zero;
+        private Rect _blipRect = Rect.zero;
+        private Rect _unclamppedClipRect = Rect.zero;
 
-        private uint m_RenderCounter = 0; // initially the first render
-        private uint m_LastRenderCounter = 0;
-        private uint m_ClipRectRenderCounter = 0;
-        private float m_LastRenderTime = 0f;
+        private uint _renderCounter = 0; // initially the first render
+        private uint _lastRenderCounter = 0;
+        private uint _blipRectRenderCounter = 0;
+        private float _lastRenderTime = 0f;
 
-        internal int Framerate { get; private set; } = 0;
+        public int Framerate { get; private set; } = 0;
         
-        internal Vector3Int? HighlightTile { get; set; }
-        internal object HighlightObject { get; set; }
+        public Vector3Int? HighlightTile { get; set; }
+        public object HighlightObject { get; set; }
 
-        internal WorldMapRenderer() {
+        public WorldMapRenderer() {
             int mapCapacity = Constants.MapSizeX * Constants.MapSizeY;
 
-            m_MinZPlane = new int[mapCapacity];
-            m_CreatureField = new RenderAtom[mapCapacity][];
-            m_CreatureCount = new int[mapCapacity];
-            m_DrawnCreatures = new RenderAtom[mapCapacity * Constants.MapSizeW];
-            m_CreaturesStatus = new List<Components.CreatureStatusPanel>();
+            _minZPlane = new int[mapCapacity];
+            _creatureField = new RenderAtom[mapCapacity][];
+            _creatureCount = new int[mapCapacity];
+            _drawnCreatures = new RenderAtom[mapCapacity * Constants.MapSizeW];
+            _creaturesStatus = new List<Components.CreatureStatusPanel>();
 
             for (int i = 0; i < mapCapacity; i++) {
-                m_CreatureField[i] = new RenderAtom[Constants.MapSizeW];
+                _creatureField[i] = new RenderAtom[Constants.MapSizeW];
                 for (int j = 0; j < Constants.MapSizeW; j++)
-                    m_CreatureField[i][j] = new RenderAtom();
-                m_CreatureCount[i] = 0;
+                    _creatureField[i][j] = new RenderAtom();
+                _creatureCount[i] = 0;
             }
 
-            for (int i = 0; i < m_DrawnCreatures.Length; i++)
-                m_DrawnCreatures[i] = new RenderAtom();
+            for (int i = 0; i < _drawnCreatures.Length; i++)
+                _drawnCreatures[i] = new RenderAtom();
 
-            m_DrawnTextualEffects = new RenderAtom[Constants.NumEffects];
-            for (int i = 0; i < m_DrawnTextualEffects.Length; i++)
-                m_DrawnTextualEffects[i] = new RenderAtom();
+            _drawnTextualEffects = new RenderAtom[Constants.NumEffects];
+            for (int i = 0; i < _drawnTextualEffects.Length; i++)
+                _drawnTextualEffects[i] = new RenderAtom();
 
-            m_CreaturesMarksView.AddMarkToView(MarkType.ClientMapWindow, Constants.MarkThicknessBold);
-            m_CreaturesMarksView.AddMarkToView(MarkType.Permenant, Constants.MarkThicknessBold);
-            m_CreaturesMarksView.AddMarkToView(MarkType.OneSecondTemp, Constants.MarkThicknessBold);
+            _creaturesMarksView.AddMarkToView(MarkType.ClientMapWindow, Constants.MarkThicknessBold);
+            _creaturesMarksView.AddMarkToView(MarkType.Permenant, Constants.MarkThicknessBold);
+            _creaturesMarksView.AddMarkToView(MarkType.OneSecondTemp, Constants.MarkThicknessBold);
 
-            m_TileCursor.FrameDuration = 100;
+            _tileCursor.FrameDuration = 100;
 
-            m_CachedHighlightOpacities = new float[8 * 2 - 2];
+            _cachedHighlightOpacities = new float[8 * 2 - 2];
             for (int i = 0; i < 8; i++)
-                m_CachedHighlightOpacities[i] = Constants.HighlightMinOpacity + (i / 7f) * (Constants.HighlightMaxOpacity - Constants.HighlightMinOpacity);
+                _cachedHighlightOpacities[i] = Constants.HighlightMinOpacity + (i / 7f) * (Constants.HighlightMaxOpacity - Constants.HighlightMinOpacity);
             for (int i = 1; i < 7; i++)
-                m_CachedHighlightOpacities[7 + i] = Constants.HighlightMaxOpacity - (i / 7f) * (Constants.HighlightMaxOpacity - Constants.HighlightMinOpacity);
+                _cachedHighlightOpacities[7 + i] = Constants.HighlightMaxOpacity - (i / 7f) * (Constants.HighlightMaxOpacity - Constants.HighlightMinOpacity);
             
             // enable this if you intend to change the name during the game..
             // Creatures.Creature.onNameChange.AddListener(OnCreatureNameChange);
             Creatures.Creature.onSkillChange.AddListener(OnCreatureSkillChange);
         }
 
-        internal void DestroyUIElements() {
-            foreach (var panel in m_CreaturesStatus) {
+        public void DestroyUIElements() {
+            foreach (var panel in _creaturesStatus) {
                 if (panel && !panel.IsDestroyed())
                     UnityEngine.Object.Destroy(panel.gameObject);
             }
 
-            m_CreaturesStatus = new List<Components.CreatureStatusPanel>();
+            _creaturesStatus = new List<Components.CreatureStatusPanel>();
         }
         
-        internal Rect CalculateClipRect() {
-            if (m_ClipRectRenderCounter == m_RenderCounter)
-                return m_ClipRect;
+        public Rect CalculateClipRect() {
+            if (_blipRectRenderCounter == _renderCounter)
+                return _blipRect;
 
             float width = Constants.WorldMapRealWidth;
             float height = Constants.WorldMapRealHeight;
 
             // (0, 0) respects to the bottomleft
-            float x = 2 * Constants.FieldSize + m_Player.AnimationDelta.x;
-            float y = Constants.FieldSize - m_Player.AnimationDelta.y;
+            float x = 2 * Constants.FieldSize + _player.AnimationDelta.x;
+            float y = Constants.FieldSize - _player.AnimationDelta.y;
 
-            m_UnclamppedClipRect = new Rect(x, y, width, height);
+            _unclamppedClipRect = new Rect(x, y, width, height);
 
             width /= Constants.WorldMapScreenWidth;
             x /= Constants.WorldMapScreenWidth;
             height /= Constants.WorldMapScreenHeight;
             y /= Constants.WorldMapScreenHeight;
 
-            m_ClipRect = new Rect(x, y, width, height);
-            m_ClipRectRenderCounter = m_RenderCounter;
-            return m_ClipRect;
+            _blipRect = new Rect(x, y, width, height);
+            _blipRectRenderCounter = _renderCounter;
+            return _blipRect;
         }
 
-        internal RenderError Render(Rect worldMapLayerRect) {
-            if (m_WorldMapStorage == null || m_CreatureStorage == null || m_Player == null || !m_WorldMapStorage.Valid)
+        public RenderError Render(Rect worldMapLayerRect) {
+            if (_worldMapStorage == null || _creatureStorage == null || _player == null || !_worldMapStorage.Valid)
                 return RenderError.WorldMapNotValid;
 
-            m_LastWorldMapLayerRect = worldMapLayerRect;
-            if (m_LastWorldMapLayerRect.width < Constants.WorldMapMinimumWidth || m_LastWorldMapLayerRect.height < Constants.WorldMapMinimumHeight)
+            _lastWorldMapLayerRect = worldMapLayerRect;
+            if (_lastWorldMapLayerRect.width < Constants.WorldMapMinimumWidth || _lastWorldMapLayerRect.height < Constants.WorldMapMinimumHeight)
                 return RenderError.SizeNotEffecient;
 
             var screenSize = new Vector2(Screen.width, Screen.height);
-            m_ScreenZoom.Set(
+            _screenZoom.Set(
                 screenSize.x / Constants.WorldMapScreenWidth,
                 screenSize.y / Constants.WorldMapScreenHeight);
 
-            m_LayerZoom.Set(
-                    m_LastWorldMapLayerRect.width / Constants.WorldMapRealWidth,
-                    m_LastWorldMapLayerRect.height / Constants.WorldMapRealHeight);
+            _layerZoom.Set(
+                    _lastWorldMapLayerRect.width / Constants.WorldMapRealWidth,
+                    _lastWorldMapLayerRect.height / Constants.WorldMapRealHeight);
 
-            m_WorldMapStorage.Animate();
-            m_CreatureStorage.Animate();
-            m_HighlightOpacity = m_CachedHighlightOpacities[(OpenTibiaUnity.TicksMillis / 50) % m_CachedHighlightOpacities.Length];
+            _worldMapStorage.Animate();
+            _creatureStorage.Animate();
+            _highlightOpacity = _cachedHighlightOpacities[(OpenTibiaUnity.TicksMillis / 50) % _cachedHighlightOpacities.Length];
 
-            m_DrawnCreaturesCount = 0;
-            m_DrawnTextualEffectsCount = 0;
-            m_RenderCounter++;
+            _drawnCreaturesCount = 0;
+            _drawnTextualEffectsCount = 0;
+            _renderCounter++;
 
-            if (Time.time - m_LastRenderTime > 1f) {
-                Framerate = (int)((m_RenderCounter - m_LastRenderCounter) / (Time.time - m_LastRenderTime));
-                m_LastRenderTime = Time.time;
-                m_LastRenderCounter = m_RenderCounter;
+            if (Time.time - _lastRenderTime > 1f) {
+                Framerate = (int)((_renderCounter - _lastRenderCounter) / (Time.time - _lastRenderTime));
+                _lastRenderTime = Time.time;
+                _lastRenderCounter = _renderCounter;
             }
 
-            m_WorldMapStorage.ToMap(m_Player.Position, out m_HelperCoordinate);
-            m_PlayerZPlane = m_HelperCoordinate.z;
+            _worldMapStorage.ToMap(_player.Position, out _helperCoordinate);
+            _playerZPlane = _helperCoordinate.z;
 
             UpdateMinMaxZPlane();
 
             if (HighlightObject is Creatures.Creature tmpCreature)
-                m_HighlightCreature = tmpCreature;
+                _highlightCreature = tmpCreature;
             else if (HighlightObject is Appearances.ObjectInstance tmpObject && tmpObject.IsCreature)
-                m_HighlightCreature = m_CreatureStorage.GetCreature(tmpObject.Data);
+                _highlightCreature = _creatureStorage.GetCreature(tmpObject.Data);
             else
-                m_HighlightCreature = null;
+                _highlightCreature = null;
 
-            for (int z = 0; z <= m_MaxZPlane; z++) {
+            for (int z = 0; z <= _maxZPlane; z++) {
                 UpdateFloorCreatures(z);
-                InternalDrawFields(z);
+                publicDrawFields(z);
             }
             
-            var lightmapTexture = m_LightmapRenderer.CreateLightmap();
+            var lightmapTexture = _lightmapRenderer.CreateLightmap();
             var lightmapRect = new Rect() {
-                x = (Constants.FieldSize / 2) * m_ScreenZoom.y,
-                y = (Constants.FieldSize / 2) * m_ScreenZoom.y,
-                width = Constants.WorldMapScreenWidth * m_ScreenZoom.x,
-                height = Constants.WorldMapScreenHeight * m_ScreenZoom.y,
+                x = (Constants.FieldSize / 2) * _screenZoom.y,
+                y = (Constants.FieldSize / 2) * _screenZoom.y,
+                width = Constants.WorldMapScreenWidth * _screenZoom.x,
+                height = Constants.WorldMapScreenHeight * _screenZoom.y,
             };
 
             Graphics.DrawTexture(lightmapRect, lightmapTexture, OpenTibiaUnity.GameManager.LightSurfaceMaterial);
 
             InternelDrawCreaturesStatus();
-            InternalUpdateTextualEffects();
-            InternalUpdateOnscreenMessages();
+            publicUpdateTextualEffects();
+            publicUpdateOnscreenMessages();
             
             return RenderError.None;
         }
         
         private void UpdateMinMaxZPlane() {
-            if (!m_WorldMapStorage.CacheUnsight) {
-                m_MaxZPlane = Constants.MapSizeZ - 1;
-                while (m_MaxZPlane > m_PlayerZPlane && m_WorldMapStorage.GetObjectPerLayer(m_MaxZPlane) <= 0) {
-                    m_MaxZPlane--;
+            if (!_worldMapStorage.CacheUnsight) {
+                _maxZPlane = Constants.MapSizeZ - 1;
+                while (_maxZPlane > _playerZPlane && _worldMapStorage.GetObjectPerLayer(_maxZPlane) <= 0) {
+                    _maxZPlane--;
                 }
 
                 for (int x = Constants.PlayerOffsetX - 1; x <= Constants.PlayerOffsetX + 1; x++) {
                     for (int y = Constants.PlayerOffsetY - 1; y <= Constants.PlayerOffsetY + 1; y++) {
-                        if (!(x != Constants.PlayerOffsetX && y != Constants.PlayerOffsetY || !m_WorldMapStorage.IsLookPossible(x, y, m_PlayerZPlane))) {
-                            int z = m_PlayerZPlane + 1;
-                            while (z - 1 < m_MaxZPlane && x + m_PlayerZPlane - z >= 0 && y + m_PlayerZPlane - z >= 0) {
-                                var @object = m_WorldMapStorage.GetObject(x + m_PlayerZPlane - z, y + m_PlayerZPlane - z, z, 0);
+                        if (!(x != Constants.PlayerOffsetX && y != Constants.PlayerOffsetY || !_worldMapStorage.IsLookPossible(x, y, _playerZPlane))) {
+                            int z = _playerZPlane + 1;
+                            while (z - 1 < _maxZPlane && x + _playerZPlane - z >= 0 && y + _playerZPlane - z >= 0) {
+                                var @object = _worldMapStorage.GetObject(x + _playerZPlane - z, y + _playerZPlane - z, z, 0);
                                 if (!!@object && !!@object.Type && @object.Type.IsGround && !@object.Type.IsDontHide) {
-                                    m_MaxZPlane = z - 1;
+                                    _maxZPlane = z - 1;
                                     continue;
                                 }
 
-                                @object = m_WorldMapStorage.GetObject(x, y, z, 0);
+                                @object = _worldMapStorage.GetObject(x, y, z, 0);
                                 if (!!@object && !!@object.Type && (@object.Type.IsGround || @object.Type.IsBottom) && !@object.Type.IsDontHide) {
-                                    m_MaxZPlane = z - 1;
+                                    _maxZPlane = z - 1;
                                     continue;
                                 }
                                 z++;
@@ -221,23 +221,23 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                     }
                 }
 
-                m_WorldMapStorage.CacheUnsight = true;
+                _worldMapStorage.CacheUnsight = true;
             }
 
-            if (!m_WorldMapStorage.CacheFullbank) {
+            if (!_worldMapStorage.CacheFullbank) {
                 for (int y = 0; y < Constants.MapSizeY; y++) {
                     for (int x = 0; x < Constants.MapSizeX; x++) {
                         int index = y * Constants.MapSizeX + x;
 
-                        m_MinZPlane[index] = 0;
-                        for (int z = m_MaxZPlane; z > 0; z--) {
+                        _minZPlane[index] = 0;
+                        for (int z = _maxZPlane; z > 0; z--) {
                             bool covered = true, done = false;
                             for (int ix = 0; ix < 2 && !done; ix++) {
                                 for (int iy = 0; iy < 2 && !done; iy++) {
                                     int mx = x + ix;
                                     int my = y + iy;
                                     if (mx < Constants.MapSizeX && my < Constants.MapSizeY) {
-                                        Appearances.ObjectInstance @object = m_WorldMapStorage.GetObject(mx, my, z, 0);
+                                        Appearances.ObjectInstance @object = _worldMapStorage.GetObject(mx, my, z, 0);
                                         if (!@object || (!!@object.Type && !@object.Type.IsFullGround)) {
                                             covered = false;
                                             done = true;
@@ -247,50 +247,50 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                             }
                             
                             if (covered)
-                                m_MinZPlane[index] = z;
+                                _minZPlane[index] = z;
                         }
                     }
                 }
 
-                m_WorldMapStorage.CacheFullbank = true;
+                _worldMapStorage.CacheFullbank = true;
             }
         }
         
         private void UpdateFloorCreatures(int z) {
             RenderAtom renderAtom = null;
             
-            bool aboveGround = m_Player.Position.z <= 7;
-            float optionsLevelSeparator = m_OptionStorage.LightLevelSeparator / 100f;
-            int defaultBrightness = m_WorldMapStorage.AmbientCurrentBrightness;
-            int brightness = aboveGround ? m_WorldMapStorage.AmbientCurrentBrightness : 0;
-            for (int i = 0; i < m_CreatureCount.Length; i++) {
-                m_CreatureCount[i] = 0;
+            bool aboveGround = _player.Position.z <= 7;
+            float optionsLevelSeparator = _optionStorage.LightLevelSeparator / 100f;
+            int defaultBrightness = _worldMapStorage.AmbientCurrentBrightness;
+            int brightness = aboveGround ? _worldMapStorage.AmbientCurrentBrightness : 0;
+            for (int i = 0; i < _creatureCount.Length; i++) {
+                _creatureCount[i] = 0;
             }
             
             for (int x = 0; x < Constants.MapSizeX; x++) {
                 for (int y = 0; y < Constants.MapSizeY; y++) {
-                    Field field = m_WorldMapStorage.GetField(x, y, z);
-                    if (m_OptionStorage.ShowLightEffects) {
-                        var colorIndex = m_LightmapRenderer.ToColorIndex(x, y);
-                        if (z == m_PlayerZPlane && z > 0)
-                            m_LightmapRenderer[colorIndex] = ILightmapRenderer.MulColor32(m_LightmapRenderer[colorIndex], optionsLevelSeparator);
+                    Field field = _worldMapStorage.GetField(x, y, z);
+                    if (_optionStorage.ShowLightEffects) {
+                        var colorIndex = _lightmapRenderer.ToColorIndex(x, y);
+                        if (z == _playerZPlane && z > 0)
+                            _lightmapRenderer[colorIndex] = Utils.Utility.MulColor32(_lightmapRenderer[colorIndex], optionsLevelSeparator);
 
                         Appearances.ObjectInstance @object;
                         if (z == 0 || (@object = field.ObjectsRenderer[0]) != null && @object.Type.IsGround) {
-                            var color = m_LightmapRenderer[colorIndex];
-                            m_LightmapRenderer.SetFieldBrightness(x, y, brightness, aboveGround);
+                            var color = _lightmapRenderer[colorIndex];
+                            _lightmapRenderer.SetFieldBrightness(x, y, brightness, aboveGround);
                             if (z > 0 && field.CacheTranslucent) {
-                                color = ILightmapRenderer.MulColor32(color, optionsLevelSeparator);
-                                var alterColor = m_LightmapRenderer[colorIndex];
+                                color = Utils.Utility.MulColor32(color, optionsLevelSeparator);
+                                var alterColor = _lightmapRenderer[colorIndex];
                                 color.r = Math.Max(color.r, alterColor.r);
                                 color.g = Math.Max(color.g, alterColor.g);
                                 color.b = Math.Max(color.b, alterColor.b);
-                                m_LightmapRenderer[colorIndex] = color;
+                                _lightmapRenderer[colorIndex] = color;
                             }
                         }
 
-                        if (x > 0 && y > 0 && z < 7 && z == m_PlayerZPlane + m_WorldMapStorage.Position.z - 8 && m_WorldMapStorage.IsTranslucent(x - 1, y - 1, z + 1))
-                            m_LightmapRenderer.SetFieldBrightness(x, y, defaultBrightness, aboveGround);
+                        if (x > 0 && y > 0 && z < 7 && z == _playerZPlane + _worldMapStorage.Position.z - 8 && _worldMapStorage.IsTranslucent(x - 1, y - 1, z + 1))
+                            _lightmapRenderer.SetFieldBrightness(x, y, defaultBrightness, aboveGround);
                     }
                     
                     for (int i = field.ObjectsCount - 1; i >= 0; i--) {
@@ -298,7 +298,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                         if (!@object.IsCreature)
                             continue;
 
-                        var creature = m_CreatureStorage.GetCreature(@object.Data);
+                        var creature = _creatureStorage.GetCreature(@object.Data);
                         if (!creature)
                             continue;
 
@@ -316,18 +316,18 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 
                         int fieldIndex = fieldY * Constants.MapSizeX + fieldX;
                         if (!(fieldIndex < 0 || fieldIndex >= Constants.MapSizeX * Constants.MapSizeY)) {
-                            RenderAtom[] fieldAtoms = m_CreatureField[fieldIndex];
+                            RenderAtom[] fieldAtoms = _creatureField[fieldIndex];
                             int j = 0;
-                            while (j < m_CreatureCount[fieldIndex] && !!(renderAtom = fieldAtoms[j]) && (renderAtom.y < positionY || renderAtom.y == positionY && renderAtom.x <= positionX))
+                            while (j < _creatureCount[fieldIndex] && !!(renderAtom = fieldAtoms[j]) && (renderAtom.y < positionY || renderAtom.y == positionY && renderAtom.x <= positionX))
                                 j++;
 
                             if (j < Constants.MapSizeZ) {
-                                if (m_CreatureCount[fieldIndex] < Constants.MapSizeW) {
-                                    m_CreatureCount[fieldIndex]++;
+                                if (_creatureCount[fieldIndex] < Constants.MapSizeW) {
+                                    _creatureCount[fieldIndex]++;
                                 }
 
-                                renderAtom = fieldAtoms[m_CreatureCount[fieldIndex] - 1];
-                                for (int k = m_CreatureCount[fieldIndex] - 1; k > j; k--)
+                                renderAtom = fieldAtoms[_creatureCount[fieldIndex] - 1];
+                                for (int k = _creatureCount[fieldIndex] - 1; k > j; k--)
                                     fieldAtoms[k] = fieldAtoms[k - 1];
 
                                 fieldAtoms[j] = renderAtom;
@@ -339,43 +339,43 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             }
         }
         
-        private void InternalDrawFields(int z) {
-            m_HelperCoordinate.Set(0, 0, z);
-            m_WorldMapStorage.ToAbsolute(m_HelperCoordinate, out m_HelperCoordinate);
+        private void publicDrawFields(int z) {
+            _helperCoordinate.Set(0, 0, z);
+            _worldMapStorage.ToAbsolute(_helperCoordinate, out _helperCoordinate);
             int size = Constants.MapSizeX + Constants.MapSizeY;
             for (int i = 0; i < size; i++) {
                 int y = Math.Max(i - Constants.MapSizeX + 1, 0);
                 int x = Math.Min(i, Constants.MapSizeX - 1);
                 while (x >= 0 && y < Constants.MapSizeY) {
-                    InternalDrawField(
+                    publicDrawField(
                         (x + 1) * Constants.FieldSize,
                         (y + 1) * Constants.FieldSize,
-                        m_HelperCoordinate.x + x,
-                        m_HelperCoordinate.y + y,
-                        m_HelperCoordinate.z,
+                        _helperCoordinate.x + x,
+                        _helperCoordinate.y + y,
+                        _helperCoordinate.z,
                         x, y, z,
                         true);
                     x--;
                     y++;
                 }
                 
-                if (m_OptionStorage.HighlightMouseTarget && HighlightTile.HasValue && HighlightTile.Value.z == z) {
-                    m_TileCursor.DrawTo((HighlightTile.Value.x + 1f) * Constants.FieldSize, (HighlightTile.Value.y + 1f) * Constants.FieldSize, m_ScreenZoom, OpenTibiaUnity.TicksMillis);
+                if (_optionStorage.HighlightMouseTarget && HighlightTile.HasValue && HighlightTile.Value.z == z) {
+                    _tileCursor.DrawTo((HighlightTile.Value.x + 1f) * Constants.FieldSize, (HighlightTile.Value.y + 1f) * Constants.FieldSize, _screenZoom, OpenTibiaUnity.TicksMillis);
                 }
             }
         }
 
-        private void InternalDrawField(float rectX, float rectY, int absoluteX, int absoluteY, int absoluteZ, int positionX, int positionY, int positionZ, bool drawLyingObjects) {
+        private void publicDrawField(float rectX, float rectY, int absoluteX, int absoluteY, int absoluteZ, int positionX, int positionY, int positionZ, bool drawLyingObjects) {
 
-            Field field = m_WorldMapStorage.GetField(positionX, positionY, positionZ);
+            Field field = _worldMapStorage.GetField(positionX, positionY, positionZ);
 
             int objCount = field.ObjectsCount;
             int index = positionY * Constants.MapSizeX + positionX;
             
-            bool isCovered = positionZ > m_MinZPlane[index]
-                || (positionX == 0 || positionZ >= m_MinZPlane[index - 1])
-                || (positionY == 0 || positionZ >= m_MinZPlane[index - Constants.MapSizeX])
-                || (positionX == 0 && positionY == 0 || positionZ >= m_MinZPlane[index - Constants.MapSizeX - 1]);
+            bool isCovered = positionZ > _minZPlane[index]
+                || (positionX == 0 || positionZ >= _minZPlane[index - 1])
+                || (positionY == 0 || positionZ >= _minZPlane[index - Constants.MapSizeX])
+                || (positionX == 0 && positionY == 0 || positionZ >= _minZPlane[index - Constants.MapSizeX - 1]);
 
             int objectsHeight = 0;
             Appearances.ObjectInstance previousHang = null;
@@ -392,18 +392,18 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                     if (@object.IsCreature || type.IsTop)
                         break;
 
-                    if (m_OptionStorage.ShowLightEffects && type.IsLight) {
+                    if (_optionStorage.ShowLightEffects && type.IsLight) {
                         // check how correct those are
                         int lightX = ((int)rectX - objectsHeight - (int)type.OffsetX) / Constants.FieldSize;
                         int lightY = ((int)rectY - objectsHeight - (int)type.OffsetY) / Constants.FieldSize;
                         Color32 color32 = Colors.ColorFrom8Bit((byte)type.LightColor);
 
-                        m_LightmapRenderer.SetLightSource(lightX, lightY, positionZ, type.Brightness, color32);
+                        _lightmapRenderer.SetLightSource(lightX, lightY, positionZ, type.Brightness, color32);
                     }
 
                     var screenPosition = new Vector2(rectX - objectsHeight, rectY - objectsHeight);
                     bool highlighted = HighlightObject is Appearances.ObjectInstance && HighlightObject == @object;
-                    @object.DrawTo(screenPosition, m_ScreenZoom, absoluteX, absoluteY, absoluteZ, highlighted, m_HighlightOpacity);
+                    @object.DrawTo(screenPosition, _screenZoom, absoluteX, absoluteY, absoluteZ, highlighted, _highlightOpacity);
 
                     isLying = isLying || type.IsLyingCorpse;
                     if (type.IsHangable && @object.Hang == Appearances.AppearanceInstance.HookSouth)
@@ -416,43 +416,43 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                 // lying tile, draw lying tile
                 if (isLying) {
                     if (positionX > 0 && positionY > 0) {
-                        InternalDrawField(rectX - Constants.FieldSize, rectY - Constants.FieldSize, absoluteX - 1, absoluteY - 1, absoluteZ, positionX - 1, positionY - 1, positionZ, false);
+                        publicDrawField(rectX - Constants.FieldSize, rectY - Constants.FieldSize, absoluteX - 1, absoluteY - 1, absoluteZ, positionX - 1, positionY - 1, positionZ, false);
                     } else if (positionX > 0) {
-                        InternalDrawField(rectX - Constants.FieldSize, rectY, absoluteX - 1, absoluteY, absoluteZ, positionX - 1, positionY, positionZ, false);
+                        publicDrawField(rectX - Constants.FieldSize, rectY, absoluteX - 1, absoluteY, absoluteZ, positionX - 1, positionY, positionZ, false);
                     } else if (positionY > 0) {
-                        InternalDrawField(rectX, rectY - Constants.FieldSize, absoluteX, absoluteY - 1, absoluteZ, positionX, positionY - 1, positionZ, false);
+                        publicDrawField(rectX, rectY - Constants.FieldSize, absoluteX, absoluteY - 1, absoluteZ, positionX, positionY - 1, positionZ, false);
                     }
                 }
 
                 // draw hang object
-                if (!!m_PreviousHang) {
-                    var screenPosition = new Vector2(m_HangPixelX, m_HangPixelY);
-                    bool highlighted = HighlightObject is Appearances.ObjectInstance && HighlightObject == m_PreviousHang;
-                    m_PreviousHang.DrawTo(screenPosition, m_ScreenZoom, m_HangPatternX, m_HangPatternY, m_HangPatternZ, highlighted, m_HighlightOpacity);
-                    m_PreviousHang = null;
+                if (!!_previousHang) {
+                    var screenPosition = new Vector2(_hangPixelX, _hangPixelY);
+                    bool highlighted = HighlightObject is Appearances.ObjectInstance && HighlightObject == _previousHang;
+                    _previousHang.DrawTo(screenPosition, _screenZoom, _hangPatternX, _hangPatternY, _hangPatternZ, highlighted, _highlightOpacity);
+                    _previousHang = null;
                 }
 
                 if (!!previousHang) {
-                    m_PreviousHang = previousHang;
-                    m_HangPixelX = rectX;
-                    m_HangPixelY = rectY;
-                    m_HangPatternX = absoluteX;
-                    m_HangPatternY = absoluteY;
-                    m_HangPatternZ = absoluteZ;
+                    _previousHang = previousHang;
+                    _hangPixelX = rectX;
+                    _hangPixelY = rectY;
+                    _hangPatternX = absoluteX;
+                    _hangPatternY = absoluteY;
+                    _hangPatternZ = absoluteZ;
                 }
             }
 
             // draw creatures
-            InternalFieldDrawCreatures(positionX, positionY, positionZ, drawLyingObjects, isCovered, objectsHeight);
+            publicFieldDrawCreatures(positionX, positionY, positionZ, drawLyingObjects, isCovered, objectsHeight);
 
             // draw effects
-            InternalFieldDrawEffects(rectX, rectY, absoluteX, absoluteY, absoluteZ, positionZ, drawLyingObjects, field, objectsHeight);
+            publicFieldDrawEffects(rectX, rectY, absoluteX, absoluteY, absoluteZ, positionZ, drawLyingObjects, field, objectsHeight);
 
             // TODO: this should be drawn on a separate render texture (atmosphere texture)
             // this is likely to be fog and such effects
             //if (!!field.EnvironmentalEffect) {
             //    var screenPosition = new Vector2(rectX, rectY);
-            //    field.EnvironmentalEffect.DrawTo(screenPosition, m_ScreenZoom, absoluteX, absoluteY, absoluteZ);
+            //    field.EnvironmentalEffect.DrawTo(screenPosition, _screenZoom, absoluteX, absoluteY, absoluteZ);
             //}
             
             if (drawLyingObjects) {
@@ -461,15 +461,15 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                     if (@object.Type.IsTop) {
                         var screenPosition = new Vector2(rectX, rectY);
                         bool highlighted = HighlightObject is Appearances.ObjectInstance && HighlightObject == @object;
-                        @object.DrawTo(screenPosition, m_ScreenZoom, absoluteX, absoluteY, absoluteZ, highlighted, m_HighlightOpacity);
+                        @object.DrawTo(screenPosition, _screenZoom, absoluteX, absoluteY, absoluteZ, highlighted, _highlightOpacity);
                     }
                 }
             }
         }
 
-        private void InternalFieldDrawCreatures(int positionX, int positionY, int positionZ, bool drawLyingObjects, bool isCovered, int objectsHeight) {
-            RenderAtom[] renderAtomArray = m_CreatureField[positionY * Constants.MapSizeX + positionX];
-            int creatureCount = m_CreatureCount[positionY * Constants.MapSizeX + positionX];
+        private void publicFieldDrawCreatures(int positionX, int positionY, int positionZ, bool drawLyingObjects, bool isCovered, int objectsHeight) {
+            RenderAtom[] renderAtomArray = _creatureField[positionY * Constants.MapSizeX + positionX];
+            int creatureCount = _creatureCount[positionY * Constants.MapSizeX + positionX];
             for (int i = 0; i < creatureCount; i++) {
                 RenderAtom renderAtom = null;
                 Creatures.Creature creature = null;
@@ -481,54 +481,54 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                     renderAtom.y -= objectsHeight;
                 }
 
-                bool highlighted = !!m_HighlightCreature && m_HighlightCreature.ID == creature.ID;
+                bool highlighted = !!_highlightCreature && _highlightCreature.Id == creature.Id;
 
                 // marks
-                m_CreaturesMarksView.DrawMarks(creature.Marks, renderAtom.x, renderAtom.y, m_ScreenZoom);
+                _creaturesMarksView.DrawMarks(creature.Marks, renderAtom.x, renderAtom.y, _screenZoom);
 
-                m_HelperPoint.Set(0, 0);
+                _helperPoint.Set(0, 0);
                 if (isCovered && !!creature.MountOutfit) {
-                    m_HelperPoint += creature.MountOutfit.Type.Offset;
-                    var screenPosition = new Vector2(renderAtom.x + m_HelperPoint.x, renderAtom.y + m_HelperPoint.y);
-                    creature.MountOutfit.DrawTo(screenPosition, m_ScreenZoom, (int)creature.Direction, 0, 0, highlighted, m_HighlightOpacity);
+                    _helperPoint += creature.MountOutfit.Type.Offset;
+                    var screenPosition = new Vector2(renderAtom.x + _helperPoint.x, renderAtom.y + _helperPoint.y);
+                    creature.MountOutfit.DrawTo(screenPosition, _screenZoom, (int)creature.Direction, 0, 0, highlighted, _highlightOpacity);
                 }
 
                 if (isCovered) {
-                    m_HelperPoint += creature.Outfit.Type.Offset;
-                    var screenPosition = new Vector2(renderAtom.x + m_HelperPoint.x, renderAtom.y + m_HelperPoint.y);
-                    creature.Outfit.DrawTo(screenPosition, m_ScreenZoom, (int)creature.Direction, 0, !!creature.MountOutfit ? 1 : 0, highlighted, m_HighlightOpacity);
+                    _helperPoint += creature.Outfit.Type.Offset;
+                    var screenPosition = new Vector2(renderAtom.x + _helperPoint.x, renderAtom.y + _helperPoint.y);
+                    creature.Outfit.DrawTo(screenPosition, _screenZoom, (int)creature.Direction, 0, !!creature.MountOutfit ? 1 : 0, highlighted, _highlightOpacity);
                 }
 
-                if (positionZ == m_PlayerZPlane && (m_CreatureStorage.IsOpponent(creature) || creature.ID == m_Player.ID)) {
-                    m_DrawnCreatures[m_DrawnCreaturesCount].Assign(renderAtom);
-                    m_DrawnCreaturesCount++;
+                if (positionZ == _playerZPlane && (_creatureStorage.IsOpponent(creature) || creature.Id == _player.Id)) {
+                    _drawnCreatures[_drawnCreaturesCount].Assign(renderAtom);
+                    _drawnCreaturesCount++;
                 }
 
-                if (isCovered && drawLyingObjects && m_OptionStorage.ShowLightEffects) {
+                if (isCovered && drawLyingObjects && _optionStorage.ShowLightEffects) {
                     int lightX = renderAtom.x / Constants.FieldSize;
                     int lightY = renderAtom.y / Constants.FieldSize;
 
-                    m_LightmapRenderer.SetLightSource(lightX, lightY, positionZ, (uint)creature.Brightness, creature.LightColor);
+                    _lightmapRenderer.SetLightSource(lightX, lightY, positionZ, (uint)creature.Brightness, creature.LightColor);
 
                     if (!!creature.MountOutfit && creature.MountOutfit.Type.IsLight) {
                         var color = Colors.ColorFrom8Bit((byte)creature.MountOutfit.Type.LightColor);
-                        m_LightmapRenderer.SetLightSource(lightX, lightY, positionZ, creature.MountOutfit.Type.Brightness, color);
+                        _lightmapRenderer.SetLightSource(lightX, lightY, positionZ, creature.MountOutfit.Type.Brightness, color);
                     }
 
                     if (!!creature.Outfit && creature.Outfit.Type.IsLight) {
                         var color = Colors.ColorFrom8Bit((byte)creature.Outfit.Type.LightColor);
-                        m_LightmapRenderer.SetLightSource(lightX, lightY, positionZ, creature.Outfit.Type.Brightness, color);
+                        _lightmapRenderer.SetLightSource(lightX, lightY, positionZ, creature.Outfit.Type.Brightness, color);
                     }
 
-                    if (creature.ID == m_Player.ID && creature.Brightness < 2) {
+                    if (creature.Id == _player.Id && creature.Brightness < 2) {
                         var color = new Color32(255, 255, 255, 255);
-                        m_LightmapRenderer.SetLightSource(lightX, lightY, positionZ, 2, color);
+                        _lightmapRenderer.SetLightSource(lightX, lightY, positionZ, 2, color);
                     }
                 }
             }
         }
 
-        private void InternalFieldDrawEffects(float rectX, float rectY, int absoluteX, int absoluteY, int absoluteZ, int positionZ, bool drawLyingObjects, Field field, int objectsHeight) {
+        private void publicFieldDrawEffects(float rectX, float rectY, int absoluteX, int absoluteY, int absoluteZ, int positionZ, bool drawLyingObjects, Field field, int objectsHeight) {
             int effectRectX = (int)rectX - objectsHeight;
             int effectRectY = (int)rectY - objectsHeight;
             int effectLightX = effectRectX / Constants.FieldSize;
@@ -544,7 +544,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 
                 if (effect is Appearances.TextualEffectInstance textualEffect) {
                     if (drawLyingObjects) {
-                        var renderAtom = m_DrawnTextualEffects[m_DrawnTextualEffectsCount];
+                        var renderAtom = _drawnTextualEffects[_drawnTextualEffectsCount];
                         int x = effectRectX - Constants.FieldSize / 2 + totalTextualEffectsWidth;
                         int y = effectRectY - Constants.FieldSize - 2 * textualEffect.Phase;
                         renderAtom.Update(textualEffect, x, y, 0);
@@ -553,26 +553,26 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                             totalTextualEffectsWidth += (int)textualEffect.Width;
 
                         if (totalTextualEffectsWidth < 2 * Constants.FieldSize) {
-                            m_DrawnTextualEffectsCount++;
+                            _drawnTextualEffectsCount++;
                             lastTextualEffectY = renderAtom.y;
                         }
                     }
                 } else if (effect is Appearances.MissileInstance missileEffect) {
                     var screenPosition = new Vector2(effectRectX + missileEffect.AnimationDelta.x, effectRectY + missileEffect.AnimationDelta.y);
-                    effect.DrawTo(screenPosition, m_ScreenZoom, absoluteX, absoluteY, absoluteZ);
+                    effect.DrawTo(screenPosition, _screenZoom, absoluteX, absoluteY, absoluteZ);
 
-                    if (drawLyingObjects && m_OptionStorage.ShowLightEffects && effect.Type.IsLight) {
+                    if (drawLyingObjects && _optionStorage.ShowLightEffects && effect.Type.IsLight) {
                         var color = Colors.ColorFrom8Bit((byte)effect.Type.LightColor);
-                        m_LightmapRenderer.SetLightSource(effectLightX, effectLightY, positionZ, effect.Type.Brightness, color);
+                        _lightmapRenderer.SetLightSource(effectLightX, effectLightY, positionZ, effect.Type.Brightness, color);
                     }
                 } else { // EffectInstance
                     var screenPosition = new Vector2(effectRectX, effectRectY);
-                    effect.DrawTo(screenPosition, m_ScreenZoom, absoluteX, absoluteY, absoluteZ);
+                    effect.DrawTo(screenPosition, _screenZoom, absoluteX, absoluteY, absoluteZ);
 
-                    if (drawLyingObjects && m_OptionStorage.ShowLightEffects && effect.Type.IsLight) {
+                    if (drawLyingObjects && _optionStorage.ShowLightEffects && effect.Type.IsLight) {
                         uint activeBrightness = (uint)((Math.Min(effect.Phase, effect.Type.FrameGroups[0].SpriteInfo.Phases + 1 - effect.Phase) * effect.Type.Brightness + 2) / 3);
                         var color = Colors.ColorFrom8Bit((byte)effect.Type.LightColor);
-                        m_LightmapRenderer.SetLightSource(effectLightX, effectLightY, positionZ, Math.Min(activeBrightness, effect.Type.Brightness), color);
+                        _lightmapRenderer.SetLightSource(effectLightX, effectLightY, positionZ, Math.Min(activeBrightness, effect.Type.Brightness), color);
                     }
                 }
             }
@@ -582,17 +582,17 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             var optionStorage = OpenTibiaUnity.OptionStorage;
             
             int myPlayerIndex = -1;
-            for (int i = 0; i < m_DrawnCreaturesCount; i++) {
-                var renderAtom = m_DrawnCreatures[i];
+            for (int i = 0; i < _drawnCreaturesCount; i++) {
+                var renderAtom = _drawnCreatures[i];
                 var creature = renderAtom.Object as Creatures.Creature;
                 if (!!creature) {
-                    if (creature == m_Player) {
+                    if (creature == _player) {
                         myPlayerIndex = i;
                         continue;
                     }
                     
-                    bool isExplicitlyVisible = renderAtom.z >= m_MinZPlane[renderAtom.fieldY * Constants.MapSizeX + renderAtom.fieldX];
-                    InternalDrawCreatureStatusClassic(
+                    bool isExplicitlyVisible = renderAtom.z >= _minZPlane[renderAtom.fieldY * Constants.MapSizeX + renderAtom.fieldX];
+                    publicDrawCreatureStatusClassic(
                         renderAtom, renderAtom.x, renderAtom.y, isExplicitlyVisible,
                         optionStorage.ShowNameForOtherCreatures,
                         optionStorage.ShowHealthForOtherCreatures && !creature.IsNPC,
@@ -602,16 +602,16 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             }
 
             if (myPlayerIndex != -1) {
-                var renderAtom = m_DrawnCreatures[myPlayerIndex];
-                InternalDrawCreatureStatusClassic(renderAtom, renderAtom.x, renderAtom.y, true,
+                var renderAtom = _drawnCreatures[myPlayerIndex];
+                publicDrawCreatureStatusClassic(renderAtom, renderAtom.x, renderAtom.y, true,
                     optionStorage.ShowNameForOwnCharacter,
                     optionStorage.ShowHealthForOwnCharacter,
                     optionStorage.ShowManaForOwnCharacter && OpenTibiaUnity.GameManager.ClientVersion >= 1100,
                     optionStorage.ShowMarksForOwnCharacter);
             }
 
-            m_CreaturesStatus = m_CreaturesStatus.Where((x) => {
-                if (x.CachedRenderCount == m_RenderCounter)
+            _creaturesStatus = _creaturesStatus.Where((x) => {
+                if (x.CachedRenderCount == _renderCounter)
                     return true;
 
                 UnityEngine.Object.Destroy(x.gameObject);
@@ -619,78 +619,78 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             }).ToList();
         }
 
-        private void InternalUpdateTextualEffects() {
-            for (int i = 0; i < m_DrawnTextualEffectsCount; i++) {
-                var renderAtom = m_DrawnTextualEffects[i];
+        private void publicUpdateTextualEffects() {
+            for (int i = 0; i < _drawnTextualEffectsCount; i++) {
+                var renderAtom = _drawnTextualEffects[i];
                 if (renderAtom.Object is Appearances.TextualEffectInstance textualEffect) {
-                    Vector3Int mapPosition = m_WorldMapStorage.ToMapClosest(new Vector3Int(renderAtom.x, renderAtom.y, renderAtom.z));
-                    float x = (renderAtom.x - m_Player.AnimationDelta.x - Constants.FieldSize) * m_LayerZoom.x;
-                    float y = (renderAtom.y - m_Player.AnimationDelta.y - Constants.FieldSize) * m_LayerZoom.y;
+                    Vector3Int mapPosition = _worldMapStorage.ToMapClosest(new Vector3Int(renderAtom.x, renderAtom.y, renderAtom.z));
+                    float x = (renderAtom.x - _player.AnimationDelta.x - Constants.FieldSize) * _layerZoom.x;
+                    float y = (renderAtom.y - _player.AnimationDelta.y - Constants.FieldSize) * _layerZoom.y;
                     textualEffect.UpdateTextMeshPosition(x, -y);
                 }
             }
         }
         
-        private void InternalUpdateOnscreenMessages() {
-            if (m_WorldMapStorage.LayoutOnscreenMessages) {
+        private void publicUpdateOnscreenMessages() {
+            if (_worldMapStorage.LayoutOnscreenMessages) {
                 LayoutOnscreenMessages();
-                m_WorldMapStorage.LayoutOnscreenMessages = false;
+                _worldMapStorage.LayoutOnscreenMessages = false;
             }
 
             int animationDeltaX = 0;
             int animationDeltaY = 0;
 
-            if (m_Player != null) {
-                animationDeltaX = m_Player.AnimationDelta.x;
-                animationDeltaY = m_Player.AnimationDelta.y;
+            if (_player != null) {
+                animationDeltaX = _player.AnimationDelta.x;
+                animationDeltaY = _player.AnimationDelta.y;
             }
 
-            var messageBoxes = m_WorldMapStorage.MessageBoxes;
+            var messageBoxes = _worldMapStorage.MessageBoxes;
             var length = messageBoxes.Count - 1;
             while (length >= (int)MessageScreenTargets.BoxCoordinate) {
                 var messageBox = messageBoxes[length];
-                Vector3Int mapPosition = m_WorldMapStorage.ToMapClosest(messageBox.Position.Value);
-                float x = ((mapPosition.x - 0.5f) * Constants.FieldSize - m_Player.AnimationDelta.x) * m_LayerZoom.x;
-                float y = ((mapPosition.y - 1f) * Constants.FieldSize - m_Player.AnimationDelta.y) * m_LayerZoom.y;
+                Vector3Int mapPosition = _worldMapStorage.ToMapClosest(messageBox.Position.Value);
+                float x = ((mapPosition.x - 0.5f) * Constants.FieldSize - _player.AnimationDelta.x) * _layerZoom.x;
+                float y = ((mapPosition.y - 1f) * Constants.FieldSize - _player.AnimationDelta.y) * _layerZoom.y;
                 messageBox.UpdateTextMeshPosition(x, -y);
                 length--;
             }
         }
 
-        private void InternalDrawCreatureStatusClassic(RenderAtom renderAtom, float rectX, float rectY, bool isVisible, bool drawNames, bool drawHealth, bool drawMana, bool drawFlags) {
+        private void publicDrawCreatureStatusClassic(RenderAtom renderAtom, float rectX, float rectY, bool isVisible, bool drawNames, bool drawHealth, bool drawMana, bool drawFlags) {
             var creature = renderAtom.Object as Creatures.Creature;
-            if (creature.Position.z != m_Player.Position.z) {
-                RemoveCreatureStatusPanel(creature.ID);
+            if (creature.Position.z != _player.Position.z) {
+                RemoveCreatureStatusPanel(creature.Id);
                 return;
             }
 
             var statusPanel = AddOrGetCreatureStatusPanel(creature);
-            statusPanel.CachedRenderCount = m_RenderCounter;
-            statusPanel.UpdateCreatureMisc(isVisible, m_LightmapRenderer.CalculateCreatureBrightnessFactor(creature, creature.ID == m_Player.ID));
+            statusPanel.CachedRenderCount = _renderCounter;
+            statusPanel.UpdateCreatureMisc(isVisible, _lightmapRenderer.CalculateCreatureBrightnessFactor(creature, creature.Id == _player.Id));
             statusPanel.SetDrawingProperties(drawNames, drawHealth, drawMana);
             statusPanel.SetFlags(drawFlags, creature.PartyFlag, creature.PKFlag, creature.SummonTypeFlag, creature.SpeechCategory, creature.GuildFlag);
 
             // the animation delta is already applied earlier on creatures check
             // but we need to add the animation delta of the screen
-            float x = renderAtom.x - 2 * Constants.FieldSize - m_Player.AnimationDelta.x + 27 / 2f;
-            float y = renderAtom.y - 2 * Constants.FieldSize - m_Player.AnimationDelta.y - 8;
+            float x = renderAtom.x - 2 * Constants.FieldSize - _player.AnimationDelta.x + 27 / 2f;
+            float y = renderAtom.y - 2 * Constants.FieldSize - _player.AnimationDelta.y - 8;
             
-            statusPanel.rectTransform.anchoredPosition = new Vector2(x * m_LayerZoom.x, -y * m_LayerZoom.y);
+            statusPanel.rectTransform.anchoredPosition = new Vector2(x * _layerZoom.x, -y * _layerZoom.y);
         }
 
-        private void InternalDrawCreatureStatusHUD(RenderAtom renderAtom, int rectX, int rectY, bool isVisible, bool drawNames, bool drawHealth, bool drawMana, bool drawFlags) {
+        private void publicDrawCreatureStatusHUD(RenderAtom renderAtom, int rectX, int rectY, bool isVisible, bool drawNames, bool drawHealth, bool drawMana, bool drawFlags) {
             // TODO
         }
 
         private Components.CreatureStatusPanel AddOrGetCreatureStatusPanel(Creatures.Creature creature) {
             int index = 0;
-            int lastIndex = m_CreaturesStatus.Count - 1;
+            int lastIndex = _creaturesStatus.Count - 1;
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
-                var foundPanel = m_CreaturesStatus[tmpIndex];
-                if (foundPanel.CreatureID < creature.ID)
+                var foundPanel = _creaturesStatus[tmpIndex];
+                if (foundPanel.Creature_id < creature.Id)
                     index = tmpIndex + 1;
-                else if (foundPanel.CreatureID > creature.ID)
+                else if (foundPanel.Creature_id > creature.Id)
                     lastIndex = tmpIndex - 1;
                 else
                     return foundPanel;
@@ -699,25 +699,25 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             var panel = UnityEngine.Object.Instantiate(OpenTibiaUnity.GameManager.CreatureStatusPanelPrefab,
                     OpenTibiaUnity.GameManager.CreatureStatusContainer);
 
-            panel.CreatureID = creature.ID;
+            panel.Creature_id = creature.Id;
             panel.name = "CreatureStatus_" + creature.Name;
             panel.UpdateProperties(creature.Name, creature.HealthPercent, creature.ManaPercent);
 
-            m_CreaturesStatus.Insert(index, panel);
+            _creaturesStatus.Insert(index, panel);
             return panel;
         }
 
-        private bool RemoveCreatureStatusPanel(uint ID) {
-            int lastIndex = m_CreaturesStatus.Count - 1;
+        private bool RemoveCreatureStatusPanel(uint _id) {
+            int lastIndex = _creaturesStatus.Count - 1;
             int index = 0;
             int foundIndex = -1;
             Components.CreatureStatusPanel foundPanel = null;
             while (index < lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
-                foundPanel = m_CreaturesStatus[tmpIndex];
-                if (foundPanel.CreatureID > ID) {
+                foundPanel = _creaturesStatus[tmpIndex];
+                if (foundPanel.Creature_id > _id) {
                     index = tmpIndex + 1;
-                } else if (foundPanel.CreatureID < ID) {
+                } else if (foundPanel.Creature_id < _id) {
                     lastIndex = tmpIndex - 1;
                 } else {
                     foundIndex = tmpIndex;
@@ -728,20 +728,20 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             if (foundIndex == -1)
                 return false;
 
-            m_CreaturesStatus.RemoveAt(foundIndex);
+            _creaturesStatus.RemoveAt(foundIndex);
             UnityEngine.Object.Destroy(foundPanel.gameObject);
             return true;
         }
 
-        internal Components.CreatureStatusPanel FindCreatureStatusPanel(Creatures.Creature creature) {
+        public Components.CreatureStatusPanel FindCreatureStatusPanel(Creatures.Creature creature) {
             int index = 0;
-            int lastIndex = m_CreaturesStatus.Count - 1;
+            int lastIndex = _creaturesStatus.Count - 1;
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
-                var foundPanel = m_CreaturesStatus[tmpIndex];
-                if (foundPanel.CreatureID < creature.ID)
+                var foundPanel = _creaturesStatus[tmpIndex];
+                if (foundPanel.Creature_id < creature.Id)
                     index = tmpIndex + 1;
-                else if (foundPanel.CreatureID > creature.ID)
+                else if (foundPanel.Creature_id > creature.Id)
                     lastIndex = tmpIndex - 1;
                 else
                     return foundPanel;
@@ -751,7 +751,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         }
         
         private void LayoutOnscreenMessages() {
-            foreach (var messageBox in m_WorldMapStorage.MessageBoxes) {
+            foreach (var messageBox in _worldMapStorage.MessageBoxes) {
                 if (messageBox.Visible) {
                     messageBox.ResetTextMesh();
                     if (!messageBox.Empty)
@@ -760,13 +760,13 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             }
         }
 
-        internal void OnCreatureNameChange(Creatures.Creature creature, string newName, string oldName) {
+        public void OnCreatureNameChange(Creatures.Creature creature, string newName, string oldName) {
             Components.CreatureStatusPanel statusPanel = FindCreatureStatusPanel(creature);
             if (statusPanel)
                 statusPanel.SetCharacterName(newName);
         }
 
-        internal void OnCreatureSkillChange(Creatures.Creature creature, SkillType skillType, Creatures.Skill skill) {
+        public void OnCreatureSkillChange(Creatures.Creature creature, SkillType skillType, Creatures.Skill skill) {
             Components.CreatureStatusPanel statusPanel = FindCreatureStatusPanel(creature);
             if (!statusPanel)
                 return;
@@ -782,20 +782,20 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             }
         }
 
-        internal Vector3Int? PointToMap(Vector2 point) {
-            int x = (int)(point.x / (Constants.FieldSize * m_LayerZoom.x)) + 1;
-            int y = (int)(point.y / (Constants.FieldSize * m_LayerZoom.y)) + 1;
+        public Vector3Int? PointToMap(Vector2 point) {
+            int x = (int)(point.x / (Constants.FieldSize * _layerZoom.x)) + 1;
+            int y = (int)(point.y / (Constants.FieldSize * _layerZoom.y)) + 1;
 
             if (x < 0 || x > Constants.MapWidth || y < 0 || y > Constants.MapHeight)
                 return null;
 
             Vector3Int mapPosition = new Vector3Int(x, y, 0);
 
-            int minZ = m_MinZPlane[y * Constants.MapSizeX + x];
-            int z = m_MaxZPlane;
+            int minZ = _minZPlane[y * Constants.MapSizeX + x];
+            int z = _maxZPlane;
 
             while (z > minZ) {
-                var field = m_WorldMapStorage.GetField(x, y, z);
+                var field = _worldMapStorage.GetField(x, y, z);
                 for (int i = 0; i < field.ObjectsCount; i++) {
                     var type = field.ObjectsRenderer[i].Type;
                     if ((type.IsGround || type.IsBottom) && !type.IsIgnoreLook) {
@@ -817,15 +817,15 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             return mapPosition;
         }
 
-        internal Vector3Int? PointToAbsolute(Vector2 point) {
+        public Vector3Int? PointToAbsolute(Vector2 point) {
             var mapPosition = PointToMap(point);
             if (mapPosition.HasValue)
-                return m_WorldMapStorage.ToAbsolute(mapPosition.Value);
+                return _worldMapStorage.ToAbsolute(mapPosition.Value);
             return null;
         }
 
-        internal Creatures.Creature PointToCreature(Vector2 point, bool restrictedToPlayerZPlane) {
-            if (m_WorldMapStorage == null || (restrictedToPlayerZPlane && !m_Player))
+        public Creatures.Creature PointToCreature(Vector2 point, bool restrictedToPlayerZPlane) {
+            if (_worldMapStorage == null || (restrictedToPlayerZPlane && !_player))
                 return null;
             
             Vector3Int? tmpPosition = PointToMap(point);
@@ -834,9 +834,9 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             
             var mapPosition = tmpPosition.Value;
             if (restrictedToPlayerZPlane)
-                mapPosition.z = m_WorldMapStorage.ToMap(m_Player.Position).z;
+                mapPosition.z = _worldMapStorage.ToMap(_player.Position).z;
             
-            var field = m_WorldMapStorage.GetField(mapPosition);
+            var field = _worldMapStorage.GetField(mapPosition);
             if (!field)
                 return null;
 
@@ -844,7 +844,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             if (index == -1)
                 return null;
             
-            return m_CreatureStorage.GetCreature(@object.Data);
+            return _creatureStorage.GetCreature(@object.Data);
         }
     } // class 
 } // ns

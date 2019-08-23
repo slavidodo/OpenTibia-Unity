@@ -8,7 +8,7 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Inventory
 {
-    internal class InventoryWindow : Core.Components.Base.MiniWindow, IUseWidget, IMoveWidget, IWidgetContainerWidget
+    public class InventoryWindow : Core.Components.Base.MiniWindow, IUseWidget, IMoveWidget, IWidgetContainerWidget
     {
         private const int ModernMaximizedWindowHeight = 158;
         private const int LegacyMaximizedWindowHeight = ModernMaximizedWindowHeight + 26;
@@ -19,121 +19,121 @@ namespace OpenTibiaUnity.Modules.Inventory
         private static Core.Options.OptionStorage OptionStorage { get => OpenTibiaUnity.OptionStorage; }
 
         #region Components
-        [SerializeField] private Container.ItemView m_HeadItemView = null;
-        [SerializeField] private Container.ItemView m_TorsoItemView = null;
-        [SerializeField] private Container.ItemView m_LegsItemView = null;
-        [SerializeField] private Container.ItemView m_FeetItemView = null;
-        [SerializeField] private Container.ItemView m_NeckItemView = null;
-        [SerializeField] private Container.ItemView m_LeftHandItemView = null;
-        [SerializeField] private Container.ItemView m_FingerItemView = null;
-        [SerializeField] private Container.ItemView m_BackItemView = null;
-        [SerializeField] private Container.ItemView m_RightHandItemView = null;
-        [SerializeField] private Container.ItemView m_HipItemView = null;
+        [SerializeField] private Container.ItemView _headItemView = null;
+        [SerializeField] private Container.ItemView _torsoItemView = null;
+        [SerializeField] private Container.ItemView _legsItemView = null;
+        [SerializeField] private Container.ItemView _feetItemView = null;
+        [SerializeField] private Container.ItemView _neckItemView = null;
+        [SerializeField] private Container.ItemView _leftHandItemView = null;
+        [SerializeField] private Container.ItemView _fingerItemView = null;
+        [SerializeField] private Container.ItemView _backItemView = null;
+        [SerializeField] private Container.ItemView _rightHandItemView = null;
+        [SerializeField] private Container.ItemView _hipItemView = null;
 
-        [SerializeField] private Texture2D m_HeadDefaultTexture = null;
-        [SerializeField] private Texture2D m_TorsoDefaultTexture = null;
-        [SerializeField] private Texture2D m_LegsDefaultTexture = null;
-        [SerializeField] private Texture2D m_FeetDefaultTexture = null;
-        [SerializeField] private Texture2D m_NeckDefaultTexture = null;
-        [SerializeField] private Texture2D m_LeftHandDefaultTexture = null;
-        [SerializeField] private Texture2D m_FingerDefaultTexture = null;
-        [SerializeField] private Texture2D m_BackpackDefaultTexture = null;
-        [SerializeField] private Texture2D m_RightHandDefaultTexture = null;
-        [SerializeField] private Texture2D m_HipDefaultTexture = null;
+        [SerializeField] private Texture2D _headDefaultTexture = null;
+        [SerializeField] private Texture2D _torsoDefaultTexture = null;
+        [SerializeField] private Texture2D _legsDefaultTexture = null;
+        [SerializeField] private Texture2D _feetDefaultTexture = null;
+        [SerializeField] private Texture2D _neckDefaultTexture = null;
+        [SerializeField] private Texture2D _leftHandDefaultTexture = null;
+        [SerializeField] private Texture2D _fingerDefaultTexture = null;
+        [SerializeField] private Texture2D _backpackDefaultTexture = null;
+        [SerializeField] private Texture2D _rightHandDefaultTexture = null;
+        [SerializeField] private Texture2D _hipDefaultTexture = null;
         
-        [SerializeField] private TMPro.TextMeshProUGUI m_CapacityLabel = null;
-        [SerializeField] private TMPro.TextMeshProUGUI m_SoulPointsLabel = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _capacityLabel = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _soulPointsLabel = null;
 
-        [SerializeField] private Toggle m_ChaseOffToggle = null;
-        [SerializeField] private Toggle m_ChaseOnToggle = null;
+        [SerializeField] private Toggle _chaseOffToggle = null;
+        [SerializeField] private Toggle _chaseOnToggle = null;
 
-        [SerializeField] private Toggle m_ExpertModeToggle = null;
-        [SerializeField] private Toggle m_ExpertModeSmallToggle = null;
+        [SerializeField] private Toggle _expertModeToggle = null;
+        [SerializeField] private Toggle _expertModeSmallToggle = null;
 
-        [SerializeField] private Toggle m_PvpDoveToggle = null;
-        [SerializeField] private Toggle m_PvpWhiteHandToggle = null;
-        [SerializeField] private Toggle m_PvpYellowHandToggle = null;
-        [SerializeField] private Toggle m_PvpRedFistToggle = null;
+        [SerializeField] private Toggle _pvpDoveToggle = null;
+        [SerializeField] private Toggle _pvpWhiteHandToggle = null;
+        [SerializeField] private Toggle _pvpYellowHandToggle = null;
+        [SerializeField] private Toggle _pvpRedFistToggle = null;
 
-        [SerializeField] private Toggle m_AttackOffensiveToggle = null;
-        [SerializeField] private Toggle m_AttackBalancedToggle = null;
-        [SerializeField] private Toggle m_AttackDefensiveToggle = null;
+        [SerializeField] private Toggle _attackOffensiveToggle = null;
+        [SerializeField] private Toggle _attackBalancedToggle = null;
+        [SerializeField] private Toggle _attackDefensiveToggle = null;
 
-        [SerializeField] private Toggle m_SecureModeToggle = null;
-        [SerializeField] private Toggle m_SecureModeLegacyToggle = null;
+        [SerializeField] private Toggle _secureModeToggle = null;
+        [SerializeField] private Toggle _secureModeLegacyToggle = null;
 
-        [SerializeField] private Button m_StopButton = null;
-        [SerializeField] private Button m_ToggleStyleButton = null;
-        [SerializeField] private Button m_StoreInboxButton = null;
-        [SerializeField] private Button m_StoreInboxLegacyButton = null;
-        [SerializeField] private Button m_StoreButton = null;
-        [SerializeField] private Button m_StopLegacyButton = null;
-        [SerializeField] private Button m_QuestsLegacyButton = null;
-        [SerializeField] private Button m_OptionsLegacyButton = null;
-        [SerializeField] private Button m_HelpLegacyButton = null;
-        [SerializeField] private Button m_LogoutLegacyButton = null;
+        [SerializeField] private Button _stopButton = null;
+        [SerializeField] private Button _toggleStyleButton = null;
+        [SerializeField] private Button _storeInboxButton = null;
+        [SerializeField] private Button _storeInboxLegacyButton = null;
+        [SerializeField] private Button _storeButton = null;
+        [SerializeField] private Button _stopLegacyButton = null;
+        [SerializeField] private Button _questsLegacyButton = null;
+        [SerializeField] private Button _optionsLegacyButton = null;
+        [SerializeField] private Button _helpLegacyButton = null;
+        [SerializeField] private Button _logoutLegacyButton = null;
 
-        [SerializeField] private Toggle m_SkillsLegacyToggle = null;
-        [SerializeField] private Toggle m_BattleLegacyToggle = null;
-        [SerializeField] private Toggle m_BuddyLegacyToggle = null;
+        [SerializeField] private Toggle _skillsLegacyToggle = null;
+        [SerializeField] private Toggle _battleLegacyToggle = null;
+        [SerializeField] private Toggle _buddyLegacyToggle = null;
 
-        [SerializeField] private RectTransform m_ConditionsPanel = null;
+        [SerializeField] private RectTransform _conditionsPanel = null;
 
-        [SerializeField] private Sprite m_MinimizeSpriteNormal = null;
-        [SerializeField] private Sprite m_MinimizeSpritePressed = null;
-        [SerializeField] private Sprite m_MaximizeSpriteNormal = null;
-        [SerializeField] private Sprite m_MaximizeSpritePressed = null;
+        [SerializeField] private Sprite _minimizeSpriteNormal = null;
+        [SerializeField] private Sprite _minimizeSpritePressed = null;
+        [SerializeField] private Sprite _maximizeSpriteNormal = null;
+        [SerializeField] private Sprite _maximizeSpritePressed = null;
         #endregion
 
-        public Toggle skillsToggle { get => m_SkillsLegacyToggle; }
-        public Toggle battleToggle { get => m_BattleLegacyToggle; }
-        public Toggle buddyToggle { get => m_BuddyLegacyToggle; }
+        public Toggle skillsToggle { get => _skillsLegacyToggle; }
+        public Toggle battleToggle { get => _battleLegacyToggle; }
+        public Toggle buddyToggle { get => _buddyLegacyToggle; }
 
         protected MiniWindows.MiniWindowButtons miniWindowButtons {
             get => OpenTibiaUnity.GameManager.GetModule<MiniWindows.MiniWindowButtons>();
         }
 
-        private int m_SlotUnderMouse = -1;
-        private bool m_IsMinimized = false;
-        private RenderTexture m_SlotsRenderTexture;
-        private ObjectDragImpl<InventoryWindow> m_DragHandler;
-        private bool m_HandlingExpertPvPToggle = false;
+        private int _slotUnderMouse = -1;
+        private bool _isMinimized = false;
+        private RenderTexture _slotsRenderTexture;
+        private ObjectDragImpl<InventoryWindow> _dragHandler;
+        private bool _handlingExpertPvPToggle = false;
 
         protected override void Awake() {
             base.Awake();
             BodyContainerView.onSlotChange.AddListener(OnInventorySlotChange);
             Creature.onSkillChange.AddListener(OnSkillChange);
 
-            m_SlotsRenderTexture = new RenderTexture(Constants.FieldSize * (int)ClothSlots.Hip, Constants.FieldSize, 0, RenderTextureFormat.ARGB32);
-            m_DragHandler = new ObjectDragImpl<InventoryWindow>(this);
+            _slotsRenderTexture = new RenderTexture(Constants.FieldSize * (int)ClothSlots.Hip, Constants.FieldSize, 0, RenderTextureFormat.ARGB32);
+            _dragHandler = new ObjectDragImpl<InventoryWindow>(this);
             ObjectMultiUseHandler.RegisterContainer(this);
 
-            OpenTibiaUnity.InputHandler.AddMouseUpListener(Core.Utility.EventImplPriority.Default, OnMouseUp);
+            OpenTibiaUnity.InputHandler.AddMouseUpListener(Core.Utils.EventImplPriority.Default, OnMouseUp);
         }
 
         protected override void Start() {
             base.Start();
 
-            m_HeadItemView.onPointerEnter.AddListener(OnItemPointerEnter);
-            m_HeadItemView.onPointerExit.AddListener(OnItemPointerExit);
-            m_NeckItemView.onPointerEnter.AddListener(OnItemPointerEnter);
-            m_NeckItemView.onPointerExit.AddListener(OnItemPointerExit);
-            m_BackItemView.onPointerEnter.AddListener(OnItemPointerEnter);
-            m_BackItemView.onPointerExit.AddListener(OnItemPointerExit);
-            m_TorsoItemView.onPointerEnter.AddListener(OnItemPointerEnter);
-            m_TorsoItemView.onPointerExit.AddListener(OnItemPointerExit);
-            m_RightHandItemView.onPointerEnter.AddListener(OnItemPointerEnter);
-            m_RightHandItemView.onPointerExit.AddListener(OnItemPointerExit);
-            m_LeftHandItemView.onPointerEnter.AddListener(OnItemPointerEnter);
-            m_LeftHandItemView.onPointerExit.AddListener(OnItemPointerExit);
-            m_LegsItemView.onPointerEnter.AddListener(OnItemPointerEnter);
-            m_LegsItemView.onPointerExit.AddListener(OnItemPointerExit);
-            m_FeetItemView.onPointerEnter.AddListener(OnItemPointerEnter);
-            m_FeetItemView.onPointerExit.AddListener(OnItemPointerExit);
-            m_FingerItemView.onPointerEnter.AddListener(OnItemPointerEnter);
-            m_FingerItemView.onPointerExit.AddListener(OnItemPointerExit);
-            m_HipItemView.onPointerEnter.AddListener(OnItemPointerEnter);
-            m_HipItemView.onPointerExit.AddListener(OnItemPointerExit);
+            _headItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            _headItemView.onPointerExit.AddListener(OnItemPointerExit);
+            _neckItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            _neckItemView.onPointerExit.AddListener(OnItemPointerExit);
+            _backItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            _backItemView.onPointerExit.AddListener(OnItemPointerExit);
+            _torsoItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            _torsoItemView.onPointerExit.AddListener(OnItemPointerExit);
+            _rightHandItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            _rightHandItemView.onPointerExit.AddListener(OnItemPointerExit);
+            _leftHandItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            _leftHandItemView.onPointerExit.AddListener(OnItemPointerExit);
+            _legsItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            _legsItemView.onPointerExit.AddListener(OnItemPointerExit);
+            _feetItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            _feetItemView.onPointerExit.AddListener(OnItemPointerExit);
+            _fingerItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            _fingerItemView.onPointerExit.AddListener(OnItemPointerExit);
+            _hipItemView.onPointerEnter.AddListener(OnItemPointerEnter);
+            _hipItemView.onPointerExit.AddListener(OnItemPointerExit);
 
             OpenTibiaUnity.GameManager.onTacticsChangeEvent.AddListener((attackMode, chaseMode, secureMode, pvpMode) => {
                 SetAttackMode(attackMode, false, true);
@@ -142,35 +142,35 @@ namespace OpenTibiaUnity.Modules.Inventory
                 SetPvPMode(pvpMode, false, true);
             });
 
-            m_ChaseOffToggle.onValueChanged.AddListener((value) => { if (value) SetChaseMode(CombatChaseModes.Off, true, false); });
-            m_ChaseOnToggle.onValueChanged.AddListener((value) => { if (value) SetChaseMode(CombatChaseModes.On, true, false); });
+            _chaseOffToggle.onValueChanged.AddListener((value) => { if (value) SetChaseMode(CombatChaseModes.Off, true, false); });
+            _chaseOnToggle.onValueChanged.AddListener((value) => { if (value) SetChaseMode(CombatChaseModes.On, true, false); });
 
-            m_AttackOffensiveToggle.onValueChanged.AddListener((value) => { if (value) SetAttackMode(CombatAttackModes.Offensive, true, false); });
-            m_AttackBalancedToggle.onValueChanged.AddListener((value) => { if (value) SetAttackMode(CombatAttackModes.Balanced, true, false); });
-            m_AttackDefensiveToggle.onValueChanged.AddListener((value) => { if (value) SetAttackMode(CombatAttackModes.Defensive, true, false); });
+            _attackOffensiveToggle.onValueChanged.AddListener((value) => { if (value) SetAttackMode(CombatAttackModes.Offensive, true, false); });
+            _attackBalancedToggle.onValueChanged.AddListener((value) => { if (value) SetAttackMode(CombatAttackModes.Balanced, true, false); });
+            _attackDefensiveToggle.onValueChanged.AddListener((value) => { if (value) SetAttackMode(CombatAttackModes.Defensive, true, false); });
 
-            m_PvpDoveToggle.onValueChanged.AddListener((value) => { if (value) SetPvPMode(CombatPvPModes.Dove, true, false); });
-            m_PvpWhiteHandToggle.onValueChanged.AddListener((value) => { if (value) SetPvPMode(CombatPvPModes.WhiteHand, true, false); });
-            m_PvpYellowHandToggle.onValueChanged.AddListener((value) => { if (value) SetPvPMode(CombatPvPModes.YellowHand, true, false); });
-            m_PvpRedFistToggle.onValueChanged.AddListener((value) => { if (value) SetPvPMode(CombatPvPModes.RedFist, true, false); });
+            _pvpDoveToggle.onValueChanged.AddListener((value) => { if (value) SetPvPMode(CombatPvPModes.Dove, true, false); });
+            _pvpWhiteHandToggle.onValueChanged.AddListener((value) => { if (value) SetPvPMode(CombatPvPModes.WhiteHand, true, false); });
+            _pvpYellowHandToggle.onValueChanged.AddListener((value) => { if (value) SetPvPMode(CombatPvPModes.YellowHand, true, false); });
+            _pvpRedFistToggle.onValueChanged.AddListener((value) => { if (value) SetPvPMode(CombatPvPModes.RedFist, true, false); });
 
-            m_SecureModeToggle.onValueChanged.AddListener((value) => { SetSecureMode(!value, true, false); });
-            m_SecureModeLegacyToggle.onValueChanged.AddListener((value) => { SetSecureMode(!value, true, false); });
+            _secureModeToggle.onValueChanged.AddListener((value) => { SetSecureMode(!value, true, false); });
+            _secureModeLegacyToggle.onValueChanged.AddListener((value) => { SetSecureMode(!value, true, false); });
 
-            m_ExpertModeToggle.onValueChanged.AddListener(OnExpertPvPToggleValueChanged);
-            m_ExpertModeSmallToggle.onValueChanged.AddListener(OnExpertPvPToggleValueChanged);
+            _expertModeToggle.onValueChanged.AddListener(OnExpertPvPToggleValueChanged);
+            _expertModeSmallToggle.onValueChanged.AddListener(OnExpertPvPToggleValueChanged);
 
-            m_StopButton.onClick.AddListener(() => OpenTibiaUnity.Player?.StopAutowalk(false));
-            m_StopLegacyButton.onClick.AddListener(() => OpenTibiaUnity.Player?.StopAutowalk(false));
-            m_ToggleStyleButton.onClick.AddListener(ToggleStyle);
+            _stopButton.onClick.AddListener(() => OpenTibiaUnity.Player?.StopAutowalk(false));
+            _stopLegacyButton.onClick.AddListener(() => OpenTibiaUnity.Player?.StopAutowalk(false));
+            _toggleStyleButton.onClick.AddListener(ToggleStyle);
 
-            m_SkillsLegacyToggle.onValueChanged.AddListener(miniWindowButtons.OnSkillsToggleValueChanged);
-            m_BattleLegacyToggle.onValueChanged.AddListener(miniWindowButtons.OnBattleToggleValueChanged);
-            m_BuddyLegacyToggle.onValueChanged.AddListener(miniWindowButtons.OnBuddyToggleValueChanged);
-            m_QuestsLegacyButton.onClick.AddListener(miniWindowButtons.OnQuestsButtonClicked);
-            m_OptionsLegacyButton.onClick.AddListener(miniWindowButtons.OnOptionsButtonClicked);
-            m_HelpLegacyButton.onClick.AddListener(miniWindowButtons.OnHelpButtonClicked);
-            m_LogoutLegacyButton.onClick.AddListener(miniWindowButtons.OnLogoutButtonClicked);
+            _skillsLegacyToggle.onValueChanged.AddListener(miniWindowButtons.OnSkillsToggleValueChanged);
+            _battleLegacyToggle.onValueChanged.AddListener(miniWindowButtons.OnBattleToggleValueChanged);
+            _buddyLegacyToggle.onValueChanged.AddListener(miniWindowButtons.OnBuddyToggleValueChanged);
+            _questsLegacyButton.onClick.AddListener(miniWindowButtons.OnQuestsButtonClicked);
+            _optionsLegacyButton.onClick.AddListener(miniWindowButtons.OnOptionsButtonClicked);
+            _helpLegacyButton.onClick.AddListener(miniWindowButtons.OnHelpButtonClicked);
+            _logoutLegacyButton.onClick.AddListener(miniWindowButtons.OnLogoutButtonClicked);
         }
 
         private void OnGUI() {
@@ -178,12 +178,12 @@ namespace OpenTibiaUnity.Modules.Inventory
                 return;
 
             var gameManager = OpenTibiaUnity.GameManager;
-            InternalStartMouseAction(Input.mousePosition, MouseButton.None, false, true);
+            publicStartMouseAction(Input.mousePosition, MouseButton.None, false, true);
 
-            Vector2 zoom = new Vector2(Screen.width / (float)m_SlotsRenderTexture.width, Screen.height / (float)m_SlotsRenderTexture.height);
+            Vector2 zoom = new Vector2(Screen.width / (float)_slotsRenderTexture.width, Screen.height / (float)_slotsRenderTexture.height);
 
-            m_SlotsRenderTexture.Release();
-            RenderTexture.active = m_SlotsRenderTexture;
+            _slotsRenderTexture.Release();
+            RenderTexture.active = _slotsRenderTexture;
             for (int i = 0; i < (int)ClothSlots.Hip; i++) {
                 var @object = BodyContainerView.Objects[i];
                 if (@object) {
@@ -198,17 +198,17 @@ namespace OpenTibiaUnity.Modules.Inventory
         protected override void OnDestroy() {
             base.OnDestroy();
 
-            m_SlotsRenderTexture.Release();
+            _slotsRenderTexture.Release();
         }
 
         public void OnMouseUp(Event e, MouseButton mouseButton, bool repeat) {
-            if (InternalStartMouseAction(e.mousePosition, mouseButton, true, false))
+            if (publicStartMouseAction(e.mousePosition, mouseButton, true, false))
                 e.Use();
         }
 
-        private bool InternalStartMouseAction(Vector3 mousePosition, MouseButton mouseButton, bool applyAction = false, bool updateCursor = false) {
+        private bool publicStartMouseAction(Vector3 mousePosition, MouseButton mouseButton, bool applyAction = false, bool updateCursor = false) {
             var gameManager = OpenTibiaUnity.GameManager;
-            if (!m_MouseCursorOverRenderer || !gameManager.GameCanvas.gameObject.activeSelf || gameManager.GamePanelBlocker.gameObject.activeSelf)
+            if (!_mouseCursorOverRenderer || !gameManager.GameCanvas.gameObject.activeSelf || gameManager.GamePanelBlocker.gameObject.activeSelf)
                 return false;
 
             var @object = GetObjectUnderMouse();
@@ -292,7 +292,7 @@ namespace OpenTibiaUnity.Modules.Inventory
                 OpenTibiaUnity.GameManager.CursorController.SetCursorState(action, CursorPriority.Medium);
 
             if (applyAction) {
-                var absolutePosition = new Vector3Int(65535, m_SlotUnderMouse, 0);
+                var absolutePosition = new Vector3Int(65535, _slotUnderMouse, 0);
                 switch (action) {
                     case AppearanceActions.None: break;
                     case AppearanceActions.ContextMenu:
@@ -328,32 +328,32 @@ namespace OpenTibiaUnity.Modules.Inventory
             int newHeight = hasExpertPvp ? ModernMaximizedWindowHeight : LegacyMaximizedWindowHeight;
             if (hasLegacyStoreInbox) {
                 newHeight += 14;
-                m_StopButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(-5.0f, 14.0f);
+                _stopButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(-5.0f, 14.0f);
             } else {
-                m_StopButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(-5.0f, 0.0f);
+                _stopButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(-5.0f, 0.0f);
             }
 
             GetComponent<LayoutElement>().minHeight = newHeight;
 
-            m_StopButton.gameObject.SetActive(hasExpertPvp);
-            m_StoreInboxButton.gameObject.SetActive(hasStoreInbox && !hasLegacyStoreInbox);
-            m_StoreInboxLegacyButton.gameObject.SetActive(hasLegacyStoreInbox);
-            m_StoreButton.gameObject.SetActive(hasStoreButton);
-            m_StopLegacyButton.gameObject.SetActive(!hasExpertPvp);
-            m_QuestsLegacyButton.gameObject.SetActive(!hasExpertPvp);
-            m_OptionsLegacyButton.gameObject.SetActive(!hasExpertPvp);
-            m_HelpLegacyButton.gameObject.SetActive(!hasExpertPvp);
-            m_LogoutLegacyButton.gameObject.SetActive(!hasExpertPvp);
-            m_SkillsLegacyToggle.gameObject.SetActive(!hasExpertPvp);
-            m_BattleLegacyToggle.gameObject.SetActive(!hasExpertPvp);
-            m_BuddyLegacyToggle.gameObject.SetActive(!hasExpertPvp);
+            _stopButton.gameObject.SetActive(hasExpertPvp);
+            _storeInboxButton.gameObject.SetActive(hasStoreInbox && !hasLegacyStoreInbox);
+            _storeInboxLegacyButton.gameObject.SetActive(hasLegacyStoreInbox);
+            _storeButton.gameObject.SetActive(hasStoreButton);
+            _stopLegacyButton.gameObject.SetActive(!hasExpertPvp);
+            _questsLegacyButton.gameObject.SetActive(!hasExpertPvp);
+            _optionsLegacyButton.gameObject.SetActive(!hasExpertPvp);
+            _helpLegacyButton.gameObject.SetActive(!hasExpertPvp);
+            _logoutLegacyButton.gameObject.SetActive(!hasExpertPvp);
+            _skillsLegacyToggle.gameObject.SetActive(!hasExpertPvp);
+            _battleLegacyToggle.gameObject.SetActive(!hasExpertPvp);
+            _buddyLegacyToggle.gameObject.SetActive(!hasExpertPvp);
 
-            m_SecureModeToggle.gameObject.SetActive(hasExpertPvp);
-            m_SecureModeLegacyToggle.gameObject.SetActive(!hasExpertPvp);
+            _secureModeToggle.gameObject.SetActive(hasExpertPvp);
+            _secureModeLegacyToggle.gameObject.SetActive(!hasExpertPvp);
 
-            m_ExpertModeToggle.gameObject.SetActive(hasExpertPvp);
+            _expertModeToggle.gameObject.SetActive(hasExpertPvp);
             if (!hasExpertPvp)
-                m_PvpDoveToggle.transform.parent.gameObject.SetActive(false);
+                _pvpDoveToggle.transform.parent.gameObject.SetActive(false);
         }
 
         protected void OnSkillChange(Creature creature, SkillType skillType, Skill skill) {
@@ -363,26 +363,26 @@ namespace OpenTibiaUnity.Modules.Inventory
 
             if (skillType == SkillType.Capacity) {
                 if (player.FreeCapacity <= -1)
-                    m_CapacityLabel.text = "<color=#00EB00>infinity</color>";
+                    _capacityLabel.text = "<color=#00EB00>infinity</color>";
                 else
-                    m_CapacityLabel.text = string.Format("{0}", Utility.Commafy(player.FreeCapacity / 1000));
+                    _capacityLabel.text = string.Format("{0}", Core.Utils.Utility.Commafy(player.FreeCapacity / 1000));
             } else if (skillType == SkillType.SoulPoints) {
-                m_SoulPointsLabel.text = string.Format("{0}", skill.Level);
+                _soulPointsLabel.text = string.Format("{0}", skill.Level);
             }
         }
 
         public void OnInventorySlotChange(ClothSlots slot, ObjectInstance @object) {
             switch (slot) {
-                case ClothSlots.Head: InitialiseObjectImage(slot, m_HeadItemView, m_HeadDefaultTexture, @object); break;
-                case ClothSlots.Neck: InitialiseObjectImage(slot, m_NeckItemView, m_NeckDefaultTexture, @object); break;
-                case ClothSlots.Backpack: InitialiseObjectImage(slot, m_BackItemView, m_BackpackDefaultTexture, @object); break;
-                case ClothSlots.Torso: InitialiseObjectImage(slot, m_TorsoItemView, m_TorsoDefaultTexture, @object); break;
-                case ClothSlots.RightHand: InitialiseObjectImage(slot, m_RightHandItemView, m_RightHandDefaultTexture, @object); break;
-                case ClothSlots.LeftHand: InitialiseObjectImage(slot, m_LeftHandItemView, m_LeftHandDefaultTexture, @object); break;
-                case ClothSlots.Legs: InitialiseObjectImage(slot, m_LegsItemView, m_LegsDefaultTexture, @object); break;
-                case ClothSlots.Feet: InitialiseObjectImage(slot, m_FeetItemView, m_FeetDefaultTexture, @object); break;
-                case ClothSlots.Finger: InitialiseObjectImage(slot, m_FingerItemView, m_FingerDefaultTexture, @object); break;
-                case ClothSlots.Hip: InitialiseObjectImage(slot, m_HipItemView, m_HipDefaultTexture, @object); break;
+                case ClothSlots.Head: InitialiseObjectImage(slot, _headItemView, _headDefaultTexture, @object); break;
+                case ClothSlots.Neck: InitialiseObjectImage(slot, _neckItemView, _neckDefaultTexture, @object); break;
+                case ClothSlots.Backpack: InitialiseObjectImage(slot, _backItemView, _backpackDefaultTexture, @object); break;
+                case ClothSlots.Torso: InitialiseObjectImage(slot, _torsoItemView, _torsoDefaultTexture, @object); break;
+                case ClothSlots.RightHand: InitialiseObjectImage(slot, _rightHandItemView, _rightHandDefaultTexture, @object); break;
+                case ClothSlots.LeftHand: InitialiseObjectImage(slot, _leftHandItemView, _leftHandDefaultTexture, @object); break;
+                case ClothSlots.Legs: InitialiseObjectImage(slot, _legsItemView, _legsDefaultTexture, @object); break;
+                case ClothSlots.Feet: InitialiseObjectImage(slot, _feetItemView, _feetDefaultTexture, @object); break;
+                case ClothSlots.Finger: InitialiseObjectImage(slot, _fingerItemView, _fingerDefaultTexture, @object); break;
+                case ClothSlots.Hip: InitialiseObjectImage(slot, _hipItemView, _hipDefaultTexture, @object); break;
             }
         }
 
@@ -395,8 +395,8 @@ namespace OpenTibiaUnity.Modules.Inventory
                 itemView.objectAmount = (int)@object.Data;
                 itemView.showAmount = itemView.objectAmount > 1;
 
-                itemView.itemImage.texture = m_SlotsRenderTexture;
-                float w = (float)Constants.FieldSize / m_SlotsRenderTexture.width;
+                itemView.itemImage.texture = _slotsRenderTexture;
+                float w = (float)Constants.FieldSize / _slotsRenderTexture.width;
                 itemView.itemImage.uvRect = new Rect(w * ((int)slot - 1), 0, w, 1);
             } else {
                 itemView.itemImage.texture = defaultTexture;
@@ -418,10 +418,10 @@ namespace OpenTibiaUnity.Modules.Inventory
             if (toggle) {
                 switch (chaseMode) {
                     case CombatChaseModes.On:
-                        m_ChaseOnToggle.isOn = true;
+                        _chaseOnToggle.isOn = true;
                         break;
                     case CombatChaseModes.Off:
-                        m_ChaseOffToggle.isOn = true;
+                        _chaseOffToggle.isOn = true;
                         break;
 
                     default:
@@ -444,13 +444,13 @@ namespace OpenTibiaUnity.Modules.Inventory
             if (toggle) {
                 switch (attackMode) {
                     case CombatAttackModes.Offensive:
-                        m_AttackOffensiveToggle.isOn = true;
+                        _attackOffensiveToggle.isOn = true;
                         break;
                     case CombatAttackModes.Balanced:
-                        m_AttackBalancedToggle.isOn = true;
+                        _attackBalancedToggle.isOn = true;
                         break;
                     case CombatAttackModes.Defensive:
-                        m_AttackBalancedToggle.isOn = true;
+                        _attackBalancedToggle.isOn = true;
                         break;
 
                     default:
@@ -471,8 +471,8 @@ namespace OpenTibiaUnity.Modules.Inventory
             }
 
             if (toggle) {
-                m_SecureModeToggle.isOn = !secureMode;
-                m_SecureModeLegacyToggle.isOn = !secureMode;
+                _secureModeToggle.isOn = !secureMode;
+                _secureModeLegacyToggle.isOn = !secureMode;
             }
         }
         
@@ -482,8 +482,8 @@ namespace OpenTibiaUnity.Modules.Inventory
 
             // force toggle of e-pvp button
             if (pvpMode != CombatPvPModes.Dove) {
-                m_ExpertModeToggle.isOn = true;
-                m_ExpertModeSmallToggle.isOn = true;
+                _expertModeToggle.isOn = true;
+                _expertModeSmallToggle.isOn = true;
             }
 
             OptionStorage.CombatPvPMode = pvpMode;
@@ -494,29 +494,29 @@ namespace OpenTibiaUnity.Modules.Inventory
             }
 
             if (toggle) {
-                m_PvpDoveToggle.isOn = pvpMode == CombatPvPModes.Dove;
-                m_PvpWhiteHandToggle.isOn = pvpMode == CombatPvPModes.WhiteHand;
-                m_PvpYellowHandToggle.isOn = pvpMode == CombatPvPModes.YellowHand;
-                m_PvpRedFistToggle.isOn = pvpMode == CombatPvPModes.RedFist;
+                _pvpDoveToggle.isOn = pvpMode == CombatPvPModes.Dove;
+                _pvpWhiteHandToggle.isOn = pvpMode == CombatPvPModes.WhiteHand;
+                _pvpYellowHandToggle.isOn = pvpMode == CombatPvPModes.YellowHand;
+                _pvpRedFistToggle.isOn = pvpMode == CombatPvPModes.RedFist;
             }
         }
 
         public void ToggleStyle() {
-            var spriteState = m_ToggleStyleButton.spriteState;
-            var imageComponent = m_ToggleStyleButton.GetComponent<Image>();
+            var spriteState = _toggleStyleButton.spriteState;
+            var imageComponent = _toggleStyleButton.GetComponent<Image>();
 
-            if (m_IsMinimized) {
+            if (_isMinimized) {
                 MaximizeStyle();
-                imageComponent.sprite = m_MinimizeSpriteNormal;
-                spriteState.pressedSprite = m_MinimizeSpritePressed;
+                imageComponent.sprite = _minimizeSpriteNormal;
+                spriteState.pressedSprite = _minimizeSpritePressed;
             } else {
                 MinimizeStyle();
-                imageComponent.sprite = m_MaximizeSpriteNormal;
-                spriteState.pressedSprite = m_MaximizeSpritePressed;
+                imageComponent.sprite = _maximizeSpriteNormal;
+                spriteState.pressedSprite = _maximizeSpritePressed;
             }
 
-            m_ToggleStyleButton.spriteState = spriteState;
-            m_IsMinimized = !m_IsMinimized;
+            _toggleStyleButton.spriteState = spriteState;
+            _isMinimized = !_isMinimized;
         }
 
         private void MinimizeStyle() {
@@ -525,41 +525,41 @@ namespace OpenTibiaUnity.Modules.Inventory
             bool hasStoreInbox = OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameStoreInboxSlot);
             bool hasPurseButton = OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePurseSlot) && !hasStoreInbox;
 
-            m_HeadItemView.gameObject.SetActive(false);
-            m_TorsoItemView.gameObject.SetActive(false);
-            m_LegsItemView.gameObject.SetActive(false);
-            m_FeetItemView.gameObject.SetActive(false);
-            m_BackItemView.gameObject.SetActive(false);
-            m_RightHandItemView.gameObject.SetActive(false);
-            m_HipItemView.gameObject.SetActive(false);
-            m_NeckItemView.gameObject.SetActive(false);
-            m_LeftHandItemView.gameObject.SetActive(false);
-            m_FingerItemView.gameObject.SetActive(false);
+            _headItemView.gameObject.SetActive(false);
+            _torsoItemView.gameObject.SetActive(false);
+            _legsItemView.gameObject.SetActive(false);
+            _feetItemView.gameObject.SetActive(false);
+            _backItemView.gameObject.SetActive(false);
+            _rightHandItemView.gameObject.SetActive(false);
+            _hipItemView.gameObject.SetActive(false);
+            _neckItemView.gameObject.SetActive(false);
+            _leftHandItemView.gameObject.SetActive(false);
+            _fingerItemView.gameObject.SetActive(false);
 
-            m_SecureModeToggle.gameObject.SetActive(false);
-            m_SecureModeLegacyToggle.gameObject.SetActive(true);
-            m_ExpertModeToggle.gameObject.SetActive(false);
-            m_ExpertModeSmallToggle.gameObject.SetActive(hasExpertPvp);
-            m_StoreInboxButton.gameObject.SetActive(false);
+            _secureModeToggle.gameObject.SetActive(false);
+            _secureModeLegacyToggle.gameObject.SetActive(true);
+            _expertModeToggle.gameObject.SetActive(false);
+            _expertModeSmallToggle.gameObject.SetActive(hasExpertPvp);
+            _storeInboxButton.gameObject.SetActive(false);
 
-            m_QuestsLegacyButton.gameObject.SetActive(false);
-            m_OptionsLegacyButton.gameObject.SetActive(false);
-            m_HelpLegacyButton.gameObject.SetActive(false);
+            _questsLegacyButton.gameObject.SetActive(false);
+            _optionsLegacyButton.gameObject.SetActive(false);
+            _helpLegacyButton.gameObject.SetActive(false);
 
-            m_StopButton.gameObject.SetActive(hasExpertPvp);
-            m_StopLegacyButton.gameObject.SetActive(!hasExpertPvp);
+            _stopButton.gameObject.SetActive(hasExpertPvp);
+            _stopLegacyButton.gameObject.SetActive(!hasExpertPvp);
             
-            m_CapacityLabel.rectTransform.parent.GetComponent<RectTransform>().anchoredPosition = new Vector2(19.0f, 0.0f);
-            m_SoulPointsLabel.rectTransform.parent.GetComponent<RectTransform>().anchoredPosition = new Vector2(19.0f, -20.0f);
+            _capacityLabel.rectTransform.parent.GetComponent<RectTransform>().anchoredPosition = new Vector2(19.0f, 0.0f);
+            _soulPointsLabel.rectTransform.parent.GetComponent<RectTransform>().anchoredPosition = new Vector2(19.0f, -20.0f);
             
-            m_AttackOffensiveToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-92.0f, 0.0f);
-            m_AttackBalancedToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-72.0f, -0.0f);
-            m_AttackDefensiveToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-52.0f, -0.0f);
-            m_ChaseOffToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-92.0f, -23.0f);
-            m_ChaseOnToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-72.0f, -23.0f);
-            m_SecureModeLegacyToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-52.0f, -23.0f);
-            m_ConditionsPanel.anchoredPosition = new Vector2(5.0f, -46.0f);
-            m_StopLegacyButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(-5.0f, -0.0f);
+            _attackOffensiveToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-92.0f, 0.0f);
+            _attackBalancedToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-72.0f, -0.0f);
+            _attackDefensiveToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-52.0f, -0.0f);
+            _chaseOffToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-92.0f, -23.0f);
+            _chaseOnToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-72.0f, -23.0f);
+            _secureModeLegacyToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-52.0f, -23.0f);
+            _conditionsPanel.anchoredPosition = new Vector2(5.0f, -46.0f);
+            _stopLegacyButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(-5.0f, -0.0f);
 
             int newHeight = hasExpertPvp ? ModernMinimizedWindowHeight : LegacyMinimizedWindowHeight;
             if (hasStoreInbox && OpenTibiaUnity.GameManager.ClientVersion < 1100)
@@ -572,37 +572,37 @@ namespace OpenTibiaUnity.Modules.Inventory
             bool hasExpertPvp = OpenTibiaUnity.GameManager.ClientVersion > 1000;
             bool hasStoreInbox = OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameStoreInboxSlot);
 
-            m_HeadItemView.gameObject.SetActive(true);
-            m_TorsoItemView.gameObject.SetActive(true);
-            m_LegsItemView.gameObject.SetActive(true);
-            m_FeetItemView.gameObject.SetActive(true);
-            m_BackItemView.gameObject.SetActive(true);
-            m_RightHandItemView.gameObject.SetActive(true);
-            m_HipItemView.gameObject.SetActive(true);
-            m_NeckItemView.gameObject.SetActive(true);
-            m_LeftHandItemView.gameObject.SetActive(true);
-            m_FingerItemView.gameObject.SetActive(true);
+            _headItemView.gameObject.SetActive(true);
+            _torsoItemView.gameObject.SetActive(true);
+            _legsItemView.gameObject.SetActive(true);
+            _feetItemView.gameObject.SetActive(true);
+            _backItemView.gameObject.SetActive(true);
+            _rightHandItemView.gameObject.SetActive(true);
+            _hipItemView.gameObject.SetActive(true);
+            _neckItemView.gameObject.SetActive(true);
+            _leftHandItemView.gameObject.SetActive(true);
+            _fingerItemView.gameObject.SetActive(true);
 
-            m_SecureModeToggle.gameObject.SetActive(hasExpertPvp);
-            m_SecureModeLegacyToggle.gameObject.SetActive(!hasExpertPvp);
-            m_ExpertModeToggle.gameObject.SetActive(hasExpertPvp);
-            m_ExpertModeSmallToggle.gameObject.SetActive(false);
+            _secureModeToggle.gameObject.SetActive(hasExpertPvp);
+            _secureModeLegacyToggle.gameObject.SetActive(!hasExpertPvp);
+            _expertModeToggle.gameObject.SetActive(hasExpertPvp);
+            _expertModeSmallToggle.gameObject.SetActive(false);
 
-            m_QuestsLegacyButton.gameObject.SetActive(!hasExpertPvp);
-            m_OptionsLegacyButton.gameObject.SetActive(!hasExpertPvp);
-            m_HelpLegacyButton.gameObject.SetActive(!hasExpertPvp);
+            _questsLegacyButton.gameObject.SetActive(!hasExpertPvp);
+            _optionsLegacyButton.gameObject.SetActive(!hasExpertPvp);
+            _helpLegacyButton.gameObject.SetActive(!hasExpertPvp);
             
-            m_CapacityLabel.rectTransform.parent.GetComponent<RectTransform>().anchoredPosition = new Vector2(79.0f, -122.0f);
-            m_SoulPointsLabel.rectTransform.parent.GetComponent<RectTransform>().anchoredPosition = new Vector2(5.0f, -122.0f);
+            _capacityLabel.rectTransform.parent.GetComponent<RectTransform>().anchoredPosition = new Vector2(79.0f, -122.0f);
+            _soulPointsLabel.rectTransform.parent.GetComponent<RectTransform>().anchoredPosition = new Vector2(5.0f, -122.0f);
             
-            m_AttackOffensiveToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-28.0f, 0.0f);
-            m_AttackBalancedToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-28.0f, -23.0f);
-            m_AttackDefensiveToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-28.0f, -46.0f);
-            m_ChaseOffToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-5, 0.0f);
-            m_ChaseOnToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-5, -23.0f);
-            m_SecureModeLegacyToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-5f, -46.0f);
-            m_ConditionsPanel.anchoredPosition = new Vector2(5.0f, -147.0f);
-            m_StopLegacyButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(-5.0f, -69.0f);
+            _attackOffensiveToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-28.0f, 0.0f);
+            _attackBalancedToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-28.0f, -23.0f);
+            _attackDefensiveToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-28.0f, -46.0f);
+            _chaseOffToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-5, 0.0f);
+            _chaseOnToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-5, -23.0f);
+            _secureModeLegacyToggle.GetComponent<RectTransform>().anchoredPosition = new Vector2(-5f, -46.0f);
+            _conditionsPanel.anchoredPosition = new Vector2(5.0f, -147.0f);
+            _stopLegacyButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(-5.0f, -69.0f);
 
             int newHeight = hasExpertPvp ? ModernMaximizedWindowHeight : LegacyMaximizedWindowHeight;
             if (hasStoreInbox && OpenTibiaUnity.GameManager.ClientVersion < 1100)
@@ -612,20 +612,20 @@ namespace OpenTibiaUnity.Modules.Inventory
         }
 
         public ObjectInstance GetObjectUnderMouse() {
-            if (m_SlotUnderMouse == -1)
+            if (_slotUnderMouse == -1)
                 return null;
 
-            return BodyContainerView.GetObject((ClothSlots)m_SlotUnderMouse);
+            return BodyContainerView.GetObject((ClothSlots)_slotUnderMouse);
         }
 
         public int GetTopObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
             @object = GetObjectUnderMouse();
-            return m_SlotUnderMouse;
+            return _slotUnderMouse;
         }
 
         public int GetUseObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
             @object = GetObjectUnderMouse();
-            return m_SlotUnderMouse;
+            return _slotUnderMouse;
         }
 
         public int GetMultiUseObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
@@ -635,7 +635,7 @@ namespace OpenTibiaUnity.Modules.Inventory
                 return -1;
             }
 
-            return m_SlotUnderMouse;
+            return _slotUnderMouse;
         }
 
         public int GetMoveObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
@@ -643,10 +643,10 @@ namespace OpenTibiaUnity.Modules.Inventory
         }
 
         public Vector3Int? MousePositionToAbsolutePosition(Vector3 mousePosition) {
-            if (m_SlotUnderMouse == -1)
+            if (_slotUnderMouse == -1)
                 return null;
 
-            return new Vector3Int(65535, m_SlotUnderMouse, 0);
+            return new Vector3Int(65535, _slotUnderMouse, 0);
         }
 
         public Vector3Int? MousePositionToMapPosition(Vector3 mousePosition) {
@@ -654,27 +654,27 @@ namespace OpenTibiaUnity.Modules.Inventory
         }
 
         private void OnItemPointerEnter(ClothSlots slot) {
-            m_SlotUnderMouse = (int)slot;
+            _slotUnderMouse = (int)slot;
         }
 
         private void OnItemPointerExit(ClothSlots _) {
-            m_SlotUnderMouse = -1;
+            _slotUnderMouse = -1;
         }
 
         private void OnExpertPvPToggleValueChanged(bool value) {
-            if (m_HandlingExpertPvPToggle)
+            if (_handlingExpertPvPToggle)
                 return;
 
             try {
-                m_HandlingExpertPvPToggle = true;
-                m_ExpertModeToggle.isOn = value;
-                m_ExpertModeSmallToggle.isOn = value;
-                m_PvpDoveToggle.transform.parent.gameObject.SetActive(value);
+                _handlingExpertPvPToggle = true;
+                _expertModeToggle.isOn = value;
+                _expertModeSmallToggle.isOn = value;
+                _pvpDoveToggle.transform.parent.gameObject.SetActive(value);
 
                 SetPvPMode(CombatPvPModes.Dove, true, true);
             } catch (System.Exception) {
             } finally {
-                m_HandlingExpertPvPToggle = false;
+                _handlingExpertPvPToggle = false;
             }
         }
     }

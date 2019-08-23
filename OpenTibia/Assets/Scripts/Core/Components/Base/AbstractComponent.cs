@@ -12,24 +12,24 @@ namespace OpenTibiaUnity.Core.Components.Base
 
         public static int BlockerIndexCounter = 20000;
 
-        private RectTransform m_RectTransform;
+        private RectTransform _rectTransform;
         public RectTransform rectTransform {
             get {
-                if (!m_RectTransform)
-                    m_RectTransform = transform as RectTransform;
-                return m_RectTransform;
+                if (!_rectTransform)
+                    _rectTransform = transform as RectTransform;
+                return _rectTransform;
             }
         }
 
-        private RectTransform m_ParentRectTransform;
+        private RectTransform _parentRectTransform;
         public RectTransform parentRectTransform {
             get {
-                if (!m_ParentRectTransform)
-                    m_ParentRectTransform = transform.parent as RectTransform;
-                return m_ParentRectTransform;
+                if (!_parentRectTransform)
+                    _parentRectTransform = transform.parent as RectTransform;
+                return _parentRectTransform;
             }
         }
-        
+
         public bool LockedToOverlay { get; private set; } = false;
         public Canvas LockingBlocker { get; private set; } = null;
 
@@ -125,6 +125,18 @@ namespace OpenTibiaUnity.Core.Components.Base
             var pivotDelta = rectTransform.pivot - new Vector2(0, 1);
             var size = rectTransform.rect.size;
             return new Vector2(mousePosition.x + (pivotDelta.x * size.x), mousePosition.y + (pivotDelta.y * size.y));
+        }
+
+        public virtual void Select() {
+            if (EventSystem.current.alreadySelecting) {
+                OpenTibiaUnity.GameManager.InvokeOnMainThread(Select);
+                return;
+            }
+
+            if (EventSystem.current.currentSelectedGameObject == gameObject)
+                return;
+
+            OpenTibiaUnity.EventSystem.SetSelectedGameObject(gameObject);
         }
     }
 }

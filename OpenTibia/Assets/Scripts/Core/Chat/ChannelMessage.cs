@@ -3,83 +3,83 @@ using System.Collections.Generic;
 
 namespace OpenTibiaUnity.Core.Chat
 {
-    internal class ChannelMessage
+    public class ChannelMessage
     {
-        private static int s_NextID = 0;
+        private static int s_Next_id = 0;
 
-        private int m_ID;
-        private string m_Speaker;
-        private int m_SpeakerLevel;
-        private MessageModeType m_Mode;
-        private string m_RawText;
-        private string m_RichText = null;
-        private string m_PlainText = null;
-        private long m_TimeStamp;
-        private int m_AllowedReportTypes = 0;
+        private int _id;
+        private string _speaker;
+        private int _speakerLevel;
+        private MessageModeType _mode;
+        private string _rawText;
+        private string _richText = null;
+        private string _plainText = null;
+        private long _timeStamp;
+        private int _allowedReportTypes = 0;
 
-        internal int ID { get => m_ID; }
-        internal MessageModeType Mode { get => m_Mode; }
-        internal string RawText { get => m_RawText; }
-        internal string RichText { get => m_RichText; }
-        internal string PlainText { get => m_PlainText; }
-        internal string ReportableText { get => StringHelper.RemoveNpcHighlight(m_RawText); }
-        internal string Speaker { get => m_Speaker; }
-        internal int SpeakerLevel { get => m_SpeakerLevel; }
-        internal long TimeStamp { get => m_TimeStamp; }
+        public int Id { get => _id; }
+        public MessageModeType Mode { get => _mode; }
+        public string RawText { get => _rawText; }
+        public string RichText { get => _richText; }
+        public string PlainText { get => _plainText; }
+        public string ReportableText { get => StringHelper.RemoveNpcHighlight(_rawText); }
+        public string Speaker { get => _speaker; }
+        public int SpeakerLevel { get => _speakerLevel; }
+        public long TimeStamp { get => _timeStamp; }
 
-        internal ChannelMessage(int id, string speaker, int speakerLevel, MessageModeType mode, string text) {
+        public ChannelMessage(int id, string speaker, int speakerLevel, MessageModeType mode, string text) {
             if (id <= 0)
-                m_ID = --s_NextID;
+                _id = --s_Next_id;
             else
-                m_ID = id;
+                _id = id;
 
-            m_Speaker = speaker;
-            m_SpeakerLevel = speakerLevel;
-            m_Mode = mode;
-            m_RawText = text;
-            m_TimeStamp = System.DateTime.Now.Ticks;
+            _speaker = speaker;
+            _speakerLevel = speakerLevel;
+            _mode = mode;
+            _rawText = text;
+            _timeStamp = System.DateTime.Now.Ticks;
         }
 
-        internal void SetReportTypeAllowed(ReportTypes reportType, bool add = true) {
+        public void SetReportTypeAllowed(ReportTypes reportType, bool add = true) {
             if (add)
-                m_AllowedReportTypes |= 1 << (int)reportType;
+                _allowedReportTypes |= 1 << (int)reportType;
             else
-                m_AllowedReportTypes &= ~(1 << (int)reportType);
+                _allowedReportTypes &= ~(1 << (int)reportType);
         }
 
-        internal void FormatMessage(bool timestamps, bool levels, uint textARGB, uint highlightARGB) {
+        public void FormatMessage(bool timestamps, bool levels, uint textARGB, uint highlightARGB) {
             string prefix = "";
             // todo; verify timestamps are on the same update as levels
             timestamps = timestamps && OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameMessageLevel);
             if (timestamps)
-                prefix += string.Format("{0:HH:mm}", new System.DateTime(m_TimeStamp));
+                prefix += string.Format("{0:HH:mm}", new System.DateTime(_timeStamp));
 
-            if (m_Speaker != null) {
+            if (_speaker != null) {
                 levels = levels && OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameMessageLevel);
-                if (levels && m_SpeakerLevel > 0)
-                    prefix += string.Format(" {0} [{1}]", m_Speaker, m_SpeakerLevel);
+                if (levels && _speakerLevel > 0)
+                    prefix += string.Format(" {0} [{1}]", _speaker, _speakerLevel);
                 else
-                    prefix += string.Format(" {0}", m_Speaker);
+                    prefix += string.Format(" {0}", _speaker);
             }
 
             if (prefix.Length > 0) {
-                if (m_Mode == MessageModeType.BarkLoud)
+                if (_mode == MessageModeType.BarkLoud)
                     prefix += " ";
                 else
                     prefix += ": ";
             }
 
-            var rawText = StringHelper.RichTextSpecialChars(m_RawText);
-            if (m_Mode == MessageModeType.NpcFrom || m_Mode == MessageModeType.NpcFromStartBlock)
+            var rawText = StringHelper.RichTextSpecialChars(_rawText);
+            if (_mode == MessageModeType.NpcFrom || _mode == MessageModeType.NpcFromStartBlock)
                 rawText = StringHelper.HighlightNpcTalk(rawText, highlightARGB & 16777215);
 
-            m_RichText = string.Format("<color=#{0:X6}>{1}{2}</color>", textARGB, prefix, rawText);
+            _richText = string.Format("<color=#{0:X6}>{1}{2}</color>", textARGB, prefix, rawText);
 
-            rawText = m_RawText;
-            if (m_Mode == MessageModeType.NpcFrom || m_Mode == MessageModeType.NpcFromStartBlock)
+            rawText = _rawText;
+            if (_mode == MessageModeType.NpcFrom || _mode == MessageModeType.NpcFromStartBlock)
                 rawText = StringHelper.RemoveNpcHighlight(rawText);
 
-            m_PlainText = rawText;
+            _plainText = rawText;
         }
 
         public override bool Equals(object obj) {
@@ -88,12 +88,12 @@ namespace OpenTibiaUnity.Core.Chat
         
         public override int GetHashCode() {
             var hashCode = -517861292;
-            hashCode = hashCode * -1521134295 + m_ID.GetHashCode();
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(m_Speaker);
-            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(m_RawText);
-            hashCode = hashCode * -1521134295 + m_SpeakerLevel.GetHashCode();
-            hashCode = hashCode * -1521134295 + m_Mode.GetHashCode();
-            hashCode = hashCode * -1521134295 + m_TimeStamp.GetHashCode();
+            hashCode = hashCode * -1521134295 + _id.GetHashCode();
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_speaker);
+            hashCode = hashCode * -1521134295 + EqualityComparer<string>.Default.GetHashCode(_rawText);
+            hashCode = hashCode * -1521134295 + _speakerLevel.GetHashCode();
+            hashCode = hashCode * -1521134295 + _mode.GetHashCode();
+            hashCode = hashCode * -1521134295 + _timeStamp.GetHashCode();
             return hashCode;
         }
     }

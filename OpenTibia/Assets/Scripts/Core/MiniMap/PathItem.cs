@@ -2,7 +2,7 @@
 
 namespace OpenTibiaUnity.Core.MiniMap
 {
-    public class PathItem : Utility.HeapItem
+    public class PathItem : Utils.HeapItem
     {
         public int X = 0;
         public int Y = 0;

@@ -6,17 +6,17 @@ namespace OpenTibiaUnity.Core.Components
     [RequireComponent(typeof(ScrollRect))]
     public class ScrollRectExtention : Base.AbstractComponent
     {
-        private ScrollRect m_ScrollRect;
+        private ScrollRect _scrollRect;
         public ScrollRect scrollRect {
             get {
-                if (m_ScrollRect == null)
-                    m_ScrollRect = GetComponent<ScrollRect>();
+                if (_scrollRect == null)
+                    _scrollRect = GetComponent<ScrollRect>();
 
-                return m_ScrollRect;
+                return _scrollRect;
             }
         }
 
-        [SerializeField] private float m_MinSize = 14f;
+        [SerializeField] private float _minSize = 14f;
 
         protected void LateUpdate() {
             var horizontalScrollbar = scrollRect.horizontalScrollbar;
@@ -25,14 +25,14 @@ namespace OpenTibiaUnity.Core.Components
             
             if (verticalScrollBar) {
                 var totalSliderAreaHeight = (verticalScrollBar.handleRect.parent as RectTransform).rect.height;
-                var minSize = m_MinSize / totalSliderAreaHeight;
+                var minSize = _minSize / totalSliderAreaHeight;
                 if (verticalScrollBar.size < minSize)
                     verticalScrollBar.size = minSize;
             }
 
             if (horizontalScrollbar) {
                 var totalSliderAreaWidth = (horizontalScrollbar.handleRect.parent as RectTransform).rect.width;
-                var minSize = m_MinSize / totalSliderAreaWidth;
+                var minSize = _minSize / totalSliderAreaWidth;
                 if (horizontalScrollbar.size < minSize)
                     horizontalScrollbar.size = minSize;
             }

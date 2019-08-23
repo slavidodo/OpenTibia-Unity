@@ -1,17 +1,17 @@
 ﻿namespace OpenTibiaUnity.Core.Input.GameAction
 {
-    internal class ToggleAttackTargetActionImpl : IActionImpl
+    public class ToggleAttackTargetActionImpl : IActionImpl
     {
-        Creatures.Creature m_Creature;
-        bool m_Send;
+        Creatures.Creature _creature;
+        bool _send;
 
-        internal ToggleAttackTargetActionImpl(Creatures.Creature creature, bool send) {
-            m_Creature = creature;
-            m_Send = send;
+        public ToggleAttackTargetActionImpl(Creatures.Creature creature, bool send) {
+            _creature = creature;
+            _send = send;
         }
 
         public void Perform(bool _ = false) {
-            OpenTibiaUnity.CreatureStorage.ToggleAttackTarget(m_Creature, m_Send);
+            OpenTibiaUnity.CreatureStorage.ToggleAttackTarget(_creature, _send);
         }
 
     }

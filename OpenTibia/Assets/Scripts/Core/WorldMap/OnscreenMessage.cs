@@ -2,58 +2,47 @@
 
 namespace OpenTibiaUnity.Core.WorldMap
 {
-    internal class OnscreenMessage
+    public class OnscreenMessage
     {
-        private static int s_NextID = 0;
+        private static int s_Next_id = 0;
 
-        protected int m_TTL;
-        protected int m_ID;
-        protected int m_VisibleSince;
-        protected int m_SpeakerLevel;
-        protected string m_Speaker;
-        protected MessageModeType m_Mode;
-        protected string m_Text;
-        protected string m_RichText = null;
+        protected int _ttl;
+        protected int _id;
+        protected int _visibleSince;
+        protected int _speakerLevel;
+        protected string _speaker;
+        protected MessageModeType _mode;
+        protected string _text;
+        protected string _richText = null;
 
-        internal int VisibleSince {
-            get { return m_VisibleSince; }
-            set { m_VisibleSince = value; }
-        }
-        internal int TTL {
-            get { return m_TTL; }
-            set { m_TTL = value; }
-        }
+        public int VisibleSince { get => _visibleSince; set => _visibleSince = value; }
+        public int TTL { get => _ttl; set => _ttl = value; }
+        public string Text { get => _text; }
+        public string RichText { get => _richText; }
 
-        internal string Text {
-            get { return Text; }
-        }
-        internal string RichText {
-            get { return m_RichText; }
-        }
-
-        internal OnscreenMessage(int statementID, string speaker, int speakerLevel, MessageModeType mode, string text) {
-            if (statementID <= 0)
-                m_ID = --s_NextID;
+        public OnscreenMessage(int statement_id, string speaker, int speakerLevel, MessageModeType mode, string text) {
+            if (statement_id <= 0)
+                _id = --s_Next_id;
             else
-                m_ID = statementID;
+                _id = statement_id;
 
-            m_Speaker = speaker;
-            m_SpeakerLevel = speakerLevel;
-            m_Mode = mode;
-            m_Text = text;
-            m_VisibleSince = int.MaxValue;
-            m_TTL = (30 + m_Text.Length / 3) * 100;
+            _speaker = speaker;
+            _speakerLevel = speakerLevel;
+            _mode = mode;
+            _text = text;
+            _visibleSince = int.MaxValue;
+            _ttl = (30 + _text.Length / 3) * 100;
         }
         
-        internal void FormatMessage(string text, uint textARGB, uint highlightARGB) {
-            m_RichText = StringHelper.RichTextSpecialChars(m_Text);
-            if (m_Mode == MessageModeType.NpcFrom)
-                m_RichText = StringHelper.HighlightNpcTalk(m_RichText, highlightARGB);
+        public void FormatMessage(string text, uint textARGB, uint highlightARGB) {
+            _richText = StringHelper.RichTextSpecialChars(_text);
+            if (_mode == MessageModeType.NpcFrom)
+                _richText = StringHelper.HighlightNpcTalk(_richText, highlightARGB);
 
             if (text != null)
-                m_RichText = text + m_RichText;
+                _richText = text + _richText;
 
-            m_RichText = string.Format("<color=#{0:X6}>{1}</color>", textARGB, m_RichText);
+            _richText = string.Format("<color=#{0:X6}>{1}</color>", textARGB, _richText);
         }
     }
 }

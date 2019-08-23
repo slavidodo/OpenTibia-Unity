@@ -3,11 +3,11 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Communication.Game
 {
-    internal partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame : Internal.Protocol
     {
-        internal ushort BeatDuration = 0;
+        public ushort BeatDuration = 0;
 
-        internal bool BugReportsAllowed = false;
+        public bool BugReportsAllowed = false;
 
         private void ParseGmActions(Internal.ByteArray message) {
             int numViolationReasons = 20;
@@ -31,8 +31,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
         private void ParseWorldEntered(Internal.ByteArray message) {
             bool hasLoginPendingFeature = OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameLoginPending);
-            if ((hasLoginPendingFeature && m_ConnectionState == ConnectionState.Pending)
-                || (!hasLoginPendingFeature && m_ConnectionState > ConnectionState.Disconnected && m_ConnectionState != ConnectionState.Game)) {
+            if ((hasLoginPendingFeature && _connectionState == ConnectionState.Pending)
+                || (!hasLoginPendingFeature && _connectionState > ConnectionState.Disconnected && _connectionState != ConnectionState.Game)) {
                 MiniMapStorage.Position = Vector3Int.zero;
                 WorldMapStorage.Position = Vector3Int.zero;
                 WorldMapStorage.ResetMap();
@@ -56,7 +56,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             onLoginWait.Invoke(waitMessage, waitTime);
         }
         private void ParseLoginSuccess(Internal.ByteArray message) {
-            Player.ID = message.ReadUnsignedInt();
+            Player.Id = message.ReadUnsignedInt();
 #if !UNITY_EDITOR
             string title = string.Format("{0} - {1}", Application.productName, Player.Name);
             OpenTibiaUnity.GameManager.SetApplicationTitle(title);

@@ -7,50 +7,50 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Modules
 {
-    internal class ModulesManager : MonoBehaviour
+    public class ModulesManager : MonoBehaviour
     {
-        internal static ModulesManager Instance { get; private set; }
+        public static ModulesManager Instance { get; private set; }
         
         [Header("Module.Battle")]
-        [SerializeField] internal Battle.BattleWindow BattleWindowPrefab = null;
+        public Battle.BattleWindow BattleWindowPrefab = null;
 
         [Header("Module.Console")]
-        [SerializeField] internal Console.ConsoleBuffer ConsoleBufferPrefab = null;
-        [SerializeField] internal Console.ChannelTab ChannelTabPrefab = null;
+        public Console.ConsoleBuffer ConsoleBufferPrefab = null;
+        public Console.ChannelTab ChannelTabPrefab = null;
 
         [Header("Module.Container")]
-        [SerializeField] internal Container.ContainerWindow ContainerWindowPrefab = null;
-        [SerializeField] internal Container.ItemView ItemViewPrefab = null;
+        public Container.ContainerWindow ContainerWindowPrefab = null;
+        public Container.ItemView ItemViewPrefab = null;
 
         [Header("Module.Hotkeys")]
-        [SerializeField] internal Hotkeys.HotkeyActionPanel HotkeysActionPanelPrefab = null;
-        [SerializeField] internal Hotkeys.HotkeysWindow HotkeysWindow = null;
+        public Hotkeys.HotkeyActionPanel HotkeysActionPanelPrefab = null;
+        public Hotkeys.HotkeysWindow HotkeysWindow = null;
 
         [Header("Module.Login")]
-        [SerializeField] internal Login.CharactersWindow CharactersWindow = null;
-        [SerializeField] internal Login.LoginWindow LoginWindow = null;
-        [SerializeField] internal Login.AuthenticatorWindow AuthenticatorWindow = null;
-        [SerializeField] internal Login.CharacterPanel CharacterPanelPrefab = null;
+        public Login.CharactersWindow CharactersWindow = null;
+        public Login.LoginWindow LoginWindow = null;
+        public Login.AuthenticatorWindow AuthenticatorWindow = null;
+        public Login.CharacterPanel CharacterPanelPrefab = null;
 
         [Header("Module.Options")]
-        [SerializeField] internal Options.LegacyGeneralOptionsWindow LegacyGeneralOptionsWindow = null;
-        [SerializeField] internal Options.LegacyOptionsWindow LegacyOptionsWindow = null;
+        public Options.LegacyGeneralOptionsWindow LegacyGeneralOptionsWindow = null;
+        public Options.LegacyOptionsWindow LegacyOptionsWindow = null;
 
         [Header("Module.Outfit")]
-        [SerializeField] internal Outfit.OutfitWindow OutfitWindow = null;
+        public Outfit.OutfitWindow OutfitWindow = null;
 
         [Header("Module.Skills")]
-        [SerializeField] internal Skills.SkillsWindow SkillsWindowPrefab = null;
+        public Skills.SkillsWindow SkillsWindowPrefab = null;
 
         [Header("Module.Trade")]
-        [SerializeField] internal Trade.NPCTradeWindow NPCTradeWindowPrefab = null;
+        public Trade.NPCTradeWindow NPCTradeWindowPrefab = null;
 
         protected void Awake() {
             Instance = this;
         }
 
         protected void Start() {
-            LoginWindow.ShowWindow();
+            LoginWindow.Show();
 
             var gameManager = OpenTibiaUnity.GameManager;
 
@@ -62,16 +62,16 @@ namespace OpenTibiaUnity.Modules
         }
         
         private void OnRequestShowOptionsHotkey() {
-            HotkeysWindow.OpenWindow();
+            HotkeysWindow.Open();
         }
 
-        private void OnRequestChatSend(string text, bool autoSend, int channelID) {
+        private void OnRequestChatSend(string text, bool autoSend, int channel_id) {
             var chatModule = OpenTibiaUnity.GameManager.GetModule<Console.ConsoleModule>();
             if (!chatModule)
                 return;
 
-            if (channelID != -1)
-                chatModule.SelectChannel(OpenTibiaUnity.ChatStorage.GetChannel(channelID), true);
+            if (channel_id != -1)
+                chatModule.SelectChannel(OpenTibiaUnity.ChatStorage.GetChannel(channel_id), true);
 
             chatModule.SetInputText(text);
             if (autoSend)
@@ -80,7 +80,7 @@ namespace OpenTibiaUnity.Modules
 
         private void OnRequestOutfitDialog(AppearanceInstance outfit, AppearanceInstance mountOutfit, List<ProtocolOutfit> outfits, List<ProtocolMount> mounts) {
             if (OutfitWindow.UpdateProperties(outfit, mountOutfit, outfits, mounts))
-                OutfitWindow.OpenWindow();
+                OutfitWindow.Open();
         }
         private void OnRequestNPCTrade(string npcName, List<TradeObjectRef> buyList, List<TradeObjectRef> sellList) {
             var npcTradeWindow = OpenTibiaUnity.GameManager.GetModule<Trade.NPCTradeWindow>();
@@ -95,7 +95,7 @@ namespace OpenTibiaUnity.Modules
         private void OnRequestCloseNPCTrade() {
             var npcTradeWindow = OpenTibiaUnity.GameManager.GetModule<Trade.NPCTradeWindow>();
             if (npcTradeWindow)
-                Destroy(npcTradeWindow.gameObject);
+                npcTradeWindow.CloseWithoutNotifying();
         }
     }
 }

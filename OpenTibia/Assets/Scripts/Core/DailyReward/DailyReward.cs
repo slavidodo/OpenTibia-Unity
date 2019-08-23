@@ -4,15 +4,15 @@ namespace OpenTibiaUnity.Core.DailyReward
 {
 
 
-    internal class DailyReward
+    public class DailyReward
     {
-        DailyRewardStates m_State;
-        List<Types.Item> m_Items;
+        DailyRewardStates _state;
+        List<Types.Item> _items;
 
-        internal int AllowedMaximumItems { get; set; }
+        public int AllowedMaximumItems { get; set; }
 
-        internal DailyReward(DailyRewardStates state) {
-            m_State = state;
+        public DailyReward(DailyRewardStates state) {
+            _state = state;
 
             switch (state) {
                 case DailyRewardStates.PickedItems:
@@ -26,11 +26,11 @@ namespace OpenTibiaUnity.Core.DailyReward
                     throw new System.Exception("DailyReward.DailyReward: Invalid reward state " + (int)state + ".");
             }
 
-            m_Items = new List<Types.Item>();
+            _items = new List<Types.Item>();
         }
 
-        internal void AddItem(Types.Item item) {
-            m_Items.Add(item);
+        public void AddItem(Types.Item item) {
+            _items.Add(item);
         }
     }
 }

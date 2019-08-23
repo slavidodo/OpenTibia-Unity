@@ -1,11 +1,11 @@
 ﻿namespace OpenTibiaUnity.Core.DailyReward.Types
 {
-    internal class XpBoost : Item
+    public class XpBoost : Item
     {
-        int m_Minutes;
+        int _minutes;
 
-        internal XpBoost(int minutes) {
-            m_Minutes = minutes;
+        public XpBoost(int minutes) {
+            _minutes = minutes;
         }
     }
 }

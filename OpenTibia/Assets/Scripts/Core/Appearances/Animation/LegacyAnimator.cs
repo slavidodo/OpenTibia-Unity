@@ -2,88 +2,88 @@
 
 namespace OpenTibiaUnity.Core.Appearances.Animation
 {
-    internal class LegacyAnimator : IAppearanceAnimator
+    public class LegacyAnimator : IAppearanceAnimator
     {
 
-        private IAppearanceFrameStategy m_NextFrameStrategy;
-        private LegacyOutfitFrameStrategy m_OutfitFrameStrategy;
+        private IAppearanceFrameStategy _nextFrameStrategy;
+        private LegacyOutfitFrameStrategy _outfitFrameStrategy;
 
-        private readonly int m_PhaseCount;
-        private readonly int m_WalkPhaseCount;
-        private int m_CurrentPhaseDuration = 0;
-        private int m_CurrentPhase = 0;
+        private readonly int _phaseCount;
+        private readonly int _walkPhaseCount;
+        private int _currentPhaseDuration = 0;
+        private int _currentPhase = 0;
 
-        private bool m_IsCreature  = false;
+        private bool _isCreature  = false;
 
         public int LastAnimationTick { get; private set; } = 0;
         public bool Finished { get; set; } = false;
-        internal int PhaseDuration { get; set; }
-        internal bool Async { get; set; } = true;
+        public int PhaseDuration { get; set; }
+        public bool Async { get; set; } = true;
 
         public int Phase {
-            get => m_CurrentPhase;
+            get => _currentPhase;
             set {
                 if (Async) {
                     if (value == Constants.PhaseAsynchronous)
-                        m_CurrentPhase = 0;
+                        _currentPhase = 0;
                     else if (value == Constants.PhaseRandom)
-                        m_CurrentPhase = (int)(Random.Range(0, 10) / 10f * m_PhaseCount);
-                    else if (value >= 0 && value < m_PhaseCount)
-                        m_CurrentPhase = value;
+                        _currentPhase = (int)(Random.Range(0, 10) / 10f * _phaseCount);
+                    else if (value >= 0 && value < _phaseCount)
+                        _currentPhase = value;
                     else
-                        m_CurrentPhase = 0;
+                        _currentPhase = 0;
                 } else {
                     CalculateSynchronousPhase();
                 }
             }
         }
         
-        internal AppearanceType AppearanceType { get; set; }
+        public AppearanceType AppearanceType { get; set; }
 
-        internal LegacyAnimator(int phaseCount, int phaseDuration = 0) {
-            m_PhaseCount = phaseCount;
-            m_WalkPhaseCount = m_PhaseCount > 1 ? m_PhaseCount - 1 : 0;
+        public LegacyAnimator(int phaseCount, int phaseDuration = 0) {
+            _phaseCount = phaseCount;
+            _walkPhaseCount = _phaseCount > 1 ? _phaseCount - 1 : 0;
 
             LastAnimationTick = OpenTibiaUnity.TicksMillis;
 
             if (phaseDuration != 0)
                 PhaseDuration = phaseDuration;
-            else if (m_PhaseCount != 0)
-                PhaseDuration = 1000 / m_PhaseCount;
+            else if (_phaseCount != 0)
+                PhaseDuration = 1000 / _phaseCount;
             else
                 PhaseDuration = 40;
         }
 
-        internal void Initialise(AppearanceType type) {
+        public void Initialise(AppearanceType type) {
             if (type.IsAnimateAlways || type.Category == AppearanceCategory.Object) {
-                m_NextFrameStrategy = new LoopFrameStrategy(0);
+                _nextFrameStrategy = new LoopFrameStrategy(0);
             } else if (type.Category == AppearanceCategory.Outfit) {
-                m_IsCreature = true;
-                m_OutfitFrameStrategy = new LegacyOutfitFrameStrategy();
-                m_NextFrameStrategy = m_OutfitFrameStrategy;
+                _isCreature = true;
+                _outfitFrameStrategy = new LegacyOutfitFrameStrategy();
+                _nextFrameStrategy = _outfitFrameStrategy;
             } else {
-                m_NextFrameStrategy = new LoopFrameStrategy(1);
+                _nextFrameStrategy = new LoopFrameStrategy(1);
             }
         }
 
         public void Animate(int ticks, int delay = 0) {
             if (ticks != LastAnimationTick && !Finished) {
                 int elapsedTicks = ticks - LastAnimationTick;
-                if (elapsedTicks >= m_CurrentPhaseDuration) {
-                    if (m_IsCreature)
-                        m_OutfitFrameStrategy.UpdateState(delay != 0);
+                if (elapsedTicks >= _currentPhaseDuration) {
+                    if (_isCreature)
+                        _outfitFrameStrategy.UpdateState(delay != 0);
 
-                    var nextPhase = m_NextFrameStrategy.NextFrame(m_CurrentPhase, m_PhaseCount);
-                    if (m_CurrentPhase != nextPhase) {
+                    var nextPhase = _nextFrameStrategy.NextFrame(_currentPhase, _phaseCount);
+                    if (_currentPhase != nextPhase) {
                         int duration = delay == 0
-                            ? PhaseDuration - (elapsedTicks - m_CurrentPhaseDuration)
+                            ? PhaseDuration - (elapsedTicks - _currentPhaseDuration)
                             : CalculateMovementPhaseDuration(delay);
 
                         if (duration < 0 && !Async) {
                             CalculateSynchronousPhase();
                         } else {
-                            m_CurrentPhase = nextPhase;
-                            m_CurrentPhaseDuration = Mathf.Max(0, duration);
+                            _currentPhase = nextPhase;
+                            _currentPhaseDuration = Mathf.Max(0, duration);
                         }
                     } else {
                         Finished = true;
@@ -95,26 +95,26 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
         }
 
         public void SetEndless() {
-            m_NextFrameStrategy = new LoopFrameStrategy(0);
+            _nextFrameStrategy = new LoopFrameStrategy(0);
         }
 
         public void Reset() {
             Phase = Constants.PhaseAutomatic;
             Finished = false;
-            m_NextFrameStrategy.Reset();
+            _nextFrameStrategy.Reset();
         }
 
         private void CalculateSynchronousPhase() {
-            int totalDurations = PhaseDuration * m_PhaseCount;
+            int totalDurations = PhaseDuration * _phaseCount;
             int ticks = OpenTibiaUnity.TicksMillis;
             int loc4 = ticks % totalDurations;
 
             int tmpDurations = 0;
-            for (int i = 0; i < m_PhaseCount; i++) {
+            for (int i = 0; i < _phaseCount; i++) {
                 if (loc4 >= PhaseDuration && loc4 < PhaseDuration + tmpDurations) {
-                    m_CurrentPhase = i;
+                    _currentPhase = i;
                     int loc8 = loc4 - tmpDurations;
-                    m_CurrentPhaseDuration = PhaseDuration - loc8;
+                    _currentPhaseDuration = PhaseDuration - loc8;
                     break;
                 }
 
@@ -129,7 +129,7 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
         }
 
         public IAppearanceAnimator Clone() {
-            return new LegacyAnimator(m_PhaseCount);
+            return new LegacyAnimator(_phaseCount);
         }
 
         public static bool operator !(LegacyAnimator instance) {
@@ -145,16 +145,16 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
         }
     }
 
-    internal class LegacyOutfitFrameStrategy : IAppearanceFrameStategy
+    public class LegacyOutfitFrameStrategy : IAppearanceFrameStategy
     {
-        private bool m_Walking = false;
+        private bool _walking = false;
 
-        internal void UpdateState(bool walking) {
-            m_Walking = walking;
+        public void UpdateState(bool walking) {
+            _walking = walking;
         }
 
         public int NextFrame(int phase, int phaseCount) {
-            if (!m_Walking)
+            if (!_walking)
                 return 0;
 
 
@@ -166,7 +166,7 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
         }
 
         public void Reset() {
-            m_Walking = false;
+            _walking = false;
         }
     }
 }

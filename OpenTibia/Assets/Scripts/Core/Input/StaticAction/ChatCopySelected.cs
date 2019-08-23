@@ -2,9 +2,9 @@
 
 namespace OpenTibiaUnity.Core.Input.StaticAction
 {
-    internal class ChatCopySelected : StaticAction
+    public class ChatCopySelected : StaticAction
     {
-        internal ChatCopySelected(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
+        public ChatCopySelected(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
 
         public override bool Perform(bool repeat = false) {
             TMPro.TMP_InputField inputField = StaticAction.GetSelectedInputField();
@@ -20,7 +20,7 @@ namespace OpenTibiaUnity.Core.Input.StaticAction
         }
 
         public override IAction Clone() {
-            return new ChatCopySelected(m_ID, m_Label, m_EventMask);
+            return new ChatCopySelected(_id, _label, _eventMask);
         }
     }
 }

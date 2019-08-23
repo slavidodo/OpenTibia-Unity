@@ -11,7 +11,7 @@ using UnityEngine;
 namespace OpenTibiaUnity.Core.Options
 {
     [Serializable]
-    internal class OptionStorage
+    public class OptionStorage
     {
         // Options are preferred to be listed as how they are placed
         // in the actual options window (except presets, these have their own handler)
@@ -32,10 +32,10 @@ namespace OpenTibiaUnity.Core.Options
         
         // Advanced Options
         public bool UseDefaultKeyboardDelay { get; set; } = true;
-        private int m_KeyboardDelay = 250;
+        private int _keyboardDelay = 250;
         public int KeyboardDelay {
-            get { return UseDefaultKeyboardDelay ? 250 : m_KeyboardDelay; }
-            set { m_KeyboardDelay = value; }
+            get { return UseDefaultKeyboardDelay ? 250 : _keyboardDelay; }
+            set { _keyboardDelay = value; }
         }
         
         public bool RotateYourCharacterUsingCtrl = true;
@@ -107,16 +107,16 @@ namespace OpenTibiaUnity.Core.Options
         public bool ShowAdvancedSettings = false;
 
         public bool GeneralActionBarsLock = false;
-        public int GeneralInputSetID = MappingSet.DefaultSet;
+        public int GeneralInputSet_id = MappingSet.DefaultSet;
         public int GeneralInputSetMode = MappingSet.ChatModeON;
 
-        // Internal Client Options
+        // public Client Options
         public bool AuthenticatorTokenOn = false;
         public string LoginAddress = string.Empty;
         public int SelectedClientVersion = -1;
         public int SelectedBuildVersion = -1;
 
-        // Internal Game Options
+        // public Game Options
         public CombatAttackModes CombatAttackMode = CombatAttackModes.Balanced;
         public CombatChaseModes CombatChaseMode = CombatChaseModes.Off;
         public bool CombatSecureMode = true;
@@ -124,17 +124,17 @@ namespace OpenTibiaUnity.Core.Options
         public OpponentFilters OpponentFilter = OpponentFilters.None;
         public OpponentSortTypes OpponentSort = OpponentSortTypes.SortKnownSinceAsc;
 
-        // Internal Storages (Mappings) (TODO: Rename Mapping to Preset)
+        // public Storages (Mappings) (TODO: Rename Mapping to Preset)
         // These storages are not serialized with default options, as they are independant theirselves..
 
-        //[NonSerialized] private List<int> m_KnownTutorialHint;
-        //[NonSerialized] private List<SideBarSet> m_SideBarSets;
-        //[NonSerialized] private List<ActionBarSet> m_ActionBarSets;
-        [NonSerialized] private List<MappingSet> m_MappingSets;
-        [NonSerialized] private List<MessageFilterSet> m_MessageFilterSets;
-        //[NonSerialized] private List<ChannelSet> m_ChannelSets;
-        [NonSerialized] private List<NameFilterSet> m_NameFilterSets;
-        //[NonSerialized] private List<BuddySet> m_BuddySets;
+        //[NonSerialized] private List<int> _knownTutorialHint;
+        //[NonSerialized] private List<SideBarSet> _sideBarSets;
+        //[NonSerialized] private List<ActionBarSet> _actionBarSets;
+        [NonSerialized] private List<MappingSet> _mappingSets;
+        [NonSerialized] private List<MessageFilterSet> _messageFilterSets;
+        //[NonSerialized] private List<ChannelSet> _channelSets;
+        [NonSerialized] private List<NameFilterSet> _nameFilterSets;
+        //[NonSerialized] private List<BuddySet> _buddySets;
 
         // Proper options for client versions
         public int FixedLightLevelSeparator {
@@ -146,9 +146,9 @@ namespace OpenTibiaUnity.Core.Options
         }
 
         public OptionStorage() {
-            m_MappingSets = new List<MappingSet>();
-            m_MessageFilterSets = new List<MessageFilterSet>();
-            m_NameFilterSets = new List<NameFilterSet>();
+            _mappingSets = new List<MappingSet>();
+            _messageFilterSets = new List<MessageFilterSet>();
+            _nameFilterSets = new List<NameFilterSet>();
 
             InitialiseMappingSet();
             InitialiseMessageFilterSets();
@@ -159,22 +159,22 @@ namespace OpenTibiaUnity.Core.Options
             var mappingSet = new MappingSet(MappingSet.DefaultSet);
             mappingSet.InitialiseDefaultBindings();
 
-            m_MappingSets.Clear();
-            m_MappingSets.Add(mappingSet);
+            _mappingSets.Clear();
+            _mappingSets.Add(mappingSet);
         }
 
         public void InitialiseMessageFilterSets() {
-            m_MessageFilterSets.Clear();
-            m_MessageFilterSets.Add(new MessageFilterSet(MessageFilterSet.DefaultSet));
+            _messageFilterSets.Clear();
+            _messageFilterSets.Add(new MessageFilterSet(MessageFilterSet.DefaultSet));
         }
 
         public void InitialiseNameFilterSets() {
-            m_NameFilterSets.Clear();
-            m_NameFilterSets.Add(new NameFilterSet(NameFilterSet.DefaultSet));
+            _nameFilterSets.Clear();
+            _nameFilterSets.Add(new NameFilterSet(NameFilterSet.DefaultSet));
         }
 
         public void RemoveStarterMappings() {
-            m_MappingSets = m_MappingSets.Where((x) => {
+            _mappingSets = _mappingSets.Where((x) => {
                 return x.Name != "Knight" && x.Name != "Paladin" && x.Name != "Sorcerer" && x.Name != "Druid";
             }).ToList();
         }
@@ -190,15 +190,15 @@ namespace OpenTibiaUnity.Core.Options
         }
 
         public MappingSet GetMappingSet(int id) {
-            return GetListItem(m_MappingSets, id);
+            return GetListItem(_mappingSets, id);
         }
 
         public MessageFilterSet GetMessageFilterSet(int id) {
-            return GetListItem(m_MessageFilterSets, id);
+            return GetListItem(_messageFilterSets, id);
         }
 
         public NameFilterSet GetNameFilterSet(int id) {
-            return GetListItem(m_NameFilterSets, id);
+            return GetListItem(_nameFilterSets, id);
         }
 
         public T GetListItem<T>(List<T> list, int index) {

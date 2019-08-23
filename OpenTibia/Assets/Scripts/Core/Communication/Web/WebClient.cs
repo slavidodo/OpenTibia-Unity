@@ -6,7 +6,7 @@ using System.Text;
 
 namespace OpenTibiaUnity.Core.Communication.Web
 {
-    internal enum RequestType
+    public enum RequestType
     {
         Login,
         CacheInfo,
@@ -15,14 +15,14 @@ namespace OpenTibiaUnity.Core.Communication.Web
         EventSchedule,
     }
     
-    internal abstract class WebClient
+    public abstract class WebClient
     {
         private static HttpClient s_HttpClient = null;
 
-        internal readonly int ClientVersion;
-        internal readonly int BuildVersion;
+        public readonly int ClientVersion;
+        public readonly int BuildVersion;
 
-        internal WebClient(int clientVersion, int buildVersion) {
+        public WebClient(int clientVersion, int buildVersion) {
             ClientVersion = clientVersion;
             BuildVersion = buildVersion;
         }

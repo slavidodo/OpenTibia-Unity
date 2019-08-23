@@ -7,26 +7,26 @@ namespace OpenTibiaUnity.Core.Components
     [CanEditMultipleObjects]
     public class DraggableTransformEditor : Editor
     {
-        SerializedProperty m_BindRectToParent;
-        SerializedProperty m_DraggablePolicy;
-        SerializedProperty m_DragBoxSize;
+        SerializedProperty _bindRectToParent;
+        SerializedProperty _draggablePolicy;
+        SerializedProperty _dragBoxSize;
 
         protected virtual void OnEnable() {
-            m_BindRectToParent = serializedObject.FindProperty("bindRectToParent");
-            m_DraggablePolicy = serializedObject.FindProperty("draggingPolicy");
-            m_DragBoxSize = serializedObject.FindProperty("draggingBoxSize");
+            _bindRectToParent = serializedObject.FindProperty("bindRectToParent");
+            _draggablePolicy = serializedObject.FindProperty("draggingPolicy");
+            _dragBoxSize = serializedObject.FindProperty("draggingBoxSize");
         }
 
         public override void OnInspectorGUI() {
             serializedObject.Update();
 
             EditorGUILayout.Space();
-            EditorGUILayout.PropertyField(m_BindRectToParent);
+            EditorGUILayout.PropertyField(_bindRectToParent);
             EditorGUILayout.Separator();
-            EditorGUILayout.PropertyField(m_DraggablePolicy);
+            EditorGUILayout.PropertyField(_draggablePolicy);
             
-            if (m_DraggablePolicy.enumValueIndex != 0) {
-                EditorGUILayout.PropertyField(m_DragBoxSize);
+            if (_draggablePolicy.enumValueIndex != 0) {
+                EditorGUILayout.PropertyField(_dragBoxSize);
             } 
             
             serializedObject.ApplyModifiedProperties();

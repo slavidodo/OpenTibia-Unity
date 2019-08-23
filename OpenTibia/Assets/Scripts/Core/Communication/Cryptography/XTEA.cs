@@ -2,39 +2,39 @@
 
 namespace OpenTibiaUnity.Core.Communication.Cryptography
 {
-    internal class XTEA
+    public class XTEA
     {
-        internal const int BlockSize = 2 * sizeof(uint);
+        public const int BlockSize = 2 * sizeof(uint);
 
-        Random m_Random = new Random();
-        uint[] m_Key = new uint[4];
+        Random _random = new Random();
+        uint[] _key = new uint[4];
 
-        internal XTEA() {
+        public XTEA() {
             GenerateKey();
         }
 
         private void GenerateKey() {
-            m_Key[0] = (uint)m_Random.Next();
-            m_Key[1] = (uint)m_Random.Next();
-            m_Key[2] = (uint)m_Random.Next();
-            m_Key[3] = (uint)m_Random.Next();
+            _key[0] = (uint)_random.Next();
+            _key[1] = (uint)_random.Next();
+            _key[2] = (uint)_random.Next();
+            _key[3] = (uint)_random.Next();
         }
 
-        internal void WriteKey(Internal.ByteArray message) {
-            message.WriteUnsignedInt(m_Key[0]);
-            message.WriteUnsignedInt(m_Key[1]);
-            message.WriteUnsignedInt(m_Key[2]);
-            message.WriteUnsignedInt(m_Key[3]);
+        public void WriteKey(Internal.ByteArray message) {
+            message.WriteUnsignedInt(_key[0]);
+            message.WriteUnsignedInt(_key[1]);
+            message.WriteUnsignedInt(_key[2]);
+            message.WriteUnsignedInt(_key[3]);
         }
 
-        internal int Encrypt(Internal.ByteArray message, int offset = 0, int length = int.MaxValue) {
+        public int Encrypt(Internal.ByteArray message, int offset = 0, int length = int.MaxValue) {
             length = Math.Min(length, message.Length - offset);
             message.Position = offset + length;
 
             int encryptedLength = (int)(Math.Floor((length + BlockSize - 1) / (double)BlockSize) * BlockSize);
             if (encryptedLength > length) {
                 byte[] tmp = new byte[encryptedLength - length];
-                m_Random.NextBytes(tmp);
+                _random.NextBytes(tmp);
                 message.WriteBytes(tmp);
                 length = encryptedLength;
             }
@@ -47,9 +47,9 @@ namespace OpenTibiaUnity.Core.Communication.Cryptography
                 uint delta = 0x61C88647;
                 uint sum = 0;
                 for (int r = 0; r < 32; r++) {
-                    v0 += (v1 << 4 ^ v1 >> 5) + v1 ^ sum + m_Key[sum & 3];
+                    v0 += (v1 << 4 ^ v1 >> 5) + v1 ^ sum + _key[sum & 3];
                     sum -= delta;
-                    v1 += (v0 << 4 ^ v0 >> 5) + v0 ^ sum + m_Key[sum >> 11 & 3];
+                    v1 += (v0 << 4 ^ v0 >> 5) + v0 ^ sum + _key[sum >> 11 & 3];
                 }
 
                 message.Position -= BlockSize;
@@ -62,7 +62,7 @@ namespace OpenTibiaUnity.Core.Communication.Cryptography
             return length;
         }
 
-        internal int Decrypt(Internal.ByteArray message, int offset = 0, int length = int.MaxValue) {
+        public int Decrypt(Internal.ByteArray message, int offset = 0, int length = int.MaxValue) {
             length = Math.Min(length, message.Length - offset);
             length -= length % BlockSize;
             int i = offset;
@@ -73,9 +73,9 @@ namespace OpenTibiaUnity.Core.Communication.Cryptography
                 uint delta = 0x61C88647;
                 uint sum = 0xC6EF3720;
                 for (int r = 0; r < 32; r++) {
-                    v1 -= (v0 << 4 ^ v0 >> 5) + v0 ^ sum + m_Key[sum >> 11 & 3];
+                    v1 -= (v0 << 4 ^ v0 >> 5) + v0 ^ sum + _key[sum >> 11 & 3];
                     sum += delta;
-                    v0 -= (v1 << 4 ^ v1 >> 5) + v1 ^ sum + m_Key[sum & 3];
+                    v0 -= (v1 << 4 ^ v1 >> 5) + v1 ^ sum + _key[sum & 3];
                 }
                 message.Position -= BlockSize;
                 message.WriteUnsignedInt(v0);

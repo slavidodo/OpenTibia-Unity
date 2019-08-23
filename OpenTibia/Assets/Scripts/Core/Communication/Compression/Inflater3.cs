@@ -2,11 +2,11 @@
 
 namespace OpenTibiaUnity.Core.Communication.Compression
 {
-    internal class Inflater3
+    public class Inflater3
     {
         private static ZlibCodec s_Decompressor;
 
-        internal static bool Inflate(byte[] compressed, out byte[] decompressed) {
+        public static bool Inflate(byte[] compressed, out byte[] decompressed) {
             byte[] decompressedBytes = new byte[ushort.MaxValue];
 
             int ret;
@@ -38,7 +38,7 @@ namespace OpenTibiaUnity.Core.Communication.Compression
             return true;
         }
 
-        internal static void Cleanup() {
+        public static void Cleanup() {
             if (s_Decompressor == null)
                 return;
 

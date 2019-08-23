@@ -9,31 +9,31 @@ using UnityInput = UnityEngine.Input;
 
 namespace OpenTibiaUnity.Core.Input
 {
-    internal class InputHandler
+    public class InputHandler
     {
-        internal class ModifierKeyEvent : Utility.EventImpl<char, KeyCode, EventModifiers> { }
-        internal class KeyboardEvent : Utility.EventImpl<Event, bool> { }
-        internal class MouseEvent : Utility.EventImpl<Event, MouseButton, bool> { }
+        public class ModifierKeyEvent : Utils.EventImpl<char, KeyCode, EventModifiers> { }
+        public class KeyboardEvent : Utils.EventImpl<Event, bool> { }
+        public class MouseEvent : Utils.EventImpl<Event, MouseButton, bool> { }
 
         private const int KeyRepeatMinDelay = 250;
 
-        private bool m_CaptureKeyboard = true;
-        private bool m_CaptureMouse = true;
-        private bool m_KeyboardHandlerActive = false;
-        private bool m_MouseHandlerActive = false;
-        private bool m_ignoreNextLeft = false;
-        private bool m_ignoreNextRight = false;
-        private bool m_Numlock = false;
-        private KeyCode m_KeyCode = KeyCode.None;
+        private bool _captureKeyboard = true;
+        private bool _captureMouse = true;
+        private bool _keyboardHandlerActive = false;
+        private bool _mouseHandlerActive = false;
+        private bool _ignoreNextLeft = false;
+        private bool _ignoreNextRight = false;
+        private bool _numlock = false;
+        private KeyCode _keyCode = KeyCode.None;
 
-        private Mapping.Mapping m_Mapping;
+        private Mapping.Mapping _mapping;
 
-        private List<Binding> m_MovementBindings = null;
-        private int[] m_KeyPressed = new int[500];
-        private int[] m_MousePressed = new int[3];
-        private int[] m_MouseDragged = new int[3];
+        private List<Binding> _movementBindings = null;
+        private int[] _keyPressed = new int[500];
+        private int[] _mousePressed = new int[3];
+        private int[] _mouseDragged = new int[3];
 
-        internal ModifierKeyEvent onModifierKeyEvent = new ModifierKeyEvent();
+        public ModifierKeyEvent onModifierKeyEvent = new ModifierKeyEvent();
         private KeyboardEvent onKeyDownEvent = new KeyboardEvent();
         private KeyboardEvent onKeyUpEvent = new KeyboardEvent();
         private MouseEvent onMouseDownEvent = new MouseEvent();
@@ -42,21 +42,21 @@ namespace OpenTibiaUnity.Core.Input
         private MouseEvent onBeginDragEvent = new MouseEvent();
         private MouseEvent onEndDragEvent = new MouseEvent();
 
-        internal InputHandler() {
+        public InputHandler() {
             OpenTibiaUnity.GameManager.AddSecondaryTimerListener(OnKeyboardRepeatTimer);
             OpenTibiaUnity.GameManager.AddSecondaryTimerListener(OnMouseRepeatTimer);
         }
 
-        internal void Cleanup() {
+        public void Cleanup() {
             OpenTibiaUnity.GameManager.RemoveSecondaryTimerListener(OnKeyboardRepeatTimer);
             OpenTibiaUnity.GameManager.RemoveSecondaryTimerListener(OnMouseRepeatTimer);
         }
 
-        internal void UpdateMapping() {
+        public void UpdateMapping() {
             var optionStorage = OpenTibiaUnity.OptionStorage;
 
             Mapping.Mapping mapping = null;
-            MappingSet mappingSet = optionStorage.GetMappingSet(optionStorage.GeneralInputSetID);
+            MappingSet mappingSet = optionStorage.GetMappingSet(optionStorage.GeneralInputSet_id);
             if (mappingSet != null) {
                 if (optionStorage.GeneralInputSetMode == MappingSet.ChatModeOFF)
                     mapping = mappingSet.ChatModeOffMapping;
@@ -65,19 +65,19 @@ namespace OpenTibiaUnity.Core.Input
             }
             
             if (mapping != null && mapping.Bindings != null) {
-                m_MovementBindings = new List<Binding>();
+                _movementBindings = new List<Binding>();
                 foreach (var binding in mapping.Bindings) {
                     if (binding.Action != null && (binding.Action as StaticAction.PlayerMove) != null)
-                        m_MovementBindings.Add(binding);
+                        _movementBindings.Add(binding);
                 }
             }
 
-            m_Mapping = mapping;
+            _mapping = mapping;
         }
 
-        internal void OnKeyboardRepeatTimer() {
+        public void OnKeyboardRepeatTimer() {
             // Currently this is only useful for movement //
-            if (m_CaptureKeyboard && m_MovementBindings != null && !OpenTibiaUnity.GameManager.ActiveBlocker.gameObject.activeSelf) {
+            if (_captureKeyboard && _movementBindings != null && !OpenTibiaUnity.GameManager.ActiveBlocker.gameObject.activeSelf) {
                 var ticks = OpenTibiaUnity.TicksMillis;
 
                 EventModifiers modifier = EventModifiers.None;
@@ -86,8 +86,8 @@ namespace OpenTibiaUnity.Core.Input
                 if (IsKeyPressed(KeyCode.LeftShift) || IsKeyPressed(KeyCode.RightShift)) modifier |= EventModifiers.Shift;
 
                 bool isBlockerActive = OpenTibiaUnity.GameManager.ActiveBlocker.gameObject.activeSelf;
-                foreach (var binding in m_MovementBindings) {
-                    if (IsKeyPressed(binding.KeyCode) && m_KeyPressed[(int)binding.KeyCode] + KeyRepeatMinDelay < ticks
+                foreach (var binding in _movementBindings) {
+                    if (IsKeyPressed(binding.KeyCode) && _keyPressed[(int)binding.KeyCode] + KeyRepeatMinDelay < ticks
                         && binding.AppliesTo((binding.Action as StaticAction.PlayerMove).EventMask, binding.KeyCode, modifier, isBlockerActive)) {
                         binding.Action.Perform(true);
                         break;
@@ -96,66 +96,66 @@ namespace OpenTibiaUnity.Core.Input
             }
         }
 
-        internal void OnMouseRepeatTimer() {
+        public void OnMouseRepeatTimer() {
             // Do something when mouse is held
         }
 
-        internal void ClearPressedKeys() {
-            m_KeyPressed = new int[500];
+        public void ClearPressedKeys() {
+            _keyPressed = new int[500];
         }
 
-        internal bool IsKeyPressed(KeyCode keyCode) {
-            return m_KeyPressed[(int)keyCode] != 0;
+        public bool IsKeyPressed(KeyCode keyCode) {
+            return _keyPressed[(int)keyCode] != 0;
         }
 
-        internal bool IsMouseButtonPressed(MouseButton mouseButton) {
+        public bool IsMouseButtonPressed(MouseButton mouseButton) {
             switch (mouseButton) {
-                case MouseButton.Left: return m_MousePressed[0] != 0;
-                case MouseButton.Right: return m_MousePressed[1] != 0;
-                case MouseButton.Middle: return m_MousePressed[2] != 0;
-                case MouseButton.Both: return m_MousePressed[0] != 0 && m_MousePressed[1] != 0;
+                case MouseButton.Left: return _mousePressed[0] != 0;
+                case MouseButton.Right: return _mousePressed[1] != 0;
+                case MouseButton.Middle: return _mousePressed[2] != 0;
+                case MouseButton.Both: return _mousePressed[0] != 0 && _mousePressed[1] != 0;
             }
             return false;
         }
 
-        internal bool IsMouseButtonDragged(MouseButton mouseButton) {
+        public bool IsMouseButtonDragged(MouseButton mouseButton) {
             switch (mouseButton) {
-                case MouseButton.Left: return m_MouseDragged[0] != 0;
-                case MouseButton.Right: return m_MouseDragged[1] != 0;
-                case MouseButton.Middle: return m_MouseDragged[2] != 0;
-                case MouseButton.Both: return m_MouseDragged[0] != 0 && m_MouseDragged[1] != 0;
+                case MouseButton.Left: return _mouseDragged[0] != 0;
+                case MouseButton.Right: return _mouseDragged[1] != 0;
+                case MouseButton.Middle: return _mouseDragged[2] != 0;
+                case MouseButton.Both: return _mouseDragged[0] != 0 && _mouseDragged[1] != 0;
             }
             return false;
         }
 
-        internal void OnKeyEvent(Event e) {
-            if (m_KeyboardHandlerActive || (int)e.keyCode >= m_KeyPressed.Length)
+        public void OnKeyEvent(Event e) {
+            if (_keyboardHandlerActive || (int)e.keyCode >= _keyPressed.Length)
                 return;
             
             try {
-                m_KeyboardHandlerActive = true;
+                _keyboardHandlerActive = true;
                 var keyModified = false;
                 if (e.type == EventType.KeyUp) {
-                    keyModified = m_KeyPressed[(int)e.keyCode] != 0;
-                    m_KeyPressed[(int)e.keyCode] = 0;
+                    keyModified = _keyPressed[(int)e.keyCode] != 0;
+                    _keyPressed[(int)e.keyCode] = 0;
 
                     bool numlock = (e.modifiers & EventModifiers.Numeric) != 0;
-                    if (numlock != m_Numlock) {
+                    if (numlock != _numlock) {
                         ClearPressedKeys();
-                        m_Numlock = numlock;
+                        _numlock = numlock;
                     }
                 }
 
-                if (m_CaptureKeyboard && m_Mapping != null && !(e.alt && e.control)) {
+                if (_captureKeyboard && _mapping != null && !(e.alt && e.control)) {
                     if (e.type == EventType.KeyDown) {
-                        var type = m_KeyPressed[(int)e.keyCode] != 0 ? InputEvent.KeyRepeat : InputEvent.KeyDown;
-                        bool handled = m_Mapping.OnKeyInput(type, e.character, e.keyCode, e.modifiers);
+                        var type = _keyPressed[(int)e.keyCode] != 0 ? InputEvent.KeyRepeat : InputEvent.KeyDown;
+                        bool handled = _mapping.OnKeyInput(type, e.character, e.keyCode, e.modifiers);
                         if (!handled)
-                            onKeyDownEvent.InvokeWhile(e, m_KeyPressed[(int)e.keyCode] != 0, () => e.type != EventType.Used);
+                            onKeyDownEvent.InvokeWhile(e, _keyPressed[(int)e.keyCode] != 0, () => e.type != EventType.Used);
                         else
                             e.Use();
                     } else if (e.type == EventType.KeyUp) {
-                        bool handled = m_Mapping.OnKeyInput(InputEvent.KeyUp, e.character, e.keyCode, e.modifiers);
+                        bool handled = _mapping.OnKeyInput(InputEvent.KeyUp, e.character, e.keyCode, e.modifiers);
                         if (!handled)
                             onKeyUpEvent.InvokeWhile(e, false, () => e.type != EventType.Used);
                         else
@@ -164,34 +164,34 @@ namespace OpenTibiaUnity.Core.Input
                 }
 
                 if (e.type == EventType.KeyDown) {
-                    m_KeyCode = e.keyCode;
-                    keyModified = m_KeyPressed[(int)e.keyCode] != 0;
-                    m_KeyPressed[(int)e.keyCode] = OpenTibiaUnity.TicksMillis;
+                    _keyCode = e.keyCode;
+                    keyModified = _keyPressed[(int)e.keyCode] != 0;
+                    _keyPressed[(int)e.keyCode] = OpenTibiaUnity.TicksMillis;
                 }
 
                 if (keyModified)
                     onModifierKeyEvent.Invoke(e.character, e.keyCode, e.modifiers);
             } catch (System.Exception) {
             } finally {
-                m_KeyboardHandlerActive = false;
+                _keyboardHandlerActive = false;
             }
         }
 
-        internal void OnMouseEvent(Event e) {
-            if (m_MouseHandlerActive || e.button > m_MousePressed.Length)
+        public void OnMouseEvent(Event e) {
+            if (_mouseHandlerActive || e.button > _mousePressed.Length)
                 return;
 
             try {
-                m_MouseHandlerActive = true;
+                _mouseHandlerActive = true;
                 var eventType = e.type;
                 var rawMouseButton = e.button;
                 if (eventType == EventType.MouseUp)
-                    m_MousePressed[e.button] = 0;
+                    _mousePressed[e.button] = 0;
 
-                if (m_CaptureMouse && !(e.alt && e.control) && e.button != 2) {
+                if (_captureMouse && !(e.alt && e.control) && e.button != 2) {
                     if (eventType == EventType.MouseDown) {
-                        bool leftPressedEarlier = m_MousePressed[0] != 0;
-                        bool rightPressedEarlier = m_MousePressed[1] != 0;
+                        bool leftPressedEarlier = _mousePressed[0] != 0;
+                        bool rightPressedEarlier = _mousePressed[1] != 0;
 
                         bool both;
                         if (e.button == 0)
@@ -200,7 +200,7 @@ namespace OpenTibiaUnity.Core.Input
                             both = leftPressedEarlier;
 
                         if (both) {
-                            m_ignoreNextLeft = m_ignoreNextRight = false;
+                            _ignoreNextLeft = _ignoreNextRight = false;
                             onMouseDownEvent.Invoke(e, MouseButton.Both, leftPressedEarlier && rightPressedEarlier);
                         } else if (e.button == 0) {
                             onMouseDownEvent.Invoke(e, MouseButton.Left, leftPressedEarlier);
@@ -208,18 +208,18 @@ namespace OpenTibiaUnity.Core.Input
                             onMouseDownEvent.Invoke(e, MouseButton.Right, rightPressedEarlier);
                         }
                     } else if (eventType == EventType.MouseUp) {
-                        if (m_ignoreNextLeft && e.button == 0) {
-                            m_ignoreNextLeft = false;
-                        } else if (m_ignoreNextRight && e.button == 1) {
-                            m_ignoreNextRight = false;
+                        if (_ignoreNextLeft && e.button == 0) {
+                            _ignoreNextLeft = false;
+                        } else if (_ignoreNextRight && e.button == 1) {
+                            _ignoreNextRight = false;
                         } else {
                             bool both;
                             if (e.button == 0) {
-                                both = m_MousePressed[1] != 0;
-                                m_ignoreNextRight = both && m_MouseDragged[1] == 0;
+                                both = _mousePressed[1] != 0;
+                                _ignoreNextRight = both && _mouseDragged[1] == 0;
                             } else {
-                                both = m_MousePressed[0] != 0;
-                                m_ignoreNextLeft = both && m_MouseDragged[0] == 0;
+                                both = _mousePressed[0] != 0;
+                                _ignoreNextLeft = both && _mouseDragged[0] == 0;
                             }
 
                             var mouseButton = MouseButton.Left;
@@ -228,8 +228,8 @@ namespace OpenTibiaUnity.Core.Input
                             else if (e.button == 1)
                                 mouseButton = MouseButton.Right;
 
-                            if (m_MouseDragged[e.button] != 0) {
-                                m_MouseDragged[e.button] = 0;
+                            if (_mouseDragged[e.button] != 0) {
+                                _mouseDragged[e.button] = 0;
                                 onEndDragEvent.InvokeWhile(e, mouseButton, false, () => e.type != EventType.Used);
                             }
 
@@ -240,19 +240,19 @@ namespace OpenTibiaUnity.Core.Input
                 }
 
                 if (eventType == EventType.MouseDown)
-                    m_MousePressed[e.button] = OpenTibiaUnity.TicksMillis;
+                    _mousePressed[e.button] = OpenTibiaUnity.TicksMillis;
             } catch (System.Exception) {
             } finally {
-                m_MouseHandlerActive = false;
+                _mouseHandlerActive = false;
             }
         }
 
-        internal void OnDragEvent(Event e) {
-            if (m_MouseHandlerActive || e.button > m_MousePressed.Length)
+        public void OnDragEvent(Event e) {
+            if (_mouseHandlerActive || e.button > _mousePressed.Length)
                 return;
 
             try {
-                bool both = (e.button == 0 ? m_MousePressed[1] : m_MousePressed[0]) != 0;
+                bool both = (e.button == 0 ? _mousePressed[1] : _mousePressed[0]) != 0;
 
                 MouseButton mouseButton = MouseButton.None;
                 if (both)
@@ -265,19 +265,19 @@ namespace OpenTibiaUnity.Core.Input
                     mouseButton = MouseButton.Middle;
 
 
-                if (m_MouseDragged[e.button] == 0)
+                if (_mouseDragged[e.button] == 0)
                     onBeginDragEvent.InvokeWhile(e, mouseButton, false, () => e.type != EventType.Used);
                 else
                     onDragEvent.InvokeWhile(e, mouseButton, true, () => e.type != EventType.Used);
 
-                m_MouseDragged[e.button] = OpenTibiaUnity.TicksMillis;
+                _mouseDragged[e.button] = OpenTibiaUnity.TicksMillis;
             } catch (System.Exception) {
             } finally {
-                m_MouseHandlerActive = false;
+                _mouseHandlerActive = false;
             }
         }
         
-        internal bool IsModifierKeyPressed(Event e = null) {
+        public bool IsModifierKeyPressed(Event e = null) {
             if (e != null)
                 return e.alt || e.shift || e.control;
 
@@ -286,38 +286,38 @@ namespace OpenTibiaUnity.Core.Input
                 || IsKeyPressed(KeyCode.LeftAlt) || IsKeyPressed(KeyCode.RightAlt);
         }
 
-        internal void AddKeyDownListener(Utility.EventImplPriority priority, System.Action<Event, bool> action) =>
+        public void AddKeyDownListener(Utils.EventImplPriority priority, System.Action<Event, bool> action) =>
             onKeyDownEvent.AddListener(priority, action);
-        internal void RemoveKeyDownListener(System.Action<Event, bool> action) =>
+        public void RemoveKeyDownListener(System.Action<Event, bool> action) =>
             onKeyDownEvent.RemoveListener(action);
-        internal void AddKeyUpListener(Utility.EventImplPriority priority, System.Action<Event, bool> action) =>
+        public void AddKeyUpListener(Utils.EventImplPriority priority, System.Action<Event, bool> action) =>
            onKeyUpEvent.AddListener(priority, action);
-        internal void RemoveKeyUpListener(System.Action<Event, bool> action) =>
+        public void RemoveKeyUpListener(System.Action<Event, bool> action) =>
             onKeyUpEvent.RemoveListener(action);
 
-        internal void AddMouseDownListener(Utility.EventImplPriority priority, System.Action<Event, MouseButton, bool> action) =>
+        public void AddMouseDownListener(Utils.EventImplPriority priority, System.Action<Event, MouseButton, bool> action) =>
             onMouseDownEvent.AddListener(priority, action);
-        internal void RemoveMouseDownListener(System.Action<Event, MouseButton, bool> action) =>
+        public void RemoveMouseDownListener(System.Action<Event, MouseButton, bool> action) =>
             onMouseDownEvent.RemoveListener(action);
-        internal void AddMouseUpListener(Utility.EventImplPriority priority, System.Action<Event, MouseButton, bool> action) =>
+        public void AddMouseUpListener(Utils.EventImplPriority priority, System.Action<Event, MouseButton, bool> action) =>
             onMouseUpEvent.AddListener(priority, action);
-        internal void RemoveMouseUpListener(System.Action<Event, MouseButton, bool> action) =>
+        public void RemoveMouseUpListener(System.Action<Event, MouseButton, bool> action) =>
             onMouseUpEvent.RemoveListener(action);
 
-        internal void AddDragListener(Utility.EventImplPriority priority, System.Action<Event, MouseButton, bool> action) =>
+        public void AddDragListener(Utils.EventImplPriority priority, System.Action<Event, MouseButton, bool> action) =>
             onDragEvent.AddListener(priority, action);
-        internal void RemoveDragListener(System.Action<Event, MouseButton, bool> action) =>
+        public void RemoveDragListener(System.Action<Event, MouseButton, bool> action) =>
             onDragEvent.RemoveListener(action);
-        internal void AddBeginDragListener(Utility.EventImplPriority priority, System.Action<Event, MouseButton, bool> action) =>
+        public void AddBeginDragListener(Utils.EventImplPriority priority, System.Action<Event, MouseButton, bool> action) =>
             onBeginDragEvent.AddListener(priority, action);
-        internal void RemoveBeginDragListener(System.Action<Event, MouseButton, bool> action) =>
+        public void RemoveBeginDragListener(System.Action<Event, MouseButton, bool> action) =>
             onBeginDragEvent.RemoveListener(action);
-        internal void AddEndDragListener(Utility.EventImplPriority priority, System.Action<Event, MouseButton, bool> action) =>
+        public void AddEndDragListener(Utils.EventImplPriority priority, System.Action<Event, MouseButton, bool> action) =>
             onEndDragEvent.AddListener(priority, action);
-        internal void RemoveEndDragListener(System.Action<Event, MouseButton, bool> action) =>
+        public void RemoveEndDragListener(System.Action<Event, MouseButton, bool> action) =>
             onEndDragEvent.RemoveListener(action);
 
-        internal EventModifiers GetRawEventModifiers() {
+        public EventModifiers GetRawEventModifiers() {
             EventModifiers eventModifiers = EventModifiers.None;
 
             if (UnityInput.GetKeyDown(KeyCode.LeftAlt) || UnityInput.GetKeyDown(KeyCode.RightAlt) || UnityInput.GetKey(KeyCode.LeftAlt) || UnityInput.GetKey(KeyCode.RightAlt))
@@ -332,7 +332,7 @@ namespace OpenTibiaUnity.Core.Input
             return eventModifiers;
         }
 
-        internal static bool IsGameObjectHighlighted(GameObject gameObject) {
+        public static bool IsGameObjectHighlighted(GameObject gameObject) {
             if (!gameObject)
                 return true;
             else if (!gameObject.activeSelf)
@@ -354,6 +354,6 @@ namespace OpenTibiaUnity.Core.Input
             return false;
         }
 
-        internal static bool IsHighlighted(Component component) => IsGameObjectHighlighted(component?.gameObject);
+        public static bool IsHighlighted(Component component) => IsGameObjectHighlighted(component?.gameObject);
     }
 }

@@ -5,30 +5,30 @@ using UnityEngine.EventSystems;
 namespace OpenTibiaUnity.Core.Components.Base
 {
     [DisallowMultipleComponent]
-    internal class Window : Module
+    public class Window : Module
     {
-        internal UnityEvent onOpened = new UnityEvent();
-        internal UnityEvent onClosed = new UnityEvent();
+        public UnityEvent onOpened = new UnityEvent();
+        public UnityEvent onClosed = new UnityEvent();
 
-        [SerializeField] internal bool ResetPositionOnShow = true;
+        public bool ResetPositionOnShow = true;
         
-        internal bool Visible { get => enabled && gameObject.activeSelf; }
+        public bool Visible { get => enabled && gameObject.activeSelf; }
 
-        internal void OpenWindow(bool resetPosition = true) {
-            ShowWindow();
+        public void Open(bool resetPosition = true) {
+            Show();
             LockToOverlay();
             Select();
             
             onOpened.Invoke();
         }
 
-        internal void CloseWindow() {
-            HideWindow();
+        public override void Close() {
+            Hide();
             UnlockFromOverlay();
             onClosed.Invoke();
         }
 
-        internal virtual void ShowWindow() {
+        public virtual void Show() {
             gameObject.SetActive(true);
 
             if (ResetPositionOnShow)
@@ -36,15 +36,8 @@ namespace OpenTibiaUnity.Core.Components.Base
         }
 
 
-        internal virtual void HideWindow() {
+        public virtual void Hide() {
             gameObject.SetActive(false);
-        }
-
-        internal void Select() {
-            if (EventSystem.current.alreadySelecting)
-                return;
-
-            OpenTibiaUnity.EventSystem.SetSelectedGameObject(gameObject);
         }
     }
 }

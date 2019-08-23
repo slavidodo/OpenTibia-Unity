@@ -3,136 +3,136 @@ using UnityEngine.Events;
 
 namespace OpenTibiaUnity.Core.Creatures
 {
-    internal sealed class Player : Creature
+    public sealed class Player : Creature
     {
-        internal class UIntPlayerChangeEvent : UnityEvent<Player, uint, uint> { }
+        public class UIntPlayerChangeEvent : UnityEvent<Player, uint, uint> { }
         
-        internal UIntCreatureChangeEvent onStateFlagsChange = new UIntCreatureChangeEvent();
-        internal IntCreatureChangeEvent onFreeCapacityChange = new IntCreatureChangeEvent();
-        internal BoolCreatureChangeEvent onDepotStateChange = new BoolCreatureChangeEvent();
+        public UIntCreatureChangeEvent onStateFlagsChange = new UIntCreatureChangeEvent();
+        public IntCreatureChangeEvent onFreeCapacityChange = new IntCreatureChangeEvent();
+        public BoolCreatureChangeEvent onDepotStateChange = new BoolCreatureChangeEvent();
 
-        private bool m_AutowalkPathAborting = false;
-        private bool m_AutowalkTargetDiagonal = false;
-        private bool m_AutowalkTargetExact = false;
-        private bool m_Premium = false;
-        private bool m_HasReachedMain = false;
+        private bool _autowalkPathAborting = false;
+        private bool _autowalkTargetDiagonal = false;
+        private bool _autowalkTargetExact = false;
+        private bool _premium = false;
+        private bool _hasReachedMain = false;
 
-        private int m_PremiumUntil = 0;
-        private int m_Profession = 0;
-        private int m_BankGoldBalance = 0;
-        private int m_InventoryGoldBalance = 0;
+        private int _premiumUntil = 0;
+        private int _profession = 0;
+        private int _bankGoldBalance = 0;
+        private int _inventoryGoldBalance = 0;
 
-        private double m_ExperienceBonus = 0.0f;
+        private double _experienceBonus = 0.0f;
 
-        private UnityEngine.Vector3Int m_AutowalkPathDelta = UnityEngine.Vector3Int.zero;
-        private UnityEngine.Vector3Int m_AutowalkTarget = new UnityEngine.Vector3Int(-1, -1, -1);
-        private List<int> m_AutowalkPathSteps = new List<int>();
-        private List<int> m_KnownSpells = new List<int>();
+        private UnityEngine.Vector3Int _autowalkPathDelta = UnityEngine.Vector3Int.zero;
+        private UnityEngine.Vector3Int _autowalkTarget = new UnityEngine.Vector3Int(-1, -1, -1);
+        private List<int> _autowalkPathSteps = new List<int>();
+        private List<int> _knownSpells = new List<int>();
 
-        internal override int HealthPercent {
+        public override int HealthPercent {
             get => (int)((GetSkillValue(SkillType.Health) / (float)GetSkillbase(SkillType.Health)) * 100);
         }
 
-        internal override int ManaPercent {
+        public override int ManaPercent {
             get => (int)((GetSkillValue(SkillType.Mana) / (float)GetSkillbase(SkillType.Mana)) * 100);
         }
 
-        internal long Mana {
+        public long Mana {
             get => GetSkillValue(SkillType.Mana);
         }
 
-        internal long Level {
+        public long Level {
             get => GetSkillValue(SkillType.Level);
         }
 
-        internal double LevelPercent {
+        public double LevelPercent {
             get => GetSKillProgress(SkillType.Level);
         }
 
-        internal int EarliestMoveTime {
-            get => m_MovementEnd;
-            set => m_MovementEnd = value;
+        public int EarliestMoveTime {
+            get => _movementEnd;
+            set => _movementEnd = value;
         }
 
-        private ExperienceGainInfo m_ExperienceGainInfo = new ExperienceGainInfo();
-        private SkillCounter m_ExperienceCounter = new SkillCounter();
+        private ExperienceGainInfo _experienceGainInfo = new ExperienceGainInfo();
+        private SkillCounter _experienceCounter = new SkillCounter();
 
-        internal double ExperienceBonus { get => m_ExperienceBonus; set => m_ExperienceBonus = value; } // <= 1096
-        internal ExperienceGainInfo ExperienceGainInfo { get => m_ExperienceGainInfo; } // >= 1097
+        public double ExperienceBonus { get => _experienceBonus; set => _experienceBonus = value; } // <= 1096
+        public ExperienceGainInfo ExperienceGainInfo { get => _experienceGainInfo; } // >= 1097
 
-        private uint m_StateFlags = 0;
-        internal uint StateFlags {
-            get => m_StateFlags;
+        private uint _stateFlags = 0;
+        public uint StateFlags {
+            get => _stateFlags;
             set => UpdateStateFlags(value);
         }
 
-        private uint m_Blessings = 0;
-        internal uint Blessings {
-            get => m_Blessings;
-            set => m_Blessings = value; // todo dispatch
+        private uint _blessings = 0;
+        public uint Blessings {
+            get => _blessings;
+            set => _blessings = value; // todo dispatch
         }
 
-        private bool m_HasFullBlessings;
-        internal bool HasFullBlessings {
+        private bool _hasFullBlessings;
+        public bool HasFullBlessings {
             get {
                 if (OpenTibiaUnity.GameManager.ProtocolVersion >= 1141)
-                    return (m_Blessings & (uint)BlessingTypes.All_1141) == (uint)BlessingTypes.All_1141;
+                    return (_blessings & (uint)BlessingTypes.All_1141) == (uint)BlessingTypes.All_1141;
                 else if (OpenTibiaUnity.GameManager.ProtocolVersion >= 1120)
-                    return (m_Blessings & (uint)BlessingTypes.All_1120) == (uint)BlessingTypes.All_1120;
+                    return (_blessings & (uint)BlessingTypes.All_1120) == (uint)BlessingTypes.All_1120;
                 else
-                    return m_HasFullBlessings;
+                    return _hasFullBlessings;
             }
 
             set {
                 if (OpenTibiaUnity.GameManager.ProtocolVersion >= 1141) {
                     if (value)
-                        m_Blessings |= (uint)BlessingTypes.All_1141;
+                        _blessings |= (uint)BlessingTypes.All_1141;
                     else
-                        m_Blessings &= ~(uint)BlessingTypes.All_1141;
+                        _blessings &= ~(uint)BlessingTypes.All_1141;
                 } else if (OpenTibiaUnity.GameManager.ProtocolVersion >= 1120) {
                     if (value)
-                        m_Blessings |= (uint)BlessingTypes.All_1120;
+                        _blessings |= (uint)BlessingTypes.All_1120;
                     else
-                        m_Blessings &= ~(uint)BlessingTypes.All_1120;
+                        _blessings &= ~(uint)BlessingTypes.All_1120;
                 } else {
-                    m_HasFullBlessings = value;
+                    _hasFullBlessings = value;
                 }
             }
         }
 
-        private bool m_IsInDepot = false;
-        internal bool IsInDepot {
-            get => m_IsInDepot;
-            set { var old = m_IsInDepot; m_IsInDepot = value; if (value != old) onDepotStateChange.Invoke(this, m_IsInDepot); }
+        private bool _isInDepot = false;
+        public bool IsInDepot {
+            get => _isInDepot;
+            set { var old = _isInDepot; _isInDepot = value; if (value != old) onDepotStateChange.Invoke(this, _isInDepot); }
         }
 
-        private int m_FreeCapacity = 0;
-        internal int FreeCapacity {
-            get => m_FreeCapacity;
-            set { var old = m_FreeCapacity; m_FreeCapacity = value; if (value != old) onFreeCapacityChange.Invoke(this, old, m_FreeCapacity); }
+        private int _freeCapacity = 0;
+        public int FreeCapacity {
+            get => _freeCapacity;
+            set { var old = _freeCapacity; _freeCapacity = value; if (value != old) onFreeCapacityChange.Invoke(this, old, _freeCapacity); }
         }
 
-        internal UnityEngine.Vector3Int AnticipatedPosition {
-            get => m_Position + m_AutowalkPathDelta;
+        public UnityEngine.Vector3Int AnticipatedPosition {
+            get => _position + _autowalkPathDelta;
         }
 
-        internal bool IsFighting {
-            get => (m_StateFlags & 1 << (int)States.Fighting) > 0;
+        public bool IsFighting {
+            get => (_stateFlags & 1 << (int)States.Fighting) > 0;
         }
 
-        internal Player(uint id, string name = null) : base(id, CreatureType.Player, name) {}
+        public Player(uint id, string name = null) : base(id, CreatureType.Player, name) {}
 
-        internal void StartAutowalk(UnityEngine.Vector3Int tarReadPosition, bool diagonal, bool exact) {
+        public void StartAutowalk(UnityEngine.Vector3Int tarReadPosition, bool diagonal, bool exact) {
             StartAutowalk(tarReadPosition.x, tarReadPosition.y, tarReadPosition.z, diagonal, exact);
         }
 
-        internal void StartAutowalk(int targetX, int targetY, int targetZ, bool diagonal, bool exact) {
-            if (targetX == m_AutowalkTarget.x && targetY == m_AutowalkTarget.y && targetZ == m_AutowalkTarget.z)
+        public void StartAutowalk(int targetX, int targetY, int targetZ, bool diagonal, bool exact) {
+            if (targetX == _autowalkTarget.x && targetY == _autowalkTarget.y && targetZ == _autowalkTarget.z)
                 return;
 
-            if (targetX == m_Position.x + 2 * m_AutowalkPathDelta.x
-                && targetY == m_Position.y + 2 * m_AutowalkPathDelta.y
-                && targetZ == m_Position.z + 2 * m_AutowalkPathDelta.z)
+            if (targetX == _position.x + 2 * _autowalkPathDelta.x
+                && targetY == _position.y + 2 * _autowalkPathDelta.y
+                && targetZ == _position.z + 2 * _autowalkPathDelta.z)
                 return;
 
             var protocolGame = OpenTibiaUnity.ProtocolGame;
@@ -140,9 +140,9 @@ namespace OpenTibiaUnity.Core.Creatures
             if (protocolGame == null || !protocolGame.IsGameRunning || worldMapStorage == null)
                 return;
 
-            m_AutowalkTarget.Set(-1, -1, -1);
-            m_AutowalkTargetDiagonal = false;
-            m_AutowalkTargetExact = false;
+            _autowalkTarget.Set(-1, -1, -1);
+            _autowalkTargetDiagonal = false;
+            _autowalkTargetExact = false;
 
             // check if the tile can actually be entered (before proceeding with anything)
             // the tile must be visible, otherwise it would then be checked in the pathfinder
@@ -155,25 +155,25 @@ namespace OpenTibiaUnity.Core.Creatures
                 }
             }
 
-            m_AutowalkTarget.Set(targetX, targetY, targetZ);
-            m_AutowalkTargetDiagonal = diagonal;
-            m_AutowalkTargetExact = exact;
+            _autowalkTarget.Set(targetX, targetY, targetZ);
+            _autowalkTargetDiagonal = diagonal;
+            _autowalkTargetExact = exact;
 
             // we can't walk while already walking //
-            if (m_AutowalkPathAborting || m_AutowalkPathSteps.Count == 1)
+            if (_autowalkPathAborting || _autowalkPathSteps.Count == 1)
                 return;
 
             // if there is no steps left, permit a new walk
-            if (m_AutowalkPathSteps.Count == 0) {
-                StartAutowalkInternal();
+            if (_autowalkPathSteps.Count == 0) {
+                StartAutowalkpublic();
             } else {
                 protocolGame.SendStop();
-                m_AutowalkPathAborting = true;
+                _autowalkPathAborting = true;
             }
         }
 
-        private void StartAutowalkInternal() {
-            if (m_MovementRunning || m_AutowalkPathAborting || m_AutowalkPathDelta != UnityEngine.Vector3Int.zero || m_AutowalkTarget.x == -1 && m_AutowalkTarget.y == -1 && m_AutowalkTarget.z == -1)
+        private void StartAutowalkpublic() {
+            if (_movementRunning || _autowalkPathAborting || _autowalkPathDelta != UnityEngine.Vector3Int.zero || _autowalkTarget.x == -1 && _autowalkTarget.y == -1 && _autowalkTarget.z == -1)
                 return;
             
             var protocolGame = OpenTibiaUnity.ProtocolGame;
@@ -182,22 +182,22 @@ namespace OpenTibiaUnity.Core.Creatures
             if (protocolGame == null || !protocolGame.IsGameRunning || minimapStorage == null || worldMapStorage == null)
                 return;
 
-            m_AutowalkPathAborting = false;
-            m_AutowalkPathDelta.Set(0, 0, 0);
-            m_AutowalkPathSteps.Clear();
+            _autowalkPathAborting = false;
+            _autowalkPathDelta.Set(0, 0, 0);
+            _autowalkPathSteps.Clear();
             
-            PathState pathState = minimapStorage.CalculatePath(m_Position, m_AutowalkTarget, m_AutowalkTargetDiagonal, m_AutowalkTargetExact, m_AutowalkPathSteps);
-            if (worldMapStorage.IsVisible(m_AutowalkTarget, false)) {
-                m_AutowalkTarget.Set(-1, -1, -1);
-                m_AutowalkTargetDiagonal = false;
-                m_AutowalkTargetExact = false;
+            PathState pathState = minimapStorage.CalculatePath(_position, _autowalkTarget, _autowalkTargetDiagonal, _autowalkTargetExact, _autowalkPathSteps);
+            if (worldMapStorage.IsVisible(_autowalkTarget, false)) {
+                _autowalkTarget.Set(-1, -1, -1);
+                _autowalkTargetDiagonal = false;
+                _autowalkTargetExact = false;
             }
             
             switch (pathState) {
                 case PathState.PathEmpty:
                     break;
                 case PathState.PathExists:
-                    protocolGame.SendGo(m_AutowalkPathSteps);
+                    protocolGame.SendGo(_autowalkPathSteps);
                     NextAutowalkStep();
                     break;
                 case PathState.PathErrorGoDownstairs:
@@ -213,17 +213,17 @@ namespace OpenTibiaUnity.Core.Creatures
                     worldMapStorage.AddOnscreenMessage(MessageModeType.Failure, TextResources.MSG_PATH_UNREACHABLE);
                     StopAutowalk(false);
                     break;
-                case PathState.PathErrorInternal:
+                case PathState.PathErrorpublic:
                     worldMapStorage.AddOnscreenMessage(MessageModeType.Failure, TextResources.MSG_SORRY_NOT_POSSIBLE);
                     StopAutowalk(false);
                     break;
                 default:
-                    throw new System.Exception("Player.StartAutowalkInternal: Unknown path state: " + pathState);
+                    throw new System.Exception("Player.StartAutowalkpublic: Unknown path state: " + pathState);
             }
         }
 
         private void NextAutowalkStep() {
-            if (m_MovementRunning || m_AutowalkPathAborting || m_AutowalkPathDelta != UnityEngine.Vector3Int.zero || m_AutowalkPathSteps.Count == 0)
+            if (_movementRunning || _autowalkPathAborting || _autowalkPathDelta != UnityEngine.Vector3Int.zero || _autowalkPathSteps.Count == 0)
                 return;
             
             var protocolGame = OpenTibiaUnity.ProtocolGame;
@@ -231,69 +231,69 @@ namespace OpenTibiaUnity.Core.Creatures
             if (protocolGame == null || !protocolGame.IsGameRunning || worldMapStorage == null)
                 return;
 
-            switch ((PathDirection)(m_AutowalkPathSteps[0] & 65535)) {
+            switch ((PathDirection)(_autowalkPathSteps[0] & 65535)) {
                 case PathDirection.East:
-                    m_AutowalkPathDelta.x = 1;
+                    _autowalkPathDelta.x = 1;
                     break;
                 case PathDirection.NorthEast:
-                    m_AutowalkPathDelta.x = 1;
-                    m_AutowalkPathDelta.y = -1;
+                    _autowalkPathDelta.x = 1;
+                    _autowalkPathDelta.y = -1;
                     break;
                 case PathDirection.North:
-                    m_AutowalkPathDelta.y = -1;
+                    _autowalkPathDelta.y = -1;
                     break;
                 case PathDirection.NorthWest:
-                    m_AutowalkPathDelta.x = -1;
-                    m_AutowalkPathDelta.y = -1;
+                    _autowalkPathDelta.x = -1;
+                    _autowalkPathDelta.y = -1;
                     break;
                 case PathDirection.West:
-                    m_AutowalkPathDelta.x = -1;
+                    _autowalkPathDelta.x = -1;
                     break;
                 case PathDirection.SouthWest:
-                    m_AutowalkPathDelta.x = -1;
-                    m_AutowalkPathDelta.y = 1;
+                    _autowalkPathDelta.x = -1;
+                    _autowalkPathDelta.y = 1;
                     break;
                 case PathDirection.South:
-                    m_AutowalkPathDelta.y = 1;
+                    _autowalkPathDelta.y = 1;
                     break;
                 case PathDirection.SouthEast:
-                    m_AutowalkPathDelta.x = 1;
-                    m_AutowalkPathDelta.y = 1;
+                    _autowalkPathDelta.x = 1;
+                    _autowalkPathDelta.y = 1;
                     break;
                 default:
-                    throw new System.Exception("Player.NextAutowalkStep: Invalid step(1): " + (m_AutowalkPathSteps[0] & 65535));
+                    throw new System.Exception("Player.NextAutowalkStep: Invalid step(1): " + (_autowalkPathSteps[0] & 65535));
             }
 
-            var mapPosition = worldMapStorage.ToMap(m_Position);
+            var mapPosition = worldMapStorage.ToMap(_position);
             var tmpMapPosition = mapPosition;
 
-            tmpMapPosition.x += m_AutowalkPathDelta.x;
-            tmpMapPosition.y += m_AutowalkPathDelta.y;
+            tmpMapPosition.x += _autowalkPathDelta.x;
+            tmpMapPosition.y += _autowalkPathDelta.y;
 
             // Tile should be walkable (full ground)
             Appearances.ObjectInstance @object = null;
             if (!(@object = worldMapStorage.GetObject(tmpMapPosition.x, tmpMapPosition.y, tmpMapPosition.z, 0)) || !@object.Type || !@object.Type.IsGround) {
-                m_AutowalkPathDelta.Set(0, 0, 0);
+                _autowalkPathDelta.Set(0, 0, 0);
                 return;
             }
 
             EnterPossibleFlag enterFlag = worldMapStorage.GetEnterPossibleFlag(tmpMapPosition.x, tmpMapPosition.y, tmpMapPosition.z, false);
             if (enterFlag == EnterPossibleFlag.NotPossible || worldMapStorage.GetFieldHeight(mapPosition.x, mapPosition.y, mapPosition.z) + 1 < worldMapStorage.GetFieldHeight(tmpMapPosition.x, tmpMapPosition.y, tmpMapPosition.z)) {
-                m_AutowalkPathDelta.Set(0, 0, 0);
+                _autowalkPathDelta.Set(0, 0, 0);
                 return;
             }
 
             if (enterFlag == EnterPossibleFlag.Possible) {
-                base.StartMovementAnimation(m_AutowalkPathDelta.x, m_AutowalkPathDelta.y, (int)@object.Type.GroundSpeed);
-                m_AnimationDelta.x = m_AnimationDelta.x + m_AutowalkPathDelta.x * Constants.FieldSize;
-                m_AnimationDelta.y = m_AnimationDelta.y + m_AutowalkPathDelta.y * Constants.FieldSize;
+                base.StartMovementAnimation(_autowalkPathDelta.x, _autowalkPathDelta.y, (int)@object.Type.GroundSpeed);
+                _animationDelta.x = _animationDelta.x + _autowalkPathDelta.x * Constants.FieldSize;
+                _animationDelta.y = _animationDelta.y + _autowalkPathDelta.y * Constants.FieldSize;
             } else if (enterFlag == EnterPossibleFlag.PossibleNoAnimation) {
-                m_AnimationDelta.Set(0, 0, 0);
+                _animationDelta.Set(0, 0, 0);
             }
 
-            for (int i = 1; i < m_AutowalkPathSteps.Count; i++) {
-                var pathDirection = (PathDirection)(m_AutowalkPathSteps[i] & 65535);
-                var mapCost = ((uint)m_AutowalkPathSteps[i] & 4294901760U) >> 16;
+            for (int i = 1; i < _autowalkPathSteps.Count; i++) {
+                var pathDirection = (PathDirection)(_autowalkPathSteps[i] & 65535);
+                var mapCost = ((uint)_autowalkPathSteps[i] & 4294901760U) >> 16;
                 switch (pathDirection) {
                     case PathDirection.East:
                         tmpMapPosition.x += 1;
@@ -324,7 +324,7 @@ namespace OpenTibiaUnity.Core.Creatures
                         tmpMapPosition.y += 1;
                         break;
                     default:
-                        throw new System.Exception("Player.NextAutowalkStep: Invalid step(2): " + (m_AutowalkPathSteps[i] & 65535));
+                        throw new System.Exception("Player.NextAutowalkStep: Invalid step(2): " + (_autowalkPathSteps[i] & 65535));
                 }
 
                 if (tmpMapPosition.x < 0 || tmpMapPosition.x >= Constants.MapSizeX || tmpMapPosition.y < 0 || tmpMapPosition.y >= Constants.MapSizeY)
@@ -332,80 +332,80 @@ namespace OpenTibiaUnity.Core.Creatures
 
                 if (worldMapStorage.GetMiniMapCost(tmpMapPosition.x, tmpMapPosition.y, tmpMapPosition.z) > mapCost) {
                     protocolGame.SendStop();
-                    m_AutowalkPathAborting = true;
+                    _autowalkPathAborting = true;
                     break;
                 }
             }
         }
 
-        internal void StopAutowalk(bool stopAnimation) {
+        public void StopAutowalk(bool stopAnimation) {
             if (stopAnimation)
                 StopMovementAnimation();
-            m_AutowalkPathAborting = false;
-            m_AutowalkPathDelta.Set(0, 0, 0);
-            m_AutowalkPathSteps.Clear();
-            m_AutowalkTarget.Set(-1, -1, -1);
-            m_AutowalkTargetDiagonal = false;
-            m_AutowalkTargetExact = false;
+            _autowalkPathAborting = false;
+            _autowalkPathDelta.Set(0, 0, 0);
+            _autowalkPathSteps.Clear();
+            _autowalkTarget.Set(-1, -1, -1);
+            _autowalkTargetDiagonal = false;
+            _autowalkTargetExact = false;
         }
 
-        internal void AbortAutowalk(Direction direction) {
-            m_Direction = direction;
-            m_AutowalkPathAborting = false;
-            m_AutowalkPathSteps.Clear();
-            if (!m_MovementRunning || m_AutowalkPathDelta != UnityEngine.Vector3Int.zero) {
-                m_AutowalkPathDelta.Set(0, 0, 0);
+        public void AbortAutowalk(Direction direction) {
+            _direction = direction;
+            _autowalkPathAborting = false;
+            _autowalkPathSteps.Clear();
+            if (!_movementRunning || _autowalkPathDelta != UnityEngine.Vector3Int.zero) {
+                _autowalkPathDelta.Set(0, 0, 0);
                 StopMovementAnimation();
-                StartAutowalkInternal();
+                StartAutowalkpublic();
             }
         }
 
-        internal void ResetAutowalk() {
+        public void ResetAutowalk() {
             StopAutowalk(false);
             AbortAutowalk(Direction.South);
         }
 
-        internal override void StartMovementAnimation(int deltaX, int deltaY, int movementCost) {
-            if (deltaX != m_AutowalkPathDelta.x || deltaY != m_AutowalkPathDelta.y)
+        public override void StartMovementAnimation(int deltaX, int deltaY, int movementCost) {
+            if (deltaX != _autowalkPathDelta.x || deltaY != _autowalkPathDelta.y)
                 base.StartMovementAnimation(deltaX, deltaY, movementCost);
 
-            m_AutowalkPathDelta.Set(0, 0, 0);
-            if (m_AutowalkPathSteps.Count > 0) {
-                m_AutowalkPathSteps.RemoveAt(0);
+            _autowalkPathDelta.Set(0, 0, 0);
+            if (_autowalkPathSteps.Count > 0) {
+                _autowalkPathSteps.RemoveAt(0);
             }
         }
 
-        internal override void AnimateMovement(int ticks) {
+        public override void AnimateMovement(int ticks) {
             base.AnimateMovement(ticks);
-            m_AnimationDelta.x += m_AutowalkPathDelta.x * Constants.FieldSize;
-            m_AnimationDelta.y += m_AutowalkPathDelta.y * Constants.FieldSize;
-            if (!m_MovementRunning && m_AutowalkPathDelta == UnityEngine.Vector3Int.zero) {
-                if (m_AutowalkPathSteps.Count > 0)
+            _animationDelta.x += _autowalkPathDelta.x * Constants.FieldSize;
+            _animationDelta.y += _autowalkPathDelta.y * Constants.FieldSize;
+            if (!_movementRunning && _autowalkPathDelta == UnityEngine.Vector3Int.zero) {
+                if (_autowalkPathSteps.Count > 0)
                     NextAutowalkStep();
                 else
-                    StartAutowalkInternal();
+                    StartAutowalkpublic();
             }
         }
 
-        internal void ResetFlags() {
+        public void ResetFlags() {
 
         }
 
-        internal override void ResetSkills() {
-            m_Skills = new Skill[(int)SkillType.ManaLeechAmount + 1];
-            m_ExperienceCounter.Reset();
-            m_ExperienceGainInfo.Reset();
+        public override void ResetSkills() {
+            _skills = new Skill[(int)SkillType.ManaLeechAmount + 1];
+            _experienceCounter.Reset();
+            _experienceGainInfo.Reset();
         }
 
-        internal override void SetSkill(SkillType skillType, long level, long baseLevel = 0, float percentage = 0) {
+        public override void SetSkill(SkillType skillType, long level, long baseLevel = 0, float percentage = 0) {
             switch (skillType) {
                 case SkillType.Experience:
                     var currentLevel = GetSkillValue(skillType);
                     if (level >= currentLevel) {
                         if (currentLevel > 0)
-                            m_ExperienceCounter.AddSkillGain(level - currentLevel);
+                            _experienceCounter.AddSkillGain(level - currentLevel);
                     } else {
-                        m_ExperienceCounter.Reset();
+                        _experienceCounter.Reset();
                     }
 
                     var skill = new Skill() {
@@ -426,15 +426,15 @@ namespace OpenTibiaUnity.Core.Creatures
             }
         }
 
-        internal override void SetSkillValue(SkillType skillType, int level) {
+        public override void SetSkillValue(SkillType skillType, int level) {
             switch (skillType) {
                 case SkillType.Experience:
                     var currentLevel = GetSkillValue(skillType);
                     if (level >= currentLevel) {
                         if (currentLevel > 0)
-                            m_ExperienceCounter.AddSkillGain(level - currentLevel);
+                            _experienceCounter.AddSkillGain(level - currentLevel);
                     } else {
-                        m_ExperienceCounter.Reset();
+                        _experienceCounter.Reset();
                     }
 
                     base.SetSkillValue(skillType, level);
@@ -449,40 +449,40 @@ namespace OpenTibiaUnity.Core.Creatures
             }
         }
 
-        internal override void Reset() {
-            uint myID = m_ID;
+        public override void Reset() {
+            uint my_id = _id;
             base.Reset();
             ResetAutowalk();
             ResetFlags();
             ResetSkills();
-            m_ID = myID;
-            m_KnownSpells.Clear();
-            m_Premium = false;
-            m_PremiumUntil = 0;
-            m_HasReachedMain = false;
-            m_Blessings = 0;
-            m_Profession = 0;
-            m_Type = CreatureType.Player;
-            m_BankGoldBalance = 0;
-            m_InventoryGoldBalance = 0;
+            _id = my_id;
+            _knownSpells.Clear();
+            _premium = false;
+            _premiumUntil = 0;
+            _hasReachedMain = false;
+            _blessings = 0;
+            _profession = 0;
+            _type = CreatureType.Player;
+            _bankGoldBalance = 0;
+            _inventoryGoldBalance = 0;
         }
 
-        internal void UpdateStateFlags(uint? value = null) {
-            var flags = value ?? m_StateFlags;
+        public void UpdateStateFlags(uint? value = null) {
+            var flags = value ?? _stateFlags;
             if (GetSkillValue(SkillType.Food) <= GetSkillbase(SkillType.Food))
                 flags |= 1U << (int)States.Hungry;
 
-            if (m_StateFlags != flags) {
-                var old = m_StateFlags;
-                m_StateFlags = flags;
-                onStateFlagsChange.Invoke(this, m_StateFlags, old);
+            if (_stateFlags != flags) {
+                var old = _stateFlags;
+                _stateFlags = flags;
+                onStateFlagsChange.Invoke(this, _stateFlags, old);
             }
         }
 
-        internal int GetRuneUses(Magic.Rune rune) {
+        public int GetRuneUses(Magic.Rune rune) {
             if (rune == null || rune.RestrictLevel > GetSkillValue(SkillType.Level)
                              || rune.RestrictMagicLevel > GetSkillValue(SkillType.MagLevel)
-                             || (rune.RestrictProfession & (1 << m_Profession)) == 0)
+                             || (rune.RestrictProfession & (1 << _profession)) == 0)
                 return -1;
 
 

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Battle
 {
-    internal class BattleCreature : Core.Components.Base.AbstractComponent
+    public class BattleCreature : Core.Components.Base.AbstractComponent
     {
         public RawImage markImageComponent = null;
         public RawImage outfitImageCompoenent = null;
@@ -14,10 +14,10 @@ namespace OpenTibiaUnity.Modules.Battle
         public Slider healthProgressBar = null;
         public RawImage healthProgressFillArea = null;
 
-        protected CachedSpriteInformation m_CachedSpriteInformation;
-        private Creature m_Creature = null;
+        protected CachedSpriteInformation _cachedSpriteInformation;
+        private Creature _creature = null;
 
-        public Creature Creature { get => m_Creature; }
+        public Creature Creature { get => _creature; }
 
         protected override void Start() {
             base.Start();
@@ -27,7 +27,7 @@ namespace OpenTibiaUnity.Modules.Battle
         }
 
         public void UpdateDetails(Creature creature) {
-            m_Creature = creature;
+            _creature = creature;
 
             nameTextComponent.text = creature.Name;
             healthProgressBar.value = creature.HealthPercent;
@@ -35,9 +35,9 @@ namespace OpenTibiaUnity.Modules.Battle
 
             var outfit = creature.Outfit;
             if (outfit) {
-                m_CachedSpriteInformation = outfit.GetSprite(0, (int)Direction.South, 0, 0, false);
-                outfitImageCompoenent.texture = m_CachedSpriteInformation.texture;
-                outfitImageCompoenent.uvRect = m_CachedSpriteInformation.rect;
+                _cachedSpriteInformation = outfit.GetSprite(0, (int)Direction.South, 0, 0, false);
+                outfitImageCompoenent.texture = _cachedSpriteInformation.texture;
+                outfitImageCompoenent.uvRect = _cachedSpriteInformation.rect;
             }
 
             var markColor = creature.Marks.GetMarkColor(MarkType.ClientBattleList);

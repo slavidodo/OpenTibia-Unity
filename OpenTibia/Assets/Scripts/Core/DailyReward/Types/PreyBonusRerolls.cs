@@ -1,11 +1,11 @@
 ﻿namespace OpenTibiaUnity.Core.DailyReward.Types
 {
-    internal class PreyBonusRerolls : Item
+    public class PreyBonusRerolls : Item
     {
-        int m_Amount;
+        int _amount;
 
-        internal PreyBonusRerolls(int amount) {
-            m_Amount = amount;
+        public PreyBonusRerolls(int amount) {
+            _amount = amount;
         }
     }
 }

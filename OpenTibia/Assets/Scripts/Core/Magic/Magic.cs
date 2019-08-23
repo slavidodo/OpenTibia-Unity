@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace OpenTibiaUnity.Core.Magic
 {
-    internal class Magic
+    public class Magic
     {
-        internal readonly int ID;
+        public readonly int _id;
     }
 }

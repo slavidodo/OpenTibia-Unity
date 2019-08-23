@@ -4,14 +4,14 @@
     {
         public const uint MessageBaseDelay = 1000;
 
-        private MessageBlock m_CurrentBlock = null;
+        private MessageBlock _currentBlock = null;
 
         public MessageBlock GetMessageBlock(string speaker) {
             if (speaker == null)
                 throw new System.ArgumentNullException("MessageStorage.GetMessageBlock: speaker is null");
 
-            if (m_CurrentBlock != null && m_CurrentBlock.Speaker == speaker)
-                return m_CurrentBlock;
+            if (_currentBlock != null && _currentBlock.Speaker == speaker)
+                return _currentBlock;
 
             return null;
         }
@@ -21,13 +21,13 @@
                 return;
 
             if (GetMessageBlock(speaker) != null)
-                m_CurrentBlock.Dispose(true);
+                _currentBlock.Dispose(true);
 
-            if (m_CurrentBlock != null)
-                m_CurrentBlock.Dispose(false);
+            if (_currentBlock != null)
+                _currentBlock.Dispose(false);
 
-            m_CurrentBlock = new MessageBlock(speaker, position);
-            m_CurrentBlock.AddText(text);
+            _currentBlock = new MessageBlock(speaker, position);
+            _currentBlock.AddText(text);
         }
 
         public void AddTextToBlock(string speaker, string text) {

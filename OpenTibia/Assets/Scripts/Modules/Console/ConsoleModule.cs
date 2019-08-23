@@ -5,64 +5,63 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Console
 {
-    internal class ChannelInformation
+    public class ChannelInformation
     {
         public Channel channel;
-        public Core.Utility.RingBuffer<ChannelMessage> talkHistory;
+        public Core.Utils.RingBuffer<ChannelMessage> talkHistory;
 
-        internal ChannelInformation(Channel channel) {
+        public ChannelInformation(Channel channel) {
             this.channel = channel;
-            talkHistory = new Core.Utility.RingBuffer<ChannelMessage>(Constants.MaxTalkHistory);
+            talkHistory = new Core.Utils.RingBuffer<ChannelMessage>(Constants.MaxTalkHistory);
         }
     }
 
-    internal class ConsoleModule : Core.Components.Base.Module
+    public class ConsoleModule : Core.Components.Base.Module
     {
-        [SerializeField] private Sprite m_ChannelButtonActiveSprite = null;
-        [SerializeField] private Sprite m_ChannelButtonInactiveSprite = null;
-
-        [SerializeField] private RectTransform m_ConsoleMessagesContent = null;
-        [SerializeField] private RectTransform m_ChannelsButtonsTransform = null;
-        [SerializeField] private Button m_ToggleSound = null;
-        [SerializeField] private Button m_ToggleChat = null;
-        [SerializeField] private TMPro.TMP_InputField m_ChatInputField = null;
-        [SerializeField] private ConsoleBuffer m_ConsoleBuffer = null;
-        [SerializeField] private Button m_IgnoreListButton = null;
-        [SerializeField] private Button m_NewChannelButton = null;
-        [SerializeField] private Toggle m_ToggleShowServerMessages = null;
-        [SerializeField] private Button m_ButtonCloseChannel = null;
+        [SerializeField] private Sprite _channelButtonActiveSprite = null;
+        [SerializeField] private Sprite _channelButtonInactiveSprite = null;
         
-        private SortedDictionary<object, ChannelTab> m_ChannelTabs = null;
-        private SortedDictionary<object, ChannelInformation> m_KnownChannels = null;
-        private Channel m_ActiveChannel = null;
-        private ChannelTab m_ActiveChannelTab = null;
+        [SerializeField] private RectTransform _channelsButtonsTransform = null;
+        [SerializeField] private Button _toggleSound = null;
+        [SerializeField] private Button _toggleChat = null;
+        [SerializeField] private TMPro.TMP_InputField _chatInputField = null;
+        [SerializeField] private ConsoleBuffer _consoleBuffer = null;
+        [SerializeField] private Button _ignoreListButton = null;
+        [SerializeField] private Button _newChannelButton = null;
+        [SerializeField] private Toggle _toggleShowServerMessages = null;
+        [SerializeField] private Button _buttonCloseChannel = null;
+        
+        private SortedDictionary<object, ChannelTab> _channelTabs = null;
+        private SortedDictionary<object, ChannelInformation> _knownChannels = null;
+        private Channel _activeChannel = null;
+        private ChannelTab _activeChannelTab = null;
         
         protected override void Awake() {
             base.Awake();
             
-            m_ChannelTabs = new SortedDictionary<object, ChannelTab>();
-            m_KnownChannels = new SortedDictionary<object, ChannelInformation>();
+            _channelTabs = new SortedDictionary<object, ChannelTab>();
+            _knownChannels = new SortedDictionary<object, ChannelInformation>();
 
             OpenTibiaUnity.ChatStorage.onAddChannel.AddListener(OnAddChannel);
             OpenTibiaUnity.ChatStorage.onClearChannels.AddListener(OnClearChannels);
 
-            m_ButtonCloseChannel.onClick.AddListener(OnCloseChannelButtonClicked);
+            _buttonCloseChannel.onClick.AddListener(OnCloseChannelButtonClicked);
         }
 
         protected override void Start() {
             base.Start();
 
             OpenTibiaUnity.GameManager.onGameStart.AddListener(OnGameStart);
-            OpenTibiaUnity.InputHandler.AddKeyUpListener(Core.Utility.EventImplPriority.Default, OnKeyUp);
+            OpenTibiaUnity.InputHandler.AddKeyUpListener(Core.Utils.EventImplPriority.Default, OnKeyUp);
         }
 
         private void OnGameStart() {
-            m_ChatInputField.ActivateInputField();
-            m_ChatInputField.text = string.Empty;
+            _chatInputField.ActivateInputField();
+            _chatInputField.text = string.Empty;
         }
 
         private void OnKeyUp(Event e, bool repeated) {
-            if (!Core.Input.InputHandler.IsGameObjectHighlighted(m_ChatInputField.gameObject))
+            if (!Core.Input.InputHandler.IsGameObjectHighlighted(_chatInputField.gameObject))
                 return;
 
             if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter)
@@ -71,44 +70,44 @@ namespace OpenTibiaUnity.Modules.Console
 
         private void OnAddChannel(Channel channel) {
             // make sure we know this channel before doing anything
-            m_KnownChannels[channel.ID] = new ChannelInformation(channel);
+            _knownChannels[channel.Id] = new ChannelInformation(channel);
 
             // get the channel button if exists, force create if not
             var channelButton = GetChannelTab(channel, true);
 
             // if there is no channel or this channel is NPC, then select it!
-            if (channel.ID == ChatStorage.NpcChannelID || m_ActiveChannel == null) {
+            if (channel.Id == ChatStorage.NpcChannel_id || _activeChannel == null) {
                 SelectChannelButton(channelButton);
             } else {
                 channelButton.SetState(ChannelButtonState.Inactive);
-                channelButton.SetImage(m_ChannelButtonInactiveSprite);
+                channelButton.SetImage(_channelButtonInactiveSprite);
             }
 
             channel.onAddChannelMessage.AddListener(OnAddChannelMessage);
         }
 
         private void OnClearChannels() {
-            foreach (var p in m_ChannelTabs)
+            foreach (var p in _channelTabs)
                 Destroy(p.Value.gameObject);
 
-            m_ChannelTabs.Clear();
-            m_KnownChannels.Clear();
-            m_ActiveChannel = null;
-            m_ActiveChannelTab = null;
+            _channelTabs.Clear();
+            _knownChannels.Clear();
+            _activeChannel = null;
+            _activeChannelTab = null;
         }
         
         private void OnAddChannelMessage(Channel channel, ChannelMessage channelMessage) {
-            if (channel.ID == ChatStorage.NpcChannelID || channel.ID == ChatStorage.DebugChannelID)
+            if (channel.Id == ChatStorage.NpcChannel_id || channel.Id == ChatStorage.DebugChannel_id)
                 SelectChannelButton(GetChannelTab(channel, true));
             else
                 GetChannelTab(channel, true);
 
-            m_KnownChannels[channel.ID].talkHistory.AddItem(channelMessage);
+            _knownChannels[channel.Id].talkHistory.AddItem(channelMessage);
 
-            if (channel == m_ActiveChannel)
-                m_ConsoleBuffer.AddChannelMessage(channelMessage);
+            if (channel == _activeChannel)
+                _consoleBuffer.AddChannelMessage(channelMessage);
             else
-                m_ChannelTabs[channel.ID].SetState(ChannelButtonState.Flashing);
+                _channelTabs[channel.Id].SetState(ChannelButtonState.Flashing);
         }
 
         private void OnChannelButtonClicked(ChannelTab channelTab) {
@@ -116,16 +115,16 @@ namespace OpenTibiaUnity.Modules.Console
         }
 
         private void OnCloseChannelButtonClicked() {
-            if (!m_ActiveChannelTab || !m_ActiveChannel.Closable)
+            if (!_activeChannelTab || !_activeChannel.Closable)
                 return;
             
-            m_KnownChannels.Remove(m_ActiveChannel.ID);
-            m_ChannelTabs.Remove(m_ActiveChannel.ID);
+            _knownChannels.Remove(_activeChannel.Id);
+            _channelTabs.Remove(_activeChannel.Id);
 
-            OpenTibiaUnity.ChatStorage.RemoveChannel(m_ActiveChannel.ID);
-            m_ActiveChannel.onAddChannelMessage.RemoveListener(OnAddChannelMessage);
+            OpenTibiaUnity.ChatStorage.LeaveChannel(_activeChannel.Id);
+            _activeChannel.onAddChannelMessage.RemoveListener(OnAddChannelMessage);
 
-            var channelButtonRectTransform = m_ActiveChannelTab.rectTransform;
+            var channelButtonRectTransform = _activeChannelTab.rectTransform;
             int index = channelButtonRectTransform.GetSiblingIndex();
 
             int relativeIndex;
@@ -136,10 +135,10 @@ namespace OpenTibiaUnity.Modules.Console
             
             
             var otherChannelButton = channelButtonRectTransform.parent.GetChild(relativeIndex).GetComponent<ChannelTab>();
-            Destroy(m_ActiveChannelTab.gameObject);
+            Destroy(_activeChannelTab.gameObject);
 
-            m_ActiveChannel = null;
-            m_ActiveChannelTab = null;
+            _activeChannel = null;
+            _activeChannelTab = null;
             SelectChannelButton(otherChannelButton);
         }
 
@@ -147,35 +146,35 @@ namespace OpenTibiaUnity.Modules.Console
 
         }
 
-        internal void SetInputText(string text) {
-            m_ChatInputField.text = text;
-            m_ChatInputField.MoveTextEnd(false);
+        public void SetInputText(string text) {
+            _chatInputField.text = text;
+            _chatInputField.MoveTextEnd(false);
         }
 
-        internal void SendChannelMessage() {
-            var text = m_ChatInputField.text;
+        public void SendChannelMessage() {
+            var text = _chatInputField.text;
             if (text.Length == 0)
                 return;
-
-            m_ChatInputField.text = OpenTibiaUnity.ChatStorage.SendChannelMessage(text, m_ActiveChannel, MessageModeType.None);
+            
+            _chatInputField.text = OpenTibiaUnity.ChatStorage.SendChannelMessage(text, _activeChannel, MessageModeType.None);
             OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
-                m_ChatInputField.ActivateInputField();
-                m_ChatInputField.MoveTextEnd(false);
+                _chatInputField.ActivateInputField();
+                _chatInputField.MoveTextEnd(false);
             });
         }
         
         private ChannelTab GetChannelTab(Channel channel, bool forceCreate) {
             ChannelTab channelTab;
-            if (m_ChannelTabs.TryGetValue(channel.ID, out channelTab))
+            if (_channelTabs.TryGetValue(channel.Id, out channelTab))
                 return channelTab;
 
             if (forceCreate) {
-                channelTab = Instantiate(ModulesManager.Instance.ChannelTabPrefab, m_ChannelsButtonsTransform);
+                channelTab = Instantiate(ModulesManager.Instance.ChannelTabPrefab, _channelsButtonsTransform);
                 channelTab.SetText(channel.Name);
                 channelTab.onClick.AddListener(OnChannelButtonClicked);
                 channelTab.Channel = channel;
 
-                m_ChannelTabs.Add(channel.ID, channelTab);
+                _channelTabs.Add(channel.Id, channelTab);
             } else {
                 channelTab = null;
             }
@@ -185,45 +184,45 @@ namespace OpenTibiaUnity.Modules.Console
 
         private void SelectChannelButton(ChannelTab channelTab) {
             // this button is already selected
-            if (m_ActiveChannel == channelTab.Channel) {
+            if (_activeChannel == channelTab.Channel) {
                 return;
 
             // set the previous button to non-selected
-            } else if (m_ActiveChannel != null) {
-                m_ActiveChannelTab.SetImage(m_ChannelButtonInactiveSprite);
-                m_ActiveChannelTab.SetState(ChannelButtonState.Inactive);
+            } else if (_activeChannel != null) {
+                _activeChannelTab.SetImage(_channelButtonInactiveSprite);
+                _activeChannelTab.SetState(ChannelButtonState.Inactive);
             }
 
             // set the button as selected
-            m_ActiveChannel = channelTab.Channel;
-            m_ActiveChannelTab = channelTab;
-            m_ActiveChannelTab.SetImage(m_ChannelButtonActiveSprite);
-            m_ActiveChannelTab.SetState(ChannelButtonState.Active);
+            _activeChannel = channelTab.Channel;
+            _activeChannelTab = channelTab;
+            _activeChannelTab.SetImage(_channelButtonActiveSprite);
+            _activeChannelTab.SetState(ChannelButtonState.Active);
 
-            m_ConsoleBuffer.ResetTalkHistory(m_KnownChannels[m_ActiveChannel.ID].talkHistory);
+            _consoleBuffer.ResetTalkHistory(_knownChannels[_activeChannel.Id].talkHistory);
 
-            m_ButtonCloseChannel.gameObject.SetActive(m_ActiveChannel.Closable);
-            m_ToggleShowServerMessages.gameObject.SetActive(m_ActiveChannel.Closable);
+            _buttonCloseChannel.gameObject.SetActive(_activeChannel.Closable);
+            _toggleShowServerMessages.gameObject.SetActive(_activeChannel.Closable);
 
-            m_ToggleShowServerMessages.onValueChanged.RemoveListener(OnShowServerMessagesToggleValueChanged);
-            //m_ToggleShowServerMessages.isOn = m_ActiveChannel.ShowServerMessages;
-            m_ToggleShowServerMessages.onValueChanged.AddListener(OnShowServerMessagesToggleValueChanged);
+            _toggleShowServerMessages.onValueChanged.RemoveListener(OnShowServerMessagesToggleValueChanged);
+            //_toggleShowServerMessages.isOn = _activeChannel.ShowServerMessages;
+            _toggleShowServerMessages.onValueChanged.AddListener(OnShowServerMessagesToggleValueChanged);
         }
 
-        internal void SelectChannel(Channel channel, bool forceCreate) {
+        public void SelectChannel(Channel channel, bool forceCreate) {
             var channelButton = GetChannelTab(channel, forceCreate);
             if (channelButton)
                 SelectChannelButton(channelButton);
         }
         
-        internal ChannelMessageContextMenu CreateChannelMessageContextMenu(ChannelMessage channelMessage, TMPro.TMP_InputField inputField) {
+        public ChannelMessageContextMenu CreateChannelMessageContextMenu(ChannelMessage channelMessage, TMPro.TMP_InputField inputField) {
 
             var gameManager = OpenTibiaUnity.GameManager;
             var canvas = gameManager.ActiveCanvas;
             var gameObject = Instantiate(gameManager.ContextMenuBasePrefab, canvas.transform);
 
             var channelMessageContextMenu = gameObject.AddComponent<ChannelMessageContextMenu>();
-            channelMessageContextMenu.Set(m_ActiveChannel, channelMessage, inputField);
+            channelMessageContextMenu.Set(_activeChannel, channelMessage, inputField);
             return channelMessageContextMenu;
         }
     }

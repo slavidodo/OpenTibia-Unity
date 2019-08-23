@@ -6,17 +6,17 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Console
 {
-    internal enum ChannelButtonState
+    public enum ChannelButtonState
     {
         Active,
         Inactive,
         Flashing,
 
-        // internal only
+        // public only
         FlashingFinished,
     }
     
-    internal class ChannelTab : Core.Components.DraggableTabButton
+    public class ChannelTab : Core.Components.DraggableTabButton
     {
         private static Color s_ActiveColor = Colors.ColorFromRGB(MessageColors.White);
         private static Color s_InactiveColor = Colors.ColorFromRGB(MessageColors.Grey);
@@ -25,16 +25,16 @@ namespace OpenTibiaUnity.Modules.Console
         private const float FlashingDuration = 2f;
         private const float FlashingReverseAfter = 1f;
 
-        internal class ChannelButtonClickedEvent : UnityEvent<ChannelTab> { }
+        public class ChannelButtonClickedEvent : UnityEvent<ChannelTab> { }
         
-        [SerializeField] private TMPro.TextMeshProUGUI m_ChannelNameLabel = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _channelNameLabel = null;
 
-        internal ChannelButtonClickedEvent onClick = new ChannelButtonClickedEvent();
-        internal Channel Channel;
-        private ChannelButtonState m_State = ChannelButtonState.Active;
-        private float m_FlashingTicks = 0;
-        private float m_LastFlashingTime = 0;
-        private bool m_LastColorIsFlashing = false;
+        public ChannelButtonClickedEvent onClick = new ChannelButtonClickedEvent();
+        public Channel Channel;
+        private ChannelButtonState _state = ChannelButtonState.Active;
+        private float _flashingTicks = 0;
+        private float _lastFlashingTime = 0;
+        private bool _lastColorIsFlashing = false;
 
         protected override void Start() {
             base.Start();
@@ -43,53 +43,53 @@ namespace OpenTibiaUnity.Modules.Console
         }
 
         protected void Update() {
-            if (m_State == ChannelButtonState.Flashing) {
-                m_FlashingTicks += Time.deltaTime;
-                if (m_FlashingTicks >= FlashingDuration) {
-                    m_State = ChannelButtonState.FlashingFinished;
-                    m_ChannelNameLabel.color = s_FlashingColor;
+            if (_state == ChannelButtonState.Flashing) {
+                _flashingTicks += Time.deltaTime;
+                if (_flashingTicks >= FlashingDuration) {
+                    _state = ChannelButtonState.FlashingFinished;
+                    _channelNameLabel.color = s_FlashingColor;
                     return;
                 }
                 
-                if (Time.time - m_LastFlashingTime >= FlashingReverseAfter) {
-                    if (m_LastColorIsFlashing)
-                        m_ChannelNameLabel.color = s_ActiveColor;
+                if (Time.time - _lastFlashingTime >= FlashingReverseAfter) {
+                    if (_lastColorIsFlashing)
+                        _channelNameLabel.color = s_ActiveColor;
                     else
-                        m_ChannelNameLabel.color = s_FlashingColor;
+                        _channelNameLabel.color = s_FlashingColor;
 
-                    m_LastColorIsFlashing = !m_LastColorIsFlashing;
-                    m_LastFlashingTime = Time.time;
+                    _lastColorIsFlashing = !_lastColorIsFlashing;
+                    _lastFlashingTime = Time.time;
                 }
             }
         }
 
-        internal void SetText(string text) {
-            m_ChannelNameLabel.SetText(text);
-            GetComponent<LayoutElement>().preferredWidth = Mathf.Max(120, m_ChannelNameLabel.preferredWidth * 1.5f);
+        public void SetText(string text) {
+            _channelNameLabel.SetText(text);
+            GetComponent<LayoutElement>().preferredWidth = Mathf.Max(120, _channelNameLabel.preferredWidth * 1.5f);
         }
 
-        internal void SetImage(Sprite sprite) {
+        public void SetImage(Sprite sprite) {
             GetComponent<Image>().sprite = sprite;
         }
 
-        internal void SetState(ChannelButtonState state) {
+        public void SetState(ChannelButtonState state) {
             if (state == ChannelButtonState.FlashingFinished)
                 state = ChannelButtonState.Flashing;
 
-            m_State = state;
-            m_FlashingTicks = 0;
-            m_LastFlashingTime = Time.time;
-            m_LastColorIsFlashing = true;
+            _state = state;
+            _flashingTicks = 0;
+            _lastFlashingTime = Time.time;
+            _lastColorIsFlashing = true;
 
             switch (state) {
                 case ChannelButtonState.Active:
-                    m_ChannelNameLabel.color = s_ActiveColor;
+                    _channelNameLabel.color = s_ActiveColor;
                     break;
                 case ChannelButtonState.Inactive:
-                    m_ChannelNameLabel.color = s_InactiveColor;
+                    _channelNameLabel.color = s_InactiveColor;
                     break;
                 case ChannelButtonState.Flashing:
-                    m_ChannelNameLabel.color = s_FlashingColor;
+                    _channelNameLabel.color = s_FlashingColor;
                     break;
             }
         }

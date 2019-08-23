@@ -1,6 +1,6 @@
 ﻿namespace OpenTibiaUnity.Core.Communication.Game
 {
-    internal partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame : Internal.Protocol
     {
         private void ParseInspectionList(Internal.ByteArray message) {
             bool isPlayer = message.ReadBoolean();
@@ -15,7 +15,7 @@
 
                 int imbuementSlots = message.ReadUnsignedByte();
                 for (int j = 0; j < imbuementSlots; j++) {
-                    int imbuementID = message.ReadUnsignedByte();
+                    int imbuement_id = message.ReadUnsignedByte();
                 }
 
                 int details = message.ReadUnsignedByte();

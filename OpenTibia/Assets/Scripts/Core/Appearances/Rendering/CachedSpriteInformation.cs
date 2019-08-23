@@ -2,25 +2,25 @@
 
 namespace OpenTibiaUnity.Core.Appearances.Rendering
 {
-    public class CachedSpriteInformation : Utility.Texture2DPart
+    public class CachedSpriteInformation : Utils.Texture2DPart
     {
-        private uint m_SpriteID;
-        private Vector2Int m_Size;
+        private uint _sprite_id;
+        private Vector2Int _size;
         
-        public uint SpriteID { get => m_SpriteID; }
+        public uint Sprite_id { get => _sprite_id; }
 
         public CachedSpriteInformation(uint spriteId, Texture2D tex2D, Rect rect, Vector2Int size) : base(null, Rect.zero) {
-            m_SpriteID = spriteId;
-            m_Size = size;
+            _sprite_id = spriteId;
+            _size = size;
         }
 
         public void SetCachedSpriteInformationTo(uint spriteId, Texture2D tex2D, Rect rect) {
             SetTexture2DPartTo(tex2D, rect);
-            m_SpriteID = spriteId;
+            _sprite_id = spriteId;
         }
 
         public void Reset() {
-            m_SpriteID = 0;
+            _sprite_id = 0;
             SetTexture2DPartTo(null, null);
         }
 

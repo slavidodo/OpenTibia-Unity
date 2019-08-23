@@ -6,49 +6,49 @@ using OpenTibiaUnity.Core.Input;
 namespace OpenTibiaUnity.Core.Components
 {
     [RequireComponent(typeof(VerticalLayoutGroup))]
-    internal class PopupWindow : Base.Window, IPointerClickHandler
+    public class PopupWindow : Base.Window, IPointerClickHandler
     {
-        [SerializeField] private TMPro.TextMeshProUGUI m_TitleLabel = null;
-        [SerializeField] private TMPro.TextMeshProUGUI m_MessagesLabel = null;
-        [SerializeField] private RectTransform m_SeparatorPanel = null;
-        [SerializeField] private RectTransform m_ButtonsPanel = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _titleLabel = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _messagesLabel = null;
+        [SerializeField] private RectTransform _separatorPanel = null;
+        [SerializeField] private RectTransform _buttonsPanel = null;
 
-        [SerializeField] private Button m_OKButton = null;
-        [SerializeField] private Button m_CancelButton = null;
+        [SerializeField] private Button _oKButton = null;
+        [SerializeField] private Button _cancelButton = null;
 
-        [SerializeField] private bool m_SizeCheckRequired = false;
+        [SerializeField] private bool _sizeCheckRequired = false;
 
-        private Vector2Int m_RefMaximumSize = Vector2Int.zero;
+        private Vector2Int _refMaximumSize = Vector2Int.zero;
 
-        private PopupMenuType m_PopupMenuType = PopupMenuType.OKCancel;
-        internal PopupMenuType PopupType {
+        private PopupMenuType _popupMenuType = PopupMenuType.OKCancel;
+        public PopupMenuType PopupType {
             set {
-                if (value != m_PopupMenuType) {
-                    m_OKButton.gameObject.SetActive((value & PopupMenuType.OK) != 0);
-                    m_CancelButton.gameObject.SetActive((value & PopupMenuType.Cancel) != 0);
-                    m_ButtonsPanel.gameObject.SetActive(value != PopupMenuType.NoButtons);
-                    m_PopupMenuType = value;
+                if (value != _popupMenuType) {
+                    _oKButton.gameObject.SetActive((value & PopupMenuType.OK) != 0);
+                    _cancelButton.gameObject.SetActive((value & PopupMenuType.Cancel) != 0);
+                    _buttonsPanel.gameObject.SetActive(value != PopupMenuType.NoButtons);
+                    _popupMenuType = value;
 
                     if (value == PopupMenuType.NoButtons) {
-                        m_SeparatorPanel.gameObject.SetActive(false);
-                        m_ButtonsPanel.gameObject.SetActive(false);
+                        _separatorPanel.gameObject.SetActive(false);
+                        _buttonsPanel.gameObject.SetActive(false);
                     } else {
-                        m_SeparatorPanel.gameObject.SetActive(true);
-                        m_ButtonsPanel.gameObject.SetActive(true);
+                        _separatorPanel.gameObject.SetActive(true);
+                        _buttonsPanel.gameObject.SetActive(true);
                     }
                 }
             }
         }
 
-        internal Button.ButtonClickedEvent onOKClick { get; } = new Button.ButtonClickedEvent();
-        internal Button.ButtonClickedEvent onCancelClick { get; } = new Button.ButtonClickedEvent();
+        public Button.ButtonClickedEvent onOKClick { get; } = new Button.ButtonClickedEvent();
+        public Button.ButtonClickedEvent onCancelClick { get; } = new Button.ButtonClickedEvent();
 
         protected override void Start() {
             base.Start();
-            m_OKButton.onClick.AddListener(TriggerOk);
-            m_CancelButton.onClick.AddListener(TriggerCancel);
+            _oKButton.onClick.AddListener(TriggerOk);
+            _cancelButton.onClick.AddListener(TriggerCancel);
 
-            OpenTibiaUnity.InputHandler.AddKeyUpListener(Utility.EventImplPriority.Default, (Event e, bool repeat) => {
+            OpenTibiaUnity.InputHandler.AddKeyUpListener(Utils.EventImplPriority.Default, (Event e, bool repeat) => {
                 if (!InputHandler.IsHighlighted(this))
                     return;
                 
@@ -69,11 +69,11 @@ namespace OpenTibiaUnity.Core.Components
 
         protected new void OnRectTransformDimensionsChange() {
             base.OnRectTransformDimensionsChange();
-            if (m_SizeCheckRequired) {
-                int maxWidth = m_RefMaximumSize.x;
-                int maxHeight = m_RefMaximumSize.y;
+            if (_sizeCheckRequired) {
+                int maxWidth = _refMaximumSize.x;
+                int maxHeight = _refMaximumSize.y;
 
-                var layoutElement = m_MessagesLabel.GetComponent<LayoutElement>();
+                var layoutElement = _messagesLabel.GetComponent<LayoutElement>();
                 if (maxWidth > 0 && rectTransform.sizeDelta.x > maxWidth) {
                     layoutElement.preferredWidth = maxWidth;
                 } else {
@@ -88,32 +88,32 @@ namespace OpenTibiaUnity.Core.Components
             }
         }
 
-        internal void SetTitle(string title) {
-            m_TitleLabel.SetText(title);
+        public void SetTitle(string title) {
+            _titleLabel.SetText(title);
         }
 
-        internal void SetMessage(string message, int maxWidth = -1, int maxHeight = -1) {
-            m_RefMaximumSize = new Vector2Int(maxWidth, maxHeight);
-            m_SizeCheckRequired = true;
+        public void SetMessage(string message, int maxWidth = -1, int maxHeight = -1) {
+            _refMaximumSize = new Vector2Int(maxWidth, maxHeight);
+            _sizeCheckRequired = true;
 
-            var layoutElement = m_MessagesLabel.GetComponent<LayoutElement>();
+            var layoutElement = _messagesLabel.GetComponent<LayoutElement>();
             layoutElement.preferredWidth = -1;
             layoutElement.preferredHeight = -1;
 
-            m_MessagesLabel.SetText(message);
+            _messagesLabel.SetText(message);
             LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
         }
 
-        internal void SetMessageAlignment(TMPro.TextAlignmentOptions alignment) {
-            m_MessagesLabel.alignment = alignment;
+        public void SetMessageAlignment(TMPro.TextAlignmentOptions alignment) {
+            _messagesLabel.alignment = alignment;
         }
 
         protected void TriggerHideWindow(bool enter) {
-            HideWindow();
+            Hide();
 
-            if (enter && (m_PopupMenuType & PopupMenuType.OK) != 0)
+            if (enter && (_popupMenuType & PopupMenuType.OK) != 0)
                 TriggerOk();
-            else if (!enter && (m_PopupMenuType & PopupMenuType.Cancel) != 0)
+            else if (!enter && (_popupMenuType & PopupMenuType.Cancel) != 0)
                 TriggerCancel();
         }
         
@@ -121,20 +121,20 @@ namespace OpenTibiaUnity.Core.Components
             Select();
         }
 
-        internal void TriggerOk() {
+        public void TriggerOk() {
             if (LockedToOverlay)
-                CloseWindow();
+                Close();
             else
-                HideWindow();
+                Hide();
 
             onOKClick.Invoke();
         }
 
-        internal void TriggerCancel() {
+        public void TriggerCancel() {
             if (LockedToOverlay)
-                CloseWindow();
+                Close();
             else
-                HideWindow();
+                Hide();
 
             onCancelClick.Invoke();
         }

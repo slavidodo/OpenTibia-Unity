@@ -1,49 +1,49 @@
 ﻿namespace OpenTibiaUnity.Core.Input.StaticAction
 {
-    internal sealed class PlayerMove : StaticAction
+    public sealed class PlayerMove : StaticAction
     {
-        private int m_DeltaX;
-        private int m_DeltaY;
-        private Direction m_Direction;
+        private int _deltaX;
+        private int _deltaY;
+        private Direction _direction;
 
-        internal PlayerMove(int id, string label, uint eventMask, Direction direction) : base(id, label, eventMask, false) {
-            m_Direction = direction;
+        public PlayerMove(int id, string label, uint eventMask, Direction direction) : base(id, label, eventMask, false) {
+            _direction = direction;
             switch (direction) {
                 case Direction.North:
-                    m_DeltaX = 0;
-                    m_DeltaY = -1;
+                    _deltaX = 0;
+                    _deltaY = -1;
                     break;
                 case Direction.East:
-                    m_DeltaX = 1;
-                    m_DeltaY = 0;
+                    _deltaX = 1;
+                    _deltaY = 0;
                     break;
                 case Direction.South:
-                    m_DeltaX = 0;
-                    m_DeltaY = 1;
+                    _deltaX = 0;
+                    _deltaY = 1;
                     break;
                 case Direction.West:
-                    m_DeltaX = -1;
-                    m_DeltaY = 0;
+                    _deltaX = -1;
+                    _deltaY = 0;
                     break;
                 case Direction.NorthEast:
-                    m_DeltaX = 1;
-                    m_DeltaY = -1;
+                    _deltaX = 1;
+                    _deltaY = -1;
                     break;
                 case Direction.SouthEast:
-                    m_DeltaX = 1;
-                    m_DeltaY = 1;
+                    _deltaX = 1;
+                    _deltaY = 1;
                     break;
                 case Direction.SouthWest:
-                    m_DeltaX = -1;
-                    m_DeltaY = 1;
+                    _deltaX = -1;
+                    _deltaY = 1;
                     break;
                 case Direction.NorthWest:
-                    m_DeltaX = -1;
-                    m_DeltaY = -1;
+                    _deltaX = -1;
+                    _deltaY = -1;
                     break;
                 case Direction.Stop:
-                    m_DeltaX = 0;
-                    m_DeltaY = 0;
+                    _deltaX = 0;
+                    _deltaY = 0;
                     break;
                 default: throw new System.ArgumentException("PlayerMove.PlayerMove: Invalid movement direction: " + direction + ".");
             }
@@ -52,14 +52,14 @@
         public override bool Perform(bool repeat = false) {
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             if (!!protocolGame && protocolGame.IsGameRunning) {
-                if (m_DeltaX == 0 && m_DeltaY == 0) {
+                if (_deltaX == 0 && _deltaY == 0) {
                     protocolGame.SendStop();
                 } else {
                     var player = OpenTibiaUnity.Player;
 
                     var position = player.AnticipatedPosition;
-                    var forceDiagonal = System.Math.Abs(m_DeltaX) + System.Math.Abs(m_DeltaY) > 1;
-                    player.StartAutowalk(position.x + m_DeltaX, position.y + m_DeltaY, position.z, forceDiagonal, true);
+                    var forceDiagonal = System.Math.Abs(_deltaX) + System.Math.Abs(_deltaY) > 1;
+                    player.StartAutowalk(position.x + _deltaX, position.y + _deltaY, position.z, forceDiagonal, true);
                 }
 
                 return true;
@@ -69,7 +69,7 @@
         }
 
         public override IAction Clone() {
-            return new PlayerMove(m_ID, m_Label, m_EventMask, m_Direction);
+            return new PlayerMove(_id, _label, _eventMask, _direction);
         }
     }
 }

@@ -1,7 +1,13 @@
 ﻿namespace OpenTibiaUnity.Core.Components.Base
 {
-    internal class Module : AbstractComponent
+    public class Module : AbstractComponent
     {
+        protected bool _destoryable = false;
+        protected bool _closable = false;
+
+        public bool Destroyable { get => _destoryable; }
+        public bool Closable { get => _closable; }
+
         protected virtual new void Awake() {
             base.Awake();
             if (OpenTibiaUnity.GameManager != null)
@@ -12,6 +18,10 @@
             base.OnDestroy();
             if (OpenTibiaUnity.GameManager != null)
                 OpenTibiaUnity.GameManager.UnregisterModule(this);
+        }
+
+        public virtual void Close() {
+
         }
     }
 }

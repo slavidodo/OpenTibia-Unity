@@ -1,4 +1,4 @@
-﻿namespace OpenTibiaUnity.Core.Utility
+﻿namespace OpenTibiaUnity.Core.Utils
 {
     public class Delay
     {

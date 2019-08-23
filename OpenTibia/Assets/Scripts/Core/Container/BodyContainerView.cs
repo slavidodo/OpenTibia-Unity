@@ -3,20 +3,20 @@ using UnityEngine.Events;
 
 namespace OpenTibiaUnity.Core.Container
 {
-    internal class BodyContainerView
+    public class BodyContainerView
     {
-        internal class ObjectChangeEvent : UnityEvent<ClothSlots, ObjectInstance> { }
+        public class ObjectChangeEvent : UnityEvent<ClothSlots, ObjectInstance> { }
 
-        internal ObjectChangeEvent onSlotChange = new ObjectChangeEvent();
-        internal UnityEvent onReset = new UnityEvent();
+        public ObjectChangeEvent onSlotChange = new ObjectChangeEvent();
+        public UnityEvent onReset = new UnityEvent();
 
-        internal ObjectInstance[] Objects { get; private set; }
+        public ObjectInstance[] Objects { get; private set; }
         
-        internal BodyContainerView() {
+        public BodyContainerView() {
             Objects = new ObjectInstance[ClothSlots.Last - ClothSlots.First + 1];
         }
 
-        internal void SetObject(ClothSlots slot, ObjectInstance @object) {
+        public void SetObject(ClothSlots slot, ObjectInstance @object) {
             if (slot < ClothSlots.First || slot > ClothSlots.Last)
                 throw new System.IndexOutOfRangeException("BodyContainerView.getObject: Index out of range: " + slot);
 
@@ -24,16 +24,16 @@ namespace OpenTibiaUnity.Core.Container
             onSlotChange.Invoke(slot, @object);
         }
 
-        internal ObjectInstance GetObject(ClothSlots slot) {
+        public ObjectInstance GetObject(ClothSlots slot) {
             if (slot < ClothSlots.First || slot > ClothSlots.Last)
                 throw new System.IndexOutOfRangeException("BodyContainerView.getObject: Index out of range: " + slot);
 
             return Objects[slot - ClothSlots.First];
         }
 
-        internal bool IsEquipped(uint objectID) {
+        public bool IsEquipped(uint object_id) {
             var appearanceStorage = OpenTibiaUnity.AppearanceStorage;
-            var appearanceType = appearanceStorage.GetObjectType(objectID);
+            var appearanceType = appearanceStorage.GetObjectType(object_id);
             if (!!appearanceType && appearanceType.IsCloth) {
                 ClothSlots clothSlot = (ClothSlots)appearanceType.Cloth;
                 if (clothSlot == ClothSlots.BothHands)
@@ -46,7 +46,7 @@ namespace OpenTibiaUnity.Core.Container
             return false;
         }
 
-        internal void Reset() {
+        public void Reset() {
             for (var i = ClothSlots.First; i <= ClothSlots.Last; i++)
                 Objects[i - ClothSlots.First] = null;
 

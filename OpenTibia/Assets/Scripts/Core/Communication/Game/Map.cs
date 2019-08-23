@@ -1,9 +1,9 @@
 ﻿namespace OpenTibiaUnity.Core.Communication.Game
 {
-    internal partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame : Internal.Protocol
     {
-        private UnityEngine.Vector3Int m_LastSnapback = UnityEngine.Vector3Int.zero;
-        private int m_SnapbackCount = 0;
+        private UnityEngine.Vector3Int _lastSnapback = UnityEngine.Vector3Int.zero;
+        private int _snapbackCount = 0;
 
         private void ParseFullMap(Internal.ByteArray message) {
             UnityEngine.Vector3Int position = message.ReadPosition();
@@ -95,10 +95,10 @@
             Appearances.ObjectInstance @object;
             if (typeOrId == Appearances.AppearanceInstance.Creature || typeOrId == Appearances.AppearanceInstance.OutdatedCreature || typeOrId == Appearances.AppearanceInstance.UnknownCreature) {
                 var creature = ReadCreatureInstance(message, typeOrId, absolutePosition);
-                if (creature.ID == Player.ID)
+                if (creature.Id == Player.Id)
                     Player.StopAutowalk(true);
                 
-                @object = AppearanceStorage.CreateObjectInstance(Appearances.AppearanceInstance.Creature, creature.ID);
+                @object = AppearanceStorage.CreateObjectInstance(Appearances.AppearanceInstance.Creature, creature.Id);
             } else {
                 @object = ReadObjectInstance(message, typeOrId);
             }
@@ -149,17 +149,17 @@
                         || typeOrId == Appearances.AppearanceInstance.OutdatedCreature
                         || typeOrId == Appearances.AppearanceInstance.Creature) {
                     creature = ReadCreatureInstance(message, typeOrId, absolutePosition);
-                    objectInstance = AppearanceStorage.CreateObjectInstance(Appearances.AppearanceInstance.Creature, creature.ID);
+                    objectInstance = AppearanceStorage.CreateObjectInstance(Appearances.AppearanceInstance.Creature, creature.Id);
                 } else {
                     objectInstance = ReadObjectInstance(message, typeOrId);
                 }
 
                 WorldMapStorage.ChangeObject(mapPosition, stackPos, objectInstance);
             } else {
-                uint creatureID = message.ReadUnsignedInt();
+                uint creature_id = message.ReadUnsignedInt();
 
-                if (!(creature = CreatureStorage.GetCreature(creatureID)))
-                    throw new System.Exception("ProtocolGame.ParseChangeOnMap: Creature " + creatureID + " not found");
+                if (!(creature = CreatureStorage.GetCreature(creature_id)))
+                    throw new System.Exception("ProtocolGame.ParseChangeOnMap: Creature " + creature_id + " not found");
 
                 absolutePosition = creature.Position;
                 if (!WorldMapStorage.IsVisible(absolutePosition, true))
@@ -214,8 +214,8 @@
 
                 WorldMapStorage.DeleteObject(mapPosition, stackPos);
             } else {
-                uint creatureID = message.ReadUnsignedInt();
-                if ((creature = CreatureStorage.GetCreature(creatureID)) == null) {
+                uint creature_id = message.ReadUnsignedInt();
+                if ((creature = CreatureStorage.GetCreature(creature_id)) == null) {
                     throw new System.Exception($"ProtocolGame.ParseDeleteOnMap: Object not found.");
                 }
 
@@ -259,10 +259,10 @@
                 if (!@object || !@object.IsCreature || !(creature = CreatureStorage.GetCreature(@object.Data)))
                     throw new System.Exception("ProtocolGame.ParseCreatureMove: No creature at position " + oldAbsolutePosition);
             } else {
-                uint creatureID = message.ReadUnsignedInt();
-                @object = AppearanceStorage.CreateObjectInstance(Appearances.AppearanceInstance.Creature, creatureID);
-                if (!(creature = CreatureStorage.GetCreature(creatureID)))
-                    throw new System.Exception("ProtocolGame.ParseCreatureMove: Creature " + creatureID + " not found");
+                uint creature_id = message.ReadUnsignedInt();
+                @object = AppearanceStorage.CreateObjectInstance(Appearances.AppearanceInstance.Creature, creature_id);
+                if (!(creature = CreatureStorage.GetCreature(creature_id)))
+                    throw new System.Exception("ProtocolGame.ParseCreatureMove: Creature " + creature_id + " not found");
 
                 oldAbsolutePosition = creature.Position;
                 if (!WorldMapStorage.IsVisible(oldAbsolutePosition, true))
@@ -291,7 +291,7 @@
             creature.Position = newAbsolutePosition;
             
             if (pushMovement) {
-                if (creature.ID == Player.ID)
+                if (creature.Id == Player.Id)
                     Player.StopAutowalk(true);
 
                 if (delta.x > 0)
@@ -303,7 +303,7 @@
                 else if (delta.y > 0)
                     creature.Direction = Direction.South;
                 
-                if (creature.ID != Player.ID)
+                if (creature.Id != Player.Id)
                     creature.StopMovementAnimation();
             } else {
                 creature.StartMovementAnimation(delta.x, delta.y, (int)otherObj.Type.GroundSpeed);
@@ -331,17 +331,17 @@
             int direction = message.ReadUnsignedByte();
 
             var absolutePosition = Player.Position;
-            if (absolutePosition == m_LastSnapback)
-                m_SnapbackCount++;
+            if (absolutePosition == _lastSnapback)
+                _snapbackCount++;
             else
-                m_SnapbackCount = 0;
+                _snapbackCount = 0;
 
-            m_LastSnapback.Set(absolutePosition.x, absolutePosition.y, absolutePosition.z);
-            if (m_SnapbackCount >= 16) {
+            _lastSnapback.Set(absolutePosition.x, absolutePosition.y, absolutePosition.z);
+            if (_snapbackCount >= 16) {
                 Player.StopAutowalk(true);
                 CreatureStorage.SetAttackTarget(null, false);
                 SendCancel();
-                m_SnapbackCount = 0;
+                _snapbackCount = 0;
             }
 
             Player.AbortAutowalk((Direction)direction);

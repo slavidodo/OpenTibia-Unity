@@ -25,9 +25,9 @@
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
                 var rune = Runes[tmpIndex];
-                if (rune.ID < id)
+                if (rune._id < id)
                     index = tmpIndex + 1;
-                else if (rune.ID > id)
+                else if (rune._id > id)
                     lastIndex = tmpIndex - 1;
                 else
                     return rune;
@@ -43,9 +43,9 @@
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
                 var spell = Spells[tmpIndex];
-                if (spell.ID < id)
+                if (spell._id < id)
                     index = tmpIndex + 1;
-                else if (spell.ID > id)
+                else if (spell._id > id)
                     lastIndex = tmpIndex - 1;
                 else
                     return spell;

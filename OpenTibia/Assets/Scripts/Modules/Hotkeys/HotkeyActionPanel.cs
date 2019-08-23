@@ -3,36 +3,36 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Hotkeys
 {
-    internal class HotkeyActionPanel : Core.Components.Base.AbstractComponent
+    public class HotkeyActionPanel : Core.Components.Base.AbstractComponent
     {
-        [SerializeField] internal TMPro.TextMeshProUGUI textComponent = null;
+        public TMPro.TextMeshProUGUI textComponent = null;
         
-        internal Color normalColor;
-        internal Color highlightColor;
+        public Color normalColor;
+        public Color highlightColor;
 
-        private Toggle m_ToggleComponent;
-        internal Toggle toggleComponent {
+        private Toggle _toggleComponent;
+        public Toggle toggleComponent {
             get {
-                if (!m_ToggleComponent)
-                    m_ToggleComponent = GetComponent<Toggle>();
+                if (!_toggleComponent)
+                    _toggleComponent = GetComponent<Toggle>();
 
-                return m_ToggleComponent;
+                return _toggleComponent;
             }
         }
 
-        private Image m_ImageComponent;
-        internal Image imageComponent {
+        private Image _imageComponent;
+        public Image imageComponent {
             get {
-                if (!m_ImageComponent)
-                    m_ImageComponent = GetComponent<Image>();
+                if (!_imageComponent)
+                    _imageComponent = GetComponent<Image>();
 
-                return m_ImageComponent;
+                return _imageComponent;
             }
         }
 
-        internal KeyCode KeyCode;
-        internal EventModifiers EventModifiers;
-        internal string BaseText = string.Empty;
+        public KeyCode KeyCode;
+        public EventModifiers EventModifiers;
+        public string BaseText = string.Empty;
 
         protected override void Awake() {
             base.Awake();
@@ -44,7 +44,8 @@ namespace OpenTibiaUnity.Modules.Hotkeys
             imageComponent.color = value ? highlightColor : normalColor;
         }
 
-        public void Select() {
+        public override void Select() {
+            base.Select();
             toggleComponent.isOn = true;
             toggleComponent.Select();
         }

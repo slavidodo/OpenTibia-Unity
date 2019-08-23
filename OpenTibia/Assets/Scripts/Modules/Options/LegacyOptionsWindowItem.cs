@@ -6,9 +6,9 @@ using UnityEngine.UI;
 namespace OpenTibiaUnity.Modules.Options
 {
     [DisallowMultipleComponent]
-    internal sealed class LegacyOptionsWindowItem : AbstractComponent
+    public sealed class LegacyOptionsWindowItem : AbstractComponent
     {
-        [SerializeField] internal ButtonWrapper buttonWrapper;
-        [SerializeField] internal TMPro.TextMeshProUGUI label;
+        public ButtonWrapper buttonWrapper;
+        public TMPro.TextMeshProUGUI label;
     }
 }

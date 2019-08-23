@@ -1,25 +1,25 @@
-﻿namespace OpenTibiaUnity.Core.Utility
+﻿namespace OpenTibiaUnity.Core.Utils
 {
     public sealed class ByteArray
     {
-        private byte[] m_Buffer;
-        private int m_Position;
-        private int m_Size;
+        private byte[] _buffer;
+        private int _position;
+        private int _size;
 
         public ByteArray() {
-            m_Buffer = new byte[65535];
-            m_Position = 0;
-            m_Size = 0;
+            _buffer = new byte[65535];
+            _position = 0;
+            _size = 0;
         }
 
         public ByteArray(byte[] buffer) {
-            m_Buffer = buffer ?? throw new System.Exception("ByteArray.ByteArray: Can't assign a null buffer!");
-            m_Position = 0;
-            m_Size = buffer.Length;
+            _buffer = buffer ?? throw new System.Exception("ByteArray.ByteArray: Can't assign a null buffer!");
+            _position = 0;
+            _size = buffer.Length;
         }
 
         public bool CanRead(int size) {
-            return m_Position + size <= m_Size;
+            return _position + size <= _size;
         }
 
         public void ThrowIfCantRead(int size) {
@@ -29,8 +29,8 @@
 
         public byte ReadU8() {
             ThrowIfCantRead(sizeof(byte));
-            byte result = m_Buffer[m_Position];
-            m_Position += sizeof(byte);
+            byte result = _buffer[_position];
+            _position += sizeof(byte);
             return result;
         }
 
@@ -40,50 +40,50 @@
 
         public ushort ReadU16() {
             ThrowIfCantRead(sizeof(ushort));
-            ushort result = System.BitConverter.ToUInt16(m_Buffer, m_Position);
-            m_Position += sizeof(ushort);
+            ushort result = System.BitConverter.ToUInt16(_buffer, _position);
+            _position += sizeof(ushort);
             return result;
         }
 
         public uint ReadU32() {
             ThrowIfCantRead(sizeof(uint));
-            uint result = System.BitConverter.ToUInt32(m_Buffer, m_Position);
-            m_Position += sizeof(uint);
+            uint result = System.BitConverter.ToUInt32(_buffer, _position);
+            _position += sizeof(uint);
             return result;
         }
 
         public ulong ReadU64() {
             ThrowIfCantRead(sizeof(ulong));
-            ulong result = System.BitConverter.ToUInt64(m_Buffer, m_Position);
-            m_Position += sizeof(ulong);
+            ulong result = System.BitConverter.ToUInt64(_buffer, _position);
+            _position += sizeof(ulong);
             return result;
         }
 
         public sbyte ReadS8() {
             ThrowIfCantRead(sizeof(sbyte));
-            sbyte result = (sbyte)m_Buffer[m_Position];
-            m_Position += sizeof(sbyte);
+            sbyte result = (sbyte)_buffer[_position];
+            _position += sizeof(sbyte);
             return result;
         }
 
         public short ReadS16() {
             ThrowIfCantRead(sizeof(short));
-            short result = System.BitConverter.ToInt16(m_Buffer, m_Position);
-            m_Position += sizeof(short);
+            short result = System.BitConverter.ToInt16(_buffer, _position);
+            _position += sizeof(short);
             return result;
         }
 
         public int ReadS32() {
             ThrowIfCantRead(sizeof(int));
-            int result = System.BitConverter.ToInt32(m_Buffer, m_Position);
-            m_Position += sizeof(int);
+            int result = System.BitConverter.ToInt32(_buffer, _position);
+            _position += sizeof(int);
             return result;
         }
 
         public long ReadS64() {
             ThrowIfCantRead(sizeof(long));
-            long result = System.BitConverter.ToInt64(m_Buffer, m_Position);
-            m_Position += sizeof(long);
+            long result = System.BitConverter.ToInt64(_buffer, _position);
+            _position += sizeof(long);
             return result;
         }
 

@@ -2,80 +2,80 @@
 
 namespace OpenTibiaUnity.Core.Appearances.Animation
 {
-    internal class EnhancedAnimator : IAppearanceAnimator
+    public class EnhancedAnimator : IAppearanceAnimator
     {
         // constants for the new movement animation formula
-        internal const int MinSpeedFrameDuration = 90 * 8;
-        internal const int MaxSpeedFrameDuration = 35 * 8;
+        public const int MinSpeedFrameDuration = 90 * 8;
+        public const int MaxSpeedFrameDuration = 35 * 8;
 
-        internal const int MinSpeedDelay = 500;
-        internal const int MaxSpeedDelay = 100;
+        public const int MinSpeedDelay = 500;
+        public const int MaxSpeedDelay = 100;
 
-        private Protobuf.Appearances.SpriteAnimation m_AnimationInstance;
-        private IAppearanceFrameStategy m_NextFrameStrategy;
+        private Protobuf.Appearances.SpriteAnimation _animationInstance;
+        private IAppearanceFrameStategy _nextFrameStrategy;
 
-        private readonly int m_PhaseCount;
-        private int m_CurrentPhaseDuration = 0;
-        private int m_CurrentPhase = 0;
+        private readonly int _phaseCount;
+        private int _currentPhaseDuration = 0;
+        private int _currentPhase = 0;
 
         public int LastAnimationTick { get; private set; } = 0;
         public bool Finished { get; set; } = false;
 
         public int Phase {
-            get => m_CurrentPhase;
+            get => _currentPhase;
             set {
-                if (m_AnimationInstance == null) {
+                if (_animationInstance == null) {
                     return;
-                } else if (m_AnimationInstance.Synchornized) {
+                } else if (_animationInstance.Synchornized) {
                     CalculateSynchronousPhase();
                 } else {
                     if (value == Constants.PhaseAsynchronous)
-                        m_CurrentPhase = 0;
+                        _currentPhase = 0;
                     else if (value == Constants.PhaseRandom)
-                        m_CurrentPhase = (int)(Random.Range(0, 10) / 10f * m_PhaseCount);
-                    else if (value >= 0 && value < m_PhaseCount)
-                        m_CurrentPhase = value;
+                        _currentPhase = (int)(Random.Range(0, 10) / 10f * _phaseCount);
+                    else if (value >= 0 && value < _phaseCount)
+                        _currentPhase = value;
                     else
-                        m_CurrentPhase = (int)m_AnimationInstance.DefaultStartPhase;
+                        _currentPhase = (int)_animationInstance.DefaultStartPhase;
                 }
             }
         }
 
-        internal EnhancedAnimator(Protobuf.Appearances.SpriteAnimation animation, int phaseCount) {
-            m_AnimationInstance = animation;
-            m_PhaseCount = phaseCount;
+        public EnhancedAnimator(Protobuf.Appearances.SpriteAnimation animation, int phaseCount) {
+            _animationInstance = animation;
+            _phaseCount = phaseCount;
             LastAnimationTick = OpenTibiaUnity.TicksMillis;
 
             Phase = Constants.PhaseAutomatic;
 
-            if (m_AnimationInstance?.LoopCount < 0)
-                m_NextFrameStrategy = new PingPongFrameStrategy();
+            if (_animationInstance?.LoopCount < 0)
+                _nextFrameStrategy = new PingPongFrameStrategy();
             else
-                m_NextFrameStrategy = new LoopFrameStrategy((uint)m_AnimationInstance?.LoopCount);
+                _nextFrameStrategy = new LoopFrameStrategy((uint)_animationInstance?.LoopCount);
         }
 
         public void Animate(int ticks, int delay = 0) {
             // if delay != 0, then this is movement animation delay
             if (ticks != LastAnimationTick && !Finished) {
                 int elapsedTicks = ticks - LastAnimationTick;
-                if (elapsedTicks >= m_CurrentPhaseDuration) {
-                    var nextPhase = m_NextFrameStrategy.NextFrame(m_CurrentPhase, m_PhaseCount);
-                    if (m_CurrentPhase != nextPhase) {
+                if (elapsedTicks >= _currentPhaseDuration) {
+                    var nextPhase = _nextFrameStrategy.NextFrame(_currentPhase, _phaseCount);
+                    if (_currentPhase != nextPhase) {
                         int duration = delay == 0
-                            ? m_AnimationInstance.SpritePhases[nextPhase].Duration() - (elapsedTicks - m_CurrentPhaseDuration)
+                            ? _animationInstance.SpritePhases[nextPhase].Duration() - (elapsedTicks - _currentPhaseDuration)
                             : CalculateMovementPhaseDuration(delay);
 
-                        if (duration < 0 && m_AnimationInstance != null && m_AnimationInstance.Synchornized) {
+                        if (duration < 0 && _animationInstance != null && _animationInstance.Synchornized) {
                             CalculateSynchronousPhase();
                         } else {
-                            m_CurrentPhase = nextPhase;
-                            m_CurrentPhaseDuration = Mathf.Max(0, duration);
+                            _currentPhase = nextPhase;
+                            _currentPhaseDuration = Mathf.Max(0, duration);
                         }
                     } else {
                         Finished = true;
                     }
                 } else {
-                    m_CurrentPhaseDuration -= elapsedTicks;
+                    _currentPhaseDuration -= elapsedTicks;
                 }
 
                 LastAnimationTick = ticks;
@@ -83,30 +83,30 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
         }
 
         public void SetEndless() {
-            m_NextFrameStrategy = new LoopFrameStrategy(0);
+            _nextFrameStrategy = new LoopFrameStrategy(0);
         }
 
         public void Reset() {
             Phase = Constants.PhaseAutomatic;
             Finished = false;
-            m_NextFrameStrategy.Reset();
+            _nextFrameStrategy.Reset();
         }
 
         private void CalculateSynchronousPhase() {
             int totalDurations = 0;
-            for (int i = 0; i < m_PhaseCount; i++)
-                totalDurations += m_AnimationInstance.SpritePhases[i].Duration();
+            for (int i = 0; i < _phaseCount; i++)
+                totalDurations += _animationInstance.SpritePhases[i].Duration();
 
             int ticks = OpenTibiaUnity.TicksMillis;
             int loc4 = ticks % totalDurations;
 
             int tmpDurations = 0;
-            for (int i = 0; i < m_PhaseCount; i++) {
-                int duration = m_AnimationInstance.SpritePhases[i].Duration();
+            for (int i = 0; i < _phaseCount; i++) {
+                int duration = _animationInstance.SpritePhases[i].Duration();
                 if (loc4 >= duration && loc4 < duration + tmpDurations) {
-                    m_CurrentPhase = i;
+                    _currentPhase = i;
                     int loc8 = loc4 - tmpDurations;
-                    m_CurrentPhaseDuration = duration - loc8;
+                    _currentPhaseDuration = duration - loc8;
                     break;
                 }
 
@@ -119,14 +119,14 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
         private int CalculateMovementPhaseDuration(int delay) {
             delay = Mathf.Clamp(delay, MaxSpeedDelay, MinSpeedDelay);
             int loc5 = (delay - MaxSpeedDelay) / (MinSpeedDelay - MaxSpeedDelay);
-            int loc6 = MinSpeedFrameDuration / m_PhaseCount;
-            int loc7 = MaxSpeedFrameDuration / m_PhaseCount;
+            int loc6 = MinSpeedFrameDuration / _phaseCount;
+            int loc7 = MaxSpeedFrameDuration / _phaseCount;
 
             return (loc6 - loc7) * loc5 + loc7;
         }
 
         public IAppearanceAnimator Clone() {
-            return new EnhancedAnimator(m_AnimationInstance, m_PhaseCount); 
+            return new EnhancedAnimator(_animationInstance, _phaseCount); 
         }
 
         public static bool operator !(EnhancedAnimator instance) {

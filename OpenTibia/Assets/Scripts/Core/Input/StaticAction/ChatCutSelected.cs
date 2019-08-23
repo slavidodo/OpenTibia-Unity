@@ -2,9 +2,9 @@
 
 namespace OpenTibiaUnity.Core.Input.StaticAction
 {
-    internal class ChatCutSelected : StaticAction
+    public class ChatCutSelected : StaticAction
     {
-        internal ChatCutSelected(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
+        public ChatCutSelected(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
 
         public override bool Perform(bool repeat = false) {
             TMPro.TMP_InputField inputField = StaticAction.GetSelectedInputField();
@@ -20,7 +20,7 @@ namespace OpenTibiaUnity.Core.Input.StaticAction
         }
 
         public override IAction Clone() {
-            return new ChatCutSelected(m_ID, m_Label, m_EventMask);
+            return new ChatCutSelected(_id, _label, _eventMask);
         }
     }
 }

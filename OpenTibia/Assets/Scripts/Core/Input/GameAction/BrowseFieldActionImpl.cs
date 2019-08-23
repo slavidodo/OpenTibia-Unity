@@ -2,16 +2,16 @@
 {
     public class BrowseFieldActionImpl : IActionImpl
     {
-        UnityEngine.Vector3Int m_Absolute;
+        UnityEngine.Vector3Int _absolute;
 
         public BrowseFieldActionImpl(UnityEngine.Vector3Int absolute) {
-            m_Absolute = absolute;
+            _absolute = absolute;
         }
 
         public void Perform(bool _ = false) {
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             if (!!protocolGame && protocolGame.IsGameRunning)
-                protocolGame.SendBrowseField(m_Absolute);
+                protocolGame.SendBrowseField(_absolute);
         }
     }
 }

@@ -5,33 +5,31 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Input
 {
-    internal class MappingSet
+    public class MappingSet
     {
-        internal const int ChatModeON = 0;
-        internal const int ChatModeOFF = 1;
+        public const int ChatModeON = 0;
+        public const int ChatModeOFF = 1;
 
-        internal const int DefaultSet = 0;
+        public const int DefaultSet = 0;
 
-        internal static Binding[] ChatModeOffDefaultBindings;
-        internal static Binding[] ChatModeOnDefaultBindings;
+        public static Binding[] ChatModeOffDefaultBindings;
+        public static Binding[] ChatModeOnDefaultBindings;
 
-        protected Mapping.Mapping m_ChatModeOn = null;
-        protected Mapping.Mapping m_ChatModeOff = null;
-        protected int m_ID = 0;
-        protected string m_Name = null;
+        protected Mapping.Mapping _chatModeOn = null;
+        protected Mapping.Mapping _chatModeOff = null;
+        protected int _id = 0;
+        protected string _name = null;
 
-        internal int ID {
-            get { return m_ID; }
-        }
-        internal string Name {
-            get { return m_Name; }
+        public int Id { get => _id; }
+        public string Name {
+            get { return _name; }
         }
 
-        internal Mapping.Mapping ChatModeOnMapping {
-            get { return m_ChatModeOn; }
+        public Mapping.Mapping ChatModeOnMapping {
+            get { return _chatModeOn; }
         }
-        internal Mapping.Mapping ChatModeOffMapping {
-            get { return m_ChatModeOff; }
+        public Mapping.Mapping ChatModeOffMapping {
+            get { return _chatModeOff; }
         }
 
         static MappingSet() {
@@ -104,22 +102,22 @@ namespace OpenTibiaUnity.Core.Input
             };
         }
 
-        internal MappingSet(int id, string name = null) {
-            m_ID = id;
-            m_Name = GetSanitizedSetName(id, name);
+        public MappingSet(int id, string name = null) {
+            _id = id;
+            _name = GetSanitizedSetName(id, name);
 
-            m_ChatModeOff = new Mapping.Mapping();
-            m_ChatModeOn = new Mapping.Mapping();
+            _chatModeOff = new Mapping.Mapping();
+            _chatModeOn = new Mapping.Mapping();
         }
 
-        internal void InitialiseDefaultBindings() {
-            m_ChatModeOn.RemoveAll(false);
-            m_ChatModeOn.AddAll(ChatModeOnDefaultBindings);
-            m_ChatModeOff.RemoveAll(false);
-            m_ChatModeOff.AddAll(ChatModeOffDefaultBindings);
+        public void InitialiseDefaultBindings() {
+            _chatModeOn.RemoveAll(false);
+            _chatModeOn.AddAll(ChatModeOnDefaultBindings);
+            _chatModeOff.RemoveAll(false);
+            _chatModeOff.AddAll(ChatModeOffDefaultBindings);
         }
 
-        internal static string GetSanitizedSetName(int id, string name) {
+        public static string GetSanitizedSetName(int id, string name) {
             if (name != null) {
                 name = Regex.Replace(name, @"\t|\n|\r", "").TrimStart().TrimEnd();
                 if (name.Length > 255)

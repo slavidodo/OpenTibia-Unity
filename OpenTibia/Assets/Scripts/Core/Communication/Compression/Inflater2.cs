@@ -3,11 +3,11 @@ using System.IO;
 
 namespace OpenTibiaUnity.Core.Communication.Compression
 {
-    internal class Inflater2
+    public class Inflater2
     {
         private static MemoryStream s_OutputStream;
 
-        internal static bool Inflate(byte[] compressed, out byte[] decompressed) {
+        public static bool Inflate(byte[] compressed, out byte[] decompressed) {
             var outputStream = GetOrCreateOutputStream();
             
             using (var deflateStream = new DeflateStream(outputStream, CompressionMode.Decompress, true)) {
@@ -29,7 +29,7 @@ namespace OpenTibiaUnity.Core.Communication.Compression
             return true;
         }
 
-        internal static MemoryStream GetOrCreateOutputStream() {
+        public static MemoryStream GetOrCreateOutputStream() {
             if (s_OutputStream != null)
                 return s_OutputStream;
 
@@ -37,7 +37,7 @@ namespace OpenTibiaUnity.Core.Communication.Compression
             return s_OutputStream;
         }
 
-        internal static void Cleanup() {
+        public static void Cleanup() {
             if (s_OutputStream == null)
                 return;
 

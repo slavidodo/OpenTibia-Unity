@@ -1,6 +1,6 @@
 ﻿namespace OpenTibiaUnity.Core.Input
 {
-    internal interface IAction
+    public interface IAction
     {
         bool Perform(bool repeat = false);
         IAction Clone();

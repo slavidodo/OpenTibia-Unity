@@ -1,19 +1,19 @@
 ﻿namespace OpenTibiaUnity.Core.Input.StaticAction
 {
-    internal class PlayerTurn : StaticAction
+    public class PlayerTurn : StaticAction
     {
-        private Direction m_Direction;
-        internal PlayerTurn(int id, string label, uint eventMask, Direction direction) : base(id, label, eventMask, false) {
+        private Direction _direction;
+        public PlayerTurn(int id, string label, uint eventMask, Direction direction) : base(id, label, eventMask, false) {
             if (direction < Direction.North || direction > Direction.West)
                 throw new System.ArgumentException("PlayerTurn.PlayerTurn: Invalid direction.");
 
-            m_Direction = direction;
+            _direction = direction;
         }
 
         public override bool Perform(bool repeat = false) {
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             if (!!protocolGame && protocolGame.IsGameRunning) {
-                switch (m_Direction) {
+                switch (_direction) {
                     case Direction.North:
                         protocolGame.SendTurnNorth();
                         break;
@@ -35,7 +35,7 @@
         }
 
         public override IAction Clone() {
-            return new PlayerTurn(m_ID, m_Label, m_EventMask, m_Direction);
+            return new PlayerTurn(_id, _label, _eventMask, _direction);
         }
     }
 }

@@ -5,33 +5,33 @@ using UnityEngine.UI;
 namespace OpenTibiaUnity.Core.Components
 {
     [RequireComponent(typeof(Toggle), typeof(Image))]
-    internal class Checkbox : Base.AbstractComponent
+    public class Checkbox : Base.AbstractComponent
     {
-        [SerializeField] protected Sprite m_OnSprite = null;
-        [SerializeField] protected Sprite m_OffSprite = null;
-        [SerializeField] protected Sprite m_DisabledOnSprite = null;
+        [SerializeField] protected Sprite _onSprite = null;
+        [SerializeField] protected Sprite _offSprite = null;
+        [SerializeField] protected Sprite _disabledOnSprite = null;
 
-        private Toggle m_ToggleComponent;
-        internal Toggle toggleComponent {
+        private Toggle _toggleComponent;
+        public Toggle toggleComponent {
             get {
-                if (!m_ToggleComponent)
-                    m_ToggleComponent = GetComponent<Toggle>();
+                if (!_toggleComponent)
+                    _toggleComponent = GetComponent<Toggle>();
 
-                return m_ToggleComponent;
+                return _toggleComponent;
             }
         }
 
-        private Image m_ImageComponent;
-        internal Image imageComponent {
+        private Image _imageComponent;
+        public Image imageComponent {
             get {
-                if (!m_ImageComponent)
-                    m_ImageComponent = GetComponent<Image>();
+                if (!_imageComponent)
+                    _imageComponent = GetComponent<Image>();
 
-                return m_ImageComponent;
+                return _imageComponent;
             }
         }
         
-        internal bool Checked {
+        public bool Checked {
             get => toggleComponent.isOn;
             set {
                 if (toggleComponent.isOn != value)
@@ -48,25 +48,25 @@ namespace OpenTibiaUnity.Core.Components
 
         private void OnToggleValueChanged(bool value) {
             if (value)
-                imageComponent.sprite = m_OnSprite;
+                imageComponent.sprite = _onSprite;
             else
-                imageComponent.sprite = m_OffSprite;
+                imageComponent.sprite = _offSprite;
         }
 
-        internal void DisableToggle() {
+        public void DisableToggle() {
             toggleComponent.interactable = false;
             if (Checked)
-                imageComponent.sprite = m_DisabledOnSprite;
+                imageComponent.sprite = _disabledOnSprite;
             else
-                imageComponent.sprite = m_OffSprite;
+                imageComponent.sprite = _offSprite;
         }
 
-        internal void EnableToggle() {
+        public void EnableToggle() {
             toggleComponent.interactable = true;
             if (Checked)
-                imageComponent.sprite = m_OnSprite;
+                imageComponent.sprite = _onSprite;
             else
-                imageComponent.sprite = m_OffSprite;
+                imageComponent.sprite = _offSprite;
         }
     }
 }

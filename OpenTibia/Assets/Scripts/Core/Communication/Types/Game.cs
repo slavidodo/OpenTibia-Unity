@@ -1,6 +1,6 @@
 ﻿namespace OpenTibiaUnity.Core.Communication.Types
 {
-    internal enum GameclientMessageType
+    public enum GameclientMessageType
     {
         /**
          * Missing
@@ -141,7 +141,7 @@
         GetTransactionHistory = 254,
     }
 
-    internal enum GameserverMessageType : byte
+    public enum GameserverMessageType : byte
     {
         /** Missing Messages
          * * SpecialContainersAvailable

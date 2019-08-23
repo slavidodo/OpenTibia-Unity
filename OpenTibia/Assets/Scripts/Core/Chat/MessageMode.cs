@@ -2,20 +2,20 @@
 
 namespace OpenTibiaUnity.Core.Chat
 {
-    internal class MessageModeProperties
+    public class MessageModeProperties
     {
-        internal MessageModeType Mode;
-        internal bool ShowOnscreen;
-        internal bool ShowChannel;
-        internal uint TextARGB;
-        internal uint HighlightARGB;
-        internal bool Editable;
-        internal bool IgnoreNameFilter;
-        internal MessageScreenTargets ScreenTarget;
-        internal MessageModeHeaders Header;
-        internal MessageModePrefixes Prefix;
+        public MessageModeType Mode;
+        public bool ShowOnscreen;
+        public bool ShowChannel;
+        public uint TextARGB;
+        public uint HighlightARGB;
+        public bool Editable;
+        public bool IgnoreNameFilter;
+        public MessageScreenTargets ScreenTarget;
+        public MessageModeHeaders Header;
+        public MessageModePrefixes Prefix;
 
-        internal MessageModeProperties(MessageModeType mode, bool showOnscreen, bool showChannel, uint textARGB, uint highlightARGB, bool editable, bool ignoreNameFilter, MessageScreenTargets screenTarget = MessageScreenTargets.None, MessageModeHeaders header = MessageModeHeaders.None, MessageModePrefixes prefix = MessageModePrefixes.None) {
+        public MessageModeProperties(MessageModeType mode, bool showOnscreen, bool showChannel, uint textARGB, uint highlightARGB, bool editable, bool ignoreNameFilter, MessageScreenTargets screenTarget = MessageScreenTargets.None, MessageModeHeaders header = MessageModeHeaders.None, MessageModePrefixes prefix = MessageModePrefixes.None) {
             Mode = mode;
             ShowOnscreen = showOnscreen;
             ShowChannel = showChannel;
@@ -29,26 +29,26 @@ namespace OpenTibiaUnity.Core.Chat
         }
     }
 
-    internal static class MessageColors
+    public static class MessageColors
     {
-        internal const uint White = 0xFFFFFF;
-        internal const uint Yellow = 0xFFFF00;
+        public const uint White = 0xFFFFFF;
+        public const uint Yellow = 0xFFFF00;
 
-        internal const uint Red = 0xF55E5E;
-        internal const uint Green = 0x00EB00;
+        public const uint Red = 0xF55E5E;
+        public const uint Green = 0x00EB00;
 
-        internal const uint Blue = 0x9F9DFD;
-        internal const uint Cyan = 0x5FF7F7;
+        public const uint Blue = 0x9F9DFD;
+        public const uint Cyan = 0x5FF7F7;
 
-        internal const uint Orange = 0xFE6500;
+        public const uint Orange = 0xFE6500;
 
-        internal const uint Pink = 0xF080CE;
+        public const uint Pink = 0xF080CE;
 
-        internal const uint Grey = 0x7F7F7F;
+        public const uint Grey = 0x7F7F7F;
     }
 
-    internal class MessageMode {
-        internal static Dictionary<MessageModeType, MessageModeProperties> MessageModeDefaults;
+    public class MessageMode {
+        public static Dictionary<MessageModeType, MessageModeProperties> MessageModeDefaults;
 
         static MessageMode() {
             MessageModeDefaults = new Dictionary<MessageModeType, MessageModeProperties>();
@@ -106,43 +106,43 @@ namespace OpenTibiaUnity.Core.Chat
             MessageModeDefaults.Add(MessageModeType.NpcFromStartBlock, new MessageModeProperties(MessageModeType.NpcFromStartBlock, true, true, MessageColors.Cyan, MessageColors.Cyan, false, true, MessageScreenTargets.BoxCoordinate, MessageModeHeaders.NpcFromStartBlock));
         }
 
-        private MessageModeType m_ID;
-        private bool m_ShowOnscreenMessage;
-        private bool m_ShowChannelMessage;
-        private uint m_TextARGB;
-        private uint m_HighlightARGB;
-        private MessageScreenTargets m_ScreenTarget;
-        private bool m_IgnoreNameFilter;
-        private MessageModeHeaders m_Header;
-        private MessageModePrefixes m_Prefix;
+        private MessageModeType _id;
+        private bool _showOnscreenMessage;
+        private bool _showChannelMessage;
+        private uint _textARGB;
+        private uint _highlightARGB;
+        private MessageScreenTargets _screenTarget;
+        private bool _ignoreNameFilter;
+        private MessageModeHeaders _header;
+        private MessageModePrefixes _prefix;
 
-        internal MessageModeType ID { get => m_ID; }
-        internal bool ShowOnScreen { get => m_ShowOnscreenMessage; }
-        internal bool ShowChannelMessage { get => m_ShowChannelMessage; }
-        internal uint TextARGB { get => FormattedTextARGB(); }
-        internal uint HighlightARGB { get => m_HighlightARGB; }
-        internal MessageScreenTargets ScreenTarget { get => m_ScreenTarget; }
-        internal bool IgnoreNameFilter { get => m_IgnoreNameFilter; }
+        public MessageModeType Id { get => _id; }
+        public bool ShowOnScreen { get => _showOnscreenMessage; }
+        public bool ShowChannelMessage { get => _showChannelMessage; }
+        public uint TextARGB { get => FormattedTextARGB(); }
+        public uint HighlightARGB { get => _highlightARGB; }
+        public MessageScreenTargets ScreenTarget { get => _screenTarget; }
+        public bool IgnoreNameFilter { get => _ignoreNameFilter; }
 
-        internal MessageMode(MessageModeType mode) {
-            m_ID = mode;
+        public MessageMode(MessageModeType mode) {
+            _id = mode;
             if (!MessageModeDefaults.ContainsKey(mode)) {
                 UnityEngine.Debug.LogWarningFormat("Unable to find a settings for mode: {0}.", mode);
                 return;
             }
 
-            m_ShowOnscreenMessage = MessageModeDefaults[m_ID].ShowOnscreen;
-            m_ShowChannelMessage = MessageModeDefaults[m_ID].ShowChannel;
-            m_TextARGB = MessageModeDefaults[m_ID].TextARGB;
-            m_HighlightARGB = MessageModeDefaults[m_ID].HighlightARGB;
-            m_ScreenTarget = MessageModeDefaults[m_ID].ScreenTarget;
-            m_Header = MessageModeDefaults[m_ID].Header;
-            m_Prefix = MessageModeDefaults[m_ID].Prefix;
-            m_IgnoreNameFilter = MessageModeDefaults[m_ID].IgnoreNameFilter;
+            _showOnscreenMessage = MessageModeDefaults[_id].ShowOnscreen;
+            _showChannelMessage = MessageModeDefaults[_id].ShowChannel;
+            _textARGB = MessageModeDefaults[_id].TextARGB;
+            _highlightARGB = MessageModeDefaults[_id].HighlightARGB;
+            _screenTarget = MessageModeDefaults[_id].ScreenTarget;
+            _header = MessageModeDefaults[_id].Header;
+            _prefix = MessageModeDefaults[_id].Prefix;
+            _ignoreNameFilter = MessageModeDefaults[_id].IgnoreNameFilter;
         }
 
-        internal string GetOnscreenMessageHeader(params object[] rest) {
-            switch (m_Header) {
+        public string GetOnscreenMessageHeader(params object[] rest) {
+            switch (_header) {
                 case MessageModeHeaders.Say:
                     return string.Format("{0} says:", rest);
                 case MessageModeHeaders.Whisper:
@@ -152,15 +152,15 @@ namespace OpenTibiaUnity.Core.Chat
                 case MessageModeHeaders.Spell:
                     return string.Format("{0} casts:", rest);
                 case MessageModeHeaders.NpcFrom:
-                    return string.Format("{0}:\n:", rest);
+                    return string.Format("{0}:", rest);
 
                 default:
                     return null;
             }
         }
 
-        internal string GetOnscreenMessagePrefix(params object[] rest) {
-            switch (m_Prefix) {
+        public string GetOnscreenMessagePrefix(params object[] rest) {
+            switch (_prefix) {
                 case MessageModePrefixes.PrivateFrom:
                 case MessageModePrefixes.GamemasterBroadcast:
                 case MessageModePrefixes.GamemasterPrivateFrom:
@@ -171,10 +171,10 @@ namespace OpenTibiaUnity.Core.Chat
             }
         }
 
-        internal uint FormattedTextARGB() {
+        public uint FormattedTextARGB() {
             var clientVersion = OpenTibiaUnity.GameManager.ClientVersion;
 
-            switch (m_ID) {
+            switch (_id) {
                 case MessageModeType.Spell:
                     if (clientVersion > 1100 && clientVersion < 1110)
                         return MessageColors.Pink;
@@ -185,10 +185,10 @@ namespace OpenTibiaUnity.Core.Chat
                     break;
             }
 
-            return m_TextARGB;
+            return _textARGB;
         }
 
-        internal static bool s_CheckMode(int mode) {
+        public static bool s_CheckMode(int mode) {
             return mode >= 0 && mode != (int)MessageModeType.Invalid;
         }
     }

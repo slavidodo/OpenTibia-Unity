@@ -3,30 +3,30 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Appearances.Provider
 {
-    internal class GeneralSpriteProvider
+    public class GeneralSpriteProvider
     {
-        private SpritesInformation m_SpritesInformation;
-        private AssetBundle m_AssetBundle;
-        private Utility.RingBuffer<Rendering.CachedSpriteInformation> m_CachedSpriteInformations;
+        private SpritesInformation _spritesInformation;
+        private AssetBundle _assetBundle;
+        private Utils.RingBuffer<Rendering.CachedSpriteInformation> _cachedSpriteInformations;
 
-        internal GeneralSpriteProvider(AssetBundle assetBundle, string catalogContent) {
-            m_AssetBundle = assetBundle;
-            m_SpritesInformation = new SpritesInformation(catalogContent);
+        public GeneralSpriteProvider(AssetBundle assetBundle, string catalogContent) {
+            _assetBundle = assetBundle;
+            _spritesInformation = new SpritesInformation(catalogContent);
             
-            m_CachedSpriteInformations = new Utility.RingBuffer<Rendering.CachedSpriteInformation>(Constants.MapSizeX * Constants.MapSizeY * Constants.MapSizeZ * Constants.MapSizeW);
+            _cachedSpriteInformations = new Utils.RingBuffer<Rendering.CachedSpriteInformation>(Constants.MapSizeX * Constants.MapSizeY * Constants.MapSizeZ * Constants.MapSizeW);
         }
 
-        internal Rendering.CachedSpriteInformation GetCachedSpriteInformation(uint spriteID) {
+        public Rendering.CachedSpriteInformation GetCachedSpriteInformation(uint sprite_id) {
             // have we loaded this one recently?
-            var cachedSpriteInformation = FindCachedSpriteInformation(spriteID);
+            var cachedSpriteInformation = FindCachedSpriteInformation(sprite_id);
             if (!!cachedSpriteInformation)
                 return cachedSpriteInformation;
 
-            var asset = m_SpritesInformation.FindSpritesAsset(spriteID);
+            var asset = _spritesInformation.FindSpritesAsset(sprite_id);
             if (!asset)
                 return null;
 
-            cachedSpriteInformation = asset.GetCachedSpriteInformation(spriteID, m_AssetBundle);
+            cachedSpriteInformation = asset.GetCachedSpriteInformation(sprite_id, _assetBundle);
             if (!cachedSpriteInformation)
                 return null;
 
@@ -35,15 +35,15 @@ namespace OpenTibiaUnity.Core.Appearances.Provider
             return cachedSpriteInformation;
         }
 
-        private Rendering.CachedSpriteInformation FindCachedSpriteInformation(uint spriteID) {
-            int lastIndex = m_CachedSpriteInformations.Length - 1;
+        private Rendering.CachedSpriteInformation FindCachedSpriteInformation(uint sprite_id) {
+            int lastIndex = _cachedSpriteInformations.Length - 1;
             int index = 0;
             while (index < lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
-                var cachedSpriteInformation = m_CachedSpriteInformations.GetItemAt(tmpIndex);
-                if (cachedSpriteInformation.SpriteID > spriteID)
+                var cachedSpriteInformation = _cachedSpriteInformations.GetItemAt(tmpIndex);
+                if (cachedSpriteInformation.Sprite_id > sprite_id)
                     index = tmpIndex + 1;
-                else if (cachedSpriteInformation.SpriteID < spriteID)
+                else if (cachedSpriteInformation.Sprite_id < sprite_id)
                     lastIndex = tmpIndex - 1;
                 else
                     return cachedSpriteInformation;
@@ -53,20 +53,20 @@ namespace OpenTibiaUnity.Core.Appearances.Provider
         }
 
         private void InsertCachedSpriteInformation(Rendering.CachedSpriteInformation cachedSpriteInformation) {
-            int lastIndex = m_CachedSpriteInformations.Length - 1;
+            int lastIndex = _cachedSpriteInformations.Length - 1;
             int index = 0;
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
-                var foundCachedSpriteInformation = m_CachedSpriteInformations.GetItemAt(tmpIndex);
-                if (foundCachedSpriteInformation.SpriteID < cachedSpriteInformation.SpriteID)
+                var foundCachedSpriteInformation = _cachedSpriteInformations.GetItemAt(tmpIndex);
+                if (foundCachedSpriteInformation.Sprite_id < cachedSpriteInformation.Sprite_id)
                     index = tmpIndex + 1;
-                else if (foundCachedSpriteInformation.SpriteID > cachedSpriteInformation.SpriteID)
+                else if (foundCachedSpriteInformation.Sprite_id > cachedSpriteInformation.Sprite_id)
                     lastIndex = tmpIndex - 1;
                 else
                     return;
             }
 
-            m_CachedSpriteInformations.AddItemAt(cachedSpriteInformation, index);
+            _cachedSpriteInformations.AddItemAt(cachedSpriteInformation, index);
         }
         
         public static bool operator !(GeneralSpriteProvider instance) {

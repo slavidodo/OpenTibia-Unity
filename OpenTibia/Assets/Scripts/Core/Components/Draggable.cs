@@ -21,14 +21,14 @@ namespace OpenTibiaUnity.Core.Components
         public DraggingPolicy draggingPolicy = DraggingPolicy.FullTransform;
         public int draggingBoxSize = 5;
         
-        private Vector2 m_InitialMousePositionOverrider = Vector2.zero;
-        private Vector2 m_InitialMousePosition = Vector2.zero;
-        private Vector3 m_InitialPosition = Vector3.zero;
-        private bool m_DraggingEnabled = false;
+        private Vector2 _initialMousePositionOverrider = Vector2.zero;
+        private Vector2 _initialMousePosition = Vector2.zero;
+        private Vector3 _initialPosition = Vector3.zero;
+        private bool _draggingEnabled = false;
 
-        public DragEvent onBeginDrag;
-        public DragEvent onDrag;
-        public DragEvent onEndDrag;
+        public DragEvent onBeginDrag = null;
+        public DragEvent onDrag = null;
+        public DragEvent onEndDrag = null;
 
         protected override void Awake() {
             base.Awake();
@@ -37,23 +37,23 @@ namespace OpenTibiaUnity.Core.Components
             onDrag = new DragEvent();
             onEndDrag = new DragEvent();
         }
-        
+
         public override Vector2 CalculateRelativeMousePosition(Vector3 mousePosition) {
-            return new Vector2(mousePosition.x, mousePosition.y) + m_InitialMousePositionOverrider;
+            return new Vector2(mousePosition.x, mousePosition.y) + _initialMousePositionOverrider;
         }
 
         public void OnBeginDrag(PointerEventData eventData) {
-            if (m_DraggingEnabled) {
+            if (_draggingEnabled) {
                 onBeginDrag.Invoke(eventData);
             }
         }
 
         public void OnDrag(PointerEventData eventData) {
-            if (m_DraggingEnabled) {
+            if (_draggingEnabled) {
                 var relativeMousePosition = CalculateRelativeMousePosition(eventData.position);
 
-                float x = m_InitialPosition.x + (relativeMousePosition.x - m_InitialMousePosition.x);
-                float y = m_InitialPosition.y + (relativeMousePosition.y - m_InitialMousePosition.y);
+                float x = _initialPosition.x + (relativeMousePosition.x - _initialMousePosition.x);
+                float y = _initialPosition.y + (relativeMousePosition.y - _initialMousePosition.y);
                 if (transform.position.x != x || transform.position.y != y)
                     transform.position = new Vector2(x, y);
 
@@ -65,8 +65,8 @@ namespace OpenTibiaUnity.Core.Components
         }
 
         public void OnEndDrag(PointerEventData eventData) {
-            if (m_DraggingEnabled) {
-                m_DraggingEnabled = false;
+            if (_draggingEnabled) {
+                _draggingEnabled = false;
 
                 onEndDrag.Invoke(eventData);
             }
@@ -76,13 +76,13 @@ namespace OpenTibiaUnity.Core.Components
             var pivotDelta = rectTransform.pivot - new Vector2(0, 1);
             var size = rectTransform.rect.size;
 
-            m_InitialMousePositionOverrider = pivotDelta * size;
-            m_InitialMousePosition = CalculateRelativeMousePosition(eventData.position);
-            m_InitialPosition = rectTransform.position;
+            _initialMousePositionOverrider = pivotDelta * size;
+            _initialMousePosition = CalculateRelativeMousePosition(eventData.position);
+            _initialPosition = rectTransform.position;
 
             Vector2 initialOffset = new Vector2() {
-                x = Mathf.Abs(m_InitialMousePosition.x - m_InitialPosition.x),
-                y = Mathf.Abs(m_InitialPosition.y - m_InitialMousePosition.y)
+                x = Mathf.Abs(_initialMousePosition.x - _initialPosition.x),
+                y = Mathf.Abs(_initialPosition.y - _initialMousePosition.y)
             };
             
             if (draggingPolicy != DraggingPolicy.FullTransform) {
@@ -116,7 +116,7 @@ namespace OpenTibiaUnity.Core.Components
                 }
             }
 
-            m_DraggingEnabled = true;
+            _draggingEnabled = true;
         }
     }
 }

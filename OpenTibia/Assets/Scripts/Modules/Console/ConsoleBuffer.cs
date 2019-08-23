@@ -13,27 +13,27 @@ namespace OpenTibiaUnity.Modules.Console
     // to the scrollbar / scrollrect it's reversed (top-to-bottom instead of bottom-to-top)
     // hence affecting the placeholder
     [RequireComponent(typeof(TMPro.TMP_InputField))]
-    internal class ConsoleBuffer : Core.Components.Base.AbstractComponent, IPointerDownHandler, IPointerUpHandler
+    public class ConsoleBuffer : Core.Components.Base.AbstractComponent, IPointerDownHandler, IPointerUpHandler
     {
-        [SerializeField] private ConsoleModule m_ConsoleModule = null;
+        [SerializeField] private ConsoleModule _consoleModule = null;
 
-        private TMPro.TMP_InputField m_TextLabel;
-        internal TMPro.TMP_InputField textInput {
+        private TMPro.TMP_InputField _textLabel;
+        public TMPro.TMP_InputField textInput {
             get {
-                if (m_TextLabel)
-                    return m_TextLabel;
+                if (_textLabel)
+                    return _textLabel;
 
-                m_TextLabel = GetComponent<TMPro.TMP_InputField>();
-                return m_TextLabel;
+                _textLabel = GetComponent<TMPro.TMP_InputField>();
+                return _textLabel;
             }
         }
 
-        private List<ChannelMessage> m_History = null;
+        private List<ChannelMessage> _history = null;
 
         protected override void Awake() {
             base.Awake();
 
-            m_History = new List<ChannelMessage>();
+            _history = new List<ChannelMessage>();
         }
 
         void IPointerDownHandler.OnPointerDown(PointerEventData eventData) {
@@ -47,46 +47,46 @@ namespace OpenTibiaUnity.Modules.Console
                 return;
 
             var linkInfo = textInput.textComponent.textInfo.linkInfo[linkIndex];
-            int linkID;
-            if (!int.TryParse(linkInfo.GetLinkID(), out linkID))
+            int linkId;
+            if (!int.TryParse(linkInfo.GetLinkID(), out linkId))
                 return;
             
             var linkText = linkInfo.GetLinkText();
-            var channelMessage = m_History.Find((x) => x.GetHashCode() == linkID);
+            var channelMessage = _history.Find((x) => x.GetHashCode() == linkId);
 
             if (eventData.button == PointerEventData.InputButton.Left) {
                 
             } else if (eventData.button == PointerEventData.InputButton.Right) {
                 var mousePosition = new Vector3(eventData.position.x, Screen.height - eventData.position.y);
-                m_ConsoleModule.CreateChannelMessageContextMenu(channelMessage, textInput).Display(mousePosition);
+                _consoleModule.CreateChannelMessageContextMenu(channelMessage, textInput).Display(mousePosition);
             }
         }
 
-        internal void AddChannelMessage(ChannelMessage channelMessage) {
+        public void AddChannelMessage(ChannelMessage channelMessage) {
             // check for history
             // we can support up to 200 message, afterwhich we keep removing
             string text = textInput.text;
-            if (m_History.Count >= Constants.MaxTalkHistory) {
-                var oldMessage = m_History[0];
-                m_History.RemoveAt(0);
+            if (_history.Count >= Constants.MaxTalkHistory) {
+                var oldMessage = _history[0];
+                _history.RemoveAt(0);
 
                 var hashCode = oldMessage.GetHashCode();
                 var linkInfo = System.Array.Find(textInput.textComponent.textInfo.linkInfo, (link) => link.GetLinkID() == hashCode.ToString());
                 text = text.Substring(linkInfo.linkTextfirstCharacterIndex + linkInfo.linkTextLength);
             }
 
-            m_History.Add(channelMessage);
+            _history.Add(channelMessage);
             if (text.Length > 0)
                 text += '\n';
             text += FormatChannelMessage(channelMessage);
             textInput.text = text;
         }
 
-        internal void ResetTalkHistory(IEnumerable<ChannelMessage> talkHistory) {
-            m_History = talkHistory.ToList();
+        public void ResetTalkHistory(IEnumerable<ChannelMessage> talkHistory) {
+            _history = talkHistory.ToList();
 
             string text = "";
-            foreach (var channelMessage in m_History) {
+            foreach (var channelMessage in _history) {
                 if (text.Length > 0)
                     text += '\n';
                 text += FormatChannelMessage(channelMessage);
@@ -94,7 +94,7 @@ namespace OpenTibiaUnity.Modules.Console
             textInput.text = text;
         }
 
-        internal string FormatChannelMessage(ChannelMessage channelMessage) {
+        public string FormatChannelMessage(ChannelMessage channelMessage) {
             return string.Format("<link=\"{0}\">{1}</link>", channelMessage.GetHashCode().ToString(), channelMessage.RichText);
         }
     }

@@ -1,10 +1,10 @@
 ﻿namespace OpenTibiaUnity.Core.Appearances
 {
-    internal class AppearanceTypeInfo : AppearanceTypeRef
+    public class AppearanceTypeInfo : AppearanceTypeRef
     {
-        internal string Name = null;
+        public string Name = null;
 
-        internal AppearanceTypeInfo(int id, int data, string name) : base(id, data) {
+        public AppearanceTypeInfo(ushort id, int data, string name) : base(id, data) {
             Name = name ?? throw new System.ArgumentNullException("AppearanceTypeInfo.AppearanceTypeInfo: Invalid name.");
         }
     }

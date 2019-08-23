@@ -1,8 +1,8 @@
 ﻿namespace OpenTibiaUnity.Core.Input.StaticAction
 {
-    internal class ChatSelectAll : StaticAction
+    public class ChatSelectAll : StaticAction
     {
-        internal ChatSelectAll(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
+        public ChatSelectAll(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
 
         public override bool Perform(bool repeat = false) {
             TMPro.TMP_InputField inputField = StaticAction.GetSelectedInputField();
@@ -16,7 +16,7 @@
         }
 
         public override IAction Clone() {
-            return new ChatSelectAll(m_ID, m_Label, m_EventMask);
+            return new ChatSelectAll(_id, _label, _eventMask);
         }
     }
 }

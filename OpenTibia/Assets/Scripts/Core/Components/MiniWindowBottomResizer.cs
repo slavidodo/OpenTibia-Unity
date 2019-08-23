@@ -4,44 +4,44 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Core.Components
 {
-    internal class MiniWindowBottomResizer : Base.AbstractComponent,
+    public class MiniWindowBottomResizer : Base.AbstractComponent,
         IPointerDownHandler, IPointerEnterHandler, IPointerExitHandler, IDragHandler, IEndDragHandler
     {
-        private Base.MiniWindow m_MiniWindow = null;
+        private Base.MiniWindow _miniWindow = null;
         protected Base.MiniWindow miniWindow {
             get {
-                if (m_MiniWindow)
-                    return m_MiniWindow;
+                if (_miniWindow)
+                    return _miniWindow;
 
-                m_MiniWindow = transform.parent.GetComponent<Base.MiniWindow>();
-                return m_MiniWindow;
+                _miniWindow = transform.parent.GetComponent<Base.MiniWindow>();
+                return _miniWindow;
             }
         }
         
-        private LayoutElement m_PanelContentLayout = null;
+        private LayoutElement _panelContentLayout = null;
         protected LayoutElement panelContentLayout {
             get {
-                if (m_PanelContentLayout)
-                    return m_PanelContentLayout;
+                if (_panelContentLayout)
+                    return _panelContentLayout;
 
-                m_PanelContentLayout = miniWindow.panelContent.GetComponent<LayoutElement>();
-                return m_PanelContentLayout;
+                _panelContentLayout = miniWindow.panelContent.GetComponent<LayoutElement>();
+                return _panelContentLayout;
             }
         }
 
-        private bool m_DragAllowed = false;
-        private bool m_CursorActivated = false;
-        private bool m_ShouldDeactivateCursor = false;
-        private float m_InitialHeight = 0;
-        private Vector2 m_InitialMousePosition = Vector2.zero;
+        private bool _dragAllowed = false;
+        private bool _cursorActivated = false;
+        private bool _shouldDeactivateCursor = false;
+        private float _initialHeight = 0;
+        private Vector2 _initialMousePosition = Vector2.zero;
         
         void IDragHandler.OnDrag(PointerEventData eventData) {
-            if (!m_DragAllowed)
+            if (!_dragAllowed)
                 return;
 
             // the y decresed the more we go to the bottom
             // thus we must be reverse the sign
-            float deltaY = m_InitialMousePosition.y - eventData.position.y;
+            float deltaY = _initialMousePosition.y - eventData.position.y;
             if (deltaY == 0)
                 return;
             
@@ -53,17 +53,17 @@ namespace OpenTibiaUnity.Core.Components
             float maxHeight = Mathf.Clamp(miniWindow.MaxHeight == -1 ? remainingHeight : miniWindow.MaxHeight, minHeight, remainingHeight);
 
             var sizeDelta = miniWindow.rectTransform.sizeDelta;
-            miniWindow.rectTransform.sizeDelta = new Vector2(sizeDelta.x, Mathf.Clamp(m_InitialHeight + deltaY, minHeight, maxHeight));
+            miniWindow.rectTransform.sizeDelta = new Vector2(sizeDelta.x, Mathf.Clamp(_initialHeight + deltaY, minHeight, maxHeight));
         }
 
         void IEndDragHandler.OnEndDrag(PointerEventData eventData) {
-            if (m_DragAllowed) {
-                m_DragAllowed = false;
-                m_InitialHeight = 0;
+            if (_dragAllowed) {
+                _dragAllowed = false;
+                _initialHeight = 0;
 
-                if (m_ShouldDeactivateCursor) {
-                    m_ShouldDeactivateCursor = false;
-                    m_CursorActivated = false;
+                if (_shouldDeactivateCursor) {
+                    _shouldDeactivateCursor = false;
+                    _cursorActivated = false;
                     PopResizeCursor();
                 }
             }
@@ -71,21 +71,21 @@ namespace OpenTibiaUnity.Core.Components
         
         void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData) {
             if (miniWindow.Resizable) {
-                m_ShouldDeactivateCursor = false;
-                m_CursorActivated = true;
+                _shouldDeactivateCursor = false;
+                _cursorActivated = true;
                 PushResizeCursor();
             }
         }
 
         void IPointerExitHandler.OnPointerExit(PointerEventData eventData) {
-            if (m_DragAllowed) {
-                m_ShouldDeactivateCursor = true;
+            if (_dragAllowed) {
+                _shouldDeactivateCursor = true;
                 return;
             }
 
-            if (m_CursorActivated) {
-                m_CursorActivated = false;
-                m_ShouldDeactivateCursor = false;
+            if (_cursorActivated) {
+                _cursorActivated = false;
+                _shouldDeactivateCursor = false;
                 PopResizeCursor();
             }
         }
@@ -94,9 +94,9 @@ namespace OpenTibiaUnity.Core.Components
             if (!miniWindow.Resizable)
                 return;
 
-            m_DragAllowed = true;
-            m_InitialMousePosition = eventData.position;
-            m_InitialHeight = miniWindow.rectTransform.sizeDelta.y;
+            _dragAllowed = true;
+            _initialMousePosition = eventData.position;
+            _initialHeight = miniWindow.rectTransform.sizeDelta.y;
         }
 
         private void PushResizeCursor() {

@@ -2,39 +2,39 @@
 
 namespace OpenTibiaUnity.Core.Communication.Login
 {
-    internal class CharacterList
+    public class CharacterList
     {
-        internal struct World
+        public struct World
         {
-            public int ID;
+            public int _id;
             public string Name;
             public string HostName;
             public int Port;
             public bool Preview;
         }
 
-        internal struct Character
+        public struct Character
         {
-            public int WorldID;
+            public int World_id;
             public string Name;
         }
 
-        internal List<World> Worlds { get; private set; } = new List<World>();
-        internal List<Character> Characters { get; private set; } = new List<Character>();
+        public List<World> Worlds { get; private set; } = new List<World>();
+        public List<Character> Characters { get; private set; } = new List<Character>();
 
-        internal int AccountState { get; private set; }
-        internal bool IsPremium { get; private set; }
-        internal bool InfinitePremium { get; private set; }
+        public int AccountState { get; private set; }
+        public bool IsPremium { get; private set; }
+        public bool InfinitePremium { get; private set; }
 
-        internal ushort PremiumDays { get; private set; }
-        internal uint PremiumTimeStamp { get; private set; }
+        public ushort PremiumDays { get; private set; }
+        public uint PremiumTimeStamp { get; private set; }
 
-        internal void Parse(Internal.ByteArray message) {
+        public void Parse(Internal.ByteArray message) {
             if (OpenTibiaUnity.GameManager.ClientVersion >= 1010) {
                 byte worlds = message.ReadUnsignedByte();
                 for (int i = 0; i < worlds; i++) {
                     var world = new World {
-                        ID = message.ReadUnsignedByte(),
+                        _id = message.ReadUnsignedByte(),
                         Name = message.ReadString(),
                         HostName = message.ReadString(),
                         Port = message.ReadUnsignedShort(),
@@ -46,7 +46,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
                 byte characters = message.ReadUnsignedByte();
                 for (int i = 0; i < characters; i++) {
                     Character character = new Character {
-                        WorldID = message.ReadUnsignedByte(),
+                        World_id = message.ReadUnsignedByte(),
                         Name = message.ReadString()
                     };
                     Characters.Add(character);
@@ -62,7 +62,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
                     var world = GetOrCreateWorld(worldName, worldIpLong, worldPort);
                     var character = new Character {
                         Name = characterName,
-                        WorldID = world.ID
+                        World_id = world._id
                     };
                     Characters.Add(character);
                 }
@@ -100,7 +100,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
             }
 
             World newWorld = new World {
-                ID = Worlds.Count,
+                _id = Worlds.Count,
                 Name = name,
                 HostName = ipAddress,
                 Port = port,
@@ -111,11 +111,11 @@ namespace OpenTibiaUnity.Core.Communication.Login
             return newWorld;
         }
 
-        internal World FindWorld(int id) {
-            return Worlds.Find((x) => x.ID == id);
+        public World FindWorld(int id) {
+            return Worlds.Find((x) => x._id == id);
         }
 
-        internal World FindWorld(string name) {
+        public World FindWorld(string name) {
             return Worlds.Find((x) => x.Name == name);
         }
     }

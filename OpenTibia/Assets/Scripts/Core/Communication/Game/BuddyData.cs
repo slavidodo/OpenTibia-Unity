@@ -2,10 +2,10 @@
 
 namespace OpenTibiaUnity.Core.Communication.Game
 {
-    internal partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame : Internal.Protocol
     {
         private void ParseBuddyAdd(Internal.ByteArray message) {
-            uint creatureID = message.ReadUnsignedInt();
+            uint creature_id = message.ReadUnsignedInt();
             string name = message.ReadString();
             string desc = string.Empty;
             uint icon = 0;
@@ -29,12 +29,12 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseBuddyState(Internal.ByteArray message) {
-            uint creatureID = message.ReadUnsignedInt();
+            uint creature_id = message.ReadUnsignedInt();
             byte status = message.ReadUnsignedByte();
         }
 
         private void ParseBuddyLogout(Internal.ByteArray message) {
-            uint creatureID = message.ReadUnsignedInt();
+            uint creature_id = message.ReadUnsignedInt();
         }
 
         private void ParseBuddyGroupData(Internal.ByteArray message) {

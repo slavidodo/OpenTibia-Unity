@@ -1,17 +1,17 @@
 ﻿namespace OpenTibiaUnity.Core.DailyReward.Types
 {
-    internal class Object : Item
+    public class Object : Item
     {
-        ushort m_ID;
-        string m_Name;
-        uint m_Weight;
-        int m_Amount;
+        ushort _id;
+        string _name;
+        uint _weight;
+        int _amount;
 
         public Object(ushort id, string name, uint weight, int amount) {
-            m_ID = id;
-            m_Name = name;
-            m_Weight = weight;
-            m_Amount = amount;
+            _id = id;
+            _name = name;
+            _weight = weight;
+            _amount = amount;
         }
     }
 }

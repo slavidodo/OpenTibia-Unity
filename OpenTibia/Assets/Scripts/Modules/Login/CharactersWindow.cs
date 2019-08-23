@@ -8,9 +8,9 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Login
 {
-    internal class CharactersWindow : Core.Components.Base.Window
+    public class CharactersWindow : Core.Components.Base.Window
     {
-        internal class ClosedEvent : UnityEvent { }
+        public class ClosedEvent : UnityEvent { }
 
         /**
          * Notes:
@@ -22,54 +22,54 @@ namespace OpenTibiaUnity.Modules.Login
          */ 
 
         // Serializable Fields
-        [SerializeField] private OTU_ScrollRect m_CharactersScrollRect = null;
-        [SerializeField] private ToggleGroup m_CharactersToggleGroup = null;
-        [SerializeField] private Button m_OKButton = null;
-        [SerializeField] private Button m_CancelButton = null;
-        [SerializeField] private Button m_GetPremiumLegacyButton = null;
-        [SerializeField] private Button m_GetPremiumV12Button = null;
+        [SerializeField] private OTU_ScrollRect _charactersScrollRect = null;
+        [SerializeField] private ToggleGroup _charactersToggleGroup = null;
+        [SerializeField] private Button _oKButton = null;
+        [SerializeField] private Button _cancelButton = null;
+        [SerializeField] private Button _getPremiumLegacyButton = null;
+        [SerializeField] private Button _getPremiumV12Button = null;
 
-        [SerializeField] private TMPro.TextMeshProUGUI m_AccountStatusLabel = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _accountStatusLabel = null;
 
-        [SerializeField] private GameObject m_HorizontalSeparator1 = null;
-        [SerializeField] private GameObject m_PremiumBenefitsLabel = null;
-        [SerializeField] private GameObject m_PremiumBenefitsPanel = null;
-        [SerializeField] private GameObject m_AndManyMoreLabel = null;
+        [SerializeField] private GameObject _horizontalSeparator1 = null;
+        [SerializeField] private GameObject _premiumBenefitsLabel = null;
+        [SerializeField] private GameObject _premiumBenefitsPanel = null;
+        [SerializeField] private GameObject _andManyMoreLabel = null;
 
         // Fields
-        protected string m_SessionKey = null;
-        protected string m_AccountName = null;
-        protected string m_Password = null;
-        protected string m_Token = null;
-        protected CharacterList m_CharactersList = null;
-        protected bool m_PopupIsAdvice = false;
+        protected string _sessionKey = null;
+        protected string _accountName = null;
+        protected string _password = null;
+        protected string _token = null;
+        protected CharacterList _charactersList = null;
+        protected bool _popupIsAdvice = false;
 
-        protected Playdata m_Playdata = null;
-        protected Session m_Session = null;
+        protected Playdata _playdata = null;
+        protected Session _session = null;
 
-        protected int m_SelectedCharacterIndex = -1;
-        protected Core.Components.PopupWindow m_PopupWindow = null;
+        protected int _selectedCharacterIndex = -1;
+        protected Core.Components.PopupWindow _popupWindow = null;
         
         protected override void Start() {
             base.Start();
 
             // setup input
-            OpenTibiaUnity.InputHandler.AddKeyDownListener(Core.Utility.EventImplPriority.High, OnKeyDown);
-            OpenTibiaUnity.InputHandler.AddKeyUpListener(Core.Utility.EventImplPriority.High, OnKeyUp);
+            OpenTibiaUnity.InputHandler.AddKeyDownListener(Core.Utils.EventImplPriority.High, OnKeyDown);
+            OpenTibiaUnity.InputHandler.AddKeyUpListener(Core.Utils.EventImplPriority.High, OnKeyUp);
 
             // setup events
-            m_OKButton.onClick.AddListener(OnOkButtonClick);
-            m_CancelButton.onClick.AddListener(OnCancelButtonClick);
-            m_GetPremiumLegacyButton.onClick.AddListener(OnGetPremiumButtonClicked);
-            m_GetPremiumV12Button.onClick.AddListener(OnGetPremiumButtonClicked);
+            _oKButton.onClick.AddListener(OnOkButtonClick);
+            _cancelButton.onClick.AddListener(OnCancelButtonClick);
+            _getPremiumLegacyButton.onClick.AddListener(OnGetPremiumButtonClicked);
+            _getPremiumV12Button.onClick.AddListener(OnGetPremiumButtonClicked);
             
             // setup popup message
-            m_PopupWindow = Instantiate(OpenTibiaUnity.GameManager.PopupWindowPrefab, transform.parent);
-            m_PopupWindow.name = "PopupWindow_CharactersWindow";
-            m_PopupWindow.HideWindow();
+            _popupWindow = Instantiate(OpenTibiaUnity.GameManager.PopupWindowPrefab, transform.parent);
+            _popupWindow.name = "PopupWindow_CharactersWindow";
+            _popupWindow.Hide();
 
-            m_PopupWindow.onOKClick.AddListener(OnPopupOkClick);
-            m_PopupWindow.onCancelClick.AddListener(OnPopupCancelClick);
+            _popupWindow.onOKClick.AddListener(OnPopupOkClick);
+            _popupWindow.onCancelClick.AddListener(OnPopupCancelClick);
 
             // setup game events
             OpenTibiaUnity.GameManager.onGameStart.AddListener(OnGameStart);
@@ -118,10 +118,10 @@ namespace OpenTibiaUnity.Modules.Login
         }
 
         protected void OnOkButtonClick() {
-            if (m_SelectedCharacterIndex < 0 || m_SelectedCharacterIndex >= m_CharactersScrollRect.content.childCount)
+            if (_selectedCharacterIndex < 0 || _selectedCharacterIndex >= _charactersScrollRect.content.childCount)
                 return;
 
-            var child = m_CharactersScrollRect.content.GetChild(m_SelectedCharacterIndex);
+            var child = _charactersScrollRect.content.GetChild(_selectedCharacterIndex);
             var characterPanel = child.GetComponent<CharacterPanel>();
 
             string characterName;
@@ -129,19 +129,19 @@ namespace OpenTibiaUnity.Modules.Login
             string worldAddress;
             int worldPort;
 
-            if (m_Playdata != null) {
-                var character = m_Playdata.Characters[m_SelectedCharacterIndex];
+            if (_playdata != null) {
+                var character = _playdata.Characters[_selectedCharacterIndex];
                 characterName = character.Name;
 
-                var world = m_Playdata.FindWorld(character.WorldID);
+                var world = _playdata.FindWorld(character.World_id);
                 worldName = world.Name;
                 worldAddress = world.GetAddress(OpenTibiaUnity.GameManager.ClientVersion, OpenTibiaUnity.GameManager.BuildVersion);
                 worldPort = world.GetPort(OpenTibiaUnity.GameManager.ClientVersion, OpenTibiaUnity.GameManager.BuildVersion);
             } else {
-                var character = m_CharactersList.Characters[m_SelectedCharacterIndex];
+                var character = _charactersList.Characters[_selectedCharacterIndex];
                 characterName = character.Name;
 
-                var world = m_CharactersList.FindWorld(character.WorldID);
+                var world = _charactersList.FindWorld(character.World_id);
                 worldName = world.Name;
                 worldAddress = world.HostName;
                 worldPort = world.Port;
@@ -151,7 +151,7 @@ namespace OpenTibiaUnity.Modules.Login
         }
 
         protected void OnCancelButtonClick() {
-            CloseWindow();
+            Close();
         }
 
         protected void OnGetPremiumButtonClicked() {
@@ -160,10 +160,10 @@ namespace OpenTibiaUnity.Modules.Login
         }
 
         protected void OnPopupOkClick() {
-            ShowWindow();
+            Show();
 
-            if (m_PopupIsAdvice) {
-                m_PopupIsAdvice = false;
+            if (_popupIsAdvice) {
+                _popupIsAdvice = false;
                 
                 if (OpenTibiaUnity.ProtocolGame != null && OpenTibiaUnity.ProtocolGame.IsGameRunning)
                     SwitchToGameplayCanvas();
@@ -179,7 +179,7 @@ namespace OpenTibiaUnity.Modules.Login
             protocolGame.Disconnect();
             OpenTibiaUnity.ProtocolGame = null;
 
-            ShowWindow();
+            Show();
         }
 
         protected void OnProtocolGameConnectionError(string message, bool disconnected) {
@@ -203,7 +203,7 @@ namespace OpenTibiaUnity.Modules.Login
 
         protected void OnProtocolGameLoginAdvice(string advice) {
             PopupMessage("For your information", advice);
-            m_PopupIsAdvice = true;
+            _popupIsAdvice = true;
         }
 
         protected void OnProtocolGameLoginWait(string message, int time) {
@@ -220,18 +220,18 @@ namespace OpenTibiaUnity.Modules.Login
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             RemoveProtocolGameListeners(protocolGame);
 
-            if (m_PopupWindow.Visible) {
-                if (m_PopupIsAdvice)
+            if (_popupWindow.Visible) {
+                if (_popupIsAdvice)
                     return;
                 else
-                    m_PopupWindow.CloseWindow();
+                    _popupWindow.Close();
             }
 
             SwitchToGameplayCanvas();
         }
 
         protected void OnProcessChangeCharacter() {
-            OpenWindow();
+            Open();
         }
 
         protected void OnGameEnd() {
@@ -243,16 +243,16 @@ namespace OpenTibiaUnity.Modules.Login
         }
 
 
-        internal void Setup(string sessionKey, string accountName, string password, string token, CharacterList characterList) {
-            m_SessionKey = sessionKey;
-            m_AccountName = accountName;
-            m_Password = password;
-            m_Token = token;
-            m_CharactersList = characterList;
-            m_Session = null;
-            m_Playdata = null;
+        public void Setup(string sessionKey, string accountName, string password, string token, CharacterList characterList) {
+            _sessionKey = sessionKey;
+            _accountName = accountName;
+            _password = password;
+            _token = token;
+            _charactersList = characterList;
+            _session = null;
+            _playdata = null;
 
-            var content = m_CharactersScrollRect.content;
+            var content = _charactersScrollRect.content;
             foreach (Transform child in content)
                 Destroy(child.gameObject);
             
@@ -263,24 +263,24 @@ namespace OpenTibiaUnity.Modules.Login
                 var characterPanel = Instantiate(ModulesManager.Instance.CharacterPanelPrefab);
                 characterPanel.transform.SetParent(content);
                 characterPanel.characterName.text = character.Name;
-                characterPanel.worldName.text = characterList.FindWorld(character.WorldID).Name;
-                characterPanel.toggleComponent.onValueChanged.AddListener((value) => { if (value) m_SelectedCharacterIndex = characterIndex; });
-                characterPanel.toggleComponent.group = m_CharactersToggleGroup;
+                characterPanel.worldName.text = characterList.FindWorld(character.World_id).Name;
+                characterPanel.toggleComponent.onValueChanged.AddListener((value) => { if (value) _selectedCharacterIndex = characterIndex; });
+                characterPanel.toggleComponent.group = _charactersToggleGroup;
                 characterPanel.onDoubleClick.AddListener(OnOkButtonClick);
             }
 
-            m_SelectedCharacterIndex = -1;
+            _selectedCharacterIndex = -1;
         }
 
-        internal void Setup(Session session, Playdata playData) {
-            m_Session = session;
-            m_Playdata = playData;
-            m_SessionKey = null;
-            m_AccountName = null;
-            m_Password = null;
-            m_Token = null;
+        public void Setup(Session session, Playdata playData) {
+            _session = session;
+            _playdata = playData;
+            _sessionKey = null;
+            _accountName = null;
+            _password = null;
+            _token = null;
 
-            var content = m_CharactersScrollRect.content;
+            var content = _charactersScrollRect.content;
             foreach (Transform child in content)
                 Destroy(child.gameObject);
             
@@ -294,15 +294,15 @@ namespace OpenTibiaUnity.Modules.Login
                 characterPanel.transform.SetParent(content);
                 characterPanel.characterName.text = character.Name;
 
-                var world = playData.FindWorld(character.WorldID);
+                var world = playData.FindWorld(character.World_id);
 
                 characterPanel.worldName.text = string.Format("{0}\n({1})", world.Name, world.GetPvPTypeDescription());
-                characterPanel.toggleComponent.onValueChanged.AddListener((value) => { if (value) m_SelectedCharacterIndex = characterIndex; });
-                characterPanel.toggleComponent.group = m_CharactersToggleGroup;
+                characterPanel.toggleComponent.onValueChanged.AddListener((value) => { if (value) _selectedCharacterIndex = characterIndex; });
+                characterPanel.toggleComponent.group = _charactersToggleGroup;
                 characterPanel.onDoubleClick.AddListener(OnOkButtonClick);
             }
 
-            m_SelectedCharacterIndex = -1;
+            _selectedCharacterIndex = -1;
         }
 
         protected void AddProtocolGameListeners(Core.Communication.Game.ProtocolGame protocolGame) {
@@ -327,33 +327,33 @@ namespace OpenTibiaUnity.Modules.Login
         }
 
         protected void SelectFirstCharacter() {
-            if (m_CharactersScrollRect.content.childCount > 0) {
-                var child = m_CharactersScrollRect.content.GetChild(0);
+            if (_charactersScrollRect.content.childCount > 0) {
+                var child = _charactersScrollRect.content.GetChild(0);
                 var characterPanel = child.GetComponent<CharacterPanel>();
                 characterPanel.Select();
             }
         }
 
         protected void SelectNextCharacter() {
-            if (m_CharactersScrollRect.content.childCount > 1) {
-                m_SelectedCharacterIndex = (++m_SelectedCharacterIndex) % m_CharactersScrollRect.content.childCount;
-                var child = m_CharactersScrollRect.content.GetChild(m_SelectedCharacterIndex);
+            if (_charactersScrollRect.content.childCount > 1) {
+                _selectedCharacterIndex = (++_selectedCharacterIndex) % _charactersScrollRect.content.childCount;
+                var child = _charactersScrollRect.content.GetChild(_selectedCharacterIndex);
                 var characterPanel = child.GetComponent<CharacterPanel>();
                 characterPanel.Select();
             }
         }
 
         protected void SelectPreviousCharacter() {
-            if (m_CharactersScrollRect.content.childCount > 1) {
-                if (m_SelectedCharacterIndex <= 0)
-                    m_SelectedCharacterIndex = m_CharactersScrollRect.content.childCount - 1;
+            if (_charactersScrollRect.content.childCount > 1) {
+                if (_selectedCharacterIndex <= 0)
+                    _selectedCharacterIndex = _charactersScrollRect.content.childCount - 1;
                 else
-                    m_SelectedCharacterIndex = (m_SelectedCharacterIndex - 1) % m_CharactersScrollRect.content.childCount;
+                    _selectedCharacterIndex = (_selectedCharacterIndex - 1) % _charactersScrollRect.content.childCount;
                 
-                var child = m_CharactersScrollRect.content.GetChild(m_SelectedCharacterIndex);
+                var child = _charactersScrollRect.content.GetChild(_selectedCharacterIndex);
                 var characterPanel = child.GetComponent<CharacterPanel>();
                 characterPanel.Select();
-            } else if (m_CharactersScrollRect.content.childCount > 0 && m_SelectedCharacterIndex != 0) {
+            } else if (_charactersScrollRect.content.childCount > 0 && _selectedCharacterIndex != 0) {
                 SelectFirstCharacter();
             }
         }
@@ -372,31 +372,31 @@ namespace OpenTibiaUnity.Modules.Login
             int clientVersion = OpenTibiaUnity.GameManager.ClientVersion;
 
             bool premium;
-            if (m_Playdata != null) {
-                premium = m_Session.IsPremium;
+            if (_playdata != null) {
+                premium = _session.IsPremium;
                 bool showV12Button = !premium && clientVersion >= 1200;
-                m_GetPremiumLegacyButton.gameObject.SetActive(!premium && clientVersion < 1200);
-                m_GetPremiumV12Button.gameObject.SetActive(showV12Button);
-                m_HorizontalSeparator1.gameObject.SetActive(!premium && clientVersion >= 1148);
-                m_PremiumBenefitsLabel.gameObject.SetActive(!premium && clientVersion >= 1148);
-                m_PremiumBenefitsPanel.gameObject.SetActive(!premium && clientVersion >= 1148);
-                m_AndManyMoreLabel.gameObject.SetActive(!premium && clientVersion >= 1148);
+                _getPremiumLegacyButton.gameObject.SetActive(!premium && clientVersion < 1200);
+                _getPremiumV12Button.gameObject.SetActive(showV12Button);
+                _horizontalSeparator1.gameObject.SetActive(!premium && clientVersion >= 1148);
+                _premiumBenefitsLabel.gameObject.SetActive(!premium && clientVersion >= 1148);
+                _premiumBenefitsPanel.gameObject.SetActive(!premium && clientVersion >= 1148);
+                _andManyMoreLabel.gameObject.SetActive(!premium && clientVersion >= 1148);
 
-                m_AccountStatusLabel.text = string.Format("  <sprite=\"PremiumStatus\" index={0}> {1} Account", premium ? 1 : 0, premium ? "Premium" : "Free");
+                _accountStatusLabel.text = string.Format("  <sprite=\"PremiumStatus\" index={0}> {1} Account", premium ? 1 : 0, premium ? "Premium" : "Free");
             } else {
-                premium = m_CharactersList.IsPremium;
-                m_GetPremiumLegacyButton.gameObject.SetActive(!m_CharactersList.IsPremium && clientVersion >= 1098);
-                m_GetPremiumV12Button.gameObject.SetActive(false);
-                m_HorizontalSeparator1.gameObject.SetActive(false);
-                m_PremiumBenefitsLabel.gameObject.SetActive(false);
-                m_PremiumBenefitsPanel.gameObject.SetActive(false);
-                m_AndManyMoreLabel.gameObject.SetActive(false);
+                premium = _charactersList.IsPremium;
+                _getPremiumLegacyButton.gameObject.SetActive(!_charactersList.IsPremium && clientVersion >= 1098);
+                _getPremiumV12Button.gameObject.SetActive(false);
+                _horizontalSeparator1.gameObject.SetActive(false);
+                _premiumBenefitsLabel.gameObject.SetActive(false);
+                _premiumBenefitsPanel.gameObject.SetActive(false);
+                _andManyMoreLabel.gameObject.SetActive(false);
 
-                m_AccountStatusLabel.text = string.Format("  {0} Account", premium ? "Premium" : "Free");
-                m_CharactersScrollRect.GetComponent<LayoutElement>().preferredHeight = 250;
+                _accountStatusLabel.text = string.Format("  {0} Account", premium ? "Premium" : "Free");
+                _charactersScrollRect.GetComponent<LayoutElement>().preferredHeight = 250;
             }
 
-            var scrollRectLayoutElement = m_CharactersScrollRect.GetComponent<LayoutElement>();
+            var scrollRectLayoutElement = _charactersScrollRect.GetComponent<LayoutElement>();
             if (premium) {
                 scrollRectLayoutElement.preferredHeight = (clientVersion < 1200) ? 250 : 300;
             } else {
@@ -407,17 +407,17 @@ namespace OpenTibiaUnity.Modules.Login
         }
         
         protected void PopupMessage(string title, string message, PopupMenuType popupType = PopupMenuType.OK, TMPro.TextAlignmentOptions alignment = TMPro.TextAlignmentOptions.MidlineGeoAligned) {
-            m_PopupWindow.ShowWindow();
+            _popupWindow.Show();
 
-            m_PopupWindow.PopupType = popupType;
+            _popupWindow.PopupType = popupType;
 
-            m_PopupWindow.SetTitle(title);
-            m_PopupWindow.SetMessage(message, 500, 250);
-            m_PopupWindow.SetMessageAlignment(alignment);
+            _popupWindow.SetTitle(title);
+            _popupWindow.SetMessage(message, 500, 250);
+            _popupWindow.SetMessageAlignment(alignment);
         }
 
         protected async void DoEnterGame(string characterName, string worldAddress, string worldName, int worldPort) {
-            CloseWindow();
+            Close();
 
             var gameManager = OpenTibiaUnity.GameManager;
             if (gameManager.IsLoadingClientAssets) {
@@ -449,13 +449,13 @@ namespace OpenTibiaUnity.Modules.Login
 
             var protocolGame = new Core.Communication.Game.ProtocolGame();
 
-            if (m_Session != null) {
-                protocolGame.SessionKey = m_Session.SessionKey;
+            if (_session != null) {
+                protocolGame.SessionKey = _session.SessionKey;
             } else {
-                protocolGame.SessionKey = m_SessionKey;
-                protocolGame.AccountName = m_AccountName;
-                protocolGame.Password = m_Password;
-                protocolGame.Token = m_Token;
+                protocolGame.SessionKey = _sessionKey;
+                protocolGame.AccountName = _accountName;
+                protocolGame.Password = _password;
+                protocolGame.Token = _token;
             }
 
             protocolGame.CharacterName = characterName;

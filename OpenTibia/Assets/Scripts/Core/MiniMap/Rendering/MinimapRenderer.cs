@@ -3,37 +3,37 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.MiniMap.Rendering
 {
-    internal sealed class MiniMapRenderer
+    public sealed class MiniMapRenderer
     {
-        private int m_Zoom = 0;
-        private float m_ZoomScale = 1f;
+        private int _zoom = 0;
+        private float _zoomScale = 1f;
 
-        private Rect m_PositionRect = Rect.zero;
+        private Rect _positionRect = Rect.zero;
 
-        internal int m_PositionX = 0;
-        internal int m_PositionY = 0;
-        internal int m_PositionZ = 0;
+        public int _positionX = 0;
+        public int _positionY = 0;
+        public int _positionZ = 0;
 
-        internal int PositionX {
-            get { return m_PositionX; }
+        public int PositionX {
+            get { return _positionX; }
             set {
-                m_PositionX = Mathf.Clamp(value, Constants.MapMinX, Constants.MapMaxX);
+                _positionX = Mathf.Clamp(value, Constants.MapMinX, Constants.MapMaxX);
             }
         }
-        internal int PositionY {
-            get { return m_PositionY; }
+        public int PositionY {
+            get { return _positionY; }
             set {
-                m_PositionY = Mathf.Clamp(value, Constants.MapMinY, Constants.MapMaxY);
+                _positionY = Mathf.Clamp(value, Constants.MapMinY, Constants.MapMaxY);
             }
         }
-        internal int PositionZ {
-            get { return m_PositionZ; }
+        public int PositionZ {
+            get { return _positionZ; }
             set {
-                m_PositionZ = Mathf.Clamp(value, Constants.MapMinZ, Constants.MapMaxZ);
+                _positionZ = Mathf.Clamp(value, Constants.MapMinZ, Constants.MapMaxZ);
             }
         }
 
-        internal Vector3Int Position {
+        public Vector3Int Position {
             get { return new Vector3Int(PositionX, PositionY, PositionZ); }
             set {
                 PositionX = value.x;
@@ -45,24 +45,24 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
         private MiniMapStorage MiniMapStorage { get { return OpenTibiaUnity.MiniMapStorage; } }
         private WorldMap.WorldMapStorage WorldMapStorage { get { return OpenTibiaUnity.WorldMapStorage; } }
 
-        internal int Zoom {
-            get { return m_Zoom; }
+        public int Zoom {
+            get { return _zoom; }
             set {
                 value = Mathf.Clamp(value, Constants.MiniMapSideBarZoomMin, Constants.MiniMapSideBarZoomMax);
-                if (m_Zoom != value) {
-                    m_Zoom = value;
-                    m_ZoomScale = Mathf.Pow(2, m_Zoom);
+                if (_zoom != value) {
+                    _zoom = value;
+                    _zoomScale = Mathf.Pow(2, _zoom);
                 }
             }
         }
 
-        internal MiniMapRenderer() {
+        public MiniMapRenderer() {
             MiniMapStorage.onPositionChange.AddListener((_, position, __) => {
                 Position = position;
             });
         }
 
-        internal RenderError Render(Material material) {
+        public RenderError Render(Material material) {
             if (MiniMapStorage == null || !OpenTibiaUnity.GameManager.IsGameRunning || !WorldMapStorage.Valid)
                 return RenderError.MiniMapNotValid;
 
@@ -75,29 +75,29 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
             }
 
             Vector2 screenZoom = new Vector2() {
-                x = Screen.width * m_ZoomScale / Constants.MiniMapSideBarViewWidth,
-                y = Screen.height * m_ZoomScale / Constants.MiniMapSideBarViewHeight,
+                x = Screen.width * _zoomScale / Constants.MiniMapSideBarViewWidth,
+                y = Screen.height * _zoomScale / Constants.MiniMapSideBarViewHeight,
             };
 
             Vector2 zoom = new Vector2() {
-                x = Constants.MiniMapSideBarViewWidth / m_ZoomScale,
-                y = Constants.MiniMapSideBarViewHeight / m_ZoomScale
+                x = Constants.MiniMapSideBarViewWidth / _zoomScale,
+                y = Constants.MiniMapSideBarViewHeight / _zoomScale
             };
 
-            m_PositionRect.x = PositionX - zoom.x / 2;
-            m_PositionRect.y = PositionY - zoom.y / 2;
-            m_PositionRect.width = zoom.x;
-            m_PositionRect.height = zoom.y;
+            _positionRect.x = PositionX - zoom.x / 2;
+            _positionRect.y = PositionY - zoom.y / 2;
+            _positionRect.width = zoom.x;
+            _positionRect.height = zoom.y;
             
             var drawnSectors = new List<MiniMapSector>();
             
             Vector3Int position = Vector3Int.zero;
 
-            var transformationMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(m_ZoomScale, m_ZoomScale, 1));
+            var transformationMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(_zoomScale, _zoomScale, 1));
             for (int i = 0; i < 4; i++) {
                 position.Set(
-                    (int)(m_PositionRect.x + i % 2 * m_PositionRect.width),
-                    (int)(m_PositionRect.y + (int)(i / 2) * m_PositionRect.height),
+                    (int)(_positionRect.x + i % 2 * _positionRect.width),
+                    (int)(_positionRect.y + (int)(i / 2) * _positionRect.height),
                     PositionZ);
             
                 var sector = MiniMapStorage.AcquireSector(position, false);
@@ -105,11 +105,11 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
                     drawnSectors.Add(sector);
 
                     var otherRect = new Rect(sector.SectorX, sector.SectorY, Constants.MiniMapSectorSize, Constants.MiniMapSectorSize);
-                    var intersectingRect = Intersection(m_PositionRect, otherRect);
+                    var intersectingRect = Intersection(_positionRect, otherRect);
 
                     Rect screenRect = new Rect() {
-                        x = (intersectingRect.x - m_PositionRect.x) * screenZoom.x,
-                        y = (intersectingRect.y - m_PositionRect.y) * screenZoom.y,
+                        x = (intersectingRect.x - _positionRect.x) * screenZoom.x,
+                        y = (intersectingRect.y - _positionRect.y) * screenZoom.y,
                         width = intersectingRect.width * screenZoom.x,
                         height = intersectingRect.height * screenZoom.y
                     };
@@ -122,7 +122,7 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
             return RenderError.None;
         }
 
-        internal void TranslatePosition(int x, int y, int z) {
+        public void TranslatePosition(int x, int y, int z) {
             var renderer = OpenTibiaUnity.MiniMapRenderer;
             var scale = 3 * Mathf.Pow(2, Constants.MiniMapSideBarZoomMax - renderer.Zoom);
             renderer.PositionX += (int)(x * scale);
@@ -130,7 +130,7 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
             renderer.PositionZ += z;
         }
 
-        internal static Rect Intersection(Rect r1, Rect r2) {
+        public static Rect Intersection(Rect r1, Rect r2) {
             float r1x = r1.x;
             float r1y = r1.y;
             float r2x = r2.x;

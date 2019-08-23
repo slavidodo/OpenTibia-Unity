@@ -3,24 +3,24 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.WorldMap
 {
-    internal class Field
+    public class Field
     {
-        internal List<Appearances.AppearanceInstance> Effects { get; } = new List<Appearances.AppearanceInstance>();
-        internal Appearances.ObjectInstance[] ObjectsRenderer { get; } = new Appearances.ObjectInstance[Constants.MapSizeW];
-        internal Appearances.ObjectInstance[] ObjectsNetwork { get; } = new Appearances.ObjectInstance[Constants.MapSizeW];
-        internal bool CacheTranslucent { get; private set; } = false;
-        internal bool CacheObjectsDirty { get; private set; } = false;
-        internal bool CacheUnsight { get; private set; } = false;
-        internal bool MiniMapDirty { get; private set; } = false;
+        public List<Appearances.AppearanceInstance> Effects { get; } = new List<Appearances.AppearanceInstance>();
+        public Appearances.ObjectInstance[] ObjectsRenderer { get; } = new Appearances.ObjectInstance[Constants.MapSizeW];
+        public Appearances.ObjectInstance[] ObjectsNetwork { get; } = new Appearances.ObjectInstance[Constants.MapSizeW];
+        public bool CacheTranslucent { get; private set; } = false;
+        public bool CacheObjectsDirty { get; private set; } = false;
+        public bool CacheUnsight { get; private set; } = false;
+        public bool MiniMapDirty { get; private set; } = false;
 
-        internal uint MiniMapColor { get; private set; } = 0;
-        internal int EffectsCount { get; private set; } = 0;
-        internal int ObjectsCount { get; private set; } = 0;
-        internal int MiniMapCost { get; private set; } = int.MaxValue;
+        public uint MiniMapColor { get; private set; } = 0;
+        public int EffectsCount { get; private set; } = 0;
+        public int ObjectsCount { get; private set; } = 0;
+        public int MiniMapCost { get; private set; } = int.MaxValue;
 
-        internal Appearances.ObjectInstance EnvironmentalEffect { get; set; } = null;
+        public Appearances.ObjectInstance EnvironmentalEffect { get; set; } = null;
         
-        internal int GetObjectPriority(Appearances.ObjectInstance objectInstance) {
+        public int GetObjectPriority(Appearances.ObjectInstance objectInstance) {
             Appearances.AppearanceType appearanceType = objectInstance.Type;
             if (appearanceType.IsGround) {
                 return 0;
@@ -30,17 +30,17 @@ namespace OpenTibiaUnity.Core.WorldMap
                 return 2;
             } else if (appearanceType.IsTop) {
                 return 3;
-            } else if (objectInstance.ID == Appearances.AppearanceInstance.Creature) {
+            } else if (objectInstance.Id == Appearances.AppearanceInstance.Creature) {
                 return 4;
             } else {
                 return 5;
             }
         }
 
-        internal Appearances.AppearanceInstance GetEffect(int stackPos) {
+        public Appearances.AppearanceInstance GetEffect(int stackPos) {
             return Effects[stackPos];
         }
-        internal void AppendEffect(Appearances.AppearanceInstance effect) {
+        public void AppendEffect(Appearances.AppearanceInstance effect) {
             if (!effect || (!(effect is Appearances.TextualEffectInstance) && !effect.Type))
                 throw new System.ArgumentException("Field.AppendEffect: Invalid effect.");
 
@@ -55,7 +55,7 @@ namespace OpenTibiaUnity.Core.WorldMap
 
             EffectsCount++;
         }
-        internal void DeleteEffect(int effectIndex) {
+        public void DeleteEffect(int effectIndex) {
             if (effectIndex < 0 || effectIndex >= EffectsCount) // TODO: this has been troublesome for a while, find why..
                 return; //throw new System.ArgumentException("Field.DeleteEffect: index " + effectIndex + " is out of range");
             
@@ -68,7 +68,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             }
         }
 
-        internal Appearances.ObjectInstance PutObject(Appearances.ObjectInstance objectInstance, int stackPos) {
+        public Appearances.ObjectInstance PutObject(Appearances.ObjectInstance objectInstance, int stackPos) {
             if (!objectInstance)
                 return null;
             
@@ -112,7 +112,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             MiniMapDirty = true;
             return otherObject;
         }
-        internal Appearances.ObjectInstance ChangeObject(Appearances.ObjectInstance objectInstance, int stackPos) {
+        public Appearances.ObjectInstance ChangeObject(Appearances.ObjectInstance objectInstance, int stackPos) {
             if (!objectInstance || stackPos < 0 || stackPos >= ObjectsCount) {
                 return null;
             }
@@ -127,12 +127,12 @@ namespace OpenTibiaUnity.Core.WorldMap
             return myObject;
         }
         
-        internal Appearances.ObjectInstance GetObject(int stackPos) {
+        public Appearances.ObjectInstance GetObject(int stackPos) {
             if (stackPos < 0 || stackPos >= ObjectsCount || (stackPos == 0 && ObjectsCount == 0))
                 return null;
             return ObjectsNetwork[stackPos];
         }
-        internal int GetTopLookObject(out Appearances.ObjectInstance topLookObj) {
+        public int GetTopLookObject(out Appearances.ObjectInstance topLookObj) {
             topLookObj = null;
             int index = -1;
 
@@ -149,11 +149,11 @@ namespace OpenTibiaUnity.Core.WorldMap
 
             return index;
         }
-        internal int GetTopLookObject() {
+        public int GetTopLookObject() {
             Appearances.ObjectInstance _;
             return GetTopLookObject(out _);
         }
-        internal int GetTopMultiUseObject(out Appearances.ObjectInstance topMultiUseObj) {
+        public int GetTopMultiUseObject(out Appearances.ObjectInstance topMultiUseObj) {
             if (ObjectsCount > 0) {
                 int index = 0;
                 Appearances.ObjectInstance @object;
@@ -176,11 +176,11 @@ namespace OpenTibiaUnity.Core.WorldMap
             topMultiUseObj = null;
             return -1;
         }
-        internal int GetTopMultiUseObject() {
+        public int GetTopMultiUseObject() {
             Appearances.ObjectInstance _;
             return GetTopMultiUseObject(out _);
         }
-        internal int GetTopUseObject(out Appearances.ObjectInstance @object) {
+        public int GetTopUseObject(out Appearances.ObjectInstance @object) {
             @object = null;
             if (ObjectsCount == 0)
                 return -1;
@@ -202,11 +202,11 @@ namespace OpenTibiaUnity.Core.WorldMap
             @object = ObjectsNetwork[index];
             return index;
         }
-        internal int GetTopUseObject() {
+        public int GetTopUseObject() {
             Appearances.ObjectInstance _;
             return GetTopUseObject(out _);
         }
-        internal int GetTopMoveObject(out Appearances.ObjectInstance topMoveObj) {
+        public int GetTopMoveObject(out Appearances.ObjectInstance topMoveObj) {
             if (ObjectsCount > 0) {
                 int index = 0;
                 for (; index < ObjectsCount - 1; index++) {
@@ -225,11 +225,11 @@ namespace OpenTibiaUnity.Core.WorldMap
             topMoveObj = null;
             return -1;
         }
-        internal int GetTopMoveObject() {
+        public int GetTopMoveObject() {
             Appearances.ObjectInstance _;
             return GetTopMoveObject(out _);
         }
-        internal int GetTopCreatureObject(out Appearances.ObjectInstance topCreatureObj) {
+        public int GetTopCreatureObject(out Appearances.ObjectInstance topCreatureObj) {
             int topLookIndex = GetTopLookObject(out topCreatureObj);
             if (!!topCreatureObj) {
                 if (topCreatureObj.IsCreature) {
@@ -241,12 +241,12 @@ namespace OpenTibiaUnity.Core.WorldMap
             }
             return -1;
         }
-        internal int GetTopCreatureObject() {
+        public int GetTopCreatureObject() {
             Appearances.ObjectInstance _ = null;
             return GetTopCreatureObject(out _);
         }
-        internal int GetCreatureObjectForCreatureID(uint creatureID, out Appearances.ObjectInstance @object) {
-            if (creatureID == 0 || ObjectsCount == 0) {
+        public int GetCreatureObjectForCreature_id(uint creature_id, out Appearances.ObjectInstance @object) {
+            if (creature_id == 0 || ObjectsCount == 0) {
                 @object = null;
                 return -1;
             }
@@ -254,7 +254,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             for (int i = 0; i < ObjectsCount; i++) {
                 var otherObj = ObjectsNetwork[i];
                 var type = otherObj.Type;
-                if (type.IsCreature && otherObj.Data == creatureID) {
+                if (type.IsCreature && otherObj.Data == creature_id) {
                     @object = otherObj;
                     return i;
                 }
@@ -264,7 +264,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             return -1;
         }
 
-        internal void UpdateObjectsCache() {
+        public void UpdateObjectsCache() {
             int index = 0;
             if (ObjectsCount > 0) {
                 // ground, borders, bottom items
@@ -333,7 +333,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             OpenTibiaUnity.WorldMapStorage.CacheUnsight = OpenTibiaUnity.WorldMapStorage.CacheUnsight && !CacheUnsight;
         }
 
-        internal void ResetObjects() {
+        public void ResetObjects() {
             for (int i = 0; i < Constants.MapSizeW; i++) {
                 ObjectsNetwork[i] = null;
                 ObjectsRenderer[i] = null;
@@ -348,7 +348,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             MiniMapDirty = false;
         }
 
-        internal Appearances.ObjectInstance DeleteObject(int stackPos) {
+        public Appearances.ObjectInstance DeleteObject(int stackPos) {
             if (stackPos < 0 || stackPos > ObjectsCount)
                 return null;
 
@@ -365,7 +365,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             return @object;
         }
         
-        internal void Reset() {
+        public void Reset() {
             ResetObjects();
             ResetEffects();
         }
@@ -374,13 +374,13 @@ namespace OpenTibiaUnity.Core.WorldMap
 
         }
 
-        internal void ResetEffects() {
+        public void ResetEffects() {
             Effects.Clear();
             EffectsCount = 0;
             EnvironmentalEffect = null;
         }
         
-        internal void UpdateMiniMap() {
+        public void UpdateMiniMap() {
             if (!MiniMapDirty)
                 return;
 

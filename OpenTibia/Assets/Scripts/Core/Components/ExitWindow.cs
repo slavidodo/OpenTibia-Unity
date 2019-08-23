@@ -3,17 +3,17 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Core.Components
 {
-    internal sealed class ExitWindow : Base.Window
+    public sealed class ExitWindow : Base.Window
     {
-        [SerializeField] Button m_CancelButton = null;
-        [SerializeField] Button m_LogoutButton = null;
-        [SerializeField] Button m_ForceExitButton = null;
+        [SerializeField] Button _cancelButton = null;
+        [SerializeField] Button _logoutButton = null;
+        [SerializeField] Button _forceExitButton = null;
 
         protected override void Start() {
             base.Start();
-            m_CancelButton.onClick.AddListener(OnCancelButtonClicked);
-            m_LogoutButton.onClick.AddListener(OnLogoutButtonClicked);
-            m_ForceExitButton.onClick.AddListener(OnForceExitButtonClicked);
+            _cancelButton.onClick.AddListener(OnCancelButtonClicked);
+            _logoutButton.onClick.AddListener(OnLogoutButtonClicked);
+            _forceExitButton.onClick.AddListener(OnForceExitButtonClicked);
         }
 
         void OnCancelButtonClicked() {

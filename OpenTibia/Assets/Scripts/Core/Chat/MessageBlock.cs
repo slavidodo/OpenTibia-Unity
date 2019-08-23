@@ -5,41 +5,41 @@ namespace OpenTibiaUnity.Core.Chat
 {
     public class MessageBlock : System.IDisposable
     {
-        private bool m_TimerEventRegistered = false;
-        private OnscreenMessageBox m_LastOnscreenBox = null;
+        private bool _timerEventRegistered = false;
+        private OnscreenMessageBox _lastOnscreenBox = null;
 
-        private UnityEngine.Vector3Int m_Position;
-        private List<string> m_TextPieces = new List<string>();
-        private int m_MinTimeForNextOnscreenMessage = 0;
-        private int m_NextOnscreenMessageIndex = 0;
-        public string m_Speaker;
+        private UnityEngine.Vector3Int _position;
+        private List<string> _textPieces = new List<string>();
+        private int _minTimeForNextOnscreenMessage = 0;
+        private int _nextOnscreenMessageIndex = 0;
+        private string _speaker;
 
         public string Speaker {
-            get { return m_Speaker; }
-            set { m_Speaker = value; }
+            get { return _speaker; }
+            set { _speaker = value; }
         }
 
         public MessageBlock(string speaker, UnityEngine.Vector3Int? position) {
-            m_Speaker = speaker ?? throw new System.ArgumentNullException("MessageBlock: speaker is null.");
-            m_Position = position ?? throw new System.Exception("MessageBlock: display position is null.");
+            _speaker = speaker ?? throw new System.ArgumentNullException("MessageBlock: speaker is null.");
+            _position = position ?? throw new System.Exception("MessageBlock: display position is null.");
         }
 
-        #region IDisposable Support
-        private bool m_DisposedValue = false; // To detect redundant calls
+        #region _idisposable Support
+        private bool _disposedValue = false; // To detect redundant calls
 
         public void Dispose(bool disposing) {
-            if (!m_DisposedValue) {
-                if (m_TimerEventRegistered) {
+            if (!_disposedValue) {
+                if (_timerEventRegistered) {
                     OpenTibiaUnity.GameManager.RemoveSecondaryTimerListener(OnSecondaryTimer);
-                    m_TimerEventRegistered = false;
+                    _timerEventRegistered = false;
                 }
 
-                if (disposing && m_LastOnscreenBox != null) {
-                    m_LastOnscreenBox.RemoveMessages();
+                if (disposing && _lastOnscreenBox != null) {
+                    _lastOnscreenBox.RemoveMessages();
                     OpenTibiaUnity.GameManager.WorldMapStorage.InvalidateOnscreenMessages();
                 }
 
-                m_DisposedValue = true;
+                _disposedValue = true;
             }
         }
         
@@ -54,15 +54,15 @@ namespace OpenTibiaUnity.Core.Chat
         #endregion
 
         protected void ShowNextOnscreenMessage() {
-            if (m_NextOnscreenMessageIndex < m_TextPieces.Count) {
+            if (_nextOnscreenMessageIndex < _textPieces.Count) {
                 if (IsNpcInReach()) {
-                    m_LastOnscreenBox = OpenTibiaUnity.WorldMapStorage.AddOnscreenMessage(m_Position, 0, m_Speaker, 0, MessageModeType.NpcFrom,
-                        m_TextPieces[m_NextOnscreenMessageIndex]);
+                    _lastOnscreenBox = OpenTibiaUnity.WorldMapStorage.AddOnscreenMessage(_position, 0, _speaker, 0, MessageModeType.NpcFrom,
+                        _textPieces[_nextOnscreenMessageIndex]);
 
-                    m_MinTimeForNextOnscreenMessage = OpenTibiaUnity.TicksMillis + (int)MessageStorage.s_GetTalkDelay(m_TextPieces[m_NextOnscreenMessageIndex]);
-                    m_NextOnscreenMessageIndex++;
+                    _minTimeForNextOnscreenMessage = OpenTibiaUnity.TicksMillis + (int)MessageStorage.s_GetTalkDelay(_textPieces[_nextOnscreenMessageIndex]);
+                    _nextOnscreenMessageIndex++;
                 } else {
-                    m_NextOnscreenMessageIndex = m_TextPieces.Count;
+                    _nextOnscreenMessageIndex = _textPieces.Count;
                 }
             }
         }
@@ -71,31 +71,31 @@ namespace OpenTibiaUnity.Core.Chat
             if (text == null)
                 throw new System.ArgumentNullException("MessageBlock.AddText: text is null.");
 
-            m_TextPieces.Add(text);
-            MessageModeType mode = m_NextOnscreenMessageIndex == 0 ? MessageModeType.NpcFromStartBlock : MessageModeType.NpcFrom;
+            _textPieces.Add(text);
+            MessageModeType mode = _nextOnscreenMessageIndex == 0 ? MessageModeType.NpcFromStartBlock : MessageModeType.NpcFrom;
 
-            OpenTibiaUnity.ChatStorage.AddChannelMessage(ChatStorage.NpcChannelID, 0, m_Speaker, 0, mode, text);
-            if (m_NextOnscreenMessageIndex == 0 || m_NextOnscreenMessageIndex > 0 && OpenTibiaUnity.TicksMillis > m_MinTimeForNextOnscreenMessage) {
+            OpenTibiaUnity.ChatStorage.AddChannelMessage(ChatStorage.NpcChannel_id, 0, _speaker, 0, mode, text);
+            if (_nextOnscreenMessageIndex == 0 || _nextOnscreenMessageIndex > 0 && OpenTibiaUnity.TicksMillis > _minTimeForNextOnscreenMessage) {
                 ShowNextOnscreenMessage();
-            } else if (!m_TimerEventRegistered) {
+            } else if (!_timerEventRegistered) {
                 OpenTibiaUnity.GameManager.AddSecondaryTimerListener(OnSecondaryTimer);
-                m_TimerEventRegistered = true;
+                _timerEventRegistered = true;
             }
         }
 
         private void OnSecondaryTimer() {
-            if (m_NextOnscreenMessageIndex < m_TextPieces.Count && IsNpcInReach()) {
-                if (OpenTibiaUnity.TicksMillis > m_MinTimeForNextOnscreenMessage) {
+            if (_nextOnscreenMessageIndex < _textPieces.Count && IsNpcInReach()) {
+                if (OpenTibiaUnity.TicksMillis > _minTimeForNextOnscreenMessage) {
                     ShowNextOnscreenMessage();
                 }
             } else {
                 OpenTibiaUnity.GameManager.RemoveSecondaryTimerListener(OnSecondaryTimer);
-                m_TimerEventRegistered = false;
+                _timerEventRegistered = false;
             }
         }
 
         private bool IsNpcInReach() {
-            var creature = OpenTibiaUnity.CreatureStorage.GetCreatureByName(m_Speaker);
+            var creature = OpenTibiaUnity.CreatureStorage.GetCreatureByName(_speaker);
             if (!creature)
                 return false;
 

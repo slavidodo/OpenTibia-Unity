@@ -116,7 +116,7 @@ namespace OpenTibiaUnity.Core
             return eightBit;
         }
 
-        private static uint ARGBFormatInternal(uint r, uint g, uint b, uint a) {
+        private static uint ARGBFormatpublic(uint r, uint g, uint b, uint a) {
             return a << 24 | r << 16 | g << 8 | b;
         }
 
@@ -124,7 +124,7 @@ namespace OpenTibiaUnity.Core
             uint r = (eightBit / 36) % 6 * 51;
             uint g = (eightBit / 6) % 6 * 51;
             uint b = eightBit % 6 * 51;
-            return ARGBFormatInternal(r, g, b, 255U);
+            return ARGBFormatpublic(r, g, b, 255U);
         }
 
         public static uint ARGBFromColor(Color color) {
@@ -132,7 +132,7 @@ namespace OpenTibiaUnity.Core
             uint g = (uint)(color.g * 255);
             uint b = (uint)(color.b * 255);
             uint a = (uint)(color.a * 255);
-            return ARGBFormatInternal(r, g, b, a);
+            return ARGBFormatpublic(r, g, b, a);
         }
     }
 }

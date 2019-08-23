@@ -4,19 +4,19 @@ using UnityEngine.UI;
 namespace OpenTibiaUnity.Modules.Options
 {
     [DisallowMultipleComponent]
-    internal class LegacyOptionsWindow : Core.Components.Base.Window
+    public class LegacyOptionsWindow : Core.Components.Base.Window
     {
-        [SerializeField] private RectTransform m_PanelContent = null;
-        [SerializeField] private Button m_OkButton = null;
+        [SerializeField] private RectTransform _panelContent = null;
+        [SerializeField] private Button _okButton = null;
         [SerializeField] private LegacyOptionsWindowItem LegacyOptionsWindowItemTemplate = null;
         [SerializeField] private LegacyOptionsWindowItem LegacyOptionsWindowItemGreenTemplate = null;
 
         protected override void Start() {
             base.Start();
 
-            m_OkButton.onClick.AddListener(OnOkClick);
+            _okButton.onClick.AddListener(OnOkClick);
 
-            ModulesManager.Instance.LegacyGeneralOptionsWindow.onClosed.AddListener(() => OpenWindow());
+            ModulesManager.Instance.LegacyGeneralOptionsWindow.onClosed.AddListener(() => Open());
 
             OpenTibiaUnity.GameManager.onClientVersionChange.AddListener(OnClientVersionChange);
             if (OpenTibiaUnity.GameManager.ClientVersion != 0)
@@ -26,7 +26,7 @@ namespace OpenTibiaUnity.Modules.Options
         }
 
         private void OnClientVersionChange(int oldVersion, int newVersion) {
-            foreach (Transform child in m_PanelContent) {
+            foreach (Transform child in _panelContent) {
                 Destroy(child.gameObject);
             }
             
@@ -42,12 +42,12 @@ namespace OpenTibiaUnity.Modules.Options
         }
         
         private void OnOkClick() {
-            CloseWindow();
+            Close();
         }
 
         void OpenGeneralOptions() {
-            CloseWindow();
-            ModulesManager.Instance.LegacyGeneralOptionsWindow.OpenWindow();
+            Close();
+            ModulesManager.Instance.LegacyGeneralOptionsWindow.Open();
         }
 
         void OpenGraphicsOptions() {
@@ -71,7 +71,7 @@ namespace OpenTibiaUnity.Modules.Options
         }
 
         private LegacyOptionsWindowItem CreateOption(string title, string description, UnityEngine.Events.UnityAction callback) {
-            var item = Instantiate(LegacyOptionsWindowItemTemplate, m_PanelContent);
+            var item = Instantiate(LegacyOptionsWindowItemTemplate, _panelContent);
             item.buttonWrapper.label.text = title;
             item.buttonWrapper.button.onClick.AddListener(callback);
             item.label.text = description;
@@ -80,7 +80,7 @@ namespace OpenTibiaUnity.Modules.Options
         }
 
         private LegacyOptionsWindowItem CreateGreenOption(string title, string description, UnityEngine.Events.UnityAction callback) {
-            var item = Instantiate(LegacyOptionsWindowItemGreenTemplate, m_PanelContent);
+            var item = Instantiate(LegacyOptionsWindowItemGreenTemplate, _panelContent);
             item.buttonWrapper.label.text = title;
             item.buttonWrapper.button.onClick.AddListener(callback);
             item.label.text = description;
@@ -89,7 +89,7 @@ namespace OpenTibiaUnity.Modules.Options
         }
 
         private void CreateSeparator() {
-            var separator = Instantiate(OpenTibiaUnity.GameManager.HorizontalSeparator, m_PanelContent);
+            var separator = Instantiate(OpenTibiaUnity.GameManager.HorizontalSeparator, _panelContent);
             var layoutElement = separator.AddComponent<LayoutElement>();
             layoutElement.minHeight = 2;
         }

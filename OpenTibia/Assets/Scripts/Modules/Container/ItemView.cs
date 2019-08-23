@@ -5,49 +5,49 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Container
 {
-    internal class ItemViewPointerEvent : UnityEvent<ClothSlots> { }
+    public class ItemViewPointerEvent : UnityEvent<ClothSlots> { }
 
-    internal class ItemView : Core.Components.Base.AbstractComponent, IPointerEnterHandler, IPointerExitHandler
+    public class ItemView : Core.Components.Base.AbstractComponent, IPointerEnterHandler, IPointerExitHandler
     {
-        [SerializeField] private RawImage m_ItemImage = null;
-        [SerializeField] private TMPro.TextMeshProUGUI m_ItemText = null;
-        [SerializeField] private bool m_ShowAmount = false;
-        [SerializeField] private int m_ObjectAmount = 1;
-        [SerializeField] private ClothSlots m_ClothSlot = ClothSlots.Head;
+        [SerializeField] private RawImage _itemImage = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _itemText = null;
+        [SerializeField] private bool _showAmount = false;
+        [SerializeField] private int _objectAmount = 1;
+        [SerializeField] private ClothSlots _blothSlot = ClothSlots.Head;
 
-        internal ItemViewPointerEvent onPointerEnter;
-        internal ItemViewPointerEvent onPointerExit;
+        public ItemViewPointerEvent onPointerEnter;
+        public ItemViewPointerEvent onPointerExit;
 
-        internal RawImage itemImage { get => m_ItemImage; }
-        internal TMPro.TextMeshProUGUI itemText { get => m_ItemText; }
+        public RawImage itemImage { get => _itemImage; }
+        public TMPro.TextMeshProUGUI itemText { get => _itemText; }
         
-        internal bool showAmount {
-            get => m_ShowAmount;
+        public bool showAmount {
+            get => _showAmount;
             set {
-                if (m_ShowAmount != value) {
-                    m_ShowAmount = value;
-                    itemText.gameObject.SetActive(m_ShowAmount);
+                if (_showAmount != value) {
+                    _showAmount = value;
+                    itemText.gameObject.SetActive(_showAmount);
                 }
             }
         }
-        internal int objectAmount {
-            get => m_ObjectAmount;
+        public int objectAmount {
+            get => _objectAmount;
             set {
-                if (m_ObjectAmount != value) {
-                    m_ObjectAmount = value;
-                    itemText.SetText(m_ObjectAmount.ToString());
+                if (_objectAmount != value) {
+                    _objectAmount = value;
+                    itemText.SetText(_objectAmount.ToString());
 
-                    if (!!m_ObjectInstance)
-                        m_ObjectInstance.Data = (uint)m_ObjectAmount;
+                    if (!!_objectInstance)
+                        _objectInstance.Data = (uint)_objectAmount;
                 }
             }
         }
-        internal ClothSlots clothSlot { get => m_ClothSlot; }
+        public ClothSlots clothSlot { get => _blothSlot; }
 
-        private Core.Appearances.ObjectInstance m_ObjectInstance = null;
-        internal Core.Appearances.ObjectInstance objectInstance {
-            get => m_ObjectInstance;
-            set => m_ObjectInstance = value;
+        private Core.Appearances.ObjectInstance _objectInstance = null;
+        public Core.Appearances.ObjectInstance objectInstance {
+            get => _objectInstance;
+            set => _objectInstance = value;
         }
 
         protected override void Awake() {
@@ -60,16 +60,16 @@ namespace OpenTibiaUnity.Modules.Container
         protected override void Start() {
             base.Start();
             
-            itemText.gameObject.SetActive(m_ShowAmount);
-            itemText.SetText(m_ObjectAmount.ToString());
+            itemText.gameObject.SetActive(_showAmount);
+            itemText.SetText(_objectAmount.ToString());
         }
 
         public void OnPointerEnter(PointerEventData eventData) {
-            onPointerEnter.Invoke(m_ClothSlot);
+            onPointerEnter.Invoke(_blothSlot);
         }
 
         public void OnPointerExit(PointerEventData eventData) {
-            onPointerExit.Invoke(m_ClothSlot);
+            onPointerExit.Invoke(_blothSlot);
         }
     }
 }

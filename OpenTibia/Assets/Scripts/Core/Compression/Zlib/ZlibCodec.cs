@@ -1,6 +1,6 @@
 ﻿namespace OpenTibiaUnity.Core.Compression.Zlib
 {
-    internal class ZlibCodec
+    public class ZlibCodec
     {
        //public byte[] InputBuffer;
        //public int NextIn;
@@ -14,7 +14,7 @@
        //
        //public string Message;
        //
-       ////internal InflateManager istate;
+       ////public InflateManager istate;
        //
        //public int WindowBits = ZlibConst.WindowBitsDefault;
 

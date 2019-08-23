@@ -3,7 +3,7 @@ using pb = Google.Protobuf;
 
 namespace OpenTibiaUnity.Protobuf.Protocol
 {
-    internal abstract class ProtocolMessage<T> : pb::IMessage<T> where T : pb::IMessage<T>
+    public abstract class ProtocolMessage<T> : pb::IMessage<T> where T : pb::IMessage<T>
     {
         public pbr.MessageDescriptor Descriptor => throw new System.NotImplementedException();
 

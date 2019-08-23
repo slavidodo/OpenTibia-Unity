@@ -1,18 +1,18 @@
 ﻿using System.Collections.Generic;
 
-namespace OpenTibiaUnity.Core.Utility
+namespace OpenTibiaUnity.Core.Utils
 {
     public class Heap
     {
         // TODO:
         // Technically, we are forcing a usage of <int> in a lis
         // while we could use a workarround to use SortedDictionary instead
-        public List<HeapItem> m_Heap = null;
+        public List<HeapItem> _heap = null;
 
         public int Length { get; private set; } = 0;
 
         public Heap(int capacity = 0) {
-            m_Heap = new List<HeapItem>(capacity);
+            _heap = new List<HeapItem>(capacity);
         }
 
         public HeapItem AddItem(HeapItem item, int key) {
@@ -21,7 +21,7 @@ namespace OpenTibiaUnity.Core.Utility
                 item.HeapKey = key;
                 item.HeapParent = this;
                 item.HeapPosition = len;
-                m_Heap.Add(item);
+                _heap.Add(item);
                 Length++;
                 MinHeapify(len);
             }
@@ -38,14 +38,14 @@ namespace OpenTibiaUnity.Core.Utility
 
         public void MinHeapify(int len, bool param2 = true) {
             int index = len;
-            while (param2 && index > 0 && index < m_Heap.Count - 2) {
+            while (param2 && index > 0 && index < _heap.Count - 2) {
                 int nextIndex = index + 1;
-                if (m_Heap[index].HeapKey < m_Heap[nextIndex].HeapKey) {
-                    var nextHeap = m_Heap[nextIndex];
-                    m_Heap[nextIndex] = m_Heap[index];
-                    m_Heap[nextIndex].HeapPosition = nextIndex;
-                    m_Heap[index] = nextHeap;
-                    m_Heap[index].HeapPosition = index;
+                if (_heap[index].HeapKey < _heap[nextIndex].HeapKey) {
+                    var nextHeap = _heap[nextIndex];
+                    _heap[nextIndex] = _heap[index];
+                    _heap[nextIndex].HeapPosition = nextIndex;
+                    _heap[index] = nextHeap;
+                    _heap[index].HeapPosition = index;
                     index = nextIndex;
                 } else {
                     index = 0;
@@ -56,18 +56,18 @@ namespace OpenTibiaUnity.Core.Utility
                 int loc5 = index + 1;
                 int loc6 = loc5 + 1;
                 int loc7 = index;
-                if (loc5 < Length && m_Heap[loc5].HeapKey < m_Heap[loc7].HeapKey)
+                if (loc5 < Length && _heap[loc5].HeapKey < _heap[loc7].HeapKey)
                     loc7 = loc5;
 
-                if (loc6 < Length && m_Heap[loc6].HeapKey < m_Heap[loc7].HeapKey)
+                if (loc6 < Length && _heap[loc6].HeapKey < _heap[loc7].HeapKey)
                     loc7 = loc6;
 
                 if (loc7 > index) {
-                    var otherHeap = m_Heap[index];
-                    m_Heap[index] = m_Heap[loc7];
-                    m_Heap[index].HeapPosition = index;
-                    m_Heap[loc7] = otherHeap;
-                    m_Heap[loc7].HeapPosition = loc7;
+                    var otherHeap = _heap[index];
+                    _heap[index] = _heap[loc7];
+                    _heap[index].HeapPosition = index;
+                    _heap[loc7] = otherHeap;
+                    _heap[loc7].HeapPosition = loc7;
                     index = loc7;
                     continue;
                 }
@@ -76,19 +76,19 @@ namespace OpenTibiaUnity.Core.Utility
         }
 
         public HeapItem PeekMinItem() {
-            return Length > 0 ? m_Heap[0] : null;
+            return Length > 0 ? _heap[0] : null;
         }
 
         public HeapItem ExtractMinItem() {
             if (Length <= 0)
                 return null;
 
-            var minHeap = m_Heap[0];
+            var minHeap = _heap[0];
             minHeap.HeapParent = null;
             minHeap.HeapPosition = -1;
             Length--;
-            m_Heap[0] = m_Heap[Length];
-            m_Heap.RemoveAt(Length);
+            _heap[0] = _heap[Length];
+            _heap.RemoveAt(Length);
             MinHeapify(0);
             return minHeap;
         }
@@ -106,7 +106,7 @@ namespace OpenTibiaUnity.Core.Utility
 
             Length = 0;
             if (full)
-                m_Heap.Clear();
+                _heap.Clear();
         }
     }
 }

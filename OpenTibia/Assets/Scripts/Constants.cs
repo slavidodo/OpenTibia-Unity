@@ -1,120 +1,120 @@
 ﻿namespace OpenTibiaUnity
 {
-    internal static class Constants
+    public static class Constants
     {
-        internal const string RealTibiaClientServicesAddress = "https://www.tibia.com/services/clientservices.php";
-        internal const string OpenTibiaDefaultClientServicesAddress = "http://127.0.0.1/clientservices.php";
+        public const string RealTibiaClientServicesAddress = "https://www.tibia.com/services/clientservices.php";
+        public const string OpenTibiaDefaultClientServicesAddress = "http://127.0.0.1/clientservices.php";
 
-        internal const string OpenTibiaDefaultFullIPAddress = "127.0.0.1:7171";
-        internal const string OpenTibiaDefaultIPAddress = "127.0.0.1";
-        internal const int OpenTibiaDefaultPort = 7171;
+        public const string OpenTibiaDefaultFullIPAddress = "127.0.0.1:7171";
+        public const string OpenTibiaDefaultIPAddress = "127.0.0.1";
+        public const int OpenTibiaDefaultPort = 7171;
 
         // Don't modify those unless you know what you are doing.
-        internal const int PingDelay = 1000;
-        internal const int ConnectionTimeout = 30 * 1000;
+        public const int PingDelay = 1000;
+        public const int ConnectionTimeout = 30 * 1000;
         
-        internal const int MapWidth = 15;
-        internal const int MapHeight = 11;
-        internal const int MapSizeW = 10;
-        internal const int MapSizeX = MapWidth + 3;
-        internal const int MapSizeY = MapHeight + 3;
-        internal const int MapSizeZ = 8;
-        internal const int MapMinX = 0; // Tibia restricted it to 24576 -> 24576 + (1 << 14 -1)
-        internal const int MapMinY = 0;
-        internal const int MapMaxX = MapMinX + 2 * (1 << 15 - 1);
-        internal const int MapMaxY = MapMinY + 2 * (1 << 15 - 1);
-        internal const int MapMinZ = 0;
-        internal const int MapMaxZ = 15;
+        public const int MapWidth = 15;
+        public const int MapHeight = 11;
+        public const int MapSizeW = 10;
+        public const int MapSizeX = MapWidth + 3;
+        public const int MapSizeY = MapHeight + 3;
+        public const int MapSizeZ = 8;
+        public const int MapMinX = 0; // Tibia restricted it to 24576 -> 24576 + (1 << 14 -1)
+        public const int MapMinY = 0;
+        public const int MapMaxX = MapMinX + 2 * (1 << 15 - 1);
+        public const int MapMaxY = MapMinY + 2 * (1 << 15 - 1);
+        public const int MapMinZ = 0;
+        public const int MapMaxZ = 15;
 
-        internal const int PathMaxSteps = 128;
-        internal const int PathMaxDistance = 110;
-        internal const int PathMatrixCenter = PathMaxDistance;
-        internal const int PathMatrixSize = 2 * PathMaxDistance + 1;
+        public const int PathMaxSteps = 128;
+        public const int PathMaxDistance = 110;
+        public const int PathMatrixCenter = PathMaxDistance;
+        public const int PathMatrixSize = 2 * PathMaxDistance + 1;
 
-        internal const int PathCostMax = 250;
-        internal const int PathCostUndefined = 254;
-        internal const int PathCostObstacle = 255;
+        public const int PathCostMax = 250;
+        public const int PathCostUndefined = 254;
+        public const int PathCostObstacle = 255;
 
-        internal const int NumEffects = 200;
-        internal const int NumOnscreenMessages = 16;
-        internal const int NumFields = MapSizeX * MapSizeY * MapSizeZ;
-        internal const int FieldSize = 32;
-        internal const int FieldCacheSize = 32;
-        internal const int FieldHeight = 24;
+        public const int NumEffects = 200;
+        public const int NumOnscreenMessages = 16;
+        public const int NumFields = MapSizeX * MapSizeY * MapSizeZ;
+        public const int FieldSize = 32;
+        public const int FieldCacheSize = 32;
+        public const int FieldHeight = 24;
 
-        internal const int PlayerOffsetY = 6;
-        internal const int PlayerOffsetX = 8;
+        public const int PlayerOffsetY = 6;
+        public const int PlayerOffsetX = 8;
 
-        internal const int GroundLayer = 7;
-        internal const int UndergroundLayer = 2;
+        public const int GroundLayer = 7;
+        public const int UndergroundLayer = 2;
 
-        internal const int ObjectsUpdateInterval = 40;
-        internal const int AmbientUpdateInterval = 1000;
+        public const int ObjectsUpdateInterval = 40;
+        public const int AmbientUpdateInterval = 1000;
 
-        internal const int OnscreenMessageHeight = 195;
-        internal const int OnscreenMessageWidth = 360;
+        public const int OnscreenMessageHeight = 195;
+        public const int OnscreenMessageWidth = 360;
 
-        internal const int MaxTalkLength = 255;
-        internal const int MaxChannelLength = 255;
-        internal const int MaxContainerNameLength = 255;
-        internal const int MaxContainerViews = 32;
+        public const int MaxTalkLength = 255;
+        public const int MaxChannelLength = 255;
+        public const int MaxContainerNameLength = 255;
+        public const int MaxContainerViews = 32;
 
-        internal const int MiniMapSideBarViewHeight = 106;
-        internal const int MiniMapSideBarViewWidth = 106;
+        public const int MiniMapSideBarViewHeight = 106;
+        public const int MiniMapSideBarViewWidth = 106;
 
-        internal const int MiniMapSectorSize = 256;
-        internal const int MiniMapSideBarZoomMin = -1;
-        internal const int MiniMapSideBarZoomMax = 4;
+        public const int MiniMapSectorSize = 256;
+        public const int MiniMapSideBarZoomMin = -1;
+        public const int MiniMapSideBarZoomMax = 4;
 
-        internal const int WorldMapScreenWidth = MapSizeX * FieldSize;
-        internal const int WorldMapScreenHeight = MapSizeY * FieldSize;
+        public const int WorldMapScreenWidth = MapSizeX * FieldSize;
+        public const int WorldMapScreenHeight = MapSizeY * FieldSize;
 
-        internal const int WorldMapRealWidth = MapWidth * FieldSize;
-        internal const int WorldMapRealHeight = MapHeight * FieldSize;
+        public const int WorldMapRealWidth = MapWidth * FieldSize;
+        public const int WorldMapRealHeight = MapHeight * FieldSize;
 
-        internal const int WorldMapMinimumWidth = (int)(WorldMapRealWidth * 0.6667f);
-        internal const int WorldMapMinimumHeight = (int)(WorldMapRealHeight * 0.6667f);
+        public const int WorldMapMinimumWidth = (int)(WorldMapRealWidth * 0.6667f);
+        public const int WorldMapMinimumHeight = (int)(WorldMapRealHeight * 0.6667f);
         
-        internal const int MaxNpcDistance = 3;
+        public const int MaxNpcDistance = 3;
 
-        internal const int LightmapShrinkFactor = 8;
+        public const int LightmapShrinkFactor = 8;
 
-        internal const uint MarkThicknessThin = 1;
-        internal const uint MarkThicknessBold = 2;
+        public const uint MarkThicknessThin = 1;
+        public const uint MarkThicknessBold = 2;
 
-        internal static UnityEngine.Color ColorAboveGround = new UnityEngine.Color32(200, 200, 255, 255);
-        internal static UnityEngine.Color ColorBelowGround = new UnityEngine.Color32(255, 255, 255, 255);
-        internal static UnityEngine.Color ObjectCursorColor = new UnityEngine.Color32(255, 225, 55, 255);
+        public static UnityEngine.Color ColorAboveGround = new UnityEngine.Color32(200, 200, 255, 255);
+        public static UnityEngine.Color ColorBelowGround = new UnityEngine.Color32(255, 255, 255, 255);
+        public static UnityEngine.Color ObjectCursorColor = new UnityEngine.Color32(255, 225, 55, 255);
 
-        internal const float HighlightMinOpacity = 0.3f;
-        internal const float HighlightMaxOpacity = 0.6f;
+        public const float HighlightMinOpacity = 0.3f;
+        public const float HighlightMaxOpacity = 0.6f;
 
-        internal const uint PlayerStartID = 0x10000000;
-        internal const uint PlayerEndID = 0x40000000;
-        internal const uint MonsterStartID = 0x40000000;
-        internal const uint MonsterEndID = 0x80000000;
-        internal const uint NpcStartID = 0x80000000;
-        internal const uint NpcEndID = 0xffffffff;
+        public const uint PlayerStart_id = 0x10000000;
+        public const uint PlayerEnd_id = 0x40000000;
+        public const uint MonsterStart_id = 0x40000000;
+        public const uint MonsterEnd_id = 0x80000000;
+        public const uint NpcStart_id = 0x80000000;
+        public const uint NpcEnd_id = 0xffffffff;
 
-        internal const int AnimationDelayBeforeReset = 1000;
-        internal const int PhaseAutomatic = -1;
-        internal const int PhaseAsynchronous = 255;
-        internal const int PhaseRandom = 254;
+        public const int AnimationDelayBeforeReset = 1000;
+        public const int PhaseAutomatic = -1;
+        public const int PhaseAsynchronous = 255;
+        public const int PhaseRandom = 254;
 
-        internal const int MaxTalkHistory = 200;
+        public const int MaxTalkHistory = 200;
 
-        internal const int SecondsPerDay = 24 * 60 * 60;
-        internal const int MarketRequestOwnOffers = 65534;
-        internal const int MarketRequestOwnHistory = 65535;
+        public const int SecondsPerDay = 24 * 60 * 60;
+        public const int MarketRequestOwnOffers = 65534;
+        public const int MarketRequestOwnHistory = 65535;
     }
 
-    internal enum ClientSpecification
+    public enum ClientSpecification
     {
         Cipsoft,
         OpenTibia,
     }
 
-    internal enum AppearanceCategory : byte
+    public enum AppearanceCategory : byte
     {
         Object,
         Outfit,
@@ -122,14 +122,14 @@
         Missile,
     }
 
-    internal enum EnterPossibleFlag : byte
+    public enum EnterPossibleFlag : byte
     {
         Possible,
         PossibleNoAnimation,
         NotPossible,
     }
 
-    internal enum PathState : byte
+    public enum PathState : byte
     {
         PathEmpty,
         PathExists,
@@ -137,9 +137,9 @@
         PathErrorGoUpstairs,
         PathErrorTooFar,
         PathErrorUnreachable,
-        PathErrorInternal,
+        PathErrorpublic,
     }
-    internal enum PathDirection : int
+    public enum PathDirection : int
     {
         East = 1,
         NorthEast = 2,
@@ -150,7 +150,7 @@
         South = 7,
         SouthEast = 8,
     }
-    internal enum Direction : byte
+    public enum Direction : byte
     {
         North = 0,
         East,
@@ -162,7 +162,7 @@
         NorthWest,
         Stop,
     }
-    internal enum CreatureType : byte
+    public enum CreatureType : byte
     {
         Player,
         Monster,
@@ -172,7 +172,7 @@
         First = Player,
         Last = Summon,
     }
-    internal enum PartyFlag : byte
+    public enum PartyFlag : byte
     {
         None,
         Leader,
@@ -190,7 +190,7 @@
         First = None,
         Last = Other,
     }
-    internal enum PKFlag : byte
+    public enum PKFlag : byte
     {
         None,
         Attacker,
@@ -203,7 +203,7 @@
         First = None,
         Last = Revenge,
     }
-    internal enum SummonTypeFlags : byte
+    public enum SummonTypeFlags : byte
     {
         None,
         Own,
@@ -212,7 +212,7 @@
         First = None,
         Last = Other,
     }
-    internal enum SpeechCategory : byte
+    public enum SpeechCategory : byte
     {
         None,
         Normal,
@@ -224,7 +224,7 @@
         First = None,
         Last = Travel,
     }
-    internal enum GuildFlag : byte
+    public enum GuildFlag : byte
     {
         None,
         WarAlly,
@@ -237,7 +237,7 @@
         Last = Other,
     }
 
-    internal enum SkillType : byte
+    public enum SkillType : byte
     {
         Level = 0,
         MagLevel,
@@ -264,12 +264,12 @@
         ManaLeechChance,
         ManaLeechAmount,
 
-        // internal usage only
+        // public usage only
         ExperienceGain = 253,
         None = 254,
         Experience = 255,
     }
-    internal enum States : int
+    public enum States : int
     {
         None = -1,
         Poisoned = 0,
@@ -291,7 +291,7 @@
 
         Hungry = 31,
     }
-    internal enum FluidsColor : int
+    public enum FluidsColor : int
     {
         Transparent = 0,
         Blue,
@@ -302,7 +302,7 @@
         White,
         Purple
     }
-    internal enum FluidsType : int
+    public enum FluidsType : int
     {
         None = 0,
         Water,
@@ -323,12 +323,12 @@
         Tea,
         Mead
     }
-    internal enum HUDArcOrientation
+    public enum HUDArcOrientation
     {
         Left,
         Right,
     }
-    internal enum MessageModeType : byte
+    public enum MessageModeType : byte
     {
         None = 0,
         Say = 1,
@@ -387,7 +387,7 @@
         LastMessage = 52,
         Invalid = 255
     }
-    internal enum MessageScreenTargets : int
+    public enum MessageScreenTargets : int
     {
         None = -1,
         BoxBottom = 0,
@@ -397,7 +397,7 @@
         BoxCoordinate = 4,
         EffectCoordinate = 5,
     }
-    internal enum MessageModeHeaders : int
+    public enum MessageModeHeaders : int
     {
         None = -1,
         Say,
@@ -407,14 +407,14 @@
         NpcFromStartBlock,
         NpcFrom,
     }
-    internal enum MessageModePrefixes : int
+    public enum MessageModePrefixes : int
     {
         None = -1,
         PrivateFrom,
         GamemasterBroadcast,
         GamemasterPrivateFrom,
     }
-    internal enum ChannelEvent : byte
+    public enum ChannelEvent : byte
     {
         PlayerJoined = 0,
         PlayerLeft = 1,
@@ -422,7 +422,7 @@
         PlayerExcluded = 3,
         PlayerPending = 4,
     }
-    internal enum MouseButton : byte
+    public enum MouseButton : byte
     {
         None = 0,
         Left = 1 << 0,
@@ -430,37 +430,37 @@
         Middle = 1 << 2,
         Both = Left | Right,
     }
-    internal enum MousePresets : byte
+    public enum MousePresets : byte
     {
         Classic,
         Regular,
         LeftSmartClick,
     }
-    internal enum MouseLootPresets : int
+    public enum MouseLootPresets : int
     {
         Right,
         ShiftPlusRight,
         Left,
     }
-    internal enum HUDStyles : int
+    public enum HUDStyles : int
     {
         Bars = 0,
         Arcs = 1,
     }
-    internal enum CoulouriseLootValuesTypes : int
+    public enum CoulouriseLootValuesTypes : int
     {
         None = 0,
         Corners = 1,
         Frames = 2,
     }
-    internal enum AntialiasingModes : int
+    public enum AntialiasingModes : int
     {
         None = 0,
         Antialiasing = 1,
         SmoothRetro = 2,
     }
 
-    internal enum AppearanceActions : int
+    public enum AppearanceActions : int
     {
         Unset = -1,
         None = 0,
@@ -475,25 +475,25 @@
         Loot = 10,
         SmartClick = 100,
     }
-    internal enum CombatAttackModes : int
+    public enum CombatAttackModes : int
     {
         Offensive = 1,
         Balanced = 2,
         Defensive = 3,
     }
-    internal enum CombatChaseModes : int
+    public enum CombatChaseModes : int
     {
         Off = 0,
         On = 1,
     }
-    internal enum CombatPvPModes : int
+    public enum CombatPvPModes : int
     {
         Dove = 0,
         WhiteHand = 1,
         YellowHand = 2,
         RedFist = 3,
     }
-    internal enum ClothSlots : byte
+    public enum ClothSlots : byte
     {
         BothHands = 0,
 
@@ -518,7 +518,7 @@
         First = Head,
         Last = Blessings,
     }
-    internal enum ResourceTypes : int
+    public enum ResourceTypes : int
     {
         BankGold = 0,
         InventoryGold = 1,
@@ -526,20 +526,20 @@
         PreyBonusRerolls = 10,
         CollectionTokens = 20,
     }
-    internal enum ReportTypes : int
+    public enum ReportTypes : int
     {
         Name = 0,
         Statement = 1,
         Bot = 2,
     }
-    internal enum PopupMenuType
+    public enum PopupMenuType
     {
         NoButtons = 0,
         OK = 1 << 0,
         Cancel = 1 << 1,
         OKCancel = OK | Cancel,
     }
-    internal enum RenderError
+    public enum RenderError
     {
         None,
         WorldMapNotValid,
@@ -548,14 +548,14 @@
         MiniMapNotValid,
         PositionNotValid,
     }
-    internal enum DeathType
+    public enum DeathType
     {
         DeathTypeRegular = 0x00,
         DeathTypeUnfair = 0x01,
         DeathTypeBlessed = 0x02,
         DeathTypeNoPenalty = 0x03,
     }
-    internal enum CursorState
+    public enum CursorState
     {
         Default = 0,
         DefaultDisabled,
@@ -574,7 +574,7 @@
         Loot
     }
 
-    internal enum UseActionTarget
+    public enum UseActionTarget
     {
         Auto = 0,
         NewWindow = 1,
@@ -583,14 +583,14 @@
         CrossHair = 4,
     }
 
-    internal enum CursorPriority
+    public enum CursorPriority
     {
         Low,
         Medium,
         High,
     }
 
-    internal enum OpponentFilters
+    public enum OpponentFilters
     {
         None = 0,
         Players = 1 << 0,
@@ -601,7 +601,7 @@
         Summons = 1 << 5,
     }
 
-    internal enum OpponentSortTypes
+    public enum OpponentSortTypes
     {
         SortDistanceDesc,
         SortDistanceAsc,
@@ -613,14 +613,14 @@
         SortKnownSinceAsc,
     }
 
-    internal enum OpponentStates
+    public enum OpponentStates
     {
         NoAction,
         Refresh,
         Rebuild,
     }
 
-    internal enum DialogType
+    public enum DialogType
     {
         // TODO, these are no longer existing, remove them
         OptionsGeneral = 0,
@@ -638,7 +638,7 @@
         PreyDialog = 12,
     }
 
-    internal enum BlessingTypes
+    public enum BlessingTypes
     {
         None = 0,
         Adventurer = 1 << 0,
@@ -656,7 +656,7 @@
         All_1141 = All_1120 | HeartOfTheMountain | BloodOfTheMountain,
     }
 
-    internal enum MarkType
+    public enum MarkType
     {
         ClientMapWindow = 1,
         ClientBattleList = 2,
@@ -666,7 +666,7 @@
         None = 255,
     }
 
-    internal enum ObjectCategory
+    public enum ObjectCategory
     {
         Armors = 1,
         Amulets = 2,
@@ -702,7 +702,7 @@
         All = 255,
     }
 
-    internal enum MarketDetails
+    public enum MarketDetails
     {
         Attack = 1,
         Capacity = 2,
@@ -724,13 +724,13 @@
         Last = ImbuementSlots,
     }
 
-    internal enum MarketOfferTypes
+    public enum MarketOfferTypes
     {
         Buy = 0,
         Sell = 1,
     }
 
-    internal enum MarketOfferStates
+    public enum MarketOfferStates
     {
         Active = 0,
         Cancelled = 1,
@@ -738,7 +738,7 @@
         Accepted = 3,
     }
 
-    internal enum MessageDialog
+    public enum MessageDialog
     {
         ImbuementSuccess = 0,
         ImbuementError = 1,
@@ -752,7 +752,7 @@
         PreyError = 21,
     }
 
-    internal enum StoreServiceType
+    public enum StoreServiceType
     {
         Unknown = 0,
         CharacterNameChange = 1,
@@ -764,7 +764,7 @@
         Prey = 7,
     }
 
-    internal enum PreySlotStates : byte
+    public enum PreySlotStates : byte
     {
         Locked = 0,
         Inactive = 1,
@@ -773,7 +773,7 @@
         SelectionChangeMonster = 4,
     }
 
-    internal enum PreyBonusTypes : byte
+    public enum PreyBonusTypes : byte
     {
         DamageBoost = 0,
         DamageReduction = 1,
@@ -782,36 +782,36 @@
         None = 4,
     }
 
-    internal enum PreySlotUnlockType : byte
+    public enum PreySlotUnlockType : byte
     {
         PremiumOrStore = 0,
         Store = 1,
         None = 2,
     }
 
-    internal enum DailyRewardStates : byte
+    public enum DailyRewardStates : byte
     {
         PickedItems = 1,
         FixedItems = 2,
     }
 
-    internal enum DailyRewardTypes : byte
+    public enum DailyRewardTypes : byte
     {
         Object = 1,
         PreyBonusRerolls = 2,
         FiftyPercentXpBoost = 3,
     }
 
-    internal enum CyclopediaRaceDifficulty : byte
+    public enum CyclopediaRaceStage : byte
     {
-        Harmless = 0,
-        Trivial = 1,
-        Easy = 2,
-        Medium = 3,
-        Hard = 4,
+        Locked = 0,
+        Unlocked = 1,
+        One = 2,
+        Two = 3,
+        FullyUnlocked = 4,
     }
 
-    internal enum CyclopediaRaceOccurence : byte
+    public enum CyclopediaRaceOccurence : byte
     {
         Common = 0,
         Uncommon = 1,
@@ -820,27 +820,45 @@
         VeryRare = 4,
     }
 
-    internal enum CyclopediaRaceLootType : byte
+    public enum CyclopediaRaceDifficulty : byte
+    {
+        Harmless = 0,
+        Trivial = 1,
+        Easy = 2,
+        Medium = 3,
+        Hard = 4,
+    }
+
+    public enum CyclopediaRaceLootRarity : byte
+    {
+        Common = 0,
+        Uncommon = 1,
+        SemiRare = 2,
+        Rare = 3,
+        VeryRare = 4,
+    }
+
+    public enum CyclopediaRaceLootType : byte
     {
         One = 0,
         Several = 1,
     }
 
-    internal enum CyclopediaRaceAttackType : byte
+    public enum CyclopediaRaceAttackType : byte
     {
         Melee = 0,
         Distance = 1,
         NoAttack = 2,
     }
 
-    internal enum CyclopediaCombatType : byte
+    public enum CyclopediaCombatType : byte
     {
         Physical = 0,
         Fire = 1,
         Poison = 2,
     }
 
-    internal enum CyclopediaCharacterInfoType : byte
+    public enum CyclopediaCharacterInfoType : byte
     {
         BaseInformation = 0,
         GeneralStats = 1,
@@ -853,7 +871,7 @@
         StoreSummary = 8,
     }
     
-    internal enum CyclopediaPvpKillStatus : byte
+    public enum CyclopediaPvpKillStatus : byte
     {
         Justified = 0,
         Unjustified = 1,
@@ -862,13 +880,13 @@
         Arena = 4,
     }
 
-    internal enum InspectObjectTypes
+    public enum InspectObjectTypes
     {
         NormalObject = 0,
         Cyclopedia = 3,
     }
 
-    internal enum GameFeature
+    public enum GameFeature
     {
         GameProtocolChecksum,
         GameAccountNames,
@@ -906,11 +924,10 @@
         GameNewSpeedLaw,
         GameForceFirstAutoWalkStep,
         GameMinimapRemove,
-        GameDoubleShopSellAmount,
         GameContainerPagination,
         GameCreatureMarks,
         GameObjectMarks,
-        GameOutfitIDU16,
+        GameOutfit_idU16,
         GamePlayerStamina,
         GamePlayerAddons,
         GameMessageStatements,

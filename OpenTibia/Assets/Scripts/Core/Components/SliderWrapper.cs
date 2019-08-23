@@ -6,12 +6,12 @@ namespace OpenTibiaUnity.Core.Components
     [RequireComponent(typeof(Slider))]
     public class SliderWrapper : Base.AbstractComponent
     {
-        private Slider m_Slider;
+        private Slider _slider;
         public Slider slider {
             get {
-                if (!m_Slider)
-                    m_Slider = GetComponent<Slider>();
-                return m_Slider;
+                if (!_slider)
+                    _slider = GetComponent<Slider>();
+                return _slider;
             }
         }
 

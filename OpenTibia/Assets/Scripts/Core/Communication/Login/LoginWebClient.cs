@@ -5,7 +5,7 @@ using UnityEngine.Events;
 
 namespace OpenTibiaUnity.Core.Communication.Login
 {
-    internal enum LoginWebClientError
+    public enum LoginWebClientError
     {
         None = 0,
         Technical = 1,
@@ -15,21 +15,21 @@ namespace OpenTibiaUnity.Core.Communication.Login
         Authentication = 6,
     }
 
-    internal class LoginWebClient : Web.WebClient
+    public class LoginWebClient : Web.WebClient
     {
         public class LoginErrorEvent : UnityEvent<string> { };
         public class LoginSuccessEvent : UnityEvent<Session, Playdata> { };
 
-        internal string AccountIdentifier { get; set; }
-        internal string Password { get; set; }
-        internal string Token { get; set; }
+        public string AccountIdentifier { get; set; }
+        public string Password { get; set; }
+        public string Token { get; set; }
 
-        internal LoginErrorEvent onTechnicalError = new LoginErrorEvent();
-        internal LoginErrorEvent onLoginError = new LoginErrorEvent();
-        internal LoginErrorEvent onTokenError = new LoginErrorEvent();
-        internal LoginSuccessEvent onLoginSuccess = new LoginSuccessEvent();
+        public LoginErrorEvent onTechnicalError = new LoginErrorEvent();
+        public LoginErrorEvent onLoginError = new LoginErrorEvent();
+        public LoginErrorEvent onTokenError = new LoginErrorEvent();
+        public LoginSuccessEvent onLoginSuccess = new LoginSuccessEvent();
 
-        internal LoginWebClient(int clientVersion, int buildVersion) : base(clientVersion, buildVersion) { }
+        public LoginWebClient(int clientVersion, int buildVersion) : base(clientVersion, buildVersion) { }
 
         protected static string GetAccountIdentifierField() {
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameAccountEmailAddress))
@@ -37,7 +37,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
             return "accountname";
         }
 
-        internal void LoadDataAsync(string requestURI) {
+        public void LoadDataAsync(string requestURI) {
             var requestData = new Dictionary<string, string>();
             requestData.Add(GetAccountIdentifierField(), AccountIdentifier);
             requestData.Add("password", Password);
@@ -127,8 +127,8 @@ namespace OpenTibiaUnity.Core.Communication.Login
                     || !worldObject.TryGetValue("previewstate", out previewStateToken))
                     continue;
 
-                int worldID = SafeInt(idToken);
-                if (worldIds.Contains(worldID))
+                int world_id = SafeInt(idToken);
+                if (worldIds.Contains(world_id))
                     continue;
 
                 string externalAddress = string.Empty,
@@ -190,9 +190,9 @@ namespace OpenTibiaUnity.Core.Communication.Login
                     currentTournamentPhase = SafeInt(worldObject.GetValue("currenttournamentphase"));
                 }
 
-                worldIds.Add(worldID);
+                worldIds.Add(world_id);
                 playdata.Worlds.Add(new Playdata.World() {
-                    ID = worldID,
+                    _id = world_id,
                     PreviewState = SafeInt(previewStateToken),
                     ExternalPort = externalPort,
                     ExternalPortProtected = externalPortProtected,
@@ -216,19 +216,19 @@ namespace OpenTibiaUnity.Core.Communication.Login
             }
 
             foreach (var characterObject in charactersArray.Children<JObject>()) {
-                JToken worldIDToken = null,
+                JToken world_idToken = null,
                     nameToken = null;
 
-                if (!characterObject.TryGetValue("worldid", out worldIDToken)
+                if (!characterObject.TryGetValue("worldid", out world_idToken)
                     || !characterObject.TryGetValue("name", out nameToken))
                     continue;
 
-                int worldID = SafeInt(worldIDToken);
-                if (!worldIds.Contains(worldID))
+                int world_id = SafeInt(world_idToken);
+                if (!worldIds.Contains(world_id))
                     continue;
 
                 var character = new Playdata.Character() {
-                    WorldID = worldID,
+                    World_id = world_id,
                     Name = SafeString(nameToken),
 
                     // 11.00 (x?)
@@ -237,7 +237,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
 
                     // 12.00
                     Level = SafeInt(characterObject.GetValue("level")),
-                    OutfitID = SafeInt(characterObject.GetValue("outfitid")),
+                    Outfit_id = SafeInt(characterObject.GetValue("outfitid")),
                     HeadColor = SafeInt(characterObject.GetValue("headcolor")),
                     TorsoColor = SafeInt(characterObject.GetValue("torsocolor")),
                     LegsColor = SafeInt(characterObject.GetValue("legscolor")),

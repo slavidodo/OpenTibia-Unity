@@ -2,53 +2,53 @@
 {
     public class ExperienceGainInfo
     {
-        private float m_BaseXpGain;
+        private float _baseXpGain;
         private float m_VoucherAddend;
-        private float m_GrindingAddend;
-        private float m_StoreBoostAddend;
-        private float m_HuntingBoostFactor;
+        private float _grindingAddend;
+        private float _storeBoostAddend;
+        private float _huntingBoostFactor;
 
-        private uint m_RemainingStoreXpBoostSeconds;
-        private bool m_CanBuyMoreStoreXpBoosts;
+        private uint _remainingStoreXpBoostSeconds;
+        private bool _banBuyMoreStoreXpBoosts;
 
         public ExperienceGainInfo() {
             Reset();
         }
 
         public void UpdateStoreXpBoost(uint remainingSeconds, bool canBuyMoreXpBoosts) {
-            if (m_RemainingStoreXpBoostSeconds != remainingSeconds || m_CanBuyMoreStoreXpBoosts != canBuyMoreXpBoosts) {
-                m_RemainingStoreXpBoostSeconds = remainingSeconds;
-                m_CanBuyMoreStoreXpBoosts = canBuyMoreXpBoosts;
+            if (_remainingStoreXpBoostSeconds != remainingSeconds || _banBuyMoreStoreXpBoosts != canBuyMoreXpBoosts) {
+                _remainingStoreXpBoostSeconds = remainingSeconds;
+                _banBuyMoreStoreXpBoosts = canBuyMoreXpBoosts;
             }
         }
 
         public void UpdateGainInfo(float baseXpGain, float voucherAddend, float grindingAddend, float storeBoostAddend, float huntingBoostFactor) {
 
-            if (m_BaseXpGain != baseXpGain || m_VoucherAddend != voucherAddend || m_GrindingAddend != grindingAddend || m_StoreBoostAddend != storeBoostAddend || m_HuntingBoostFactor != huntingBoostFactor) {
-                m_BaseXpGain = baseXpGain;
+            if (_baseXpGain != baseXpGain || m_VoucherAddend != voucherAddend || _grindingAddend != grindingAddend || _storeBoostAddend != storeBoostAddend || _huntingBoostFactor != huntingBoostFactor) {
+                _baseXpGain = baseXpGain;
                 m_VoucherAddend = voucherAddend;
-                m_GrindingAddend = grindingAddend;
-                m_StoreBoostAddend = storeBoostAddend;
-                m_HuntingBoostFactor = huntingBoostFactor;
+                _grindingAddend = grindingAddend;
+                _storeBoostAddend = storeBoostAddend;
+                _huntingBoostFactor = huntingBoostFactor;
             }
         }
 
         public void Reset() {
-            m_BaseXpGain = 1;
+            _baseXpGain = 1;
             m_VoucherAddend = 0;
-            m_GrindingAddend = 0;
-            m_StoreBoostAddend = 0;
-            m_HuntingBoostFactor = 1;
-            m_RemainingStoreXpBoostSeconds = 0;
-            m_CanBuyMoreStoreXpBoosts = true;
+            _grindingAddend = 0;
+            _storeBoostAddend = 0;
+            _huntingBoostFactor = 1;
+            _remainingStoreXpBoostSeconds = 0;
+            _banBuyMoreStoreXpBoosts = true;
         }
 
         public float ComputeXpGainModifier() {
-            return (m_BaseXpGain + m_VoucherAddend + m_GrindingAddend + m_StoreBoostAddend) * m_HuntingBoostFactor;
+            return (_baseXpGain + m_VoucherAddend + _grindingAddend + _storeBoostAddend) * _huntingBoostFactor;
         }
 
         public bool CanCurrentlyBuyXpBoost() {
-            return m_RemainingStoreXpBoostSeconds == 0 && m_CanBuyMoreStoreXpBoosts;
+            return _remainingStoreXpBoostSeconds == 0 && _banBuyMoreStoreXpBoosts;
         }
     }
 }

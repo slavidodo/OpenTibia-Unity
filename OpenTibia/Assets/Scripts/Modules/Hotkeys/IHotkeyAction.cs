@@ -1,16 +1,16 @@
 ﻿namespace OpenTibiaUnity.Modules.Hotkeys
 {
-    internal interface IHotkeyAction
+    public interface IHotkeyAction
     {
         void Apply();
     }
 
-    internal class HotkeyTextAction : IHotkeyAction
+    public class HotkeyTextAction : IHotkeyAction
     {
-        internal string Text { get; set; }
-        internal bool AutoSend { get; set; }
+        public string Text { get; set; }
+        public bool AutoSend { get; set; }
 
-        internal HotkeyTextAction(string text, bool autoSend = false) {
+        public HotkeyTextAction(string text, bool autoSend = false) {
             Text = text;
             AutoSend = autoSend;
         }
@@ -20,13 +20,13 @@
         }
     }
 
-    internal class HotkeyObjectAction : IHotkeyAction
+    public class HotkeyObjectAction : IHotkeyAction
     {
-        internal Core.Appearances.AppearanceType AppearanceType { get; set; }
-        internal UseActionTarget ActionTarget { get; set; }
+        public Core.Appearances.AppearanceType AppearanceType { get; set; }
+        public UseActionTarget ActionTarget { get; set; }
 
-        internal HotkeyObjectAction(ushort objectID, UseActionTarget actionTarget) {
-            var appearanceType = OpenTibiaUnity.AppearanceStorage.GetObjectType(objectID);
+        public HotkeyObjectAction(ushort object_id, UseActionTarget actionTarget) {
+            var appearanceType = OpenTibiaUnity.AppearanceStorage.GetObjectType(object_id);
             if (!appearanceType)
                 throw new System.Exception("HotkeyObjectAction.HotkeyObjectAction: invalid object id.");
 
@@ -34,7 +34,7 @@
             ActionTarget = actionTarget;
         }
 
-        internal HotkeyObjectAction(Core.Appearances.AppearanceType appearanceType, UseActionTarget actionTarget) {
+        public HotkeyObjectAction(Core.Appearances.AppearanceType appearanceType, UseActionTarget actionTarget) {
             if (!appearanceType)
                 throw new System.ArgumentNullException("HotkeyObjectAction.HotkeyObjectAction: invalid appearance type");
 
@@ -45,7 +45,7 @@
             ActionTarget = actionTarget;
         }
 
-        internal HotkeyObjectAction(Core.Appearances.ObjectInstance @object, UseActionTarget actionTarget) {
+        public HotkeyObjectAction(Core.Appearances.ObjectInstance @object, UseActionTarget actionTarget) {
             if (!@object)
                 throw new System.ArgumentNullException("HotkeyObjectAction.HotkeyObjectAction: invalid object");
 
@@ -56,7 +56,7 @@
         public void Apply() {
             var absolutePosition = new UnityEngine.Vector3Int(65535, 0, 0);
             if (ActionTarget == UseActionTarget.CrossHair) {
-                var @object = new Core.Appearances.ObjectInstance(AppearanceType.ID, AppearanceType, 0);
+                var @object = new Core.Appearances.ObjectInstance(AppearanceType._id, AppearanceType, 0);
                 Core.Game.ObjectMultiUseHandler.Activate(absolutePosition, @object, 0);
                 return;
             }
@@ -67,7 +67,7 @@
         }
     }
 
-    internal class HotkeyEquipAction : IHotkeyAction
+    public class HotkeyEquipAction : IHotkeyAction
     {
         public void Apply() {
             

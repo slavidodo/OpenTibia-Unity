@@ -3,8 +3,8 @@
     public abstract class SkillPanel : Core.Components.Base.AbstractComponent
     {
 
-        internal abstract TMPro.TextMeshProUGUI labelText { get; }
-        internal abstract TMPro.TextMeshProUGUI labelValue { get; }
+        public abstract TMPro.TextMeshProUGUI labelText { get; }
+        public abstract TMPro.TextMeshProUGUI labelValue { get; }
 
         public virtual void SetProgressColor(UnityEngine.Color color) { }
         public virtual void SetIcon(UnityEngine.Sprite icon) { }

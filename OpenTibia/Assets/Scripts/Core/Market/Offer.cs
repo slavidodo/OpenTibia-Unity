@@ -1,66 +1,66 @@
 ﻿namespace OpenTibiaUnity.Core.Market
 {
-    internal class Offer {
-        private OfferID m_ID;
-        private MarketOfferTypes m_OfferType;
-        private MarketOfferStates m_OfferState;
+    public class Offer {
+        private OfferId _id;
+        private MarketOfferTypes _offerType;
+        private MarketOfferStates _offerState;
 
-        private ushort m_TypeID;
-        private ushort m_Amount;
-        private uint m_PiecePrice;
+        private ushort _type_id;
+        private ushort _amount;
+        private uint _piecePrice;
 
-        private string m_Character;
+        private string _character;
 
-        internal bool isDubious = false;
+        public bool isDubious = false;
 
-        internal OfferID ID { get => m_ID; }
-        internal MarketOfferTypes OfferType { get => m_OfferType; }
-        internal MarketOfferStates OfferState { get => m_OfferState; }
+        public OfferId Id { get => _id; }
+        public MarketOfferTypes OfferType { get => _offerType; }
+        public MarketOfferStates OfferState { get => _offerState; }
 
-        internal ushort TypeID { get => m_TypeID; }
-        internal ushort Amount { get => m_Amount; }
-        internal uint PiecePrice { get => m_PiecePrice; }
+        public ushort Type_id { get => _type_id; }
+        public ushort Amount { get => _amount; }
+        public uint PiecePrice { get => _piecePrice; }
 
-        internal string Character { get => m_Character; }
+        public string Character { get => _character; }
 
-        internal Offer(OfferID offerID, MarketOfferTypes offerType, ushort typeID, ushort amount, uint piecePrice, string character, MarketOfferStates state) {
-            m_ID = offerID;
-            m_OfferType = offerType;
-            m_TypeID = typeID;
-            m_Amount = amount;
-            m_PiecePrice = piecePrice;
-            m_Character = character;
-            m_OfferState = state;
+        public Offer(OfferId offer_id, MarketOfferTypes offerType, ushort type_id, ushort amount, uint piecePrice, string character, MarketOfferStates state) {
+            _id = offer_id;
+            _offerType = offerType;
+            _type_id = type_id;
+            _amount = amount;
+            _piecePrice = piecePrice;
+            _character = character;
+            _offerState = state;
         }
 
-        internal bool IsLessThan(Offer other) {
-            return m_ID.IsLessThan(other.ID);
+        public bool IsLessThan(Offer other) {
+            return _id.IsLessThan(other._id);
         }
 
-        internal bool IsEqual(Offer other) {
-            return m_ID.IsEqual(other.ID);
+        public bool IsEqual(Offer other) {
+            return _id.IsEqual(other._id);
         }
     }
 
-    internal class OfferID
+    public class OfferId
     {
-        private ushort m_Counter = 0;
-        private uint m_Timestamp = 0;
+        private ushort _bounter = 0;
+        private uint _timestamp = 0;
 
-        internal ushort Counter { get => m_Counter; }
-        internal uint Timestamp { get => m_Timestamp; }
+        public ushort Counter { get => _bounter; }
+        public uint Timestamp { get => _timestamp; }
 
-        internal OfferID(ushort counter, uint timestamp) {
-            m_Counter = counter;
-            m_Timestamp = timestamp;
+        public OfferId(ushort counter, uint timestamp) {
+            _bounter = counter;
+            _timestamp = timestamp;
         }
 
-        internal bool IsLessThan(OfferID other) {
-            return m_Timestamp < other.Timestamp || m_Timestamp == other.Timestamp && m_Counter < other.Counter;
+        public bool IsLessThan(OfferId other) {
+            return _timestamp < other.Timestamp || _timestamp == other.Timestamp && _bounter < other.Counter;
         }
 
-        internal bool IsEqual(OfferID other) {
-            return m_Timestamp == other.Timestamp && m_Counter == other.Counter;
+        public bool IsEqual(OfferId other) {
+            return _timestamp == other.Timestamp && _bounter == other.Counter;
         }
     }
 }

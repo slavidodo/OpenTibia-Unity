@@ -5,58 +5,58 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Core.Components
 {
-    internal class SplitStackWindow : Base.Window
+    public class SplitStackWindow : Base.Window
     {
-        internal class SplitStackWindowButtonEvent : UnityEvent<SplitStackWindow> { }
+        public class SplitStackWindowButtonEvent : UnityEvent<SplitStackWindow> { }
         
-        [SerializeField] private Button m_OKButton = null;
-        [SerializeField] private Button m_CancelButton = null;
-        [SerializeField] private SliderWrapper m_SliderWrapper = null;
-        [SerializeField] private RawImage m_ItemImage = null;
+        [SerializeField] private Button _oKButton = null;
+        [SerializeField] private Button _cancelButton = null;
+        [SerializeField] private SliderWrapper _sliderWrapper = null;
+        [SerializeField] private RawImage _itemImage = null;
 
-        private Appearances.AppearanceType m_ObjectType = null;
-        private Appearances.ObjectInstance m_ObjectInstance = null;
-        private int m_ObjectAmount = 0;
-        private int m_SelectedAmount = 0;
+        private Appearances.AppearanceType _objectType = null;
+        private Appearances.ObjectInstance _objectInstance = null;
+        private int _objectAmount = 0;
+        private int _selectedAmount = 0;
         
-        private RenderTexture m_RenderTexture = null;
+        private RenderTexture _renderTexture = null;
 
-        internal SplitStackWindowButtonEvent onOk;
+        public SplitStackWindowButtonEvent onOk;
 
-        internal Appearances.AppearanceType ObjectType {
-            get => m_ObjectType;
+        public Appearances.AppearanceType ObjectType {
+            get => _objectType;
             set {
-                m_ObjectType = value;
+                _objectType = value;
             }
         }
 
-        internal int ObjectAmount {
-            get => m_ObjectAmount;
+        public int ObjectAmount {
+            get => _objectAmount;
             set {
-                if (m_ObjectAmount != value) {
-                    m_ObjectAmount = value;
-                    m_SliderWrapper.SetMinMax(1, m_ObjectAmount);
+                if (_objectAmount != value) {
+                    _objectAmount = value;
+                    _sliderWrapper.SetMinMax(1, _objectAmount);
                 }
             }
         }
 
-        internal int SelectedAmount {
-            get => m_SelectedAmount;
+        public int SelectedAmount {
+            get => _selectedAmount;
             set {
-                if (m_SelectedAmount != value) {
-                    m_SelectedAmount = value;
-                    m_SliderWrapper.slider.value = value;
+                if (_selectedAmount != value) {
+                    _selectedAmount = value;
+                    _sliderWrapper.slider.value = value;
                 }
             }
         }
 
         protected override void Start() {
             base.Start();
-            m_OKButton.onClick.AddListener(TriggerOk);
-            m_CancelButton.onClick.AddListener(TriggerCancel);
-            m_SliderWrapper.slider.onValueChanged.AddListener(TriggerSliderChange);
+            _oKButton.onClick.AddListener(TriggerOk);
+            _cancelButton.onClick.AddListener(TriggerCancel);
+            _sliderWrapper.slider.onValueChanged.AddListener(TriggerSliderChange);
 
-            OpenTibiaUnity.InputHandler.AddKeyUpListener(Utility.EventImplPriority.Default, (Event e, bool repeat) => {
+            OpenTibiaUnity.InputHandler.AddKeyUpListener(Utils.EventImplPriority.Default, (Event e, bool repeat) => {
                 if (!InputHandler.IsHighlighted(this))
                     return;
 
@@ -75,7 +75,7 @@ namespace OpenTibiaUnity.Core.Components
                         break;
 
                     case KeyCode.RightArrow:
-                        SelectedAmount = Mathf.Min(m_ObjectAmount, SelectedAmount + (e.shift ? 10 : 1));
+                        SelectedAmount = Mathf.Min(_objectAmount, SelectedAmount + (e.shift ? 10 : 1));
                         break;
                 }
             });
@@ -85,19 +85,19 @@ namespace OpenTibiaUnity.Core.Components
 
         protected void TriggerOk() {
             onOk.Invoke(this);
-            HideWindow();
+            Hide();
         }
 
         protected void TriggerCancel() {
-            HideWindow();
+            Hide();
         }
 
         protected void TriggerSliderChange(float newValue) {
-            m_SelectedAmount = (int)newValue;
+            _selectedAmount = (int)newValue;
         }
 
-        internal override void ShowWindow() {
-            base.ShowWindow();
+        public override void Show() {
+            base.Show();
 
             SelectedAmount = 1;
         }
@@ -106,23 +106,23 @@ namespace OpenTibiaUnity.Core.Components
             if (Event.current.type != EventType.Repaint)
                 return;
 
-            if (m_RenderTexture == null) {
-                m_RenderTexture = new RenderTexture(Constants.FieldSize, Constants.FieldSize, 0, RenderTextureFormat.ARGB32);
-                m_RenderTexture.filterMode = FilterMode.Point;
-                m_ItemImage.texture = m_RenderTexture;
+            if (_renderTexture == null) {
+                _renderTexture = new RenderTexture(Constants.FieldSize, Constants.FieldSize, 0, RenderTextureFormat.ARGB32);
+                _renderTexture.filterMode = FilterMode.Point;
+                _itemImage.texture = _renderTexture;
             } else {
-                m_RenderTexture.Release();
+                _renderTexture.Release();
             }
 
-            RenderTexture.active = m_RenderTexture;
+            RenderTexture.active = _renderTexture;
             GL.Clear(false, true, new Color(0, 0, 0, 0));
 
-            if (!!m_ObjectType) {
-                if (m_ObjectInstance == null || m_ObjectInstance.ID != m_ObjectType.ID)
-                    m_ObjectInstance = OpenTibiaUnity.AppearanceStorage.CreateObjectInstance(m_ObjectType.ID, m_ObjectAmount);
+            if (!!_objectType) {
+                if (_objectInstance == null || _objectInstance.Id != _objectType._id)
+                    _objectInstance = OpenTibiaUnity.AppearanceStorage.CreateObjectInstance(_objectType._id, _objectAmount);
 
-                var zoom = new Vector2(Screen.width / (float)m_RenderTexture.width, Screen.height / (float)m_RenderTexture.height);
-                m_ObjectInstance.DrawTo(new Vector2(0, 0), zoom, 0, 0, 0);
+                var zoom = new Vector2(Screen.width / (float)_renderTexture.width, Screen.height / (float)_renderTexture.height);
+                _objectInstance.DrawTo(new Vector2(0, 0), zoom, 0, 0, 0);
             }
 
             RenderTexture.active = null;

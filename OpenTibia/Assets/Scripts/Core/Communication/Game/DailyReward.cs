@@ -1,6 +1,6 @@
 ﻿namespace OpenTibiaUnity.Core.Communication.Game
 {
-    internal partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame : Internal.Protocol
     {
         private void ParseRestingAreaState(Internal.ByteArray message) {
             message.ReadBoolean(); // unknown
@@ -66,11 +66,11 @@
                     int objectCount = message.ReadUnsignedByte();
                     
                     for (int i = 0; i < objectCount; i++) {
-                        ushort objectID = message.ReadUnsignedShort();
+                        ushort object_id = message.ReadUnsignedShort();
                         string objectName = message.ReadString();
                         uint objectWeight = message.ReadUnsignedInt();
 
-                        reward.AddItem(new DailyReward.Types.Object(objectID, objectName, objectWeight, -1));
+                        reward.AddItem(new DailyReward.Types.Object(object_id, objectName, objectWeight, -1));
                     }
 
                     break;
@@ -82,11 +82,11 @@
                         var rewardType = message.ReadEnum<DailyRewardTypes>();
                         switch (rewardType) {
                             case DailyRewardTypes.Object: {
-                                ushort objectID = message.ReadUnsignedShort();
+                                ushort object_id = message.ReadUnsignedShort();
                                 string objectName = message.ReadString();
                                 int objectAmount = message.ReadUnsignedByte();
 
-                                reward.AddItem(new DailyReward.Types.Object(objectID, objectName, 0, objectAmount));
+                                reward.AddItem(new DailyReward.Types.Object(object_id, objectName, 0, objectAmount));
                                 break;
                             }
 

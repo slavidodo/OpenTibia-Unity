@@ -1,8 +1,8 @@
 ﻿namespace OpenTibiaUnity.Core.Input.StaticAction
 {
-    internal class ChatDeleteNext : StaticAction
+    public class ChatDeleteNext : StaticAction
     {
-        internal ChatDeleteNext(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
+        public ChatDeleteNext(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
 
         public override bool Perform(bool repeat = false) {
             TMPro.TMP_InputField inputField = StaticAction.GetSelectedInputField();
@@ -29,7 +29,7 @@
         }
 
         public override IAction Clone() {
-            return new ChatDeleteNext(m_ID, m_Label, m_EventMask);
+            return new ChatDeleteNext(_id, _label, _eventMask);
         }
     }
 }

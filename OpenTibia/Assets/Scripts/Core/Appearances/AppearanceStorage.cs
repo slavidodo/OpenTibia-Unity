@@ -2,116 +2,116 @@
 
 namespace OpenTibiaUnity.Core.Appearances
 {
-    internal class AppearanceStorage
+    public class AppearanceStorage
     {
         private static List<ObjectInstance> EnvironmentalEffects = new List<ObjectInstance>();
 
-        Protobuf.Appearances.Appearances m_ProtoAppearances;
-        SpritesProvider m_SpritesProvider;
-        private readonly AppearanceType m_CreatureAppearanceType = new AppearanceType(AppearanceInstance.Creature, null, AppearanceCategory.Outfit);
-        private AppearanceType m_InvisibleOutfitType;
+        Protobuf.Appearances.Appearances _protoAppearances;
+        SpritesProvider _spritesProvider;
+        private readonly AppearanceType _creatureAppearanceType = new AppearanceType(AppearanceInstance.Creature, null, AppearanceCategory.Outfit);
+        private AppearanceType _invisibleOutfitType;
 
-        private List<AppearanceType> m_ObjectTypes;
-        private List<AppearanceType> m_EffectTypes;
-        private List<AppearanceType> m_MissileTypes;
-        private List<AppearanceType> m_OutfitTypes;
+        private List<AppearanceType> _objectTypes;
+        private List<AppearanceType> _effectTypes;
+        private List<AppearanceType> _missileTypes;
+        private List<AppearanceType> _outfitTypes;
 
-        private List<AppearanceType> m_MarketObjectTypes;
-        private List<AppearanceTypeInfo> m_ObjectTypeInfoCache;
+        private List<AppearanceType> _marketObjectTypes;
+        private List<AppearanceTypeInfo> _objectTypeInfoCache;
         
-        internal void SetProtoAppearances(Protobuf.Appearances.Appearances appearances) {
-            m_ProtoAppearances = appearances;
+        public void SetProtoAppearances(Protobuf.Appearances.Appearances appearances) {
+            _protoAppearances = appearances;
             
-            m_ObjectTypes = new List<AppearanceType>(m_ProtoAppearances.Objects.Count);
-            m_MarketObjectTypes = new List<AppearanceType>();
-            foreach (var appearance in m_ProtoAppearances.Objects) {
-                var type = new AppearanceType(appearance.ID, appearance, AppearanceCategory.Object);
-                m_ObjectTypes.Add(type);
+            _objectTypes = new List<AppearanceType>(_protoAppearances.Objects.Count);
+            _marketObjectTypes = new List<AppearanceType>();
+            foreach (var appearance in _protoAppearances.Objects) {
+                var type = new AppearanceType(appearance._id, appearance, AppearanceCategory.Object);
+                _objectTypes.Add(type);
                 if (type.IsMarket)
-                    m_MarketObjectTypes.Add(type);
+                    _marketObjectTypes.Add(type);
             }
 
-            m_ObjectTypes.Sort((a, b) => {
-                return a.ID.CompareTo(b.ID);
+            _objectTypes.Sort((a, b) => {
+                return a._id.CompareTo(b._id);
             });
             
-            m_EffectTypes = new List<AppearanceType>(m_ProtoAppearances.Effects.Count);
-            foreach (var appearance in m_ProtoAppearances.Effects)
-                m_EffectTypes.Add(new AppearanceType(appearance.ID, appearance, AppearanceCategory.Effect));
+            _effectTypes = new List<AppearanceType>(_protoAppearances.Effects.Count);
+            foreach (var appearance in _protoAppearances.Effects)
+                _effectTypes.Add(new AppearanceType(appearance._id, appearance, AppearanceCategory.Effect));
 
-            m_MissileTypes = new List<AppearanceType>(m_ProtoAppearances.Missles.Count);
-            foreach (var appearance in m_ProtoAppearances.Missles)
-                m_MissileTypes.Add(new AppearanceType(appearance.ID, appearance, AppearanceCategory.Missile));
+            _missileTypes = new List<AppearanceType>(_protoAppearances.Missles.Count);
+            foreach (var appearance in _protoAppearances.Missles)
+                _missileTypes.Add(new AppearanceType(appearance._id, appearance, AppearanceCategory.Missile));
 
-            m_OutfitTypes = new List<AppearanceType>(m_ProtoAppearances.Outfits.Count);
-            foreach (var appearance in m_ProtoAppearances.Outfits)
-                m_OutfitTypes.Add(new AppearanceType(appearance.ID, appearance, AppearanceCategory.Outfit));
+            _outfitTypes = new List<AppearanceType>(_protoAppearances.Outfits.Count);
+            foreach (var appearance in _protoAppearances.Outfits)
+                _outfitTypes.Add(new AppearanceType(appearance._id, appearance, AppearanceCategory.Outfit));
             
-            m_InvisibleOutfitType = m_EffectTypes[13 - 1];
+            _invisibleOutfitType = _effectTypes[13 - 1];
         }
 
-        internal void SetSpriteProvider(SpritesProvider spriteProvider) => m_SpritesProvider = spriteProvider;
-        internal void UnloadSpriteProvider() => m_SpritesProvider?.Unload();
-        internal CachedSpriteInformation GetSprite(uint spriteID) => m_SpritesProvider.GetSprite(spriteID);
+        public void SetSpriteProvider(SpritesProvider spriteProvider) => _spritesProvider = spriteProvider;
+        public void UnloadSpriteProvider() => _spritesProvider?.Unload();
+        public CachedSpriteInformation GetSprite(uint sprite_id) => _spritesProvider.GetSprite(sprite_id);
 
-        internal void Unload() {
+        public void Unload() {
             UnloadSpriteProvider();
-            m_SpritesProvider = null;
+            _spritesProvider = null;
 
-            m_ObjectTypes?.Clear();
-            m_EffectTypes?.Clear();
-            m_MissileTypes?.Clear();
-            m_OutfitTypes?.Clear();
-            m_ProtoAppearances = null;
+            _objectTypes?.Clear();
+            _effectTypes?.Clear();
+            _missileTypes?.Clear();
+            _outfitTypes?.Clear();
+            _protoAppearances = null;
         }
 
-        internal AppearanceType GetObjectType(uint id) {
-            if (m_ObjectTypes == null)
+        public AppearanceType GetObjectType(uint id) {
+            if (_objectTypes == null)
                 throw new System.Exception("AppearanceStorage.CreateObjectInstance: proto appearances not loaded.");
 
             if (id == AppearanceInstance.Creature)
-                return m_CreatureAppearanceType;
-            else if (id >= 100 && (id - 100) < m_ObjectTypes.Count)
-                return FindAppearanceType(m_ObjectTypes, id);
+                return _creatureAppearanceType;
+            else if (id >= 100 && (id - 100) < _objectTypes.Count)
+                return FindAppearanceType(_objectTypes, id);
 
             return null;
         }
 
-        internal ObjectInstance CreateObjectInstance(uint id, uint data) {
+        public ObjectInstance CreateObjectInstance(uint id, uint data) {
             var type = GetObjectType(id);
             if (type != null)
                 return new ObjectInstance(id, type, data);
             return null;
         }
 
-        internal ObjectInstance CreateObjectInstance(uint id, int data) => CreateObjectInstance(id, (uint)data);
+        public ObjectInstance CreateObjectInstance(uint id, int data) => CreateObjectInstance(id, (uint)data);
 
-        internal EffectInstance CreateEffectInstance(uint id) {
-            if (m_EffectTypes == null)
+        public EffectInstance CreateEffectInstance(uint id) {
+            if (_effectTypes == null)
                 throw new System.Exception("AppearanceStorage.CreateEffectInstance: proto appearances not loaded.");
 
-            if (id >= 1 || id <= m_EffectTypes.Count)
-                return new EffectInstance(id, FindAppearanceType(m_EffectTypes, id));
+            if (id >= 1 || id <= _effectTypes.Count)
+                return new EffectInstance(id, FindAppearanceType(_effectTypes, id));
             return null;
         }
 
-        internal MissileInstance CreateMissileInstance(uint id, UnityEngine.Vector3Int fromPosition, UnityEngine.Vector3Int toPosition) {
-            if (m_MissileTypes == null)
+        public MissileInstance CreateMissileInstance(uint id, UnityEngine.Vector3Int fromPosition, UnityEngine.Vector3Int toPosition) {
+            if (_missileTypes == null)
                 throw new System.Exception("AppearanceStorage.CreateMissileInstance: proto appearances not loaded.");
 
-            if (id >= 1 || id <= m_MissileTypes.Count)
-                return new MissileInstance(id, FindAppearanceType(m_MissileTypes, id), fromPosition, toPosition);
+            if (id >= 1 || id <= _missileTypes.Count)
+                return new MissileInstance(id, FindAppearanceType(_missileTypes, id), fromPosition, toPosition);
             return null;
         }
 
-        internal OutfitInstance CreateOutfitInstance(uint id, int head, int body, int legs, int feet, int addons) {
-            if (m_OutfitTypes == null)
+        public OutfitInstance CreateOutfitInstance(uint id, int head, int body, int legs, int feet, int addons) {
+            if (_outfitTypes == null)
                 throw new System.Exception("AppearanceStorage.CreateOutfitInstance: proto appearances not loaded.");
 
-            if (id == OutfitInstance.InvisibleOutfitID) {
-                return new OutfitInstance(id, m_InvisibleOutfitType, head, body, legs, feet, addons);
-            } else if (id >= 1 && id <= m_OutfitTypes.Count) {
-                return new OutfitInstance(id, FindAppearanceType(m_OutfitTypes, id), head, body, legs, feet, addons);
+            if (id == OutfitInstance.InvisibleOutfit_id) {
+                return new OutfitInstance(id, _invisibleOutfitType, head, body, legs, feet, addons);
+            } else if (id >= 1 && id <= _outfitTypes.Count) {
+                return new OutfitInstance(id, FindAppearanceType(_outfitTypes, id), head, body, legs, feet, addons);
             }
                 
             return null;
@@ -123,9 +123,9 @@ namespace OpenTibiaUnity.Core.Appearances
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
                 var appearanceType = list[tmpIndex];
-                if (appearanceType.ID < id)
+                if (appearanceType._id < id)
                     index = tmpIndex + 1;
-                else if (appearanceType.ID > id)
+                else if (appearanceType._id > id)
                     lastIndex = tmpIndex - 1;
                 else
                     return appearanceType;
@@ -134,11 +134,11 @@ namespace OpenTibiaUnity.Core.Appearances
             return null;
         }
         
-        internal TextualEffectInstance CreateTextualEffect(int color, string value, TMPro.TextMeshProUGUI textMesh) {
+        public TextualEffectInstance CreateTextualEffect(int color, string value, TMPro.TextMeshProUGUI textMesh) {
             return new TextualEffectInstance(color, value, textMesh);
         }
 
-        internal ObjectInstance CreateEnvironmentalEffect(uint id) {
+        public ObjectInstance CreateEnvironmentalEffect(uint id) {
             // TODO(priority=low):
             // this code will actually return null all the time
             // since environmental_effects is always empty..
@@ -148,17 +148,17 @@ namespace OpenTibiaUnity.Core.Appearances
             while (i <= count) {
                 int index = (i + count) / 2;
                 var objectInstance = EnvironmentalEffects[index];
-                if (objectInstance.ID < id) {
+                if (objectInstance.Id < id) {
                     i = index + 1;
                     continue;
-                } else if (objectInstance.ID > id) {
+                } else if (objectInstance.Id > id) {
                     count = 0;
                     continue;
                 }
 
                 var type = objectInstance.Type;
                 //uint data = !!objectInstance.Atmospheric ? 1 : 0;
-                return new ObjectInstance(type.ID, type, 0);
+                return new ObjectInstance(type._id, type, 0);
             }
 
             return null;

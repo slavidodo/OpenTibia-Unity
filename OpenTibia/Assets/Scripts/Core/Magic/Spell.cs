@@ -2,10 +2,10 @@
 {
     public class Spell
     {
-        public int ID;
+        public int _id;
 
         public Spell(int id) {
-            ID = id;
+            _id = id;
         }
     }
 }

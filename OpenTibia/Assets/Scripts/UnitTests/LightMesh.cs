@@ -4,22 +4,22 @@ using UnityEngine;
 
 public class LightMesh : MonoBehaviour
 {
-    private Mesh m_CustomMesh;
-    private Matrix4x4 m_LightTransformationMatrix;
-    private Material m_Material;
+    private Mesh _customMesh;
+    private Matrix4x4 _lightTransformationMatrix;
+    private Material _material;
 
-    private int m_CachedScreenHeight;
-    private int m_CachedScreenWidth;
+    private int _cachedScreenHeight;
+    private int _cachedScreenWidth;
 
     // Start is called before the first frame update
     void Start()
     {
-        m_Material = new Material(Shader.Find("Hidden/Internal-Colored"));
+        _material = new Material(Shader.Find("Hidden/public-Colored"));
 
-        m_CustomMesh = new Mesh();
-        m_CustomMesh.vertices = new Vector3[] { new Vector3(0, 0, 0), new Vector3(0, 1, 0), new Vector3(1, 1, 0), new Vector3(1, 0, 0) };
-        m_CustomMesh.colors = new Color[] { Color.red, Color.black, Color.white, Color.blue };
-        m_CustomMesh.SetIndices(new int[] { 0, 1, 2, 3 }, MeshTopology.Quads, 0);
+        _customMesh = new Mesh();
+        _customMesh.vertices = new Vector3[] { new Vector3(0, 0, 0), new Vector3(0, 1, 0), new Vector3(1, 1, 0), new Vector3(1, 0, 0) };
+        _customMesh.colors = new Color[] { Color.red, Color.black, Color.white, Color.blue };
+        _customMesh.SetIndices(new int[] { 0, 1, 2, 3 }, MeshTopology.Quads, 0);
     }
 
     // Update is called once per frame
@@ -32,13 +32,13 @@ public class LightMesh : MonoBehaviour
         if (Event.current.type != EventType.Repaint)
             return;
 
-        if (m_CachedScreenHeight != Screen.height || m_CachedScreenWidth != Screen.width) {
-            m_CachedScreenWidth = Screen.width;
-            m_CachedScreenHeight = Screen.height;
-            m_LightTransformationMatrix = Matrix4x4.Scale(new Vector3(m_CachedScreenWidth, m_CachedScreenHeight, 0));
+        if (_cachedScreenHeight != Screen.height || _cachedScreenWidth != Screen.width) {
+            _cachedScreenWidth = Screen.width;
+            _cachedScreenHeight = Screen.height;
+            _lightTransformationMatrix = Matrix4x4.Scale(new Vector3(_cachedScreenWidth, _cachedScreenHeight, 0));
         }
 
-        m_Material.SetPass(0);
-        Graphics.DrawMeshNow(m_CustomMesh, m_LightTransformationMatrix);
+        _material.SetPass(0);
+        Graphics.DrawMeshNow(_customMesh, _lightTransformationMatrix);
     }
 }

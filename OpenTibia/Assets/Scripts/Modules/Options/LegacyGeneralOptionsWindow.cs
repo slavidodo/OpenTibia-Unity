@@ -3,17 +3,17 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Options
 {
-    internal class LegacyGeneralOptionsWindow : Core.Components.Base.Window
+    public class LegacyGeneralOptionsWindow : Core.Components.Base.Window
     {
-        [SerializeField] private RectTransform m_PanelContent;
-        [SerializeField] private Button m_OkButton;
-        [SerializeField] private Button m_CancelButton;
+        [SerializeField] private RectTransform _panelContent = null;
+        [SerializeField] private Button _okButton = null;
+        [SerializeField] private Button _cancelButton = null;
 
         protected override void Start() {
             base.Start();
 
-            m_OkButton.onClick.AddListener(OnOkClick);
-            m_CancelButton.onClick.AddListener(OnCancelClick);
+            _okButton.onClick.AddListener(OnOkClick);
+            _cancelButton.onClick.AddListener(OnCancelClick);
 
             OpenTibiaUnity.GameManager.onClientVersionChange.AddListener(OnClientVersionChange);
             if (OpenTibiaUnity.GameManager.ClientVersion != 0)
@@ -29,7 +29,7 @@ namespace OpenTibiaUnity.Modules.Options
         }
 
         private void OnClientVersionChange(int oldVersion, int newVersion) {
-            foreach (Transform child in m_PanelContent) {
+            foreach (Transform child in _panelContent) {
                 Destroy(child.gameObject);
             }
 
@@ -60,7 +60,7 @@ namespace OpenTibiaUnity.Modules.Options
         }
 
         private Core.Components.CheckboxWrapper CreateOption(string text) {
-            var checkboxWrapper = Instantiate(OpenTibiaUnity.GameManager.PanelCheckBox, m_PanelContent);
+            var checkboxWrapper = Instantiate(OpenTibiaUnity.GameManager.PanelCheckBox, _panelContent);
             checkboxWrapper.label.text = text;
             
             return checkboxWrapper;

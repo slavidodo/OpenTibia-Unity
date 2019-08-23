@@ -1,91 +1,91 @@
 ﻿namespace OpenTibiaUnity.Core.Appearances
 {
-    internal class AppearanceType {
-        internal readonly Protobuf.Appearances.Appearance ProtoAppearance;
+    public class AppearanceType {
+        public readonly Protobuf.Appearances.Appearance ProtoAppearance;
 
-        internal string Name { get => ProtoAppearance?.Name; }
+        public string Name { get => ProtoAppearance?.Name; }
         protected Protobuf.Appearances.AppearanceFlags AppearanceFlags { get => ProtoAppearance?.Flags; }
-        internal Google.Protobuf.Collections.RepeatedField<Protobuf.Appearances.FrameGroup> FrameGroups { get => ProtoAppearance?.FrameGroups; }
-        internal bool HasAppearanceFlags { get => AppearanceFlags != null; }
-        internal Protobuf.Appearances.AppearanceFlagGround Ground { get => HasAppearanceFlags ? AppearanceFlags.Ground : null; }
-        internal bool IsGround { get => Ground != null; }
-        internal uint GroundSpeed { get => IsGround ? Ground.Speed : 0; }
-        internal bool IsGroundBorder { get => HasAppearanceFlags ? AppearanceFlags.GroundBorder : false; }
-        internal bool IsBottom { get => HasAppearanceFlags ? AppearanceFlags.Bottom : false; }
-        internal bool IsTop { get => HasAppearanceFlags ? AppearanceFlags.Top : false; }
-        internal bool IsContainer { get => HasAppearanceFlags ? AppearanceFlags.Container : false; }
-        internal bool IsStackable { get => HasAppearanceFlags ? AppearanceFlags.Stackable : false; }
-        internal bool IsUsable { get => HasAppearanceFlags ? AppearanceFlags.Use : false; }
-        internal bool IsForceUse { get => HasAppearanceFlags ? AppearanceFlags.ForceUse : false; }
-        internal bool IsMultiUse { get => HasAppearanceFlags ? AppearanceFlags.MultiUse : false; }
-        internal bool IsWritable { get => HasAppearanceFlags && AppearanceFlags.Writable != null; }
-        internal uint WritableLength { get => IsWritable ? AppearanceFlags.Writable.MaxTextLength : 0; }
-        internal bool IsWritableOnce { get => HasAppearanceFlags && AppearanceFlags.WritableOnce != null; }
-        internal uint WritableOnceLength { get => IsWritableOnce ? AppearanceFlags.WritableOnce.MaxTextLengthOnce : 0; }
-        internal uint MaxTextLen { get => WritableLength != 0 ? WritableLength : WritableOnceLength; }
-        internal bool IsFluidContainer { get => HasAppearanceFlags ? AppearanceFlags.FluidContainer : false; }
-        internal bool IsSplash { get => HasAppearanceFlags ? AppearanceFlags.Splash : false; }
-        internal bool IsUnpassable { get => HasAppearanceFlags ? AppearanceFlags.Unpassable : false; }
-        internal bool IsUnmovable { get => HasAppearanceFlags ? AppearanceFlags.Unmoveable : false; }
-        internal bool IsUnsight { get => HasAppearanceFlags ? AppearanceFlags.Unsight : false; }
-        internal bool IsBlockPath { get => HasAppearanceFlags ? AppearanceFlags.BlockPath : false; }
-        internal bool IsNoMoveAnimation { get => HasAppearanceFlags ? AppearanceFlags.NoMoveAnimation : false; }
-        internal bool IsPickupable { get => HasAppearanceFlags ? AppearanceFlags.Pickupable : false; }
-        internal bool IsHangable { get => HasAppearanceFlags ? AppearanceFlags.Hangable : false; }
-        internal Protobuf.Appearances.AppearanceFlagHook Hook { get => HasAppearanceFlags ? AppearanceFlags.Hook : null; }
-        internal bool IsHook { get => Hook != null; }
-        internal bool IsHookSouth { get => IsHook ? Hook.Type == Protobuf.Shared.HookType.South : false; }
-        internal bool IsHookEast { get => IsHook ? Hook.Type == Protobuf.Shared.HookType.East : false; }
-        internal bool IsRotateable { get => HasAppearanceFlags ? AppearanceFlags.Rotateable : false; }
-        internal Protobuf.Appearances.AppearanceFlagLight Light { get => HasAppearanceFlags ? AppearanceFlags.Light : null; }
-        internal bool IsLight { get => Light != null; }
-        internal uint LightColor { get => IsLight ? Light.Color : 0; }
-        internal uint Brightness { get => IsLight ? Light.Intensity : 0; }
-        internal bool IsDontHide { get => HasAppearanceFlags ? AppearanceFlags.DontHide : false; }
-        internal bool IsTranslucent { get => HasAppearanceFlags ? AppearanceFlags.Translucent : false; }
-        private Protobuf.Appearances.AppearanceFlagOffset m_Offset { get => HasAppearanceFlags ? AppearanceFlags.Offset : null; }
-        internal bool HasDisplacement { get => m_Offset != null; }
-        internal uint OffsetX { get => HasDisplacement ? m_Offset.X : 0; }
-        internal uint OffsetY { get => HasDisplacement ? m_Offset.Y : 0; }
-        internal UnityEngine.Vector2Int Offset { get => new UnityEngine.Vector2Int((int)OffsetX, (int)OffsetY); }
-        internal bool HasElevation { get => HasAppearanceFlags && AppearanceFlags.Elevation != null; }
-        internal uint Elevation { get => HasElevation ? AppearanceFlags.Elevation.Elevation : 0; }
-        internal bool IsLyingCorpse { get => HasAppearanceFlags ? AppearanceFlags.LyingCorpse : false; }
-        internal bool IsAnimateAlways { get => HasAppearanceFlags ? AppearanceFlags.AnimateAlways : false; }
-        internal bool IsMiniMap { get => HasAppearanceFlags && AppearanceFlags.Minimap != null; }
-        internal uint MiniMapColor { get => IsMiniMap ? AppearanceFlags.Minimap.Color : 0; }
-        internal bool HasLensHelp { get => HasAppearanceFlags && AppearanceFlags.LensHelp != null; }
-        internal uint LensHelp { get => HasLensHelp ? AppearanceFlags.LensHelp.ID : 0; }
-        internal bool IsFullGround { get => HasAppearanceFlags ? AppearanceFlags.FullGround : false; }
-        internal bool IsIgnoreLook { get => HasAppearanceFlags ? AppearanceFlags.Look : false; }
-        internal bool IsCloth { get => HasAppearanceFlags && AppearanceFlags.Cloth != null; }
-        internal uint Cloth { get => IsCloth ? AppearanceFlags.Cloth.Slot : 0; }
-        internal Protobuf.Appearances.AppearanceFlagMarket Market { get => HasAppearanceFlags ? AppearanceFlags.Market: null; }
-        internal bool IsMarket { get => Market != null; }
-        internal bool HasDefaultAction { get => HasAppearanceFlags && AppearanceFlags.DefaultAction != null; }
-        internal Protobuf.Shared.PlayerAction DefaultAction { get => HasDefaultAction ? AppearanceFlags.DefaultAction.Action : Protobuf.Shared.PlayerAction.ActionNone; }
-        internal bool IsWrappable { get => HasAppearanceFlags ? AppearanceFlags.Wrapable : false; }
-        internal bool IsUnwrappable { get => HasAppearanceFlags ? AppearanceFlags.UnWrapable : false; }
-        internal bool IsTopEffect { get => HasAppearanceFlags ? AppearanceFlags.TopEffect : false; }
+        public Google.Protobuf.Collections.RepeatedField<Protobuf.Appearances.FrameGroup> FrameGroups { get => ProtoAppearance?.FrameGroups; }
+        public bool HasAppearanceFlags { get => AppearanceFlags != null; }
+        public Protobuf.Appearances.AppearanceFlagGround Ground { get => HasAppearanceFlags ? AppearanceFlags.Ground : null; }
+        public bool IsGround { get => Ground != null; }
+        public uint GroundSpeed { get => IsGround ? Ground.Speed : 0; }
+        public bool IsGroundBorder { get => HasAppearanceFlags ? AppearanceFlags.GroundBorder : false; }
+        public bool IsBottom { get => HasAppearanceFlags ? AppearanceFlags.Bottom : false; }
+        public bool IsTop { get => HasAppearanceFlags ? AppearanceFlags.Top : false; }
+        public bool IsContainer { get => HasAppearanceFlags ? AppearanceFlags.Container : false; }
+        public bool IsStackable { get => HasAppearanceFlags ? AppearanceFlags.Stackable : false; }
+        public bool IsUsable { get => HasAppearanceFlags ? AppearanceFlags.Use : false; }
+        public bool IsForceUse { get => HasAppearanceFlags ? AppearanceFlags.ForceUse : false; }
+        public bool IsMultiUse { get => HasAppearanceFlags ? AppearanceFlags.MultiUse : false; }
+        public bool IsWritable { get => HasAppearanceFlags && AppearanceFlags.Writable != null; }
+        public uint WritableLength { get => IsWritable ? AppearanceFlags.Writable.MaxTextLength : 0; }
+        public bool IsWritableOnce { get => HasAppearanceFlags && AppearanceFlags.WritableOnce != null; }
+        public uint WritableOnceLength { get => IsWritableOnce ? AppearanceFlags.WritableOnce.MaxTextLengthOnce : 0; }
+        public uint MaxTextLen { get => WritableLength != 0 ? WritableLength : WritableOnceLength; }
+        public bool IsFluidContainer { get => HasAppearanceFlags ? AppearanceFlags.FluidContainer : false; }
+        public bool IsSplash { get => HasAppearanceFlags ? AppearanceFlags.Splash : false; }
+        public bool IsUnpassable { get => HasAppearanceFlags ? AppearanceFlags.Unpassable : false; }
+        public bool IsUnmovable { get => HasAppearanceFlags ? AppearanceFlags.Unmoveable : false; }
+        public bool IsUnsight { get => HasAppearanceFlags ? AppearanceFlags.Unsight : false; }
+        public bool IsBlockPath { get => HasAppearanceFlags ? AppearanceFlags.BlockPath : false; }
+        public bool IsNoMoveAnimation { get => HasAppearanceFlags ? AppearanceFlags.NoMoveAnimation : false; }
+        public bool IsPickupable { get => HasAppearanceFlags ? AppearanceFlags.Pickupable : false; }
+        public bool IsHangable { get => HasAppearanceFlags ? AppearanceFlags.Hangable : false; }
+        public Protobuf.Appearances.AppearanceFlagHook Hook { get => HasAppearanceFlags ? AppearanceFlags.Hook : null; }
+        public bool IsHook { get => Hook != null; }
+        public bool IsHookSouth { get => IsHook ? Hook.Type == Protobuf.Shared.HookType.South : false; }
+        public bool IsHookEast { get => IsHook ? Hook.Type == Protobuf.Shared.HookType.East : false; }
+        public bool IsRotateable { get => HasAppearanceFlags ? AppearanceFlags.Rotateable : false; }
+        public Protobuf.Appearances.AppearanceFlagLight Light { get => HasAppearanceFlags ? AppearanceFlags.Light : null; }
+        public bool IsLight { get => Light != null; }
+        public uint LightColor { get => IsLight ? Light.Color : 0; }
+        public uint Brightness { get => IsLight ? Light.Intensity : 0; }
+        public bool IsDontHide { get => HasAppearanceFlags ? AppearanceFlags.DontHide : false; }
+        public bool IsTranslucent { get => HasAppearanceFlags ? AppearanceFlags.Translucent : false; }
+        private Protobuf.Appearances.AppearanceFlagOffset _offset { get => HasAppearanceFlags ? AppearanceFlags.Offset : null; }
+        public bool HasDisplacement { get => _offset != null; }
+        public uint OffsetX { get => HasDisplacement ? _offset.X : 0; }
+        public uint OffsetY { get => HasDisplacement ? _offset.Y : 0; }
+        public UnityEngine.Vector2Int Offset { get => new UnityEngine.Vector2Int((int)OffsetX, (int)OffsetY); }
+        public bool HasElevation { get => HasAppearanceFlags && AppearanceFlags.Elevation != null; }
+        public uint Elevation { get => HasElevation ? AppearanceFlags.Elevation.Elevation : 0; }
+        public bool IsLyingCorpse { get => HasAppearanceFlags ? AppearanceFlags.LyingCorpse : false; }
+        public bool IsAnimateAlways { get => HasAppearanceFlags ? AppearanceFlags.AnimateAlways : false; }
+        public bool IsMiniMap { get => HasAppearanceFlags && AppearanceFlags.Minimap != null; }
+        public uint MiniMapColor { get => IsMiniMap ? AppearanceFlags.Minimap.Color : 0; }
+        public bool HasLensHelp { get => HasAppearanceFlags && AppearanceFlags.LensHelp != null; }
+        public uint LensHelp { get => HasLensHelp ? AppearanceFlags.LensHelp._id : 0; }
+        public bool IsFullGround { get => HasAppearanceFlags ? AppearanceFlags.FullGround : false; }
+        public bool IsIgnoreLook { get => HasAppearanceFlags ? AppearanceFlags.Look : false; }
+        public bool IsCloth { get => HasAppearanceFlags && AppearanceFlags.Cloth != null; }
+        public uint Cloth { get => IsCloth ? AppearanceFlags.Cloth.Slot : 0; }
+        public Protobuf.Appearances.AppearanceFlagMarket Market { get => HasAppearanceFlags ? AppearanceFlags.Market: null; }
+        public bool IsMarket { get => Market != null; }
+        public bool HasDefaultAction { get => HasAppearanceFlags && AppearanceFlags.DefaultAction != null; }
+        public Protobuf.Shared.PlayerAction DefaultAction { get => HasDefaultAction ? AppearanceFlags.DefaultAction.Action : Protobuf.Shared.PlayerAction.ActionNone; }
+        public bool IsWrappable { get => HasAppearanceFlags ? AppearanceFlags.Wrapable : false; }
+        public bool IsUnwrappable { get => HasAppearanceFlags ? AppearanceFlags.UnWrapable : false; }
+        public bool IsTopEffect { get => HasAppearanceFlags ? AppearanceFlags.TopEffect : false; }
         // TODO NpcSaleData
         // TODO ExpiringObject
-        internal bool IsCorpse { get => HasAppearanceFlags ? false : false; } // TODO
-        internal bool IsPlayerCorpse { get => HasAppearanceFlags ? false : false; } // TODO
+        public bool IsCorpse { get => HasAppearanceFlags ? false : false; } // TODO
+        public bool IsPlayerCorpse { get => HasAppearanceFlags ? false : false; } // TODO
 
-        internal bool IsAnimation { get; }
-        internal bool IsCachable { get; }
+        public bool IsAnimation { get; }
+        public bool IsCachable { get; }
         
-        internal uint ID { get; }
-        internal bool IsCreature { get => ID == AppearanceInstance.Creature; }
-        internal AppearanceCategory Category { get; }
-        internal int IdleAnimationPhases { get; } = 0;
-        internal int WalkingAnimationPhases { get; } = 0;
-        internal int AnimationPhases { get; }
+        public uint _id { get; }
+        public bool IsCreature { get => _id == AppearanceInstance.Creature; }
+        public AppearanceCategory Category { get; }
+        public int IdleAnimationPhases { get; } = 0;
+        public int WalkingAnimationPhases { get; } = 0;
+        public int AnimationPhases { get; }
 
-        internal int BoundingSquare { get; }
+        public int BoundingSquare { get; }
 
-        internal AppearanceType(uint id, Protobuf.Appearances.Appearance appearance, AppearanceCategory category) {
-            ID = id;
+        public AppearanceType(uint id, Protobuf.Appearances.Appearance appearance, AppearanceCategory category) {
+            _id = id;
             Category = category;
             ProtoAppearance = appearance;
             BoundingSquare = 0;

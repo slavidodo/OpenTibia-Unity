@@ -2,40 +2,40 @@
 
 namespace OpenTibiaUnity.Core.Communication.Internal
 {
-    internal sealed class NetworkPacketWriter
+    public sealed class NetworkPacketWriter
     {
-        internal class PacketFinishedEvent : UnityEvent { }
+        public class PacketFinishedEvent : UnityEvent { }
 
-        private Cryptography.XTEA m_XTEA = null;
-        private ByteArray m_MessageBuffer = new ByteArray();
-        private ByteArray m_OutputBuffer = new ByteArray();
-        private uint m_SequenceNumber = 0;
+        private Cryptography.XTEA _xTEA = null;
+        private ByteArray _messageBuffer = new ByteArray();
+        private ByteArray _outputBuffer = new ByteArray();
+        private uint _sequenceNumber = 0;
 
-        internal PacketFinishedEvent onPacketFinished = new PacketFinishedEvent();
+        public PacketFinishedEvent onPacketFinished = new PacketFinishedEvent();
 
-        internal Cryptography.XTEA XTEA {
-            get => m_XTEA;
-            set => m_XTEA = value;
+        public Cryptography.XTEA XTEA {
+            get => _xTEA;
+            set => _xTEA = value;
         }
 
-        internal ByteArray OutputPacketBuffer {
-            get => m_OutputBuffer;
+        public ByteArray OutputPacketBuffer {
+            get => _outputBuffer;
         }
 
-        internal ByteArray CreateMessage() {
+        public ByteArray CreateMessage() {
             // separate the body from the whole message
             // to make it easier to perform actions on the body
 
-            m_MessageBuffer.Length = 0;
-            m_MessageBuffer.Position = 0;
-            m_OutputBuffer.Length = 0;
-            m_OutputBuffer.Position = 0;
-            return m_MessageBuffer;
+            _messageBuffer.Length = 0;
+            _messageBuffer.Position = 0;
+            _outputBuffer.Length = 0;
+            _outputBuffer.Position = 0;
+            return _messageBuffer;
         }
 
-        internal void FinishMessage() {
-            m_OutputBuffer.Length = 0;
-            m_OutputBuffer.Position = 0;
+        public void FinishMessage() {
+            _outputBuffer.Length = 0;
+            _outputBuffer.Position = 0;
 
             int pos = Connection.PacketLengthPos + Connection.PacketLengthSize;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameProtocolSequenceNumber))
@@ -43,29 +43,29 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             else if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameProtocolChecksum))
                 pos += Connection.ChecksumSize;
             
-            m_OutputBuffer.Position = pos;
-            int messageSize = m_MessageBuffer.Position;
+            _outputBuffer.Position = pos;
+            int messageSize = _messageBuffer.Position;
 
-            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameLoginPacketEncryption) && m_XTEA != null) {
-                m_OutputBuffer.WriteUnsignedShort((ushort)messageSize);
-                m_OutputBuffer.WriteBytes(m_MessageBuffer, 0, messageSize);
-                m_XTEA.Encrypt(m_OutputBuffer, pos, m_OutputBuffer.Length - pos);
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameLoginPacketEncryption) && _xTEA != null) {
+                _outputBuffer.WriteUnsignedShort((ushort)messageSize);
+                _outputBuffer.WriteBytes(_messageBuffer, 0, messageSize);
+                _xTEA.Encrypt(_outputBuffer, pos, _outputBuffer.Length - pos);
             } else {
-                m_OutputBuffer.WriteBytes(m_MessageBuffer, 0, messageSize);
+                _outputBuffer.WriteBytes(_messageBuffer, 0, messageSize);
             }
 
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameProtocolSequenceNumber)) {
-                m_OutputBuffer.Position = Connection.SequenceNumberPos;
-                m_OutputBuffer.WriteUnsignedInt(m_SequenceNumber++);
+                _outputBuffer.Position = Connection.SequenceNumberPos;
+                _outputBuffer.WriteUnsignedInt(_sequenceNumber++);
             } else if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameProtocolChecksum)) {
-                uint checksum = Cryptography.Adler32Checksum.CalculateAdler32Checksum(m_OutputBuffer, pos, m_OutputBuffer.Length - pos);
-                m_OutputBuffer.Position = Connection.ChecksumPos;
-                m_OutputBuffer.WriteUnsignedInt(checksum);
+                uint checksum = Cryptography.Adler32Checksum.CalculateAdler32Checksum(_outputBuffer, pos, _outputBuffer.Length - pos);
+                _outputBuffer.Position = Connection.ChecksumPos;
+                _outputBuffer.WriteUnsignedInt(checksum);
             }
             
-            m_OutputBuffer.Position = Connection.PacketLengthPos;
-            m_OutputBuffer.WriteShort((short)(m_OutputBuffer.Length - Connection.PacketLengthSize));
-            m_OutputBuffer.Position = 0;
+            _outputBuffer.Position = Connection.PacketLengthPos;
+            _outputBuffer.WriteShort((short)(_outputBuffer.Length - Connection.PacketLengthSize));
+            _outputBuffer.Position = 0;
 
             onPacketFinished.Invoke();
         }

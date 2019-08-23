@@ -8,63 +8,63 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Outfit
 {
-    internal class OutfitWindow : Core.Components.Base.Window
+    public class OutfitWindow : Core.Components.Base.Window
     {
-        [SerializeField] private ButtonWrapper m_OKButtonWrapper = null;
-        [SerializeField] private Button m_CancelButton = null;
-        [SerializeField] private LayoutElement m_PanelContentLayout = null;
-        [SerializeField] private RectTransform m_PanelOutfit = null;
-        [SerializeField] private RectTransform m_PanelMount = null;
-        [SerializeField] private RectTransform m_PanelColors = null;
-        [SerializeField] private ToggleGroup m_OutfitColorToggleGroup = null;
-        [SerializeField] private ToggleWrapper m_ToggleWrapperHead = null;
-        [SerializeField] private ToggleWrapper m_ToggleWrapperBody = null;
-        [SerializeField] private ToggleWrapper m_ToggleWrapperLegs = null;
-        [SerializeField] private ToggleWrapper m_ToggleWrapperFeet = null;
-        [SerializeField] private TMPro.TextMeshProUGUI m_LabelInformation = null;
-        [SerializeField] private Button m_ButtonNextOutfitLegacy = null;
-        [SerializeField] private Button m_ButtonNextOutfit = null;
-        [SerializeField] private Button m_ButtonPrevOutfit = null;
-        [SerializeField] private RectTransform m_PanelOutfitName = null;
-        [SerializeField] private TMPro.TextMeshProUGUI m_LabelOutfitName = null;
-        [SerializeField] private RectTransform m_PanelAddons = null;
-        [SerializeField] private CheckboxWrapper m_CheckboxAddon1 = null;
-        [SerializeField] private CheckboxWrapper m_CheckboxAddon2 = null;
-        [SerializeField] private CheckboxWrapper m_CheckboxAddon3 = null;
-        [SerializeField] private Button m_ButtonNextMount = null;
-        [SerializeField] private Button m_ButtonPrevMount = null;
-        [SerializeField] private TMPro.TextMeshProUGUI m_LabelMountName = null;
-        [SerializeField] private RawImage m_RawImageOutfit = null;
-        [SerializeField] private RawImage m_RawImageMount = null;
+        [SerializeField] private ButtonWrapper _oKButtonWrapper = null;
+        [SerializeField] private Button _cancelButton = null;
+        [SerializeField] private LayoutElement _panelContentLayout = null;
+        [SerializeField] private RectTransform _panelOutfit = null;
+        [SerializeField] private RectTransform _panelMount = null;
+        [SerializeField] private RectTransform _panelColors = null;
+        [SerializeField] private ToggleGroup _outfitColorToggleGroup = null;
+        [SerializeField] private ToggleWrapper _toggleWrapperHead = null;
+        [SerializeField] private ToggleWrapper _toggleWrapperBody = null;
+        [SerializeField] private ToggleWrapper _toggleWrapperLegs = null;
+        [SerializeField] private ToggleWrapper _toggleWrapperFeet = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _labelInformation = null;
+        [SerializeField] private Button _buttonNextOutfitLegacy = null;
+        [SerializeField] private Button _buttonNextOutfit = null;
+        [SerializeField] private Button _buttonPrevOutfit = null;
+        [SerializeField] private RectTransform _panelOutfitName = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _labelOutfitName = null;
+        [SerializeField] private RectTransform _panelAddons = null;
+        [SerializeField] private CheckboxWrapper _checkboxAddon1 = null;
+        [SerializeField] private CheckboxWrapper _checkboxAddon2 = null;
+        [SerializeField] private CheckboxWrapper _checkboxAddon3 = null;
+        [SerializeField] private Button _buttonNextMount = null;
+        [SerializeField] private Button _buttonPrevMount = null;
+        [SerializeField] private TMPro.TextMeshProUGUI _labelMountName = null;
+        [SerializeField] private RawImage _rawImageOutfit = null;
+        [SerializeField] private RawImage _rawImageMount = null;
 
-        [SerializeField] private float m_SpacingFactor = 0.8f;
+        [SerializeField] private float _spacingFactor = 0.8f;
         [SerializeField] private OutfitColorItem ColorItemTemplate = null;
 
-        private List<ProtocolOutfit> m_Outfits = null;
-        private List<ProtocolMount> m_Mounts = null;
-        private AppearanceInstance m_CurrentOutfit = null;
-        private AppearanceInstance m_CurrentMount = null;
-        private int m_CurrentOutfitIndex = 0;
-        private int m_CurrentMountIndex = 0;
-        private Direction m_CurrentDirection = Direction.South;
-        private bool m_UpdatingOutfit = false;
-        private bool m_Initialized = false;
+        private List<ProtocolOutfit> _outfits = null;
+        private List<ProtocolMount> _mounts = null;
+        private AppearanceInstance _currentOutfit = null;
+        private AppearanceInstance _currentMount = null;
+        private int _currentOutfitIndex = 0;
+        private int _currentMountIndex = 0;
+        private Direction _currentDirection = Direction.South;
+        private bool _updatingOutfit = false;
+        private bool _initialized = false;
 
-        private RenderTexture m_RenderTexture = null;
-        private OutfitColorItem[] m_ColorItems;
+        private RenderTexture _renderTexture = null;
+        private OutfitColorItem[] _colorItems;
         
         protected override void Start() {
             base.Start();
 
             // Create outfit colors
-            m_ColorItems = new OutfitColorItem[Core.Colors.HSI_H_STEPS * Core.Colors.HSI_SI_VALUES];
+            _colorItems = new OutfitColorItem[Core.Colors.HSI_H_STEPS * Core.Colors.HSI_SI_VALUES];
             for (int i = 0; i < Core.Colors.HSI_H_STEPS; i++) {
                 for (int j = 0; j < Core.Colors.HSI_SI_VALUES; j++) {
-                    var colorItem = Instantiate(ColorItemTemplate, m_PanelColors);
+                    var colorItem = Instantiate(ColorItemTemplate, _panelColors);
                     int hsiColor = j * Core.Colors.HSI_H_STEPS + i;
-                    colorItem.toggleComponent.group = m_OutfitColorToggleGroup;
+                    colorItem.toggleComponent.group = _outfitColorToggleGroup;
                     colorItem.imageComponent.color = Core.Colors.ColorFromHSI(hsiColor);
-                    m_ColorItems[hsiColor] = colorItem;
+                    _colorItems[hsiColor] = colorItem;
 
                     colorItem.toggleComponent.onValueChanged.AddListener((value) => {
                         if (value)
@@ -76,32 +76,32 @@ namespace OpenTibiaUnity.Modules.Outfit
             ColorItemTemplate.gameObject.SetActive(false);
 
             // this was never introduced and was removed from tibia soon
-            m_CheckboxAddon3.DisableComponent();
+            _checkboxAddon3.DisableComponent();
 
             // setup events
-            m_ToggleWrapperHead.toggle.onValueChanged.AddListener(OnHeadToggleValueChanged);
-            m_ToggleWrapperBody.toggle.onValueChanged.AddListener(OnBodyToggleValueChanged);
-            m_ToggleWrapperLegs.toggle.onValueChanged.AddListener(OnLegsToggleValueChanged);
-            m_ToggleWrapperFeet.toggle.onValueChanged.AddListener(OnFeetToggleValueChanged);
-            m_OKButtonWrapper.button.onClick.AddListener(OnOkButtonClick);
-            m_CancelButton.onClick.AddListener(OnCancelButtonClick);
-            m_ButtonNextOutfitLegacy.onClick.AddListener(OnNextOutfitButtonClick);
-            m_ButtonNextOutfit.onClick.AddListener(OnNextOutfitButtonClick);
-            m_ButtonPrevOutfit.onClick.AddListener(OnPrevOutfitButtonClick);
-            m_CheckboxAddon1.onValueChanged.AddListener(OnAddon1CheckboxChange);
-            m_CheckboxAddon2.onValueChanged.AddListener(OnAddon2CheckboxChange);
-            m_ButtonNextMount.onClick.AddListener(OnNextMountButtonClick);
-            m_ButtonPrevMount.onClick.AddListener(OnPrevMountButtonClick);
+            _toggleWrapperHead.toggle.onValueChanged.AddListener(OnHeadToggleValueChanged);
+            _toggleWrapperBody.toggle.onValueChanged.AddListener(OnBodyToggleValueChanged);
+            _toggleWrapperLegs.toggle.onValueChanged.AddListener(OnLegsToggleValueChanged);
+            _toggleWrapperFeet.toggle.onValueChanged.AddListener(OnFeetToggleValueChanged);
+            _oKButtonWrapper.button.onClick.AddListener(OnOkButtonClick);
+            _cancelButton.onClick.AddListener(OnCancelButtonClick);
+            _buttonNextOutfitLegacy.onClick.AddListener(OnNextOutfitButtonClick);
+            _buttonNextOutfit.onClick.AddListener(OnNextOutfitButtonClick);
+            _buttonPrevOutfit.onClick.AddListener(OnPrevOutfitButtonClick);
+            _checkboxAddon1.onValueChanged.AddListener(OnAddon1CheckboxChange);
+            _checkboxAddon2.onValueChanged.AddListener(OnAddon2CheckboxChange);
+            _buttonNextMount.onClick.AddListener(OnNextMountButtonClick);
+            _buttonPrevMount.onClick.AddListener(OnPrevMountButtonClick);
             
             OpenTibiaUnity.GameManager.onClientVersionChange.AddListener(OnClientVersionChange);
             if (OpenTibiaUnity.GameManager.ClientVersion != 0)
                 OnClientVersionChange(0, OpenTibiaUnity.GameManager.ClientVersion);
             
-            m_RawImageOutfit.uvRect = new Rect(0, 0, 0.5f, 1f);
-            m_RawImageMount.uvRect = new Rect(0.5f, 0, 0.5f, 1f);
+            _rawImageOutfit.uvRect = new Rect(0, 0, 0.5f, 1f);
+            _rawImageMount.uvRect = new Rect(0.5f, 0, 0.5f, 1f);
 
-            m_Initialized = true;
-            if (m_CurrentOutfit)
+            _initialized = true;
+            if (_currentOutfit)
                 OnFirstShow();
         }
 
@@ -109,68 +109,68 @@ namespace OpenTibiaUnity.Modules.Outfit
             if (Event.current.type != EventType.Repaint)
                 return;
 
-            if (!m_CurrentOutfit && !m_CurrentMount)
+            if (!_currentOutfit && !_currentMount)
                 return;
 
-            if (m_RenderTexture == null) {
+            if (_renderTexture == null) {
                 var descriptor = new RenderTextureDescriptor(Constants.FieldSize * 2 * 2, Constants.FieldSize * 2, RenderTextureFormat.ARGB32, 0);
-                m_RenderTexture = new RenderTexture(descriptor);
-                m_RenderTexture.filterMode = FilterMode.Point;
+                _renderTexture = new RenderTexture(descriptor);
+                _renderTexture.filterMode = FilterMode.Point;
 
-                m_RawImageOutfit.texture = m_RenderTexture;
-                m_RawImageMount.texture = m_RenderTexture;
+                _rawImageOutfit.texture = _renderTexture;
+                _rawImageMount.texture = _renderTexture;
             } else {
-                m_RenderTexture.Release();
+                _renderTexture.Release();
             }
 
-            RenderTexture.active = m_RenderTexture;
+            RenderTexture.active = _renderTexture;
             GL.Clear(false, true, new Color(0, 0, 0, 0));
 
-            if (!!m_CurrentOutfit) {
+            if (!!_currentOutfit) {
                 var screenPosition = new Vector2(Constants.FieldSize, Constants.FieldSize);
-                var zoom = new Vector2(Screen.width / (float)m_RenderTexture.width, Screen.height / (float)m_RenderTexture.height);
+                var zoom = new Vector2(Screen.width / (float)_renderTexture.width, Screen.height / (float)_renderTexture.height);
 
                 if (!OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerMounts))
-                    screenPosition *= m_SpacingFactor;
+                    screenPosition *= _spacingFactor;
 
-                if (m_CurrentOutfit is OutfitInstance)
-                    m_CurrentOutfit.DrawTo(screenPosition, zoom, (int)m_CurrentDirection, 0, 0);
+                if (_currentOutfit is OutfitInstance)
+                    _currentOutfit.DrawTo(screenPosition, zoom, (int)_currentDirection, 0, 0);
                 else
-                    m_CurrentOutfit.DrawTo(screenPosition, zoom, 0, 0, 0);
+                    _currentOutfit.DrawTo(screenPosition, zoom, 0, 0, 0);
                 
-                if (!m_RawImageOutfit.enabled)
-                    m_RawImageOutfit.enabled = true;
+                if (!_rawImageOutfit.enabled)
+                    _rawImageOutfit.enabled = true;
             }
 
-            if (!!m_CurrentMount) {
+            if (!!_currentMount) {
                 var screenPosition = new Vector2(Constants.FieldSize, Constants.FieldSize);
-                var zoom = new Vector2(Screen.width / (float)m_RenderTexture.width, Screen.height / (float)m_RenderTexture.height);
+                var zoom = new Vector2(Screen.width / (float)_renderTexture.width, Screen.height / (float)_renderTexture.height);
 
-                screenPosition *= m_SpacingFactor;
+                screenPosition *= _spacingFactor;
                 screenPosition += new Vector2(Constants.FieldSize * 2, 0);
 
-                if (m_CurrentMount is OutfitInstance)
-                    m_CurrentMount.DrawTo(screenPosition, zoom, (int)m_CurrentDirection, 0, 0);
+                if (_currentMount is OutfitInstance)
+                    _currentMount.DrawTo(screenPosition, zoom, (int)_currentDirection, 0, 0);
                 else
-                    m_CurrentMount.DrawTo(screenPosition, zoom, 0, 0, 0);
+                    _currentMount.DrawTo(screenPosition, zoom, 0, 0, 0);
                 
-                if (!m_RawImageMount.enabled)
-                    m_RawImageMount.enabled = true;
+                if (!_rawImageMount.enabled)
+                    _rawImageMount.enabled = true;
             }
 
             RenderTexture.active = null;
         }
 
         protected override void OnEnable() {
-            if (!m_CurrentOutfit || !m_Initialized)
+            if (!_currentOutfit || !_initialized)
                 return;
 
             OnFirstShow();
         }
 
         private void OnFirstShow() {
-            m_ToggleWrapperHead.toggle.isOn = true;
-            if (m_CurrentOutfit is OutfitInstance outfitInstance)
+            _toggleWrapperHead.toggle.isOn = true;
+            if (_currentOutfit is OutfitInstance outfitInstance)
                 UpdateColorItems(outfitInstance.Head);
         }
 
@@ -180,64 +180,64 @@ namespace OpenTibiaUnity.Modules.Outfit
             bool hasMounts = OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerMounts);
 
             if (hasNewProtocol) {
-                m_PanelContentLayout.minWidth = 462;
-                m_PanelOutfit.sizeDelta = new Vector2(141, 141);
-                m_ToggleWrapperHead.rectTransform.anchoredPosition = new Vector2(153, 0);
-                m_ToggleWrapperBody.rectTransform.anchoredPosition = new Vector2(153, -24);
-                m_ToggleWrapperLegs.rectTransform.anchoredPosition = new Vector2(153, -48);
-                m_ToggleWrapperFeet.rectTransform.anchoredPosition = new Vector2(153, -72);
-                m_ToggleWrapperHead.rectTransform.sizeDelta = new Vector2(57, 21);
-                m_ToggleWrapperBody.rectTransform.sizeDelta = new Vector2(57, 21);
-                m_ToggleWrapperLegs.rectTransform.sizeDelta = new Vector2(57, 21);
-                m_ToggleWrapperFeet.rectTransform.sizeDelta = new Vector2(57, 21);
-                m_ToggleWrapperBody.label.text = "Primary";
-                m_ToggleWrapperLegs.label.text = "Secondary";
-                m_ToggleWrapperFeet.label.text = "Detail";
+                _panelContentLayout.minWidth = 462;
+                _panelOutfit.sizeDelta = new Vector2(141, 141);
+                _toggleWrapperHead.rectTransform.anchoredPosition = new Vector2(153, 0);
+                _toggleWrapperBody.rectTransform.anchoredPosition = new Vector2(153, -24);
+                _toggleWrapperLegs.rectTransform.anchoredPosition = new Vector2(153, -48);
+                _toggleWrapperFeet.rectTransform.anchoredPosition = new Vector2(153, -72);
+                _toggleWrapperHead.rectTransform.sizeDelta = new Vector2(57, 21);
+                _toggleWrapperBody.rectTransform.sizeDelta = new Vector2(57, 21);
+                _toggleWrapperLegs.rectTransform.sizeDelta = new Vector2(57, 21);
+                _toggleWrapperFeet.rectTransform.sizeDelta = new Vector2(57, 21);
+                _toggleWrapperBody.label.text = "Primary";
+                _toggleWrapperLegs.label.text = "Secondary";
+                _toggleWrapperFeet.label.text = "Detail";
 
-                m_PanelColors.offsetMin = new Vector2(219, m_PanelColors.offsetMin.y);
+                _panelColors.offsetMin = new Vector2(219, _panelColors.offsetMin.y);
 
                 if (hasMounts) {
-                    m_PanelContentLayout.minHeight = 268;
-                    m_LabelInformation.rectTransform.anchoredPosition = new Vector2(0, -180);
-                    m_LabelInformation.text = TextResources.OUTFIT_LABEL_INFO_NEW_PROTOCOL_MOUNT;
-                    m_PanelAddons.anchoredPosition = new Vector2(153, -100);
+                    _panelContentLayout.minHeight = 268;
+                    _labelInformation.rectTransform.anchoredPosition = new Vector2(0, -180);
+                    _labelInformation.text = TextResources.OUTFIT_LABEL_INFO_NEW_PROTOCOL_MOUNT;
+                    _panelAddons.anchoredPosition = new Vector2(153, -100);
                 } else {
-                    m_PanelContentLayout.minHeight = 258;
-                    m_LabelInformation.rectTransform.anchoredPosition = new Vector2(153, -100);
-                    m_LabelInformation.text = TextResources.OUTFIT_LABEL_INFO_NEW_PROTOCOL;
-                    m_PanelAddons.anchoredPosition = new Vector2(0, -175);
+                    _panelContentLayout.minHeight = 258;
+                    _labelInformation.rectTransform.anchoredPosition = new Vector2(153, -100);
+                    _labelInformation.text = TextResources.OUTFIT_LABEL_INFO_NEW_PROTOCOL;
+                    _panelAddons.anchoredPosition = new Vector2(0, -175);
                 }
             } else {
-                m_PanelContentLayout.minWidth = 380;
-                m_PanelContentLayout.minHeight = 140;
-                m_PanelOutfit.sizeDelta = new Vector2(69, 69);
-                m_ToggleWrapperHead.rectTransform.anchoredPosition = new Vector2(81, 0);
-                m_ToggleWrapperBody.rectTransform.anchoredPosition = new Vector2(81, -24);
-                m_ToggleWrapperLegs.rectTransform.anchoredPosition = new Vector2(81, -48);
-                m_ToggleWrapperFeet.rectTransform.anchoredPosition = new Vector2(81, -72);
-                m_ToggleWrapperHead.rectTransform.sizeDelta = new Vector2(42, 21);
-                m_ToggleWrapperBody.rectTransform.sizeDelta = new Vector2(42, 21);
-                m_ToggleWrapperLegs.rectTransform.sizeDelta = new Vector2(42, 21);
-                m_ToggleWrapperFeet.rectTransform.sizeDelta = new Vector2(42, 21);
-                m_ToggleWrapperBody.label.text = "Body";
-                m_ToggleWrapperLegs.label.text = "Legs";
-                m_ToggleWrapperFeet.label.text = "Feet";
+                _panelContentLayout.minWidth = 380;
+                _panelContentLayout.minHeight = 140;
+                _panelOutfit.sizeDelta = new Vector2(69, 69);
+                _toggleWrapperHead.rectTransform.anchoredPosition = new Vector2(81, 0);
+                _toggleWrapperBody.rectTransform.anchoredPosition = new Vector2(81, -24);
+                _toggleWrapperLegs.rectTransform.anchoredPosition = new Vector2(81, -48);
+                _toggleWrapperFeet.rectTransform.anchoredPosition = new Vector2(81, -72);
+                _toggleWrapperHead.rectTransform.sizeDelta = new Vector2(42, 21);
+                _toggleWrapperBody.rectTransform.sizeDelta = new Vector2(42, 21);
+                _toggleWrapperLegs.rectTransform.sizeDelta = new Vector2(42, 21);
+                _toggleWrapperFeet.rectTransform.sizeDelta = new Vector2(42, 21);
+                _toggleWrapperBody.label.text = "Body";
+                _toggleWrapperLegs.label.text = "Legs";
+                _toggleWrapperFeet.label.text = "Feet";
 
-                m_PanelColors.offsetMin = new Vector3(135, m_PanelColors.offsetMin.y);
-                m_LabelInformation.rectTransform.anchoredPosition = new Vector2(0, -100);
-                m_LabelInformation.text = TextResources.OUTFIT_LABEL_INFO_LEGACY_PROTOCOL;
+                _panelColors.offsetMin = new Vector3(135, _panelColors.offsetMin.y);
+                _labelInformation.rectTransform.anchoredPosition = new Vector2(0, -100);
+                _labelInformation.text = TextResources.OUTFIT_LABEL_INFO_LEGACY_PROTOCOL;
             }
 
-            m_ButtonNextOutfitLegacy.gameObject.SetActive(!hasNewProtocol);
-            m_ButtonNextOutfit.gameObject.SetActive(hasNewProtocol);
-            m_ButtonPrevOutfit.gameObject.SetActive(hasNewProtocol);
-            m_PanelOutfitName.gameObject.SetActive(hasNewProtocol);
-            m_PanelAddons.gameObject.SetActive(hasAddons);
-            m_PanelMount.gameObject.SetActive(hasMounts);
+            _buttonNextOutfitLegacy.gameObject.SetActive(!hasNewProtocol);
+            _buttonNextOutfit.gameObject.SetActive(hasNewProtocol);
+            _buttonPrevOutfit.gameObject.SetActive(hasNewProtocol);
+            _panelOutfitName.gameObject.SetActive(hasNewProtocol);
+            _panelAddons.gameObject.SetActive(hasAddons);
+            _panelMount.gameObject.SetActive(hasMounts);
 
-            if (m_RenderTexture) {
-                m_RenderTexture.Release();
-                m_RenderTexture = null;
+            if (_renderTexture) {
+                _renderTexture.Release();
+                _renderTexture = null;
             }
         }
 
@@ -245,7 +245,7 @@ namespace OpenTibiaUnity.Modules.Outfit
             if (!value)
                 return;
 
-            if (m_CurrentOutfit is OutfitInstance outfitInstance)
+            if (_currentOutfit is OutfitInstance outfitInstance)
                 UpdateColorItems(outfitInstance.Head);
             else
                 UpdateColorItems(0);
@@ -255,7 +255,7 @@ namespace OpenTibiaUnity.Modules.Outfit
             if (!value)
                 return;
 
-            if (m_CurrentOutfit is OutfitInstance outfitInstance)
+            if (_currentOutfit is OutfitInstance outfitInstance)
                 UpdateColorItems(outfitInstance.Torso);
             else
                 UpdateColorItems(0);
@@ -265,7 +265,7 @@ namespace OpenTibiaUnity.Modules.Outfit
             if (!value)
                 return;
 
-            if (m_CurrentOutfit is OutfitInstance outfitInstance)
+            if (_currentOutfit is OutfitInstance outfitInstance)
                 UpdateColorItems(outfitInstance.Legs);
             else
                 UpdateColorItems(0);
@@ -275,7 +275,7 @@ namespace OpenTibiaUnity.Modules.Outfit
             if (!value)
                 return;
 
-            if (m_CurrentOutfit is OutfitInstance outfitInstance)
+            if (_currentOutfit is OutfitInstance outfitInstance)
                 UpdateColorItems(outfitInstance.Detail);
             else
                 UpdateColorItems(0);
@@ -283,86 +283,86 @@ namespace OpenTibiaUnity.Modules.Outfit
 
         private void OnOkButtonClick() {
             if (!!OpenTibiaUnity.ProtocolGame) {
-                if (m_CurrentOutfit is OutfitInstance outfitInstance)
-                    OpenTibiaUnity.ProtocolGame.SendSetOutfit(outfitInstance, m_CurrentMount as OutfitInstance);
+                if (_currentOutfit is OutfitInstance outfitInstance)
+                    OpenTibiaUnity.ProtocolGame.SendSetOutfit(outfitInstance, _currentMount as OutfitInstance);
             }
 
-            m_CurrentOutfit = null;
-            m_CurrentMount = null;
-            m_Outfits = null;
-            m_Mounts = null;
-            m_CurrentOutfitIndex = -1;
-            m_CurrentMountIndex = -1;
-            CloseWindow();
+            _currentOutfit = null;
+            _currentMount = null;
+            _outfits = null;
+            _mounts = null;
+            _currentOutfitIndex = -1;
+            _currentMountIndex = -1;
+            Close();
         }
 
         private void OnCancelButtonClick() {
-            CloseWindow();
+            Close();
         }
 
         private void OnNextOutfitButtonClick() {
-            int newIndex = m_CurrentOutfitIndex + 1;
-            if (newIndex >= m_Outfits.Count)
+            int newIndex = _currentOutfitIndex + 1;
+            if (newIndex >= _outfits.Count)
                 newIndex = 0;
             ChangeOutfitIndex(newIndex);
         }
 
         private void OnPrevOutfitButtonClick() {
-            int newIndex = m_CurrentOutfitIndex - 1;
+            int newIndex = _currentOutfitIndex - 1;
             if (newIndex < 0)
-                newIndex = m_Outfits.Count - 1;
+                newIndex = _outfits.Count - 1;
             ChangeOutfitIndex(newIndex);
         }
 
         private void OnAddon1CheckboxChange(bool value) {
-            if (m_UpdatingOutfit)
+            if (_updatingOutfit)
                 return;
             UpdateAddons(value, 1);
         }
 
         private void OnAddon2CheckboxChange(bool value) {
-            if (m_UpdatingOutfit)
+            if (_updatingOutfit)
                 return;
             UpdateAddons(value, 2);
         }
 
         private void OnNextMountButtonClick() {
-            int newIndex = m_CurrentMountIndex + 1;
-            if (newIndex >= m_Mounts.Count)
+            int newIndex = _currentMountIndex + 1;
+            if (newIndex >= _mounts.Count)
                 newIndex = 0;
             ChangeMountIndex(newIndex);
         }
 
         private void OnPrevMountButtonClick() {
-            int newIndex = m_CurrentMountIndex - 1;
+            int newIndex = _currentMountIndex - 1;
             if (newIndex < 0)
-                newIndex = m_Mounts.Count - 1;
+                newIndex = _mounts.Count - 1;
             ChangeMountIndex(newIndex);
         }
 
         private void UpdateColorItems(int hsiColor) {
-            m_UpdatingOutfit = true;
-            m_ColorItems[hsiColor].toggleComponent.isOn = true;
-            m_UpdatingOutfit = false;
+            _updatingOutfit = true;
+            _colorItems[hsiColor].toggleComponent.isOn = true;
+            _updatingOutfit = false;
         }
 
         private void UpdateColor(int hsiColor) {
-            if (m_UpdatingOutfit)
+            if (_updatingOutfit)
                 return;
 
-            if (m_CurrentOutfit is OutfitInstance outfitInstance) {
+            if (_currentOutfit is OutfitInstance outfitInstance) {
                 int head = outfitInstance.Head;
                 int body = outfitInstance.Torso;
                 int legs = outfitInstance.Legs;
                 int feet = outfitInstance.Detail;
                 
-                if (m_ToggleWrapperHead.toggle.isOn)
+                if (_toggleWrapperHead.toggle.isOn)
                     head = hsiColor;
-                else if (m_ToggleWrapperBody.toggle.isOn)
+                else if (_toggleWrapperBody.toggle.isOn)
                     body = hsiColor;
-                else if (m_ToggleWrapperLegs.toggle.isOn)
+                else if (_toggleWrapperLegs.toggle.isOn)
                     legs = hsiColor;
-                else if (m_ToggleWrapperFeet.toggle.isOn)
+                else if (_toggleWrapperFeet.toggle.isOn)
                     feet = hsiColor;
 
                 outfitInstance.UpdateProperties(head, body, legs, feet, outfitInstance.AddOns);
@@ -370,7 +370,7 @@ namespace OpenTibiaUnity.Modules.Outfit
         }
 
         private void UpdateAddons(bool value, int newAddon) {
-            if (m_CurrentOutfit is OutfitInstance outfitInstance) {
+            if (_currentOutfit is OutfitInstance outfitInstance) {
                 int addons = outfitInstance.AddOns;
                 if (value)
                     addons |= newAddon;
@@ -386,85 +386,85 @@ namespace OpenTibiaUnity.Modules.Outfit
         }
 
         private void ChangeOutfitIndex(int newIndex) {
-            if (m_CurrentOutfitIndex == newIndex)
+            if (_currentOutfitIndex == newIndex)
                 return;
 
-            m_UpdatingOutfit = true;
-            m_CurrentOutfitIndex = newIndex;
-            var newProtocolOutfit = m_Outfits[m_CurrentOutfitIndex];
+            _updatingOutfit = true;
+            _currentOutfitIndex = newIndex;
+            var newProtocolOutfit = _outfits[_currentOutfitIndex];
 
             int head = 0, body = 0, legs = 0, feet = 0, addons = newProtocolOutfit.AddOns;
-            if (m_CurrentOutfit is OutfitInstance outfitInstance) {
+            if (_currentOutfit is OutfitInstance outfitInstance) {
                 head = outfitInstance.Head;
                 body = outfitInstance.Torso;
                 legs = outfitInstance.Legs;
                 feet = outfitInstance.Detail;
             }
 
-            m_CheckboxAddon1.checkbox.Checked = (addons & 1) != 0;
-            m_CheckboxAddon2.checkbox.Checked = (addons & 2) != 0;
-            m_CheckboxAddon1.SetEnabled(m_CheckboxAddon1.checkbox.Checked);
-            m_CheckboxAddon2.SetEnabled(m_CheckboxAddon2.checkbox.Checked);
+            _checkboxAddon1.checkbox.Checked = (addons & 1) != 0;
+            _checkboxAddon2.checkbox.Checked = (addons & 2) != 0;
+            _checkboxAddon1.SetEnabled(_checkboxAddon1.checkbox.Checked);
+            _checkboxAddon2.SetEnabled(_checkboxAddon2.checkbox.Checked);
             
-            m_CurrentOutfit = OpenTibiaUnity.AppearanceStorage.CreateOutfitInstance(newProtocolOutfit.ID, head, body, legs, feet, addons);
+            _currentOutfit = OpenTibiaUnity.AppearanceStorage.CreateOutfitInstance(newProtocolOutfit._id, head, body, legs, feet, addons);
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameNewOutfitProtocol))
                 UpdateInformation(true, false);
 
-            m_UpdatingOutfit = false;
+            _updatingOutfit = false;
         }
 
         private void ChangeMountIndex(int newIndex) {
-            if (m_CurrentMountIndex == newIndex)
+            if (_currentMountIndex == newIndex)
                 return;
 
-            if (m_Mounts.Count == 0) {
-                m_CurrentMountIndex = -1;
+            if (_mounts.Count == 0) {
+                _currentMountIndex = -1;
             } else {
-                m_CurrentMountIndex = newIndex;
-                var newProtocolMount = m_Mounts[m_CurrentMountIndex];
+                _currentMountIndex = newIndex;
+                var newProtocolMount = _mounts[_currentMountIndex];
 
-                m_CurrentMount = OpenTibiaUnity.AppearanceStorage.CreateOutfitInstance(newProtocolMount.ID, 0, 0, 0, 0, 0);
+                _currentMount = OpenTibiaUnity.AppearanceStorage.CreateOutfitInstance(newProtocolMount._id, 0, 0, 0, 0, 0);
             }
 
             UpdateInformation(false, true);
         }
 
-        internal bool UpdateProperties(AppearanceInstance outfit, AppearanceInstance mountOutfit, List<ProtocolOutfit> outfits, List<ProtocolMount> mounts) {
-            m_Outfits = outfits;
-            m_Mounts = mounts;
+        public bool UpdateProperties(AppearanceInstance outfit, AppearanceInstance mountOutfit, List<ProtocolOutfit> outfits, List<ProtocolMount> mounts) {
+            _outfits = outfits;
+            _mounts = mounts;
 
-            int outfitIndex = m_Outfits.FindIndex((x) => x.ID == outfit.ID);
+            int outfitIndex = _outfits.FindIndex((x) => x._id == outfit.Id);
             if (outfitIndex == -1)
                 outfitIndex = 0;
 
             ChangeOutfitIndex(outfitIndex);
 
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerMounts)) {
-                int mountIndex = mountOutfit != null ? m_Mounts.FindIndex((x) => x.ID == mountOutfit.ID) : 0;
-                if (mountIndex == -1 && m_Mounts.Count > 0)
+                int mountIndex = mountOutfit != null ? _mounts.FindIndex((x) => x._id == mountOutfit.Id) : 0;
+                if (mountIndex == -1 && _mounts.Count > 0)
                     mountIndex = 0;
 
                 ChangeMountIndex(mountIndex);
             }
 
-            m_CurrentOutfit = outfit;
-            m_CurrentMount = mountOutfit;
-            m_CurrentDirection = Direction.South;
+            _currentOutfit = outfit;
+            _currentMount = mountOutfit;
+            _currentDirection = Direction.South;
             return true;
         }
 
         private void UpdateInformation(bool outfit, bool mount) {
             if (outfit) {
-                var protocolOutfit = m_Outfits[m_CurrentOutfitIndex];
-                m_LabelOutfitName.text = protocolOutfit.Name;
+                var protocolOutfit = _outfits[_currentOutfitIndex];
+                _labelOutfitName.text = protocolOutfit.Name;
             }
 
             if (mount) {
-                if (m_CurrentMountIndex > -1) {
-                    var protocolMount = m_Mounts[m_CurrentMountIndex];
-                    m_LabelMountName.text = protocolMount.Name;
+                if (_currentMountIndex > -1) {
+                    var protocolMount = _mounts[_currentMountIndex];
+                    _labelMountName.text = protocolMount.Name;
                 } else {
-                    m_LabelMountName.text = "No Mount";
+                    _labelMountName.text = "No Mount";
                 }
             }
         }

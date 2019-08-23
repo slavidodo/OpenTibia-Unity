@@ -2,9 +2,9 @@
 
 namespace OpenTibiaUnity.Core.Input.StaticAction
 {
-    internal class ChatInsertClipboard : StaticAction
+    public class ChatInsertClipboard : StaticAction
     {
-        internal ChatInsertClipboard(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
+        public ChatInsertClipboard(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
 
         public override bool Perform(bool repeat = false) {
             var inputField = StaticAction.GetSelectedInputField();
@@ -36,7 +36,7 @@ namespace OpenTibiaUnity.Core.Input.StaticAction
         }
 
         public override IAction Clone() {
-            return new ChatInsertClipboard(m_ID, m_Label, m_EventMask);
+            return new ChatInsertClipboard(_id, _label, _eventMask);
         }
     }
 }

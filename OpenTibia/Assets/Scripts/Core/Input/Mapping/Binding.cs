@@ -2,94 +2,94 @@
 
 namespace OpenTibiaUnity.Core.Input.Mapping
 {
-    internal class Binding
+    public class Binding
     {
-        private bool m_IgnoreBlocker = true;
-        private bool m_Editable = true;
-        private IAction m_Action = null;
-        private char m_CharCode = '\0';
-        private KeyCode m_KeyCode = KeyCode.None;
-        private EventModifiers m_EventModifier = EventModifiers.None;
-        private uint m_EventMask = 0;
+        private bool _ignoreBlocker = true;
+        private bool _editable = true;
+        private IAction _action = null;
+        private char _bharCode = '\0';
+        private KeyCode _keyCode = KeyCode.None;
+        private EventModifiers _eventModifier = EventModifiers.None;
+        private uint _eventMask = 0;
 
-        internal char CharCode {
-            get { return m_CharCode; }
+        public char CharCode {
+            get { return _bharCode; }
         }
 
-        internal KeyCode KeyCode {
-            get { return m_KeyCode; }
+        public KeyCode KeyCode {
+            get { return _keyCode; }
         }
 
-        internal EventModifiers EventModifier {
-            get { return m_EventModifier; }
+        public EventModifiers EventModifier {
+            get { return _eventModifier; }
         }
 
-        internal IAction Action {
-            get { return m_Action; }
+        public IAction Action {
+            get { return _action; }
         }
 
-        internal bool Editable {
-            get { return m_Editable; }
+        public bool Editable {
+            get { return _editable; }
         }
 
-        internal uint EventMask {
-            get { return m_EventMask; }
+        public uint EventMask {
+            get { return _eventMask; }
         }
 
-        internal bool IgnoreBlocker {
-            get { return m_IgnoreBlocker; }
+        public bool IgnoreBlocker {
+            get { return _ignoreBlocker; }
         }
 
-        internal Binding(IAction action, char charCode, KeyCode keyCode, EventModifiers eventModifier, bool ignoreBlocker = true, bool editable = true) {
-            m_Action = action;
+        public Binding(IAction action, char charCode, KeyCode keyCode, EventModifiers eventModifier, bool ignoreBlocker = true, bool editable = true) {
+            _action = action;
             if (action is StaticAction.StaticAction)
-                m_EventMask = (action as StaticAction.StaticAction).EventMask;
+                _eventMask = (action as StaticAction.StaticAction).EventMask;
             else
-                m_EventMask = 0;
+                _eventMask = 0;
 
             Update(charCode, keyCode, eventModifier, ignoreBlocker, editable);
         }
 
-        internal void Update(char charCode, KeyCode keyCode, EventModifiers eventModifier, bool ignoreBlocker = true, bool editable = true) {
-            if (!m_Editable)
+        public void Update(char charCode, KeyCode keyCode, EventModifiers eventModifier, bool ignoreBlocker = true, bool editable = true) {
+            if (!_editable)
                 return;
 
-            m_CharCode = charCode;
-            m_KeyCode = keyCode;
-            m_EventModifier = eventModifier;
-            m_IgnoreBlocker = ignoreBlocker;
-            m_Editable = editable;
+            _bharCode = charCode;
+            _keyCode = keyCode;
+            _eventModifier = eventModifier;
+            _ignoreBlocker = ignoreBlocker;
+            _editable = editable;
         }
 
-        internal bool AppliesTo(uint eventMask, KeyCode keyCode, EventModifiers keyModifer, bool blockerActive) {
-            if (!((m_EventMask & eventMask) != 0 && m_KeyCode == keyCode && m_EventModifier == keyModifer))
+        public bool AppliesTo(uint eventMask, KeyCode keyCode, EventModifiers keyModifer, bool blockerActive) {
+            if (!((_eventMask & eventMask) != 0 && _keyCode == keyCode && _eventModifier == keyModifer))
                 return false;
 
             return IgnoreBlocker || !blockerActive;
         }
 
-        internal bool Conflicts(Binding other) {
+        public bool Conflicts(Binding other) {
             if (other == null)
                 return false;
 
-            bool anyKey = (m_EventMask & InputEvent.KeyAny) != 0;
-            bool otherAnyKey = (other.m_EventMask & InputEvent.KeyAny) != 0;
+            bool anyKey = (_eventMask & InputEvent.KeyAny) != 0;
+            bool otherAnyKey = (other._eventMask & InputEvent.KeyAny) != 0;
 
-            if (anyKey == otherAnyKey && m_KeyCode == other.m_KeyCode && m_EventModifier == other.m_EventModifier)
+            if (anyKey == otherAnyKey && _keyCode == other._keyCode && _eventModifier == other._eventModifier)
                 return true;
 
-            if (anyKey && !otherAnyKey && (m_EventModifier == EventModifiers.None || m_EventModifier == EventModifiers.Shift))
+            if (anyKey && !otherAnyKey && (_eventModifier == EventModifiers.None || _eventModifier == EventModifiers.Shift))
                 return true;
 
-            if (!anyKey && otherAnyKey && (other.m_EventModifier == EventModifiers.None || other.m_EventModifier == EventModifiers.Shift))
+            if (!anyKey && otherAnyKey && (other._eventModifier == EventModifiers.None || other._eventModifier == EventModifiers.Shift))
                 return true;
 
             return false;
         }
         
-        internal Binding Clone() {
-            if (m_Editable)
-                return new Binding(m_Action.Clone(), m_CharCode, m_KeyCode, m_EventModifier, m_Editable);
+        public Binding Clone() {
+            if (_editable)
+                return new Binding(_action.Clone(), _bharCode, _keyCode, _eventModifier, _editable);
             return this;
         }
     }

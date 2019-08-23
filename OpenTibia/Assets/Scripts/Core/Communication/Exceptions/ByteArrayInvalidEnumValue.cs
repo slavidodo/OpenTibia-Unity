@@ -1,7 +1,7 @@
 ﻿namespace OpenTibiaUnity.Core.Communication.Exceptions
 {
-    internal class ByteArrayInvalidEnumValue : System.Exception
+    public class ByteArrayInvalidEnumValue : System.Exception
     {
-        internal ByteArrayInvalidEnumValue(string message) : base(message) { }
+        public ByteArrayInvalidEnumValue(string message) : base(message) { }
     }
 }

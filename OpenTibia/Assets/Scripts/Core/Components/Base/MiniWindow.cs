@@ -5,90 +5,87 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Core.Components.Base
 {
-    internal class MiniWindow : Module, IPointerEnterHandler, IPointerExitHandler
+    public class MiniWindow : Module, IPointerEnterHandler, IPointerExitHandler
     {
-        [SerializeField] protected bool m_Resizable = false;
-        [SerializeField] protected float m_MinimizedHeight = 23;
-        [SerializeField] protected float m_MinContentHeight = 50;
-        [SerializeField] protected float m_MaxContentHeight = -1;
-        [SerializeField] protected float m_PreferredContentHeight = 50;
-        [SerializeField] protected RectTransform m_PanelContent = null;
-        [SerializeField] protected TMPro.TextMeshProUGUI m_TitleLabel = null;
-        [SerializeField] protected Button m_CloseButton = null;
-        [SerializeField] protected Button m_MinimizeButton = null;
-        [SerializeField] protected Button m_MaximizeButton = null;
+        [SerializeField] protected bool _resizable = false;
+        [SerializeField] protected float _minimizedHeight = 23;
+        [SerializeField] protected float _minContentHeight = 50;
+        [SerializeField] protected float _maxContentHeight = -1;
+        [SerializeField] protected float _preferredContentHeight = 50;
+        [SerializeField] protected RectTransform _panelContent = null;
+        [SerializeField] protected TMPro.TextMeshProUGUI _titleLabel = null;
+        [SerializeField] protected Button _closeButton = null;
+        [SerializeField] protected Button _minimizeButton = null;
+        [SerializeField] protected Button _maximizeButton = null;
 
-        internal RectTransform panelContent {
-            get => m_PanelContent;
+        public RectTransform panelContent {
+            get => _panelContent;
         }
 
-        protected bool m_MouseCursorOverRenderer = false;
-        protected bool m_Minimized = false;
-        protected RectTransform m_DraggedFromParent = null;
-        protected RectTransform m_DraggedToParent = null;
-        protected GameObject m_ShadowVariantGameObject = null;
+        protected bool _mouseCursorOverRenderer = false;
+        protected bool _minimized = false;
+        protected RectTransform _draggedFromParent = null;
+        protected RectTransform _draggedToParent = null;
+        protected GameObject _shadowVariantGameObject = null;
 
-        private float m_CachedHeight = 0;
-
-        private bool m_ResizeStarted = false;
-        private bool m_ResizeFailure = false;
-
-        private Draggable m_DraggableComponent;
+        private float _cachedHeight = 0;
+        
+        private Draggable _draggableComponent;
         protected Draggable draggableComponent {
             get {
-                if (!m_DraggableComponent)
-                    m_DraggableComponent = GetComponent<Draggable>();
-                return m_DraggableComponent;
+                if (!_draggableComponent)
+                    _draggableComponent = GetComponent<Draggable>();
+                return _draggableComponent;
             }
         }
 
-        private MiniWindowContainer m_ParentContainer = null;
-        internal MiniWindowContainer parentContainer {
-            get => m_ParentContainer;
+        private MiniWindowContainer _parentContainer = null;
+        public MiniWindowContainer parentContainer {
+            get => _parentContainer;
         }
 
-        private LayoutElement m_LayoutElement;
+        private LayoutElement _layoutElement;
         protected LayoutElement layoutElement {
             get {
-                if (!m_LayoutElement)
-                    m_LayoutElement = GetComponent<LayoutElement>();
-                return m_LayoutElement;
+                if (!_layoutElement)
+                    _layoutElement = GetComponent<LayoutElement>();
+                return _layoutElement;
             }
         }
 
-        private VerticalLayoutGroup m_VertialLayoutGroup;
-        internal VerticalLayoutGroup verticalLayoutGroup {
+        private VerticalLayoutGroup _vertialLayoutGroup;
+        public VerticalLayoutGroup verticalLayoutGroup {
             get {
-                if (!m_VertialLayoutGroup)
-                    m_VertialLayoutGroup = GetComponent<VerticalLayoutGroup>();
-                return m_VertialLayoutGroup;
+                if (!_vertialLayoutGroup)
+                    _vertialLayoutGroup = GetComponent<VerticalLayoutGroup>();
+                return _vertialLayoutGroup;
             }
         }
 
-        internal bool Resizable { get => m_Resizable; }
-        internal float MinContentHeight { get => m_MinContentHeight; }
-        internal float MaxContentHeight { get => m_MaxContentHeight; }
+        public bool Resizable { get => _resizable; }
+        public float MinContentHeight { get => _minContentHeight; }
+        public float MaxContentHeight { get => _maxContentHeight; }
 
-        internal float MinHeight {
+        public float MinHeight {
             get {
                 return verticalLayoutGroup.padding.top + verticalLayoutGroup.padding.bottom
-                    + verticalLayoutGroup.spacing + m_MinContentHeight;
+                    + verticalLayoutGroup.spacing + _minContentHeight;
             }
         }
 
-        internal float MaxHeight {
+        public float MaxHeight {
             get {
-                if (m_MaxContentHeight == -1)
+                if (_maxContentHeight == -1)
                     return -1;
                 return verticalLayoutGroup.padding.top + verticalLayoutGroup.padding.bottom
-                    + verticalLayoutGroup.spacing + m_MaxContentHeight;
+                    + verticalLayoutGroup.spacing + _maxContentHeight;
             }
         }
 
-        internal float PreferredHeight {
+        public float PreferredHeight {
             get {
                 return verticalLayoutGroup.padding.top + verticalLayoutGroup.padding.bottom
-                    + verticalLayoutGroup.spacing + m_PreferredContentHeight;
+                    + verticalLayoutGroup.spacing + _preferredContentHeight;
             }
         }
 
@@ -96,13 +93,13 @@ namespace OpenTibiaUnity.Core.Components.Base
             base.Start();
 
             var parentContainerRectTransform = transform.parent?.parent;
-            m_ParentContainer = parentContainerRectTransform?.GetComponent<MiniWindowContainer>();
-            if (m_ParentContainer)
-                m_ParentContainer.RegisterMiniWindow(this);
+            _parentContainer = parentContainerRectTransform?.GetComponent<MiniWindowContainer>();
+            if (_parentContainer)
+                _parentContainer.RegisterMiniWindow(this);
 
             if (draggableComponent) {
                 // we can't proceed with dragging if parent container doesn't exist ..
-                if (m_ParentContainer) {
+                if (_parentContainer) {
                     draggableComponent.onBeginDrag.AddListener(OnBeginDrag);
                     draggableComponent.onDrag.AddListener(OnDrag);
                     draggableComponent.onEndDrag.AddListener(OnEndDrag);
@@ -117,51 +114,53 @@ namespace OpenTibiaUnity.Core.Components.Base
             if (OpenTibiaUnity.GameManager.ClientVersion != 0)
                 OnClientVersionChange(0, OpenTibiaUnity.GameManager.ClientVersion);
 
-            m_CloseButton?.onClick?.AddListener(() => ExitMiniWindow());
-            m_MinimizeButton?.onClick?.AddListener(() => ToggleMinimizedMaximized());
-            m_MaximizeButton?.onClick?.AddListener(() => ToggleMinimizedMaximized());
+            _closeButton?.onClick?.AddListener(() => Close());
+            _minimizeButton?.onClick?.AddListener(() => ToggleMinimizedMaximized());
+            _maximizeButton?.onClick?.AddListener(() => ToggleMinimizedMaximized());
         }
         
-        public void OnPointerEnter(PointerEventData _) => m_MouseCursorOverRenderer = true;
-        public void OnPointerExit(PointerEventData _) => m_MouseCursorOverRenderer = false;
+        public void OnPointerEnter(PointerEventData _) => _mouseCursorOverRenderer = true;
+        public void OnPointerExit(PointerEventData _) => _mouseCursorOverRenderer = false;
 
-        protected virtual void ExitMiniWindow() {
+        public override void Close() {
+            base.Close();
+
             Destroy(gameObject);
         }
 
         private void ToggleMinimizedMaximized() {
-            if (m_Minimized) {
-                m_MinimizeButton.gameObject.SetActive(true);
-                m_MaximizeButton.gameObject.SetActive(false);
-                m_PanelContent?.gameObject?.SetActive(true);
+            if (_minimized) {
+                _minimizeButton.gameObject.SetActive(true);
+                _maximizeButton.gameObject.SetActive(false);
+                _panelContent?.gameObject?.SetActive(true);
 
-                rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, m_CachedHeight);
+                rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, _cachedHeight);
             } else {
-                m_MinimizeButton.gameObject.SetActive(false);
-                m_MaximizeButton.gameObject.SetActive(true);
-                m_PanelContent?.gameObject?.SetActive(false);
+                _minimizeButton.gameObject.SetActive(false);
+                _maximizeButton.gameObject.SetActive(true);
+                _panelContent?.gameObject?.SetActive(false);
 
-                m_CachedHeight = rectTransform.rect.height;
-                rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, m_MinimizedHeight);
+                _cachedHeight = rectTransform.rect.height;
+                rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, _minimizedHeight);
             }
             
-            m_Minimized = !m_Minimized;
+            _minimized = !_minimized;
         }
 
         protected virtual void OnBeginDrag(PointerEventData eventData) {
-            m_DraggedFromParent = parentRectTransform;
+            _draggedFromParent = parentRectTransform;
             
-            m_ShadowVariantGameObject = CreateShadowVariant();
+            _shadowVariantGameObject = CreateShadowVariant();
 
             // on tibia 11, we are allowed to drag to another container
             if (OpenTibiaUnity.GameManager.ClientVersion > 1100)
                 transform.SetParent(OpenTibiaUnity.GameManager.ActiveCanvas.transform);
             else
-                transform.SetParent(m_ParentContainer.tmpContentPanel);
+                transform.SetParent(_parentContainer.tmpContentPanel);
         }
 
         protected virtual void OnDrag(PointerEventData eventData) {
-            int currentIndex = m_ShadowVariantGameObject.transform.GetSiblingIndex();
+            int currentIndex = _shadowVariantGameObject.transform.GetSiblingIndex();
             Vector3 localPosition = transform.localPosition;
 
             var parent = GetCurrentParent();
@@ -179,7 +178,7 @@ namespace OpenTibiaUnity.Core.Components.Base
             }
 
             if (foundIndex != -1 && foundIndex != currentIndex) {
-                m_ShadowVariantGameObject.transform.SetSiblingIndex(foundIndex);
+                _shadowVariantGameObject.transform.SetSiblingIndex(foundIndex);
                 return;
             }
 
@@ -193,23 +192,23 @@ namespace OpenTibiaUnity.Core.Components.Base
             }
 
             if (foundIndex != -1 && foundIndex != currentIndex) {
-                m_ShadowVariantGameObject.transform.SetSiblingIndex(foundIndex);
+                _shadowVariantGameObject.transform.SetSiblingIndex(foundIndex);
                 return;
             }
         }
 
         protected virtual void OnEndDrag(PointerEventData eventData) {
-            if (!m_DraggedToParent) {
-                LayoutRebuilder.ForceRebuildLayoutImmediate(m_DraggedFromParent);
-                transform.SetParent(m_DraggedFromParent);
+            if (!_draggedToParent) {
+                LayoutRebuilder.ForceRebuildLayoutImmediate(_draggedFromParent);
+                transform.SetParent(_draggedFromParent);
             }
 
-            transform.SetSiblingIndex(m_ShadowVariantGameObject.transform.GetSiblingIndex());
-            Destroy(m_ShadowVariantGameObject);
+            transform.SetSiblingIndex(_shadowVariantGameObject.transform.GetSiblingIndex());
+            Destroy(_shadowVariantGameObject);
         }
 
         private GameObject CreateShadowVariant() {
-            var shadowVariant = Instantiate(OpenTibiaUnity.GameManager.MiniWindowShadowVariant, m_DraggedFromParent);
+            var shadowVariant = Instantiate(OpenTibiaUnity.GameManager.MiniWindowShadowVariant, _draggedFromParent);
             shadowVariant.name = name + "_ShadowVariant";
             shadowVariant.transform.SetSiblingIndex(transform.GetSiblingIndex());
 
@@ -219,16 +218,16 @@ namespace OpenTibiaUnity.Core.Components.Base
         }
 
         protected RectTransform GetCurrentParent() {
-            if (m_DraggedToParent)
-                return m_DraggedToParent;
+            if (_draggedToParent)
+                return _draggedToParent;
 
-            return m_DraggedFromParent;
+            return _draggedFromParent;
         }
         
         protected virtual void OnClientVersionChange(int _, int __) {}
 
         protected void UpdateLayout() {
-            var height = Mathf.Clamp(rectTransform.rect.height, m_MinContentHeight, m_MaxContentHeight);
+            var height = Mathf.Clamp(rectTransform.rect.height, _minContentHeight, _maxContentHeight);
 
             rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, height);
         }

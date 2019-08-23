@@ -1,11 +1,11 @@
 ﻿namespace OpenTibiaUnity.Core.Communication.Types
 {
-    internal enum LoginclientMessageType
+    public enum LoginclientMessageType
     {
         EnterAccount = 1,
     }
 
-    internal enum LoginserverMessageType : byte
+    public enum LoginserverMessageType : byte
     {
         Retry = 10,
         Error = 11,
@@ -19,13 +19,13 @@
         CharacterList = 100,
     }
 
-    internal static class Login
+    public static class Login
     {
-        internal static void WriteEnum(this Internal.ByteArray message, LoginclientMessageType messageType, int offset = 0) {
+        public static void WriteEnum(this Internal.ByteArray message, LoginclientMessageType messageType, int offset = 0) {
             message.WriteEnum(messageType, offset);
         }
 
-        internal static LoginserverMessageType ReadLoginType(this Internal.ByteArray message) {
+        public static LoginserverMessageType ReadLoginType(this Internal.ByteArray message) {
             return message.ReadEnum<LoginserverMessageType>();
         }
     }

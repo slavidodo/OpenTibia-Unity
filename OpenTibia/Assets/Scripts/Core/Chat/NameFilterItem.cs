@@ -8,31 +8,31 @@ namespace OpenTibiaUnity.Core.Chat
 {
     public struct NameFilterItem
     {
-        private string m_Pattern;
-        private bool m_Permenant;
+        private string _pattern;
+        private bool _permenant;
 
         public string Pattern {
-            get => m_Pattern;
+            get => _pattern;
             set {
                 if (value != null)
                     value = value.Trim();
 
                 if (value != null && value.Length > 0)
-                    m_Pattern = value;
+                    _pattern = value;
                 else
-                    m_Pattern = null;
+                    _pattern = null;
             }
         }
 
-        public bool Permenant { get => m_Permenant; }
+        public bool Permenant { get => _permenant; }
 
         public NameFilterItem(string pattern, bool permenant) {
-            m_Pattern = pattern;
-            m_Permenant = permenant;
+            _pattern = pattern;
+            _permenant = permenant;
         }
 
         public NameFilterItem Clone() {
-            return new NameFilterItem(m_Pattern, m_Permenant);
+            return new NameFilterItem(_pattern, _permenant);
         }
 
     }

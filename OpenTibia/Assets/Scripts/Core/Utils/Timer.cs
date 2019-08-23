@@ -1,44 +1,44 @@
-﻿namespace OpenTibiaUnity.Core.Utility
+﻿namespace OpenTibiaUnity.Core.Utils
 {
     public class Timer {
         public class TimerEvent : UnityEngine.Events.UnityEvent<object, System.Timers.ElapsedEventArgs> {};
 
-        private System.Timers.Timer m_SystemTimer;
-        private TimerEvent m_TimerEvent = new TimerEvent();
+        private System.Timers.Timer _systemTimer;
+        private TimerEvent _timerEvent = new TimerEvent();
 
         public double Interval {
-            get { return m_SystemTimer.Interval; }
-            set { m_SystemTimer.Interval = value; }
+            get { return _systemTimer.Interval; }
+            set { _systemTimer.Interval = value; }
         }
 
         public Timer(double interval, bool autoStart = false) {
-            m_SystemTimer = new System.Timers.Timer(interval);
-            m_SystemTimer.Elapsed += OnSystemTimerFinishes;
+            _systemTimer = new System.Timers.Timer(interval);
+            _systemTimer.Elapsed += OnSystemTimerFinishes;
 
             if (autoStart) {
-                m_SystemTimer.Start();
+                _systemTimer.Start();
             }
         }
 
-        public void Start() => m_SystemTimer?.Start();
-        public void Stop() => m_SystemTimer?.Stop();
-        public void Dispose() => m_SystemTimer?.Dispose();
+        public void Start() => _systemTimer?.Start();
+        public void Stop() => _systemTimer?.Stop();
+        public void Dispose() => _systemTimer?.Dispose();
 
         public void AddListener(UnityEngine.Events.UnityAction<object, System.Timers.ElapsedEventArgs> action) {
-            m_TimerEvent.AddListener(action);
+            _timerEvent.AddListener(action);
         }
 
         public void RemoveListener(UnityEngine.Events.UnityAction<object, System.Timers.ElapsedEventArgs> action) {
-            m_TimerEvent.RemoveListener(action);
+            _timerEvent.RemoveListener(action);
         }
 
         public void RemoveAllListeners() {
-            m_TimerEvent.RemoveAllListeners();
+            _timerEvent.RemoveAllListeners();
         }
 
         public void OnSystemTimerFinishes(object state, System.Timers.ElapsedEventArgs e) {     
             OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
-                m_TimerEvent.Invoke(state, e);
+                _timerEvent.Invoke(state, e);
             });
         }
     }

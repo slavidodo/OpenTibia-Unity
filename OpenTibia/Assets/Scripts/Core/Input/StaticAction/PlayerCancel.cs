@@ -1,8 +1,8 @@
 ﻿namespace OpenTibiaUnity.Core.Input.StaticAction
 {
-    internal class PlayerCancel : StaticAction
+    public class PlayerCancel : StaticAction
     {
-        internal PlayerCancel(int id, string label, uint eventMask) : base(id, label, eventMask) { }
+        public PlayerCancel(int id, string label, uint eventMask) : base(id, label, eventMask) { }
 
         public override bool Perform(bool repeat = false) {
             var protocolGame = OpenTibiaUnity.ProtocolGame;
@@ -19,7 +19,7 @@
         }
 
         public override IAction Clone() {
-            return new PlayerCancel(m_ID, m_Label, m_EventMask);
+            return new PlayerCancel(_id, _label, _eventMask);
         }
     }
 }

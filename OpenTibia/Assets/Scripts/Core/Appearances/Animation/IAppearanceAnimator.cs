@@ -1,6 +1,6 @@
 ﻿namespace OpenTibiaUnity.Core.Appearances.Animation
 {
-    internal interface IAppearanceAnimator
+    public interface IAppearanceAnimator
     {
         bool Finished { get; set; }
         int Phase { get; set; }
@@ -15,25 +15,25 @@
         IAppearanceAnimator Clone();
     }
 
-    internal interface IAppearanceFrameStategy
+    public interface IAppearanceFrameStategy
     {
         int NextFrame(int phase, int phaseCount);
         void Reset();
     }
 
-    internal class PingPongFrameStrategy : IAppearanceFrameStategy
+    public class PingPongFrameStrategy : IAppearanceFrameStategy
     {
         private const int PhaseForward = 0;
         private const int PhaseBackword = 1;
 
-        private int m_CurrentDirection = 0;
+        private int _currentDirection = 0;
 
         public int NextFrame(int phase, int phaseCount) {
-            int phaseConstant = m_CurrentDirection == PhaseForward ? 1 : -1;
+            int phaseConstant = _currentDirection == PhaseForward ? 1 : -1;
             int tmpPhase = phase + phaseConstant;
 
             if (tmpPhase < 0 || tmpPhase >= phaseCount) {
-                m_CurrentDirection = m_CurrentDirection == PhaseForward ? PhaseBackword : PhaseForward;
+                _currentDirection = _currentDirection == PhaseForward ? PhaseBackword : PhaseForward;
                 phaseConstant *= -1;
             }
 
@@ -41,17 +41,17 @@
         }
 
         public void Reset() {
-            m_CurrentDirection = PhaseForward;
+            _currentDirection = PhaseForward;
         }
     }
 
-    internal class LoopFrameStrategy : IAppearanceFrameStategy
+    public class LoopFrameStrategy : IAppearanceFrameStategy
     {
-        private readonly uint m_LoopCount;
-        private uint m_CurrentLoop = 0;
+        private readonly uint _loopCount;
+        private uint _currentLoop = 0;
 
-        internal LoopFrameStrategy(uint loopCount) {
-            m_LoopCount = loopCount;
+        public LoopFrameStrategy(uint loopCount) {
+            _loopCount = loopCount;
         }
 
         public int NextFrame(int phase, int phaseCount) {
@@ -59,8 +59,8 @@
             if (tmpPhase < phaseCount)
                 return tmpPhase;
 
-            if (m_CurrentLoop < m_LoopCount - 1 || m_LoopCount == 0) {
-                m_CurrentLoop++;
+            if (_currentLoop < _loopCount - 1 || _loopCount == 0) {
+                _currentLoop++;
                 return 0;
             }
 
@@ -68,7 +68,7 @@
         }
 
         public void Reset() {
-            m_CurrentLoop = 0;
+            _currentLoop = 0;
         }
     }
 }

@@ -5,9 +5,9 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Game
 {
-    internal static class ObjectMultiUseHandler
+    public static class ObjectMultiUseHandler
     {
-        internal delegate void ObjectMultiUseDelegate(Vector3Int targetAbsolute, ObjectInstance @object, int targetStackPos);
+        public delegate void ObjectMultiUseDelegate(Vector3Int targetAbsolute, ObjectInstance @object, int targetStackPos);
 
         private static bool s_Activated = false;
         private static Vector3Int s_AbsolutePosition = Vector3Int.zero;
@@ -15,8 +15,8 @@ namespace OpenTibiaUnity.Core.Game
         private static int s_PositionOrData = 0;
         private static List<object> s_ObjectUseImpls;
 
-        internal static ObjectMultiUseDelegate onUse = null;
-        internal static bool AnyDraggingObject = false;
+        public static ObjectMultiUseDelegate onUse = null;
+        public static bool AnyDraggingObject = false;
 
         static ObjectMultiUseHandler() {
             if (s_ObjectUseImpls == null)
@@ -63,17 +63,17 @@ namespace OpenTibiaUnity.Core.Game
                 onUse.Invoke(Vector3Int.zero, null, -1);
         }
 
-        internal static void Initialize() {
+        public static void Initialize() {
             var inputHandler = OpenTibiaUnity.InputHandler;
-            inputHandler.AddMouseDownListener(Utility.EventImplPriority.UpperMedium, OnMouseDown);
-            inputHandler.AddMouseUpListener(Utility.EventImplPriority.UpperMedium, OnMouseUp);
+            inputHandler.AddMouseDownListener(Utils.EventImplPriority.UpperMedium, OnMouseDown);
+            inputHandler.AddMouseUpListener(Utils.EventImplPriority.UpperMedium, OnMouseUp);
         }
 
-        internal static void RegisterContainer<T>(T widget) where T : IUseWidget, IWidgetContainerWidget {
+        public static void RegisterContainer<T>(T widget) where T : IUseWidget, IWidgetContainerWidget {
             s_ObjectUseImpls.Add(widget);
         }
 
-        internal static void Activate(Vector3Int absolutePosition, ObjectInstance @object, int positionOrData) {
+        public static void Activate(Vector3Int absolutePosition, ObjectInstance @object, int positionOrData) {
             s_Activated = true;
             OpenTibiaUnity.GameManager.CursorController.SetCursorState(CursorState.Crosshair, CursorPriority.High);
 

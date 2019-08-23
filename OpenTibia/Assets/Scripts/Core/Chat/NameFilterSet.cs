@@ -2,45 +2,45 @@
 
 namespace OpenTibiaUnity.Core.Chat
 {
-    internal class NameFilterSet
+    public class NameFilterSet
     {
-        internal static int DefaultSet = 0;
+        public static int DefaultSet = 0;
 
-        private int m_ID;
+        private int _id;
 
-        internal bool BlacklistEnabled { get; set; } = true;
-        internal bool BlacklistPrivate { get; set; } = false;
-        internal bool BlacklistYelling { get; set; } = false;
-        internal bool WhitelistEnabled { get; set; } = true;
-        internal bool WhitelistBuddies { get; set; } = false;
+        public bool BlacklistEnabled { get; set; } = true;
+        public bool BlacklistPrivate { get; set; } = false;
+        public bool BlacklistYelling { get; set; } = false;
+        public bool WhitelistEnabled { get; set; } = true;
+        public bool WhitelistBuddies { get; set; } = false;
 
-        private List<NameFilterItem> m_BlackItems = new List<NameFilterItem>();
-        private List<NameFilterItem> m_WhiteItems = new List<NameFilterItem>();
+        private List<NameFilterItem> _blackItems = new List<NameFilterItem>();
+        private List<NameFilterItem> _whiteItems = new List<NameFilterItem>();
 
-        internal NameFilterSet(int id) {
-            m_ID = id;
+        public NameFilterSet(int id) {
+            _id = id;
         }
 
-        internal void AddBlackList(string pattern, bool permenant) {
-            if (IndexOf(pattern, m_BlackItems) == -1)
-                m_BlackItems.Add(new NameFilterItem(pattern, permenant));
+        public void AddBlackList(string pattern, bool permenant) {
+            if (IndexOf(pattern, _blackItems) == -1)
+                _blackItems.Add(new NameFilterItem(pattern, permenant));
         }
 
-        internal void RemoveBlackList(string pattern) {
-            int index = IndexOf(pattern, m_BlackItems);
+        public void RemoveBlackList(string pattern) {
+            int index = IndexOf(pattern, _blackItems);
             if (index != -1)
-                m_BlackItems.RemoveAt(index);
+                _blackItems.RemoveAt(index);
         }
 
-        internal bool IsWhitelisted(string pattern) {
-            return IndexOf(pattern, m_WhiteItems) != -1;
+        public bool IsWhitelisted(string pattern) {
+            return IndexOf(pattern, _whiteItems) != -1;
         }
 
-        internal bool IsBlacklisted(string pattern) {
-            return IndexOf(pattern, m_BlackItems) != -1;
+        public bool IsBlacklisted(string pattern) {
+            return IndexOf(pattern, _blackItems) != -1;
         }
 
-        internal bool AcceptMessage(MessageModeType mode, string speaker, string message) {
+        public bool AcceptMessage(MessageModeType mode, string speaker, string message) {
             if (string.IsNullOrEmpty(speaker))
                 return false;
 
@@ -49,7 +49,7 @@ namespace OpenTibiaUnity.Core.Chat
                     // TODO, this should cast on BuddySets that are white.
                 }
 
-                if (IndexOf(speaker, m_WhiteItems) != -1)
+                if (IndexOf(speaker, _whiteItems) != -1)
                     return true;
             }
 
@@ -60,14 +60,14 @@ namespace OpenTibiaUnity.Core.Chat
                 if (BlacklistYelling && mode == MessageModeType.Yell)
                     return false;
 
-                if (IndexOf(speaker, m_BlackItems) != -1)
+                if (IndexOf(speaker, _blackItems) != -1)
                     return false;
             }
 
             return true;
         }
 
-        internal int IndexOf(string speaker, List<NameFilterItem> list) {
+        public int IndexOf(string speaker, List<NameFilterItem> list) {
             speaker = speaker.ToLower();
             int i = 0;
             foreach (var item in list) {
@@ -79,19 +79,19 @@ namespace OpenTibiaUnity.Core.Chat
             return -1;
         }
 
-        internal NameFilterSet Clone() {
-            var set = new NameFilterSet(m_ID);
+        public NameFilterSet Clone() {
+            var set = new NameFilterSet(_id);
             set.BlacklistEnabled = BlacklistEnabled;
             set.BlacklistPrivate = BlacklistPrivate;
             set.BlacklistYelling = BlacklistYelling;
             set.WhitelistBuddies = WhitelistBuddies;
             set.WhitelistEnabled = WhitelistEnabled;
 
-            foreach (var item in m_BlackItems)
-                set.m_BlackItems.Add(item.Clone());
+            foreach (var item in _blackItems)
+                set._blackItems.Add(item.Clone());
 
-            foreach (var item in m_WhiteItems)
-                set.m_WhiteItems.Add(item.Clone());
+            foreach (var item in _whiteItems)
+                set._whiteItems.Add(item.Clone());
 
             return set;
         }

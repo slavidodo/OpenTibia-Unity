@@ -5,16 +5,16 @@ namespace OpenTibiaUnity.Core.Communication.Game
     using ObjectInstance = Appearances.ObjectInstance;
     using OutfitInstance = Appearances.OutfitInstance;
 
-    internal partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame : Internal.Protocol
     {
         private AppearanceInstance ReadCreatureOutfit(Internal.ByteArray message, AppearanceInstance instance = null) {
-            int outfitID;
-            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameOutfitIDU16))
-                outfitID = message.ReadUnsignedShort();
+            int outfit_id;
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameOutfit_idU16))
+                outfit_id = message.ReadUnsignedShort();
             else
-                outfitID = message.ReadUnsignedByte();
+                outfit_id = message.ReadUnsignedByte();
 
-            if (outfitID != 0) {
+            if (outfit_id != 0) {
                 int headColor = message.ReadUnsignedByte();
                 int torsoColor = message.ReadUnsignedByte();
                 int legsColor = message.ReadUnsignedByte();
@@ -30,29 +30,29 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     return instance;
                 }
 
-                return AppearanceStorage.CreateOutfitInstance((uint)outfitID, headColor, torsoColor, legsColor, detailColor, addonsFlags);
+                return AppearanceStorage.CreateOutfitInstance((uint)outfit_id, headColor, torsoColor, legsColor, detailColor, addonsFlags);
             }
 
-            uint objectID = message.ReadUnsignedShort();
+            uint object_id = message.ReadUnsignedShort();
             ObjectInstance objectInstance = instance as ObjectInstance;
-            if (!!objectInstance && objectInstance.ID == objectID)
+            if (!!objectInstance && objectInstance.Id == object_id)
                 return objectInstance;
 
-            if (objectID == 0)
-                return AppearanceStorage.CreateOutfitInstance(OutfitInstance.InvisibleOutfitID, 0, 0, 0, 0, 0);
+            if (object_id == 0)
+                return AppearanceStorage.CreateOutfitInstance(OutfitInstance.InvisibleOutfit_id, 0, 0, 0, 0, 0);
 
-            return AppearanceStorage.CreateObjectInstance(objectID, 0);
+            return AppearanceStorage.CreateObjectInstance(object_id, 0);
         }
 
         private AppearanceInstance ReadMountOutfit(Internal.ByteArray message, AppearanceInstance instance = null) {
-            uint outfitID = message.ReadUnsignedShort();
+            uint outfit_id = message.ReadUnsignedShort();
 
             OutfitInstance outfitInstance = instance as OutfitInstance;
-            if (!!outfitInstance && outfitInstance.ID == outfitID)
+            if (!!outfitInstance && outfitInstance.Id == outfit_id)
                 return outfitInstance;
 
-            if (outfitID != 0)
-                return AppearanceStorage.CreateOutfitInstance(outfitID, 0, 0, 0, 0, 0);
+            if (outfit_id != 0)
+                return AppearanceStorage.CreateOutfitInstance(outfit_id, 0, 0, 0, 0, 0);
 
             return null;
         }
@@ -73,33 +73,33 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 case AppearanceInstance.UnknownCreature:
                 case AppearanceInstance.OutdatedCreature: {
                     if (type == AppearanceInstance.UnknownCreature) {
-                        uint removeID = message.ReadUnsignedInt();
-                        uint newID = message.ReadUnsignedInt();
+                        uint remove_id = message.ReadUnsignedInt();
+                        uint new_id = message.ReadUnsignedInt();
                         CreatureType creatureType;
                         
                         if (gameManager.ClientVersion >= 910) {
                             creatureType = message.ReadEnum<CreatureType>();
                         } else {
-                            if (newID >= Constants.PlayerStartID && newID < Constants.PlayerEndID)
+                            if (new_id >= Constants.PlayerStart_id && new_id < Constants.PlayerEnd_id)
                                 creatureType = CreatureType.Player;
-                            else if (newID >= Constants.MonsterStartID && newID < Constants.MonsterEndID)
+                            else if (new_id >= Constants.MonsterStart_id && new_id < Constants.MonsterEnd_id)
                                 creatureType = CreatureType.Monster;
                             else
                                 creatureType = CreatureType.NPC;
                         }
                         
-                        if (newID == Player.ID)
+                        if (new_id == Player.Id)
                             creature = Player;
                         else
-                            creature = new Creatures.Creature(newID);
+                            creature = new Creatures.Creature(new_id);
 
-                        creature = CreatureStorage.ReplaceCreature(creature, removeID);
+                        creature = CreatureStorage.ReplaceCreature(creature, remove_id);
                         if (!creature)
                             throw new System.Exception("ProtocolGame.ReadCreatureInstance: Failed to append creature.");
 
                         creature.Type = creatureType;
                         if (gameManager.ClientVersion >= 1120)
-                            creature.SetSummonerID(creature.IsSummon ? message.ReadUnsignedInt() : 0);
+                            creature.SetSummoner_id(creature.IsSummon ? message.ReadUnsignedInt() : 0);
                         
                         creature.Name = message.ReadString();
                     } else {
@@ -126,7 +126,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     if (gameManager.GetFeature(GameFeature.GameCreatureMarks)) {
                         creature.Type = message.ReadEnum<CreatureType>();
                         if (gameManager.ClientVersion >= 1120)
-                            creature.SetSummonerID(creature.IsSummon ? message.ReadUnsignedInt() : 0);
+                            creature.SetSummoner_id(creature.IsSummon ? message.ReadUnsignedInt() : 0);
                     }
 
                     if (gameManager.GetFeature(GameFeature.GameCreatureIcons))
@@ -230,7 +230,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                             || typeOrId == AppearanceInstance.Creature) {
                     var creature = ReadCreatureInstance(message, typeOrId, absolutePosition);
 
-                    var @object = AppearanceStorage.CreateObjectInstance(AppearanceInstance.Creature, creature.ID);
+                    var @object = AppearanceStorage.CreateObjectInstance(AppearanceInstance.Creature, creature.Id);
                     if (stackPos < Constants.MapSizeW)
                         WorldMapStorage.AppendObject(mapPosition, @object);
                 } else {
