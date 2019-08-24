@@ -3,9 +3,9 @@
     public class TextResources
     {
         // Login Resources
-        public const string ACCOUNT__idENTIFIER_EMAIL = "Email Address:";
-        public const string ACCOUNT__idENTIFIER_ACCOUNTNAME = "Account Name:";
-        public const string ACCOUNT__idENTIFIER_ACCOUNTNUMBER = "Account Number:";
+        public const string ACCOUNT_IDENTIFIER_EMAIL = "Email Address:";
+        public const string ACCOUNT_IDENTIFIER_ACCOUNTNAME = "Account Name:";
+        public const string ACCOUNT_IDENTIFIER_ACCOUNTNUMBER = "Account Number:";
         public const string LOGIN_OKBUTTON_LEGACY = "Ok";
         public const string LOGIN_OKBUTTON_NEW = "Login";
         public const string LOGIN_AUTHBUTTON_ON = "Auth.";

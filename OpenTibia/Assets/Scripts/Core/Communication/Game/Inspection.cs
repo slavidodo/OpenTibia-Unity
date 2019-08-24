@@ -15,7 +15,7 @@
 
                 int imbuementSlots = message.ReadUnsignedByte();
                 for (int j = 0; j < imbuementSlots; j++) {
-                    int imbuement_id = message.ReadUnsignedByte();
+                    int imbuementId = message.ReadUnsignedByte();
                 }
 
                 int details = message.ReadUnsignedByte();

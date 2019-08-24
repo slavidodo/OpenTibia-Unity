@@ -32,11 +32,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 430a072f900578a48b363efa5f77ec3c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_LabelText: {fileID: 8430094139117474740}
-  m_LabelValue: {fileID: 8430094137765086533}
-  m_IconImage: {fileID: 333685048}
-  m_ProgressBar: {fileID: 5083935070454068970}
-  m_FillAreaImage: {fileID: 3774869433737460716}
+  _labelText: {fileID: 8430094139117474740}
+  _labelValue: {fileID: 8430094137765086533}
+  _iconImage: {fileID: 333685048}
+  _progressBar: {fileID: 5083935070454068970}
+  _fillAreaImage: {fileID: 3774869433737460716}
 --- !u!114 &333685048
 MonoBehaviour:
   m_ObjectHideFlags: 0

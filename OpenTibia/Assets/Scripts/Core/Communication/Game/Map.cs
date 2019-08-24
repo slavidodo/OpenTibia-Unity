@@ -156,10 +156,10 @@
 
                 WorldMapStorage.ChangeObject(mapPosition, stackPos, objectInstance);
             } else {
-                uint creature_id = message.ReadUnsignedInt();
+                uint creatureId = message.ReadUnsignedInt();
 
-                if (!(creature = CreatureStorage.GetCreature(creature_id)))
-                    throw new System.Exception("ProtocolGame.ParseChangeOnMap: Creature " + creature_id + " not found");
+                if (!(creature = CreatureStorage.GetCreature(creatureId)))
+                    throw new System.Exception("ProtocolGame.ParseChangeOnMap: Creature " + creatureId + " not found");
 
                 absolutePosition = creature.Position;
                 if (!WorldMapStorage.IsVisible(absolutePosition, true))
@@ -214,8 +214,8 @@
 
                 WorldMapStorage.DeleteObject(mapPosition, stackPos);
             } else {
-                uint creature_id = message.ReadUnsignedInt();
-                if ((creature = CreatureStorage.GetCreature(creature_id)) == null) {
+                uint creatureId = message.ReadUnsignedInt();
+                if ((creature = CreatureStorage.GetCreature(creatureId)) == null) {
                     throw new System.Exception($"ProtocolGame.ParseDeleteOnMap: Object not found.");
                 }
 
@@ -259,10 +259,10 @@
                 if (!@object || !@object.IsCreature || !(creature = CreatureStorage.GetCreature(@object.Data)))
                     throw new System.Exception("ProtocolGame.ParseCreatureMove: No creature at position " + oldAbsolutePosition);
             } else {
-                uint creature_id = message.ReadUnsignedInt();
-                @object = AppearanceStorage.CreateObjectInstance(Appearances.AppearanceInstance.Creature, creature_id);
-                if (!(creature = CreatureStorage.GetCreature(creature_id)))
-                    throw new System.Exception("ProtocolGame.ParseCreatureMove: Creature " + creature_id + " not found");
+                uint creatureId = message.ReadUnsignedInt();
+                @object = AppearanceStorage.CreateObjectInstance(Appearances.AppearanceInstance.Creature, creatureId);
+                if (!(creature = CreatureStorage.GetCreature(creatureId)))
+                    throw new System.Exception("ProtocolGame.ParseCreatureMove: Creature " + creatureId + " not found");
 
                 oldAbsolutePosition = creature.Position;
                 if (!WorldMapStorage.IsVisible(oldAbsolutePosition, true))

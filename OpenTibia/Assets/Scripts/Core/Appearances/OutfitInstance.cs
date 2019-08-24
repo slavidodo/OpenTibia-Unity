@@ -4,7 +4,7 @@ namespace OpenTibiaUnity.Core.Appearances
 {
     public class OutfitInstance : AppearanceInstance
     {
-        public const int InvisibleOutfit_id = 0;
+        public const int InvisibleOutfitId = 0;
 
         protected int _headHsiColor = 0;
         protected int _torsoHsiColor = 0;
@@ -82,9 +82,9 @@ namespace OpenTibiaUnity.Core.Appearances
                     continue;
                 
                 int spriteIndex = GetSpriteIndex(-1, patternX, patternY, patternZ);
-                uint sprite_id = _activeFrameGroup.SpriteInfo.Sprite_ids[spriteIndex];
-                var baseCachedSprite = OpenTibiaUnity.GameManager.AppearanceStorage.GetSprite(_activeFrameGroup.SpriteInfo.Sprite_ids[spriteIndex++]);
-                var channelsCachedSprites = OpenTibiaUnity.GameManager.AppearanceStorage.GetSprite(_activeFrameGroup.SpriteInfo.Sprite_ids[spriteIndex]);
+                uint spriteId = _activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
+                var baseCachedSprite = OpenTibiaUnity.GameManager.AppearanceStorage.GetSprite(_activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex++]);
+                var channelsCachedSprites = OpenTibiaUnity.GameManager.AppearanceStorage.GetSprite(_activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex]);
 
                 colouriseMaterial.SetTexture("_ChannelsTex", channelsCachedSprites.texture);
                 colouriseMaterial.SetTextureOffset("_ChannelsTex", channelsCachedSprites.rect.position - baseCachedSprite.rect.position);

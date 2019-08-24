@@ -16,38 +16,38 @@ namespace OpenTibiaUnity.Core.Appearances.Provider
             new Vector2Int(2, 2)
         };
 
-        private uint _firstSprite_id = 0;
-        private uint _lastSprite_id = 0;
+        private uint _firstSpriteId = 0;
+        private uint _lastSpriteId = 0;
         private uint _spriteType = 0;
         private string _fileName = null;
 
-        public uint FirstSprite_id { get => _firstSprite_id; }
-        public uint LastSprite_id { get => _lastSprite_id; }
+        public uint FirstSpriteId { get => _firstSpriteId; }
+        public uint LastSpriteId { get => _lastSpriteId; }
         public uint SpriteType { get => _spriteType; }
         public string FileName { get => _fileName; }
 
         public SpritesAsset(uint firstSpriteId, uint lastSpriteId, uint spriteType, string filename) {
-            _firstSprite_id = firstSpriteId;
-            _lastSprite_id = lastSpriteId;
+            _firstSpriteId = firstSpriteId;
+            _lastSpriteId = lastSpriteId;
             _spriteType = spriteType;
             _fileName = filename;
         }
 
-        public Rendering.CachedSpriteInformation GetCachedSpriteInformation(uint sprite_id, AssetBundle assetBundle) {
+        public Rendering.CachedSpriteInformation GetCachedSpriteInformation(uint spriteId, AssetBundle assetBundle) {
             Texture2D tex2D = assetBundle.LoadAsset<Texture2D>(_fileName);
             if (!tex2D)
                 return null;
 
             var realSpriteSize = s_SpritesAssetSizesRef[_spriteType - 1] * Constants.FieldSize;
-            uint real_id = sprite_id - _firstSprite_id;
+            uint realId = spriteId - _firstSpriteId;
             int texPerRow = AtlasTexture_Width / realSpriteSize.x;
-            int x = (int)((real_id % texPerRow) * realSpriteSize.x);
-            int y = (int)(real_id / texPerRow * realSpriteSize.y);
+            int x = (int)((realId % texPerRow) * realSpriteSize.x);
+            int y = (int)(realId / texPerRow * realSpriteSize.y);
             y = AtlasTexture_Height - y - (int)realSpriteSize.y;
             
             var spriteRect = new Rect(x / (float)AtlasTexture_Width, y / (float)AtlasTexture_Height, realSpriteSize.x / AtlasTexture_Width, realSpriteSize.y / AtlasTexture_Height);
 
-            return new Rendering.CachedSpriteInformation(sprite_id, tex2D, spriteRect, realSpriteSize);
+            return new Rendering.CachedSpriteInformation(spriteId, tex2D, spriteRect, realSpriteSize);
         }
 
         public static List<SpritesAsset> ParseJsonContents(JArray jArray) {
@@ -58,14 +58,14 @@ namespace OpenTibiaUnity.Core.Appearances.Provider
 
                 if (!@object.TryGetValue("file", out JToken fileToken)
                    || !@object.TryGetValue("spritetype", out JToken spriteTypeToken)
-                   || !@object.TryGetValue("firstspriteid", out JToken firstSprite_idToken)
-                   || !@object.TryGetValue("lastspriteid", out JToken lastSprite_idToken))
+                   || !@object.TryGetValue("firstspriteid", out JToken firstSpriteIdToken)
+                   || !@object.TryGetValue("lastspriteid", out JToken lastSpriteIdToken))
                     continue;
 
                 try {
                     spritesAssets.Add(new SpritesAsset(
-                        (uint)firstSprite_idToken,
-                        (uint)lastSprite_idToken,
+                        (uint)firstSpriteIdToken,
+                        (uint)lastSpriteIdToken,
                         (uint)spriteTypeToken,
                         (string)fileToken));
                 } catch (System.InvalidCastException) { }

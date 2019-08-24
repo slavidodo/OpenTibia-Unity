@@ -3,17 +3,17 @@
     public class TalkActionImpl : IActionImpl
     {
         protected bool _autoSend;
-        private int _channel_id;
+        private int _channelId;
         protected string _text;
 
-        public TalkActionImpl(string text, bool autoSend, int channel_id = -1) {
+        public TalkActionImpl(string text, bool autoSend, int channelId = -1) {
             _text = text;
             _autoSend = autoSend;
-            _channel_id = channel_id;
+            _channelId = channelId;
         }
 
         public virtual void Perform(bool repeat = false) {
-            OpenTibiaUnity.GameManager.onRequestChatSend.Invoke(_text, _autoSend, _channel_id);
+            OpenTibiaUnity.GameManager.onRequestChatSend.Invoke(_text, _autoSend, _channelId);
         }
     }
 }

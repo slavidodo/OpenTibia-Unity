@@ -66,11 +66,11 @@
                     int objectCount = message.ReadUnsignedByte();
                     
                     for (int i = 0; i < objectCount; i++) {
-                        ushort object_id = message.ReadUnsignedShort();
+                        ushort objectId = message.ReadUnsignedShort();
                         string objectName = message.ReadString();
                         uint objectWeight = message.ReadUnsignedInt();
 
-                        reward.AddItem(new DailyReward.Types.Object(object_id, objectName, objectWeight, -1));
+                        reward.AddItem(new DailyReward.Types.Object(objectId, objectName, objectWeight, -1));
                     }
 
                     break;
@@ -82,11 +82,11 @@
                         var rewardType = message.ReadEnum<DailyRewardTypes>();
                         switch (rewardType) {
                             case DailyRewardTypes.Object: {
-                                ushort object_id = message.ReadUnsignedShort();
+                                ushort objectId = message.ReadUnsignedShort();
                                 string objectName = message.ReadString();
                                 int objectAmount = message.ReadUnsignedByte();
 
-                                reward.AddItem(new DailyReward.Types.Object(object_id, objectName, 0, objectAmount));
+                                reward.AddItem(new DailyReward.Types.Object(objectId, objectName, 0, objectAmount));
                                 break;
                             }
 

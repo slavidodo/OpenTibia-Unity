@@ -25,8 +25,8 @@
         public Core.Appearances.AppearanceType AppearanceType { get; set; }
         public UseActionTarget ActionTarget { get; set; }
 
-        public HotkeyObjectAction(ushort object_id, UseActionTarget actionTarget) {
-            var appearanceType = OpenTibiaUnity.AppearanceStorage.GetObjectType(object_id);
+        public HotkeyObjectAction(ushort objectId, UseActionTarget actionTarget) {
+            var appearanceType = OpenTibiaUnity.AppearanceStorage.GetObjectType(objectId);
             if (!appearanceType)
                 throw new System.Exception("HotkeyObjectAction.HotkeyObjectAction: invalid object id.");
 

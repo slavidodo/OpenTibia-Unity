@@ -208,7 +208,7 @@ namespace OpenTibiaUnity.Core.Components
                     var chatStorage = OpenTibiaUnity.ChatStorage;
                     if (chatStorage.HasOwnPrivateChannel) {
                         CreateTextItem(TextResources.CTX_PLAYER_CHAT_INVITE, () => {
-                            new PrivateChatActionImpl(PrivateChatActionType.ChatChannelInvite, chatStorage.OwnPrivateChannel_id, _creature.Name).Perform();
+                            new PrivateChatActionImpl(PrivateChatActionType.ChatChannelInvite, chatStorage.OwnPrivateChannelId, _creature.Name).Perform();
                         });
                     }
 

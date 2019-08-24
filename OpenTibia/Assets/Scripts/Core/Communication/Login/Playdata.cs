@@ -63,9 +63,9 @@ namespace OpenTibiaUnity.Core.Communication.Login
 
         public class Character
         {
-            public int World_id = 0;
+            public int WorldId = 0;
             public int Level = 0;
-            public int Outfit_id = 0;
+            public int OutfitId = 0;
             public int HeadColor = 0;
             public int TorsoColor = 0;
             public int LegsColor = 0;

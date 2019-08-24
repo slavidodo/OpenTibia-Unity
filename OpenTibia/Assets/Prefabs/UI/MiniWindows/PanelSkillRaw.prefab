@@ -32,8 +32,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: faefcbc0a5315184f8d4e4e5b76d855e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_LabelText: {fileID: 4285303082581795441}
-  m_LabelValue: {fileID: 4285303082160358585}
+  _labelText: {fileID: 4285303082581795441}
+  _labelValue: {fileID: 4285303082160358585}
 --- !u!1001 &2417576771693698141
 PrefabInstance:
   m_ObjectHideFlags: 0

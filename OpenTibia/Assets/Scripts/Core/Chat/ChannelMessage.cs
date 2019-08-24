@@ -5,7 +5,7 @@ namespace OpenTibiaUnity.Core.Chat
 {
     public class ChannelMessage
     {
-        private static int s_Next_id = 0;
+        private static int s_NextId = 0;
 
         private int _id;
         private string _speaker;
@@ -29,7 +29,7 @@ namespace OpenTibiaUnity.Core.Chat
 
         public ChannelMessage(int id, string speaker, int speakerLevel, MessageModeType mode, string text) {
             if (id <= 0)
-                _id = --s_Next_id;
+                _id = --s_NextId;
             else
                 _id = id;
 

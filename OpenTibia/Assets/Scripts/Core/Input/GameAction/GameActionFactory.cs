@@ -14,8 +14,8 @@ namespace OpenTibiaUnity.Core.Input.GameAction
             return new UseActionImpl(absolutePosition, appearanceType, stackPosOrData, targetAbsolute, targetObject, targetStackPosOrData, useTarget);
         }
 
-        public static UseActionImpl CreateUseAction(Vector3Int absolutePosition, uint object_id, int stackPosOrData, Vector3Int targetAbsolute, ObjectInstance targetObject, int targetStackPosOrData, UseActionTarget useTarget) {
-            return new UseActionImpl(absolutePosition, object_id, stackPosOrData, targetAbsolute, targetObject, targetStackPosOrData, useTarget);
+        public static UseActionImpl CreateUseAction(Vector3Int absolutePosition, uint objectId, int stackPosOrData, Vector3Int targetAbsolute, ObjectInstance targetObject, int targetStackPosOrData, UseActionTarget useTarget) {
+            return new UseActionImpl(absolutePosition, objectId, stackPosOrData, targetAbsolute, targetObject, targetStackPosOrData, useTarget);
         }
 
         public static MoveActionImpl CreateMoveAction(Vector3Int sourceAbsolute, ObjectInstance @object, int stackPos, Vector3Int destAbsolute, int moveAmount) {

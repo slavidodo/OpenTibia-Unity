@@ -21,39 +21,18 @@ namespace OpenTibiaUnity.Core.Chat
         protected List<ChannelMessage> _messages = null;
 
         public ChannelMessageAddEvent onAddChannelMessage = new ChannelMessageAddEvent();
-        
-        public string Name {
-            get { return _name; }
-            set { _name = value; }
-        }
 
-        public bool SendAllowed {
-            get { return _sendAllowed; }
-            set { _sendAllowed = value; }
-        }
-
-        public bool Closable {
-            get { return _closable; }
-            set { _closable = value; }
-        }
-
-        public Utils.UnionStrInt Id {
-            get { return _id; }
-            set { _id = value; }
-        }
-
-        public MessageModeType SendMode {
-            get { return _sendMode; }
-        }
-
+        public Utils.UnionStrInt Id { get => _id; set => _id = value; }
+        public string Name { get => _name; set => _name = value; }
+        public bool SendAllowed { get => _sendAllowed; set => _sendAllowed = value; }
+        public bool Closable { get => _closable; set => _closable = value; }
+        public MessageModeType SendMode { get => _sendMode; }
         public bool CanModerate { get; set; } = false;
 
-        public bool IsPrivate {
-            get { return ChatStorage.s_IsPrivateChannel(_id); }
-        }
+        public bool IsPrivate { get => ChatStorage.s_IsPrivateChannel(_id); }
 
-        public Channel(Utils.UnionStrInt _id, string name, MessageModeType sendMode) {
-            _id = _id;
+        public Channel(Utils.UnionStrInt id, string name, MessageModeType sendMode) {
+            _id = id;
             _name = name;
             _sendMode = sendMode;
             _closable = true;

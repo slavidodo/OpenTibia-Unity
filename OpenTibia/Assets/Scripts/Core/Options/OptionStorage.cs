@@ -107,7 +107,7 @@ namespace OpenTibiaUnity.Core.Options
         public bool ShowAdvancedSettings = false;
 
         public bool GeneralActionBarsLock = false;
-        public int GeneralInputSet_id = MappingSet.DefaultSet;
+        public int GeneralInputSetId = MappingSet.DefaultSet;
         public int GeneralInputSetMode = MappingSet.ChatModeON;
 
         // public Client Options

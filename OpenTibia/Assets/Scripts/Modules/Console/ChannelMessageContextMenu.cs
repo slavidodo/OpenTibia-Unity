@@ -40,13 +40,13 @@ namespace OpenTibiaUnity.Modules.Console
                 }
                 
                 if (chatStorage.HasOwnPrivateChannel) {
-                    if (_channel.Id == chatStorage.OwnPrivateChannel_id) {
+                    if (_channel.Id == chatStorage.OwnPrivateChannelId) {
                         CreateTextItem(TextResources.CTX_VIEW_PRIVATE_INVITE, () => {
-                            new PrivateChatActionImpl(PrivateChatActionType.ChatChannelInvite, chatStorage.OwnPrivateChannel_id, _channelMessage.Speaker).Perform();
+                            new PrivateChatActionImpl(PrivateChatActionType.ChatChannelInvite, chatStorage.OwnPrivateChannelId, _channelMessage.Speaker).Perform();
                         });
                     } else {
                         CreateTextItem(TextResources.CTX_VIEW_PRIVATE_EXCLUDE, () => {
-                            new PrivateChatActionImpl(PrivateChatActionType.ChatChannelExclude, chatStorage.OwnPrivateChannel_id, _channelMessage.Speaker).Perform();
+                            new PrivateChatActionImpl(PrivateChatActionType.ChatChannelExclude, chatStorage.OwnPrivateChannelId, _channelMessage.Speaker).Perform();
                         });
                     }
                 }

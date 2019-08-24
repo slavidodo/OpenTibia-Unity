@@ -89,12 +89,12 @@
         public const float HighlightMinOpacity = 0.3f;
         public const float HighlightMaxOpacity = 0.6f;
 
-        public const uint PlayerStart_id = 0x10000000;
-        public const uint PlayerEnd_id = 0x40000000;
-        public const uint MonsterStart_id = 0x40000000;
-        public const uint MonsterEnd_id = 0x80000000;
-        public const uint NpcStart_id = 0x80000000;
-        public const uint NpcEnd_id = 0xffffffff;
+        public const uint PlayerStartId = 0x10000000;
+        public const uint PlayerEndId = 0x40000000;
+        public const uint MonsterStartId = 0x40000000;
+        public const uint MonsterEndId = 0x80000000;
+        public const uint NpcStartId = 0x80000000;
+        public const uint NpcEndId = 0xffffffff;
 
         public const int AnimationDelayBeforeReset = 1000;
         public const int PhaseAutomatic = -1;
@@ -927,7 +927,7 @@
         GameContainerPagination,
         GameCreatureMarks,
         GameObjectMarks,
-        GameOutfit_idU16,
+        GameOutfitIdU16,
         GamePlayerStamina,
         GamePlayerAddons,
         GameMessageStatements,

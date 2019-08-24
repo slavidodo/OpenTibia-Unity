@@ -688,9 +688,9 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
                 var foundPanel = _creaturesStatus[tmpIndex];
-                if (foundPanel.Creature_id < creature.Id)
+                if (foundPanel.CreatureId < creature.Id)
                     index = tmpIndex + 1;
-                else if (foundPanel.Creature_id > creature.Id)
+                else if (foundPanel.CreatureId > creature.Id)
                     lastIndex = tmpIndex - 1;
                 else
                     return foundPanel;
@@ -699,7 +699,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             var panel = UnityEngine.Object.Instantiate(OpenTibiaUnity.GameManager.CreatureStatusPanelPrefab,
                     OpenTibiaUnity.GameManager.CreatureStatusContainer);
 
-            panel.Creature_id = creature.Id;
+            panel.CreatureId = creature.Id;
             panel.name = "CreatureStatus_" + creature.Name;
             panel.UpdateProperties(creature.Name, creature.HealthPercent, creature.ManaPercent);
 
@@ -715,9 +715,9 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             while (index < lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
                 foundPanel = _creaturesStatus[tmpIndex];
-                if (foundPanel.Creature_id > _id) {
+                if (foundPanel.CreatureId > _id) {
                     index = tmpIndex + 1;
-                } else if (foundPanel.Creature_id < _id) {
+                } else if (foundPanel.CreatureId < _id) {
                     lastIndex = tmpIndex - 1;
                 } else {
                     foundIndex = tmpIndex;
@@ -739,9 +739,9 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
                 var foundPanel = _creaturesStatus[tmpIndex];
-                if (foundPanel.Creature_id < creature.Id)
+                if (foundPanel.CreatureId < creature.Id)
                     index = tmpIndex + 1;
-                else if (foundPanel.Creature_id > creature.Id)
+                else if (foundPanel.CreatureId > creature.Id)
                     lastIndex = tmpIndex - 1;
                 else
                     return foundPanel;

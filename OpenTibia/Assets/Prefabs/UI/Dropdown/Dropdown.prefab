@@ -262,16 +262,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 56106e20729218241b8c5d9d4b93e500, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_PanelWrapperNormalSprite: {fileID: 21300000, guid: 01f46f37f4355c44a9a6b160f72c31cd,
+  _panelWrapperNormalSprite: {fileID: 21300000, guid: a00c99e254186cd4c947dee04b100bd3,
     type: 3}
-  m_PanelWrapperHighlightedSprite: {fileID: 21300000, guid: a3d8f93440b3a314584cce4dfb31962a,
+  _panelWrapperHighlightedSprite: {fileID: 21300002, guid: a00c99e254186cd4c947dee04b100bd3,
     type: 3}
-  m_PanelArrowNormalSprite: {fileID: 21300000, guid: 4594046b461c49045addf032860db398,
+  _panelArrowNormalSprite: {fileID: 21300000, guid: 4594046b461c49045addf032860db398,
     type: 3}
-  m_PanelArrowHighlightedSprite: {fileID: 21300000, guid: 7604b86d984918643bb3366e376cf5bd,
+  _panelArrowHighlightedSprite: {fileID: 21300000, guid: 7604b86d984918643bb3366e376cf5bd,
     type: 3}
-  m_PanelWrapperImage: {fileID: 2783674007315722891}
-  m_PanelArrowImage: {fileID: 111876024986122918}
+  _panelWrapperImage: {fileID: 2783674007315722891}
+  _panelArrowImage: {fileID: 111876024986122918}
 --- !u!114 &2473713827388834445
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1064,7 +1064,7 @@ PrefabInstance:
     - target: {fileID: 8975592622985898134, guid: 40dee3dca139fc94595d30807d888dc3,
         type: 3}
       propertyPath: m_Size
-      value: 1
+      value: 0.14893617
       objectReference: {fileID: 0}
     - target: {fileID: 3971681045354460173, guid: 40dee3dca139fc94595d30807d888dc3,
         type: 3}
@@ -1109,7 +1109,7 @@ PrefabInstance:
     - target: {fileID: 1970024145670434700, guid: 40dee3dca139fc94595d30807d888dc3,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0
+      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 7725056495120241054, guid: 40dee3dca139fc94595d30807d888dc3,
         type: 3}
@@ -1282,6 +1282,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_havePropertiesChanged
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_firstOverflowCharacterIndex
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_textInfo.lineCount
+      value: 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 54eba66ce4c99784c9bc8796c90e8b87, type: 3}

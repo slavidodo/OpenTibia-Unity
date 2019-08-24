@@ -40,6 +40,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemLabel: {fileID: 8333024397353824217}
+  normalColor: {r: 0, g: 0, b: 0, a: 0}
+  highlightColor: {r: 0.34509805, g: 0.34509805, b: 0.34509805, a: 1}
 --- !u!114 &6923331156360507846
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -154,25 +156,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80e55fd14862acd458dbe3ddbc149037, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Resizable: 1
-  m_MinimizedHeight: 23
-  m_MinContentHeight: 160
-  m_MaxContentHeight: -1
-  m_PreferredContentHeight: 160
-  m_PanelContent: {fileID: 4185140735904450975}
-  m_TitleLabel: {fileID: 552489755810218943}
-  m_CloseButton: {fileID: 4514138756704383580}
-  m_MinimizeButton: {fileID: 7487153379373372868}
-  m_MaximizeButton: {fileID: 1382788398045007577}
-  m_BuyToggle: {fileID: 2345846469363237506}
-  m_SellToggle: {fileID: 7473396901846695815}
-  m_AmountSlider: {fileID: 5000636865089301163}
-  m_AmountLabel: {fileID: 566739696055100216}
-  m_PriceLabel: {fileID: 2433435911450496801}
-  m_MoneyLabel: {fileID: 724197301147645711}
-  m_AcceptButton: {fileID: 3762573236983633535}
-  m_TradeItemsToggleGroup: {fileID: 8287037620151951602}
-  m_NPCTradeItemTemplate: {fileID: 4716307457231459384}
+  _resizable: 0
+  _minimizedHeight: 23
+  _minContentHeight: 50
+  _maxContentHeight: -1
+  _preferredContentHeight: 50
+  _panelContent: {fileID: 4185140735904450975}
+  _titleLabel: {fileID: 552489755810218943}
+  _closeButton: {fileID: 4514138756704383580}
+  _minimizeButton: {fileID: 7487153379373372868}
+  _maximizeButton: {fileID: 1382788398045007577}
+  _buyToggle: {fileID: 2345846469363237506}
+  _sellToggle: {fileID: 7473396901846695815}
+  _amountSlider: {fileID: 5000636865089301163}
+  _amountLabel: {fileID: 566739696055100216}
+  _priceLabel: {fileID: 2433435911450496801}
+  _moneyLabel: {fileID: 724197301147645711}
+  _acceptButton: {fileID: 3762573236983633535}
+  _tradeItemsToggleGroup: {fileID: 8287037620151951602}
+  _nPCTradeItemTemplate: {fileID: 4716307457231459384}
 --- !u!1 &1783298057712532042
 GameObject:
   m_ObjectHideFlags: 0
@@ -1829,7 +1831,7 @@ PrefabInstance:
     - target: {fileID: 1970024145670434700, guid: 40dee3dca139fc94595d30807d888dc3,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8971189566979353510, guid: 40dee3dca139fc94595d30807d888dc3,
         type: 3}

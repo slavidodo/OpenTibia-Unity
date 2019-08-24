@@ -7,7 +7,7 @@
             int count = message.ReadUnsignedByte();
             for (int i = 0; i < count; i++) {
                 var type = message.ReadEnum<ObjectCategory>();
-                ushort object_id = message.ReadUnsignedShort();
+                ushort objectId = message.ReadUnsignedShort();
             }
         }
     }

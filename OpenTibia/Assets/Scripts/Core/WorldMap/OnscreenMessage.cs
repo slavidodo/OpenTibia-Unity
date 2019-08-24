@@ -4,7 +4,7 @@ namespace OpenTibiaUnity.Core.WorldMap
 {
     public class OnscreenMessage
     {
-        private static int s_Next_id = 0;
+        private static int s_NextId = 0;
 
         protected int _ttl;
         protected int _id;
@@ -20,11 +20,11 @@ namespace OpenTibiaUnity.Core.WorldMap
         public string Text { get => _text; }
         public string RichText { get => _richText; }
 
-        public OnscreenMessage(int statement_id, string speaker, int speakerLevel, MessageModeType mode, string text) {
-            if (statement_id <= 0)
-                _id = --s_Next_id;
+        public OnscreenMessage(int statementId, string speaker, int speakerLevel, MessageModeType mode, string text) {
+            if (statementId <= 0)
+                _id = --s_NextId;
             else
-                _id = statement_id;
+                _id = statementId;
 
             _speaker = speaker;
             _speakerLevel = speakerLevel;

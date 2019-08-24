@@ -111,12 +111,12 @@ namespace OpenTibiaUnity.Core.Appearances
             if (_cachedSpriteInformations == null) {
                 _cachedSpriteInformations = new List<CachedSpriteInformation[]>();
                 foreach (var frameGroup in _type.FrameGroups)
-                    _cachedSpriteInformations.Add(new CachedSpriteInformation[frameGroup.SpriteInfo.Sprite_ids.Count]);
+                    _cachedSpriteInformations.Add(new CachedSpriteInformation[frameGroup.SpriteInfo.SpriteIDs.Count]);
                 
-                uint spriteId = _activeFrameGroup.SpriteInfo.Sprite_ids[spriteIndex];
+                uint spriteId = _activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
                 _cachedSpriteInformations[_activeFrameGroupIndex][spriteIndex] = appearanceStorage.GetSprite(spriteId);
             } else if (_cachedSpriteInformations[_activeFrameGroupIndex][spriteIndex] == null) {
-                var spriteId = _activeFrameGroup.SpriteInfo.Sprite_ids[spriteIndex];
+                var spriteId = _activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
                 _cachedSpriteInformations[_activeFrameGroupIndex][spriteIndex] = appearanceStorage.GetSprite(spriteId);
             }
 

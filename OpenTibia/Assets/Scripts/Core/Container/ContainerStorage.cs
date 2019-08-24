@@ -82,7 +82,7 @@ namespace OpenTibiaUnity.Core.Container
             return 0;
         }
 
-        public int GetFreeContainerView_id() {
+        public int GetFreeContainerViewId() {
             for (int i = 0; i < Constants.MaxContainerViews; i++) {
                 if (_bontainerViews[i] == null)
                     return i;

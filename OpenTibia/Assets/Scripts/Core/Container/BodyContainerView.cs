@@ -31,9 +31,9 @@ namespace OpenTibiaUnity.Core.Container
             return Objects[slot - ClothSlots.First];
         }
 
-        public bool IsEquipped(uint object_id) {
+        public bool IsEquipped(uint objectId) {
             var appearanceStorage = OpenTibiaUnity.AppearanceStorage;
-            var appearanceType = appearanceStorage.GetObjectType(object_id);
+            var appearanceType = appearanceStorage.GetObjectType(objectId);
             if (!!appearanceType && appearanceType.IsCloth) {
                 ClothSlots clothSlot = (ClothSlots)appearanceType.Cloth;
                 if (clothSlot == ClothSlots.BothHands)

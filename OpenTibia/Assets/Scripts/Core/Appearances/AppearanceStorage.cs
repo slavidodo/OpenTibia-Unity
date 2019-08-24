@@ -25,7 +25,7 @@ namespace OpenTibiaUnity.Core.Appearances
             _objectTypes = new List<AppearanceType>(_protoAppearances.Objects.Count);
             _marketObjectTypes = new List<AppearanceType>();
             foreach (var appearance in _protoAppearances.Objects) {
-                var type = new AppearanceType(appearance._id, appearance, AppearanceCategory.Object);
+                var type = new AppearanceType(appearance.ID, appearance, AppearanceCategory.Object);
                 _objectTypes.Add(type);
                 if (type.IsMarket)
                     _marketObjectTypes.Add(type);
@@ -37,22 +37,22 @@ namespace OpenTibiaUnity.Core.Appearances
             
             _effectTypes = new List<AppearanceType>(_protoAppearances.Effects.Count);
             foreach (var appearance in _protoAppearances.Effects)
-                _effectTypes.Add(new AppearanceType(appearance._id, appearance, AppearanceCategory.Effect));
+                _effectTypes.Add(new AppearanceType(appearance.ID, appearance, AppearanceCategory.Effect));
 
             _missileTypes = new List<AppearanceType>(_protoAppearances.Missles.Count);
             foreach (var appearance in _protoAppearances.Missles)
-                _missileTypes.Add(new AppearanceType(appearance._id, appearance, AppearanceCategory.Missile));
+                _missileTypes.Add(new AppearanceType(appearance.ID, appearance, AppearanceCategory.Missile));
 
             _outfitTypes = new List<AppearanceType>(_protoAppearances.Outfits.Count);
             foreach (var appearance in _protoAppearances.Outfits)
-                _outfitTypes.Add(new AppearanceType(appearance._id, appearance, AppearanceCategory.Outfit));
+                _outfitTypes.Add(new AppearanceType(appearance.ID, appearance, AppearanceCategory.Outfit));
             
             _invisibleOutfitType = _effectTypes[13 - 1];
         }
 
         public void SetSpriteProvider(SpritesProvider spriteProvider) => _spritesProvider = spriteProvider;
         public void UnloadSpriteProvider() => _spritesProvider?.Unload();
-        public CachedSpriteInformation GetSprite(uint sprite_id) => _spritesProvider.GetSprite(sprite_id);
+        public CachedSpriteInformation GetSprite(uint spriteId) => _spritesProvider.GetSprite(spriteId);
 
         public void Unload() {
             UnloadSpriteProvider();
@@ -108,7 +108,7 @@ namespace OpenTibiaUnity.Core.Appearances
             if (_outfitTypes == null)
                 throw new System.Exception("AppearanceStorage.CreateOutfitInstance: proto appearances not loaded.");
 
-            if (id == OutfitInstance.InvisibleOutfit_id) {
+            if (id == OutfitInstance.InvisibleOutfitId) {
                 return new OutfitInstance(id, _invisibleOutfitType, head, body, legs, feet, addons);
             } else if (id >= 1 && id <= _outfitTypes.Count) {
                 return new OutfitInstance(id, FindAppearanceType(_outfitTypes, id), head, body, legs, feet, addons);

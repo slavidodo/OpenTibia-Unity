@@ -16,19 +16,19 @@ namespace OpenTibiaUnity.Core.Appearances.Provider
                 throw new Exception("SpritesInformation.SpritesInformation: Invalid catalog-content.json");
 
             _spritesAssetInformations.Sort((SpritesAsset x, SpritesAsset y) => {
-                return x.FirstSprite_id.CompareTo(y.FirstSprite_id);
+                return x.FirstSpriteId.CompareTo(y.FirstSpriteId);
             });
         }
         
-        public SpritesAsset FindSpritesAsset(uint sprite_id) {
+        public SpritesAsset FindSpritesAsset(uint spriteId) {
             int lastIndex = _spritesAssetInformations.Count - 1;
             int index = 0;
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
                 var asset = _spritesAssetInformations[tmpIndex];
-                if (asset.FirstSprite_id > sprite_id)
+                if (asset.FirstSpriteId > spriteId)
                     index = tmpIndex + 1;
-                else if (asset.LastSprite_id < sprite_id)
+                else if (asset.LastSpriteId < spriteId)
                     lastIndex = tmpIndex - 1;
                 else // first < id < last
                     return asset;

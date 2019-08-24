@@ -8,13 +8,13 @@ namespace OpenTibiaUnity.Core.Communication.Game
     public partial class ProtocolGame : Internal.Protocol
     {
         private AppearanceInstance ReadCreatureOutfit(Internal.ByteArray message, AppearanceInstance instance = null) {
-            int outfit_id;
-            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameOutfit_idU16))
-                outfit_id = message.ReadUnsignedShort();
+            int outfitId;
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameOutfitIdU16))
+                outfitId = message.ReadUnsignedShort();
             else
-                outfit_id = message.ReadUnsignedByte();
+                outfitId = message.ReadUnsignedByte();
 
-            if (outfit_id != 0) {
+            if (outfitId != 0) {
                 int headColor = message.ReadUnsignedByte();
                 int torsoColor = message.ReadUnsignedByte();
                 int legsColor = message.ReadUnsignedByte();
@@ -30,29 +30,29 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     return instance;
                 }
 
-                return AppearanceStorage.CreateOutfitInstance((uint)outfit_id, headColor, torsoColor, legsColor, detailColor, addonsFlags);
+                return AppearanceStorage.CreateOutfitInstance((uint)outfitId, headColor, torsoColor, legsColor, detailColor, addonsFlags);
             }
 
-            uint object_id = message.ReadUnsignedShort();
+            uint objectId = message.ReadUnsignedShort();
             ObjectInstance objectInstance = instance as ObjectInstance;
-            if (!!objectInstance && objectInstance.Id == object_id)
+            if (!!objectInstance && objectInstance.Id == objectId)
                 return objectInstance;
 
-            if (object_id == 0)
-                return AppearanceStorage.CreateOutfitInstance(OutfitInstance.InvisibleOutfit_id, 0, 0, 0, 0, 0);
+            if (objectId == 0)
+                return AppearanceStorage.CreateOutfitInstance(OutfitInstance.InvisibleOutfitId, 0, 0, 0, 0, 0);
 
-            return AppearanceStorage.CreateObjectInstance(object_id, 0);
+            return AppearanceStorage.CreateObjectInstance(objectId, 0);
         }
 
         private AppearanceInstance ReadMountOutfit(Internal.ByteArray message, AppearanceInstance instance = null) {
-            uint outfit_id = message.ReadUnsignedShort();
+            uint outfitId = message.ReadUnsignedShort();
 
             OutfitInstance outfitInstance = instance as OutfitInstance;
-            if (!!outfitInstance && outfitInstance.Id == outfit_id)
+            if (!!outfitInstance && outfitInstance.Id == outfitId)
                 return outfitInstance;
 
-            if (outfit_id != 0)
-                return AppearanceStorage.CreateOutfitInstance(outfit_id, 0, 0, 0, 0, 0);
+            if (outfitId != 0)
+                return AppearanceStorage.CreateOutfitInstance(outfitId, 0, 0, 0, 0, 0);
 
             return null;
         }
@@ -73,33 +73,33 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 case AppearanceInstance.UnknownCreature:
                 case AppearanceInstance.OutdatedCreature: {
                     if (type == AppearanceInstance.UnknownCreature) {
-                        uint remove_id = message.ReadUnsignedInt();
-                        uint new_id = message.ReadUnsignedInt();
+                        uint removeId = message.ReadUnsignedInt();
+                        uint newId = message.ReadUnsignedInt();
                         CreatureType creatureType;
                         
                         if (gameManager.ClientVersion >= 910) {
                             creatureType = message.ReadEnum<CreatureType>();
                         } else {
-                            if (new_id >= Constants.PlayerStart_id && new_id < Constants.PlayerEnd_id)
+                            if (newId >= Constants.PlayerStartId && newId < Constants.PlayerEndId)
                                 creatureType = CreatureType.Player;
-                            else if (new_id >= Constants.MonsterStart_id && new_id < Constants.MonsterEnd_id)
+                            else if (newId >= Constants.MonsterStartId && newId < Constants.MonsterEndId)
                                 creatureType = CreatureType.Monster;
                             else
                                 creatureType = CreatureType.NPC;
                         }
                         
-                        if (new_id == Player.Id)
+                        if (newId == Player.Id)
                             creature = Player;
                         else
-                            creature = new Creatures.Creature(new_id);
+                            creature = new Creatures.Creature(newId);
 
-                        creature = CreatureStorage.ReplaceCreature(creature, remove_id);
+                        creature = CreatureStorage.ReplaceCreature(creature, removeId);
                         if (!creature)
                             throw new System.Exception("ProtocolGame.ReadCreatureInstance: Failed to append creature.");
 
                         creature.Type = creatureType;
                         if (gameManager.ClientVersion >= 1120)
-                            creature.SetSummoner_id(creature.IsSummon ? message.ReadUnsignedInt() : 0);
+                            creature.SetSummonerId(creature.IsSummon ? message.ReadUnsignedInt() : 0);
                         
                         creature.Name = message.ReadString();
                     } else {
@@ -126,7 +126,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     if (gameManager.GetFeature(GameFeature.GameCreatureMarks)) {
                         creature.Type = message.ReadEnum<CreatureType>();
                         if (gameManager.ClientVersion >= 1120)
-                            creature.SetSummoner_id(creature.IsSummon ? message.ReadUnsignedInt() : 0);
+                            creature.SetSummonerId(creature.IsSummon ? message.ReadUnsignedInt() : 0);
                     }
 
                     if (gameManager.GetFeature(GameFeature.GameCreatureIcons))

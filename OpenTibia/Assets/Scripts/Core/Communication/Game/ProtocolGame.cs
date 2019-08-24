@@ -629,7 +629,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     break;
                     
                 case GameserverMessageType.TutorialHint:
-                    _inputBuffer.ReadUnsignedByte(); // hint_id
+                    _inputBuffer.ReadUnsignedByte(); // hintId
                     break;
                 case GameserverMessageType.AutomapFlag_CyclopediaMapData:
                     if (gameManager.GetFeature(GameFeature.GameCyclopediaMap))

@@ -6,7 +6,7 @@ namespace OpenTibiaUnity.Core.Appearances
     {
         private static int s_UniqueCounter = 0;
 
-        private readonly int _unique_id;
+        private readonly int _uniqueId;
         private readonly int _patternX;
         private readonly int _patternY;
         private readonly int _animationEnd = 0;
@@ -30,7 +30,7 @@ namespace OpenTibiaUnity.Core.Appearances
         }
 
         public MissileInstance(uint id, AppearanceType type, Vector3Int fromPosition, Vector3Int toPosition) : base(id, type) {
-            _unique_id = s_UniqueCounter++;
+            _uniqueId = s_UniqueCounter++;
             _animationDelta = new Vector2Int(toPosition.x - fromPosition.x, toPosition.y - fromPosition.y);
             if (_animationDelta.x == 0) {
                 if (_animationDelta.y <= 0) {

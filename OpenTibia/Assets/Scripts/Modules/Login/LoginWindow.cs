@@ -332,11 +332,11 @@ namespace OpenTibiaUnity.Modules.Login
 
             string newAccountIdentifierLabel;
             if (gameManager.GetFeature(GameFeature.GameAccountEmailAddress))
-                newAccountIdentifierLabel = TextResources.ACCOUNT__idENTIFIER_EMAIL;
+                newAccountIdentifierLabel = TextResources.ACCOUNT_IDENTIFIER_EMAIL;
             else if (gameManager.GetFeature(GameFeature.GameAccountNames))
-                newAccountIdentifierLabel = TextResources.ACCOUNT__idENTIFIER_ACCOUNTNAME;
+                newAccountIdentifierLabel = TextResources.ACCOUNT_IDENTIFIER_ACCOUNTNAME;
             else
-                newAccountIdentifierLabel = TextResources.ACCOUNT__idENTIFIER_ACCOUNTNUMBER;
+                newAccountIdentifierLabel = TextResources.ACCOUNT_IDENTIFIER_ACCOUNTNUMBER;
 
             if (_accountIdentifierLabel.text != newAccountIdentifierLabel)
                 _accountIdentifierLabel.text = newAccountIdentifierLabel;

@@ -14,12 +14,12 @@
         public const int ChatChannelNoChannel = -1;
 
         PrivateChatActionType _actionType;
-        int _channel_id;
+        int _channelId;
         string _name;
 
-        public PrivateChatActionImpl(PrivateChatActionType actionType, int channel_id, string name) {
+        public PrivateChatActionImpl(PrivateChatActionType actionType, int channelId, string name) {
             _actionType = actionType;
-            _channel_id = channel_id;
+            _channelId = channelId;
             _name = name;
         }
 
@@ -41,7 +41,7 @@
 
             switch (actionType) {
                 case PrivateChatActionType.OpenChatChannel: {
-                    var channel = chatStorage.GetChannel(chatStorage.OwnPrivateChannel_id);
+                    var channel = chatStorage.GetChannel(chatStorage.OwnPrivateChannelId);
                     if (channel == null) {
                         protocolGame.SendOpenChannel();
                     } else {
@@ -51,13 +51,13 @@
                     break;
                 }
                 case PrivateChatActionType.ChatChannelInvite: {
-                    if (_channel_id > -1)
-                        protocolGame.SendInviteToChannel(_name, _channel_id);
+                    if (_channelId > -1)
+                        protocolGame.SendInviteToChannel(_name, _channelId);
                     break;
                 }
                 case PrivateChatActionType.ChatChannelExclude: {
-                    if (_channel_id > -1)
-                        protocolGame.SendExcludeFromChannel(_name, _channel_id);
+                    if (_channelId > -1)
+                        protocolGame.SendExcludeFromChannel(_name, _channelId);
                     break;
                 }
                 case PrivateChatActionType.OpenMessageChannel: {

@@ -21,7 +21,7 @@ namespace OpenTibiaUnity.Core.Utils
 
         public UnionStrInt(string value) {
             _isString = true;
-            _stringValue = value ?? throw new System.ArgumentNullException("Channel_id.Channel_id: (string) value can't be null.");
+            _stringValue = value ?? throw new ArgumentNullException("UnionStrInt.UnionStrInt: (string) value can't be null.");
         }
 
         public override bool Equals(object @object) {

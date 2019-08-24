@@ -127,8 +127,8 @@ namespace OpenTibiaUnity.Core.Communication.Login
                     || !worldObject.TryGetValue("previewstate", out previewStateToken))
                     continue;
 
-                int world_id = SafeInt(idToken);
-                if (worldIds.Contains(world_id))
+                int worldId = SafeInt(idToken);
+                if (worldIds.Contains(worldId))
                     continue;
 
                 string externalAddress = string.Empty,
@@ -190,9 +190,9 @@ namespace OpenTibiaUnity.Core.Communication.Login
                     currentTournamentPhase = SafeInt(worldObject.GetValue("currenttournamentphase"));
                 }
 
-                worldIds.Add(world_id);
+                worldIds.Add(worldId);
                 playdata.Worlds.Add(new Playdata.World() {
-                    _id = world_id,
+                    _id = worldId,
                     PreviewState = SafeInt(previewStateToken),
                     ExternalPort = externalPort,
                     ExternalPortProtected = externalPortProtected,
@@ -216,19 +216,19 @@ namespace OpenTibiaUnity.Core.Communication.Login
             }
 
             foreach (var characterObject in charactersArray.Children<JObject>()) {
-                JToken world_idToken = null,
+                JToken worldIdToken = null,
                     nameToken = null;
 
-                if (!characterObject.TryGetValue("worldid", out world_idToken)
+                if (!characterObject.TryGetValue("worldid", out worldIdToken)
                     || !characterObject.TryGetValue("name", out nameToken))
                     continue;
 
-                int world_id = SafeInt(world_idToken);
-                if (!worldIds.Contains(world_id))
+                int worldId = SafeInt(worldIdToken);
+                if (!worldIds.Contains(worldId))
                     continue;
 
                 var character = new Playdata.Character() {
-                    World_id = world_id,
+                    WorldId = worldId,
                     Name = SafeString(nameToken),
 
                     // 11.00 (x?)
@@ -237,7 +237,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
 
                     // 12.00
                     Level = SafeInt(characterObject.GetValue("level")),
-                    Outfit_id = SafeInt(characterObject.GetValue("outfitid")),
+                    OutfitId = SafeInt(characterObject.GetValue("outfitid")),
                     HeadColor = SafeInt(characterObject.GetValue("headcolor")),
                     TorsoColor = SafeInt(characterObject.GetValue("torsocolor")),
                     LegsColor = SafeInt(characterObject.GetValue("legscolor")),

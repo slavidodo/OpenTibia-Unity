@@ -16,8 +16,8 @@ namespace OpenTibiaUnity.Core.Input.GameAction
             Init(absolutePosition, appearnceType, stackPos);
         }
 
-        public LookActionImpl(Vector3Int absolutePosition, uint object_id, int stackPos) {
-            var appearnceType = OpenTibiaUnity.AppearanceStorage.GetObjectType(object_id);
+        public LookActionImpl(Vector3Int absolutePosition, uint objectId, int stackPos) {
+            var appearnceType = OpenTibiaUnity.AppearanceStorage.GetObjectType(objectId);
             Init(absolutePosition, appearnceType, stackPos);
         }
 

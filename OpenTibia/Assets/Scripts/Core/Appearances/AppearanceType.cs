@@ -55,7 +55,7 @@
         public bool IsMiniMap { get => HasAppearanceFlags && AppearanceFlags.Minimap != null; }
         public uint MiniMapColor { get => IsMiniMap ? AppearanceFlags.Minimap.Color : 0; }
         public bool HasLensHelp { get => HasAppearanceFlags && AppearanceFlags.LensHelp != null; }
-        public uint LensHelp { get => HasLensHelp ? AppearanceFlags.LensHelp._id : 0; }
+        public uint LensHelp { get => HasLensHelp ? AppearanceFlags.LensHelp.ID : 0; }
         public bool IsFullGround { get => HasAppearanceFlags ? AppearanceFlags.FullGround : false; }
         public bool IsIgnoreLook { get => HasAppearanceFlags ? AppearanceFlags.Look : false; }
         public bool IsCloth { get => HasAppearanceFlags && AppearanceFlags.Cloth != null; }

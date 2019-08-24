@@ -178,9 +178,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseTalk(Internal.ByteArray message) {
-            uint statement_id = 0;
+            uint statementId = 0;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameMessageStatements))
-                statement_id = message.ReadUnsignedInt();
+                statementId = message.ReadUnsignedInt();
 
             string speaker = message.ReadString();
             ushort speakerLevel = 0;
@@ -191,29 +191,29 @@ namespace OpenTibiaUnity.Core.Communication.Game
             MessageModeType mode = TranslateMessageModeFromServer(rawMode);
             
             Vector3Int? absolutePosition = null;
-            Utils.UnionStrInt channel_id = null;
+            Utils.UnionStrInt channelId = null;
 
             switch (mode) {
                 case MessageModeType.Say:
                 case MessageModeType.Whisper:
                 case MessageModeType.Yell:
                     absolutePosition = message.ReadPosition();
-                    channel_id = Chat.ChatStorage.LocalChannel_id;
+                    channelId = Chat.ChatStorage.LocalChannelId;
                     break;
 
                 case MessageModeType.PrivateFrom:
-                    channel_id = speaker;
+                    channelId = speaker;
                     break;
 
                 case MessageModeType.Channel:
                 case MessageModeType.ChannelManagement:
                 case MessageModeType.ChannelHighlight:
-                    channel_id = message.ReadUnsignedShort();
+                    channelId = message.ReadUnsignedShort();
                     break;
 
                 case MessageModeType.Spell:
                     absolutePosition = message.ReadPosition();
-                    channel_id = Chat.ChatStorage.LocalChannel_id;
+                    channelId = Chat.ChatStorage.LocalChannelId;
                     break;
 
                 case MessageModeType.NpcFromStartBlock:
@@ -227,11 +227,11 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     break;
 
                 case MessageModeType.GamemasterChannel:
-                    channel_id = message.ReadUnsignedShort();
+                    channelId = message.ReadUnsignedShort();
                     break;
 
                 case MessageModeType.GamemasterPrivateFrom:
-                    channel_id = speaker;
+                    channelId = speaker;
                     break;
 
                 case MessageModeType.BarkLow:
@@ -239,7 +239,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 case MessageModeType.MonsterSay:
                 case MessageModeType.MonsterYell:
                     absolutePosition = message.ReadPosition();
-                    channel_id = -1;
+                    channelId = -1;
                     break;
 
                 case MessageModeType.Game:
@@ -247,12 +247,12 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
                 case MessageModeType.RVRAnswer:
                 case MessageModeType.RVRContinue:
-                    channel_id = Chat.ChatStorage.RVRChannel_id;
+                    channelId = Chat.ChatStorage.RVRChannelId;
                     break;
 
                 case MessageModeType.RVRChannel:
                     message.ReadUnsignedInt();
-                    channel_id = Chat.ChatStorage.RVRChannel_id;
+                    channelId = Chat.ChatStorage.RVRChannelId;
                     break;
 
                 default:
@@ -263,8 +263,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
             string text = message.ReadString();
             if(mode != MessageModeType.NpcFromStartBlock && mode != MessageModeType.NpcFrom) {
                 try {
-                    WorldMapStorage.AddOnscreenMessage(absolutePosition, (int)statement_id, speaker, speakerLevel, mode, text);
-                    ChatStorage.AddChannelMessage(channel_id, (int)statement_id, speaker, speakerLevel, mode, text);
+                    WorldMapStorage.AddOnscreenMessage(absolutePosition, (int)statementId, speaker, speakerLevel, mode, text);
+                    ChatStorage.AddChannelMessage(channelId, (int)statementId, speaker, speakerLevel, mode, text);
                 } catch (System.Exception e) {
                     throw new System.Exception("ProtocolGame.ParseTalk: Failed to add message: " + e.Message + "\n" + e.StackTrace);
                 }
@@ -286,9 +286,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseOpenChannel(Internal.ByteArray message) {
-            int channel_id = message.ReadUnsignedShort();
+            int channelId = message.ReadUnsignedShort();
             string channelName = message.ReadString();
-            Chat.Channel channel = ChatStorage.AddChannel(channel_id, channelName, MessageModeType.Channel);
+            Chat.Channel channel = ChatStorage.AddChannel(channelId, channelName, MessageModeType.Channel);
             channel.CanModerate = true;
 
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameChannelPlayerList)) {
@@ -308,13 +308,13 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseOpenOwnChannel(Internal.ByteArray message) {
-            int channel_id = message.ReadUnsignedShort();
+            int channelId = message.ReadUnsignedShort();
             string channelName = message.ReadString();
-            var channel = ChatStorage.AddChannel(channel_id, channelName, MessageModeType.Channel);
+            var channel = ChatStorage.AddChannel(channelId, channelName, MessageModeType.Channel);
             channel.CanModerate = true;
 
             if (channel.IsPrivate)
-                ChatStorage.OwnPrivateChannel_id = channel_id;
+                ChatStorage.OwnPrivateChannelId = channelId;
 
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameChannelPlayerList)) {
                 int joinedUsers = message.ReadUnsignedShort();
@@ -328,8 +328,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseCloseChannel(Internal.ByteArray message) {
-            int channel_id = message.ReadUnsignedShort();
-            ChatStorage.CloseChannel(channel_id);
+            int channelId = message.ReadUnsignedShort();
+            ChatStorage.CloseChannel(channelId);
         }
 
         private void ParseTextMessage(Internal.ByteArray message) {
@@ -338,7 +338,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             try {
                 switch (mode) {
                     case MessageModeType.ChannelManagement:
-                        int channel_id = message.ReadUnsignedShort();
+                        int channelId = message.ReadUnsignedShort();
                         string text = message.ReadString();
                         // TODO name filter
                         //var regex = new System.Text.RegularExpressions.Regex(@"^(.+?) invites you to |^You have been excluded from the channel ([^']+)'s Channel\.$");
@@ -346,16 +346,16 @@ namespace OpenTibiaUnity.Core.Communication.Game
                         //string speaker = match != null && match.Success ? match.Value : null;
 
                         WorldMapStorage.AddOnscreenMessage(null, -1, null, 0, mode, text);
-                        ChatStorage.AddChannelMessage(channel_id, -1, null, 0, mode, text);
+                        ChatStorage.AddChannelMessage(channelId, -1, null, 0, mode, text);
                         break;
 
                     case MessageModeType.Guild:
                     case MessageModeType.PartyManagement:
                     case MessageModeType.Party:
-                        channel_id = message.ReadUnsignedShort();
+                        channelId = message.ReadUnsignedShort();
                         text = message.ReadString();
                         WorldMapStorage.AddOnscreenMessage(null, -1, null, 0, mode, text);
-                        ChatStorage.AddChannelMessage(channel_id, -1, null, 0, mode, text);
+                        ChatStorage.AddChannelMessage(channelId, -1, null, 0, mode, text);
                         break;
 
                     case MessageModeType.Login:
@@ -368,10 +368,10 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     case MessageModeType.Loot:
                     case MessageModeType.TradeNpc:
                     case MessageModeType.HotkeyUse:
-                        channel_id = -1;
+                        channelId = -1;
                         text = message.ReadString();
                         WorldMapStorage.AddOnscreenMessage(null, -1, null, 0, mode, text);
-                        ChatStorage.AddChannelMessage(channel_id, -1, null, 0, mode, text);
+                        ChatStorage.AddChannelMessage(channelId, -1, null, 0, mode, text);
                         break;
 
                     case MessageModeType.Market:
@@ -430,8 +430,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseChannelEvent(Internal.ByteArray message) {
-            int channel_id = message.ReadUnsignedShort();
-            var channel = ChatStorage.GetChannel(channel_id);
+            int channelId = message.ReadUnsignedShort();
+            var channel = ChatStorage.GetChannel(channelId);
             string playerName = message.ReadString();
             var eventType = message.ReadEnum<ChannelEvent>();
 

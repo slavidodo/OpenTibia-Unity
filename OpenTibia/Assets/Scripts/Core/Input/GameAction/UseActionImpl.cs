@@ -22,8 +22,8 @@ namespace OpenTibiaUnity.Core.Input.GameAction
             Init(absolutePosition, appearanceType, stackPosOrData, targetAbsolute, targetObject, targetPosition, useTarget);
         }
 
-        public UseActionImpl(Vector3Int absolutePosition, uint object_id, int stackPosOrData, Vector3Int targetAbsolute, Appearances.ObjectInstance targetObject, int targetPosition, UseActionTarget useTarget) {
-            var appearnceType = OpenTibiaUnity.AppearanceStorage.GetObjectType(object_id);
+        public UseActionImpl(Vector3Int absolutePosition, uint objectId, int stackPosOrData, Vector3Int targetAbsolute, Appearances.ObjectInstance targetObject, int targetPosition, UseActionTarget useTarget) {
+            var appearnceType = OpenTibiaUnity.AppearanceStorage.GetObjectType(objectId);
             Init(absolutePosition, appearnceType, stackPosOrData, targetAbsolute, targetObject, targetPosition, useTarget);
         }
         
@@ -79,7 +79,7 @@ namespace OpenTibiaUnity.Core.Input.GameAction
             if (_appearanceType.IsContainer) {
                 int index = 0;
                 if (_useActionTarget == UseActionTarget.NewWindow || _absolutePosition.x < 65535 || _absolutePosition.y >= (int)ClothSlots.First && _absolutePosition.y <= (int)ClothSlots.Last)
-                    index = containerStorage.GetFreeContainerView_id();
+                    index = containerStorage.GetFreeContainerViewId();
                 else if (64 <= _absolutePosition.y && _absolutePosition.y < 64 + Constants.MaxContainerViews)
                     index = _absolutePosition.y - 64;
 

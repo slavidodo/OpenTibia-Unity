@@ -213,7 +213,8 @@ PrefabInstance:
       propertyPath: m_MinHeight
       value: 100
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 8274263800241433161, guid: a5ddc2e2a5a73e448b4ab83fc88d3cb5, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: a5ddc2e2a5a73e448b4ab83fc88d3cb5, type: 3}
 --- !u!114 &5829865409271287039 stripped
 MonoBehaviour:

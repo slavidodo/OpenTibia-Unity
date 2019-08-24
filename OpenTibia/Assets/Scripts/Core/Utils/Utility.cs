@@ -77,7 +77,7 @@ namespace OpenTibiaUnity.Core.Utils
             return OperatingSystem.UnityLinux;
 #elif UNITY_IOS
             return OperatingSystem.UnityIOS;
-#elif UNITY_ANDRO_id
+#elif UNITY_ANDROId
             return OperatingSystem.UnityAndroid;
 #else
             return OperatingSystem.UnityUnknown;

@@ -148,40 +148,40 @@ namespace OpenTibiaUnity.Core.Communication.Game
             _packetWriter.FinishMessage();
         }
 
-        public void SendMoveObject(UnityEngine.Vector3Int sourceAbsolute, ushort object_id, int stackPos, UnityEngine.Vector3Int destAbsolute, int moveAmount) {
+        public void SendMoveObject(UnityEngine.Vector3Int sourceAbsolute, ushort objectId, int stackPos, UnityEngine.Vector3Int destAbsolute, int moveAmount) {
             if (sourceAbsolute.x != 65535)
                 Player.StopAutowalk(false);
 
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.MoveObject);
             message.WritePosition(sourceAbsolute);
-            message.WriteUnsignedShort(object_id);
+            message.WriteUnsignedShort(objectId);
             message.WriteUnsignedByte((byte)stackPos);
             message.WritePosition(destAbsolute);
             message.WriteUnsignedByte((byte)moveAmount);
             _packetWriter.FinishMessage();
         }
-        public void SendInspectInNpcTrade(ushort object_id, int count) {
+        public void SendInspectInNpcTrade(ushort objectId, int count) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.LookInNpcTrade);
-            message.WriteUnsignedShort(object_id);
+            message.WriteUnsignedShort(objectId);
             message.WriteUnsignedByte((byte)count);
             _packetWriter.FinishMessage();
         }
-        public void SendBuyObject(ushort object_id, int subType, int amount, bool ignoreCapacity, bool buyWithBackpack) {
+        public void SendBuyObject(ushort objectId, int subType, int amount, bool ignoreCapacity, bool buyWithBackpack) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.BuyObject);
-            message.WriteUnsignedShort(object_id);
+            message.WriteUnsignedShort(objectId);
             message.WriteUnsignedByte((byte)subType);
             message.WriteUnsignedByte((byte)amount);
             message.WriteBoolean(ignoreCapacity);
             message.WriteBoolean(buyWithBackpack);
             _packetWriter.FinishMessage();
         }
-        public void SendSellObject(ushort object_id, int subType, int amount, bool ignoreEquiped) {
+        public void SendSellObject(ushort objectId, int subType, int amount, bool ignoreEquiped) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.SellObject);
-            message.WriteUnsignedShort(object_id);
+            message.WriteUnsignedShort(objectId);
             message.WriteUnsignedByte((byte)subType);
             message.WriteUnsignedByte((byte)amount);
             message.WriteBoolean(ignoreEquiped);
@@ -193,90 +193,90 @@ namespace OpenTibiaUnity.Core.Communication.Game
             _packetWriter.FinishMessage();
         }
 
-        public void SendUseObject(UnityEngine.Vector3Int absolute, uint type_id, int stackPosOrData, int window) {
+        public void SendUseObject(UnityEngine.Vector3Int absolute, uint typeId, int stackPosOrData, int window) {
             if (absolute.x != 65535)
                 Player.StopAutowalk(false);
 
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.UseObject);
             message.WritePosition(absolute);
-            message.WriteUnsignedShort((ushort)type_id);
+            message.WriteUnsignedShort((ushort)typeId);
             message.WriteUnsignedByte((byte)stackPosOrData);
             message.WriteUnsignedByte((byte)window); // for containers
             _packetWriter.FinishMessage();
         }
 
-        public void SendUseTwoObjects(UnityEngine.Vector3Int firstAbsolute, uint first_id, int firstData, UnityEngine.Vector3Int secondAbsolute, uint second_id, int secondData) {
+        public void SendUseTwoObjects(UnityEngine.Vector3Int firstAbsolute, uint firstId, int firstData, UnityEngine.Vector3Int secondAbsolute, uint secondId, int secondData) {
             if (firstAbsolute.x != 65535 || secondAbsolute.x != 65535)
                 Player.StopAutowalk(false);
 
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.UseTwoObjects);
             message.WritePosition(firstAbsolute);
-            message.WriteUnsignedShort((ushort)first_id);
+            message.WriteUnsignedShort((ushort)firstId);
             message.WriteUnsignedByte((byte)firstData);
             message.WritePosition(secondAbsolute);
-            message.WriteUnsignedShort((ushort)second_id);
+            message.WriteUnsignedShort((ushort)secondId);
             message.WriteUnsignedByte((byte)secondData);
             _packetWriter.FinishMessage();
         }
 
-        public void SendUseOnCreature(UnityEngine.Vector3Int absolute, uint type_id, int stackPosOrData, uint creature_id) {
+        public void SendUseOnCreature(UnityEngine.Vector3Int absolute, uint typeId, int stackPosOrData, uint creatureId) {
             if (absolute.x != 65535)
                 Player.StopAutowalk(false);
 
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.UseOnCreature);
             message.WritePosition(absolute);
-            message.WriteUnsignedShort((ushort)type_id);
+            message.WriteUnsignedShort((ushort)typeId);
             message.WriteUnsignedByte((byte)stackPosOrData);
-            message.WriteUnsignedInt(creature_id);
+            message.WriteUnsignedInt(creatureId);
             _packetWriter.FinishMessage();
         }
 
-        public void SendTurnObject(UnityEngine.Vector3Int absolute, uint type_id, int stackPos) {
+        public void SendTurnObject(UnityEngine.Vector3Int absolute, uint typeId, int stackPos) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.TurnObject);
             message.WritePosition(absolute);
-            message.WriteUnsignedShort((ushort)type_id);
+            message.WriteUnsignedShort((ushort)typeId);
             message.WriteUnsignedByte((byte)stackPos);
             _packetWriter.FinishMessage();
         }
 
-        public void SendToggleWrapState(UnityEngine.Vector3Int absolute, uint type_id, int stackPos) {
+        public void SendToggleWrapState(UnityEngine.Vector3Int absolute, uint typeId, int stackPos) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.ToggleWrapState);
             message.WriteEnum(GameclientMessageType.ToggleWrapState);
             message.WritePosition(absolute);
-            message.WriteUnsignedShort((ushort)type_id);
+            message.WriteUnsignedShort((ushort)typeId);
             message.WriteUnsignedByte((byte)stackPos);
             _packetWriter.FinishMessage();
         }
 
-        public void SendLook(UnityEngine.Vector3Int absolute, uint type_id, int stackPos) {
+        public void SendLook(UnityEngine.Vector3Int absolute, uint typeId, int stackPos) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.Look);
             message.WritePosition(absolute);
-            message.WriteUnsignedShort((ushort)type_id);
+            message.WriteUnsignedShort((ushort)typeId);
             message.WriteUnsignedByte((byte)stackPos);
             _packetWriter.FinishMessage();
         }
 
-        public void SendLookAtCreature(uint creature_id) {
+        public void SendLookAtCreature(uint creatureId) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.Look);
-            message.WriteUnsignedInt(creature_id);
+            message.WriteUnsignedInt(creatureId);
             _packetWriter.FinishMessage();
         }
 
-        public void SendJoinAggression(uint creature_id) {
+        public void SendJoinAggression(uint creatureId) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.JoinAggression);
-            message.WriteUnsignedInt(creature_id);
+            message.WriteUnsignedInt(creatureId);
             _packetWriter.FinishMessage();
         }
 
-        public void SendTalk(MessageModeType mode, int channel_id, string receiver, string text) {
+        public void SendTalk(MessageModeType mode, int channelId, string receiver, string text) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.Talk);
             message.WriteUnsignedByte(TranslateMessageModeToServer(mode));
@@ -291,7 +291,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 case MessageModeType.ChannelHighlight:
                 case MessageModeType.ChannelManagement:
                 case MessageModeType.GamemasterChannel:
-                    message.WriteUnsignedShort((ushort)channel_id);
+                    message.WriteUnsignedShort((ushort)channelId);
                     break;
                 default:
                     break;
@@ -305,16 +305,16 @@ namespace OpenTibiaUnity.Core.Communication.Game
             message.WriteEnum(GameclientMessageType.GetChannels);
             _packetWriter.FinishMessage();
         }
-        public void SendJoinChannel(int channel_id) {
+        public void SendJoinChannel(int channelId) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.JoinChannel);
-            message.WriteUnsignedShort((ushort)channel_id);
+            message.WriteUnsignedShort((ushort)channelId);
             _packetWriter.FinishMessage();
         }
-        public void SendLeaveChannel(int channel_id) {
+        public void SendLeaveChannel(int channelId) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.LeaveChannel);
-            message.WriteUnsignedShort((ushort)channel_id);
+            message.WriteUnsignedShort((ushort)channelId);
             _packetWriter.FinishMessage();
         }
         public void SendPrivateChannel(string playerName) {
@@ -342,55 +342,55 @@ namespace OpenTibiaUnity.Core.Communication.Game
             _packetWriter.FinishMessage();
         }
 
-        public void SendAttack(uint creature_id) {
-            if (creature_id != 0)
+        public void SendAttack(uint creatureId) {
+            if (creatureId != 0)
                 Player.StopAutowalk(false);
 
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.Attack);
-            message.WriteUnsignedInt(creature_id);
+            message.WriteUnsignedInt(creatureId);
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameAttackSeq))
-                message.WriteUnsignedInt(creature_id); // Sequence
+                message.WriteUnsignedInt(creatureId); // Sequence
             _packetWriter.FinishMessage();
         }
 
-        public void SendFollow(uint creature_id) {
-            if (creature_id != 0)
+        public void SendFollow(uint creatureId) {
+            if (creatureId != 0)
                 Player.StopAutowalk(false);
 
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.Follow);
-            message.WriteUnsignedInt(creature_id);
+            message.WriteUnsignedInt(creatureId);
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameAttackSeq))
-                message.WriteUnsignedInt(creature_id); // Sequence
+                message.WriteUnsignedInt(creatureId); // Sequence
             _packetWriter.FinishMessage();
         }
 
-        public void SendInviteToParty(uint creature_id) {
+        public void SendInviteToParty(uint creatureId) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.InviteToParty);
-            message.WriteUnsignedInt(creature_id);
+            message.WriteUnsignedInt(creatureId);
             _packetWriter.FinishMessage();
         }
 
-        public void SendJoinParty(uint creature_id) {
+        public void SendJoinParty(uint creatureId) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.JoinParty);
-            message.WriteUnsignedInt(creature_id);
+            message.WriteUnsignedInt(creatureId);
             _packetWriter.FinishMessage();
         }
 
-        public void SendRevokeInvitation(uint creature_id) {
+        public void SendRevokeInvitation(uint creatureId) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.RevokeInvitation);
-            message.WriteUnsignedInt(creature_id);
+            message.WriteUnsignedInt(creatureId);
             _packetWriter.FinishMessage();
         }
 
-        public void SendPassLeadership(uint creature_id) {
+        public void SendPassLeadership(uint creatureId) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.PassLeadership);
-            message.WriteUnsignedInt(creature_id);
+            message.WriteUnsignedInt(creatureId);
             _packetWriter.FinishMessage();
         }
 
@@ -413,19 +413,19 @@ namespace OpenTibiaUnity.Core.Communication.Game
             _packetWriter.FinishMessage();
         }
 
-        public void SendInviteToChannel(string name, int channel_id) {
+        public void SendInviteToChannel(string name, int channelId) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.InviteToChannel);
             message.WriteString(name);
-            message.WriteUnsignedShort((ushort)channel_id);
+            message.WriteUnsignedShort((ushort)channelId);
             _packetWriter.FinishMessage();
         }
 
-        public void SendExcludeFromChannel(string name, int channel_id) {
+        public void SendExcludeFromChannel(string name, int channelId) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.ExcludeFromChannel);
             message.WriteString(name);
-            message.WriteUnsignedShort((ushort)channel_id);
+            message.WriteUnsignedShort((ushort)channelId);
             _packetWriter.FinishMessage();
         }
 
@@ -451,7 +451,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
         public void SendSetOutfit(Appearances.OutfitInstance outfit, Appearances.OutfitInstance mount) {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.SetOutfit);
-            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameOutfit_idU16))
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameOutfitIdU16))
                 message.WriteUnsignedShort((ushort)outfit.Id);
             else
                 message.WriteUnsignedByte((byte)outfit.Id);

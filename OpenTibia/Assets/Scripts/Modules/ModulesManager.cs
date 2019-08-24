@@ -65,13 +65,13 @@ namespace OpenTibiaUnity.Modules
             HotkeysWindow.Open();
         }
 
-        private void OnRequestChatSend(string text, bool autoSend, int channel_id) {
+        private void OnRequestChatSend(string text, bool autoSend, int channelId) {
             var chatModule = OpenTibiaUnity.GameManager.GetModule<Console.ConsoleModule>();
             if (!chatModule)
                 return;
 
-            if (channel_id != -1)
-                chatModule.SelectChannel(OpenTibiaUnity.ChatStorage.GetChannel(channel_id), true);
+            if (channelId != -1)
+                chatModule.SelectChannel(OpenTibiaUnity.ChatStorage.GetChannel(channelId), true);
 
             chatModule.SetInputText(text);
             if (autoSend)

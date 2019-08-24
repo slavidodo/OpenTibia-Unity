@@ -616,7 +616,7 @@ namespace OpenTibiaUnity.Core
             Features.SetAll(false); // reset all
 
             if (version >= 770) {
-                EnableFeature(GameFeature.GameOutfit_idU16);
+                EnableFeature(GameFeature.GameOutfitIdU16);
                 EnableFeature(GameFeature.GameMessageStatements);
                 EnableFeature(GameFeature.GameLoginPacketEncryption);
             }

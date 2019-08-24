@@ -8,7 +8,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
         public string Name;
         public int AddOns;
         public bool Locked;
-        public uint StoreOffer_id;
+        public uint StoreOfferId;
     }
 
     public struct ProtocolMount
@@ -16,7 +16,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
         public ushort _id;
         public string Name;
         public bool Locked;
-        public uint StoreOffer_id;
+        public uint StoreOfferId;
     }
     
     public partial class ProtocolGame : Internal.Protocol
@@ -299,14 +299,14 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseClearTarget(Internal.ByteArray message) {
-            uint creature_id = 0;
+            uint creatureId = 0;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameAttackSeq))
-                creature_id = message.ReadUnsignedInt();
+                creatureId = message.ReadUnsignedInt();
 
             Creatures.Creature creature;
-            if (!!(creature = CreatureStorage.AttackTarget) && (creature.Id == creature_id || creature_id == 0))
+            if (!!(creature = CreatureStorage.AttackTarget) && (creature.Id == creatureId || creatureId == 0))
                 CreatureStorage.SetAttackTarget(null, false);
-            else if (!!(creature = CreatureStorage.FollowTarget) && (creature.Id == creature_id || creature_id == 0))
+            else if (!!(creature = CreatureStorage.FollowTarget) && (creature.Id == creatureId || creatureId == 0))
                 CreatureStorage.SetFollowTarget(null, false);
         }
 
@@ -381,29 +381,29 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     count = message.ReadUnsignedByte();
                 
                 for (int i = 0; i < count; i++) {
-                    ushort outfit_id = message.ReadUnsignedShort();
+                    ushort outfitId = message.ReadUnsignedShort();
                     var outfitName = message.ReadString();
                     int addOns = message.ReadUnsignedByte();
                     bool locked = true;
-                    uint offer_id = 0;
+                    uint offerId = 0;
 
                     if (OpenTibiaUnity.GameManager.ClientVersion >= 1185) {
                         locked = message.ReadBoolean();
                         if (locked)
-                            offer_id = message.ReadUnsignedInt();
+                            offerId = message.ReadUnsignedInt();
                     }
 
                     outfitList.Add(new ProtocolOutfit() {
-                        _id = outfit_id,
+                        _id = outfitId,
                         Name = outfitName,
                         AddOns = addOns,
                         Locked = locked,
-                        StoreOffer_id = offer_id,
+                        StoreOfferId = offerId,
                     });
                 }
             } else {
                 ushort outfitStart, outfitEnd;
-                if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameOutfit_idU16)) {
+                if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameOutfitIdU16)) {
                     outfitStart = message.ReadUnsignedShort();
                     outfitEnd = message.ReadUnsignedShort();
                 } else {
@@ -425,22 +425,22 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     count = message.ReadUnsignedByte();
 
                 for (int i = 0; i < count; i++) {
-                    ushort mount_id = message.ReadUnsignedShort();
+                    ushort mountId = message.ReadUnsignedShort();
                     var mountName = message.ReadString();
                     bool locked = true;
-                    uint offer_id = 0;
+                    uint offerId = 0;
 
                     if (OpenTibiaUnity.GameManager.ClientVersion >= 1185) {
                         locked = message.ReadBoolean();
                         if (locked)
-                            offer_id = message.ReadUnsignedInt();
+                            offerId = message.ReadUnsignedInt();
                     }
 
                     mountList.Add(new ProtocolMount() {
-                        _id = mount_id,
+                        _id = mountId,
                         Name = mountName,
                         Locked = locked,
-                        StoreOffer_id = offer_id,
+                        StoreOfferId = offerId,
                     });
                 }
             }

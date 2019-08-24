@@ -9,8 +9,8 @@ namespace OpenTibiaUnity.Core.Appearances
     {
         public string File;
         public int SpriteType;
-        public uint FirstSprite_id;
-        public uint LastSprite_id;
+        public uint FirstSpriteId;
+        public uint LastSpriteId;
     }
 
     public class CachedSpriteInformation
@@ -48,16 +48,16 @@ namespace OpenTibiaUnity.Core.Appearances
                 
                 if (!@object.TryGetValue("file", out JToken fileToken)
                     || !@object.TryGetValue("spritetype", out JToken spriteTypeToken)
-                    || !@object.TryGetValue("firstspriteid", out JToken firstSprite_idToken)
-                    || !@object.TryGetValue("lastspriteid", out JToken lastSprite_idToken))
+                    || !@object.TryGetValue("firstspriteid", out JToken firstSpriteIdToken)
+                    || !@object.TryGetValue("lastspriteid", out JToken lastSpriteIdToken))
                     continue;
 
                 try {
                     _spriteSheet.Add(new SpriteTypeImpl() {
                         File = (string)fileToken,
                         SpriteType = (int)spriteTypeToken,
-                        FirstSprite_id = (uint)firstSprite_idToken,
-                        LastSprite_id = (uint)lastSprite_idToken
+                        FirstSpriteId = (uint)firstSpriteIdToken,
+                        LastSpriteId = (uint)lastSpriteIdToken
                     });
                 } catch (System.InvalidCastException) {}
             }
@@ -72,8 +72,8 @@ namespace OpenTibiaUnity.Core.Appearances
             _spriteCachedInformation.Clear();
         }
 
-        private bool GetSpriteInfo(uint sprite_id, out string filename, out Rect spriteRect, out Vector2 realSpriteSize, out Texture2D tex2D) {
-            SpriteTypeImpl match = _spriteSheet.Find(m => sprite_id >= m.FirstSprite_id && sprite_id <= m.LastSprite_id);
+        private bool GetSpriteInfo(uint spriteId, out string filename, out Rect spriteRect, out Vector2 realSpriteSize, out Texture2D tex2D) {
+            SpriteTypeImpl match = _spriteSheet.Find(m => spriteId >= m.FirstSpriteId && spriteId <= m.LastSpriteId);
             tex2D = match != null ? GetOrLoadTexture(match.File) : null;
 
             if (match == null || match.SpriteType < 1 || match.SpriteType > 4 || tex2D == null) {
@@ -86,17 +86,17 @@ namespace OpenTibiaUnity.Core.Appearances
 
             filename = match.File;
             realSpriteSize = s_SpriteTypesSizesRef[match.SpriteType - 1] * Constants.FieldSize;
-            uint real_id = sprite_id - match.FirstSprite_id;
+            uint realId = spriteId - match.FirstSpriteId;
             int texPerRow = (int)(tex2D.width / realSpriteSize.x);
 
-            float x = (real_id % texPerRow) * realSpriteSize.x;
-            float y = tex2D.width - (real_id / texPerRow * realSpriteSize.y) - realSpriteSize.y;
+            float x = (realId % texPerRow) * realSpriteSize.x;
+            float y = tex2D.width - (realId / texPerRow * realSpriteSize.y) - realSpriteSize.y;
             spriteRect = new Rect(x / tex2D.width, y / tex2D.height, realSpriteSize.x / tex2D.width, realSpriteSize.y / tex2D.height);
             return true;
         }
 
-        public CachedSpriteInformation GetSprite(uint sprite_id) {
-            var cachedInformation = FindCachedInformation(sprite_id);
+        public CachedSpriteInformation GetSprite(uint spriteId) {
+            var cachedInformation = FindCachedInformation(spriteId);
             if (cachedInformation != null)
                 return cachedInformation;
 
@@ -104,11 +104,11 @@ namespace OpenTibiaUnity.Core.Appearances
             Rect spriteRect;
             Vector2 realSize;
             Texture2D tex2D;
-            if (!GetSpriteInfo(sprite_id, out filename, out spriteRect, out realSize, out tex2D))
+            if (!GetSpriteInfo(spriteId, out filename, out spriteRect, out realSize, out tex2D))
                 return null;
             
             cachedInformation = new CachedSpriteInformation();
-            cachedInformation.id = sprite_id;
+            cachedInformation.id = spriteId;
             cachedInformation.rect = spriteRect;
             cachedInformation.spriteSize = realSize;
             cachedInformation.texture = tex2D;
@@ -129,15 +129,15 @@ namespace OpenTibiaUnity.Core.Appearances
             return tex2D;
         }
 
-        private CachedSpriteInformation FindCachedInformation(uint sprite_id) {
+        private CachedSpriteInformation FindCachedInformation(uint spriteId) {
             int lastIndex = _spriteCachedInformation.Count - 1;
             int index = 0;
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
                 var cachedInformation = _spriteCachedInformation[tmpIndex];
-                if (cachedInformation.id > sprite_id)
+                if (cachedInformation.id > spriteId)
                     index = tmpIndex + 1;
-                else if (cachedInformation.id < sprite_id)
+                else if (cachedInformation.id < spriteId)
                     lastIndex = tmpIndex - 1;
                 else
                     return cachedInformation;

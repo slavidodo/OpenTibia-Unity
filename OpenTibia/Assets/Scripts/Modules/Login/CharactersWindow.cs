@@ -133,7 +133,7 @@ namespace OpenTibiaUnity.Modules.Login
                 var character = _playdata.Characters[_selectedCharacterIndex];
                 characterName = character.Name;
 
-                var world = _playdata.FindWorld(character.World_id);
+                var world = _playdata.FindWorld(character.WorldId);
                 worldName = world.Name;
                 worldAddress = world.GetAddress(OpenTibiaUnity.GameManager.ClientVersion, OpenTibiaUnity.GameManager.BuildVersion);
                 worldPort = world.GetPort(OpenTibiaUnity.GameManager.ClientVersion, OpenTibiaUnity.GameManager.BuildVersion);
@@ -141,7 +141,7 @@ namespace OpenTibiaUnity.Modules.Login
                 var character = _charactersList.Characters[_selectedCharacterIndex];
                 characterName = character.Name;
 
-                var world = _charactersList.FindWorld(character.World_id);
+                var world = _charactersList.FindWorld(character.WorldId);
                 worldName = world.Name;
                 worldAddress = world.HostName;
                 worldPort = world.Port;
@@ -263,7 +263,7 @@ namespace OpenTibiaUnity.Modules.Login
                 var characterPanel = Instantiate(ModulesManager.Instance.CharacterPanelPrefab);
                 characterPanel.transform.SetParent(content);
                 characterPanel.characterName.text = character.Name;
-                characterPanel.worldName.text = characterList.FindWorld(character.World_id).Name;
+                characterPanel.worldName.text = characterList.FindWorld(character.WorldId).Name;
                 characterPanel.toggleComponent.onValueChanged.AddListener((value) => { if (value) _selectedCharacterIndex = characterIndex; });
                 characterPanel.toggleComponent.group = _charactersToggleGroup;
                 characterPanel.onDoubleClick.AddListener(OnOkButtonClick);
@@ -294,7 +294,7 @@ namespace OpenTibiaUnity.Modules.Login
                 characterPanel.transform.SetParent(content);
                 characterPanel.characterName.text = character.Name;
 
-                var world = playData.FindWorld(character.World_id);
+                var world = playData.FindWorld(character.WorldId);
 
                 characterPanel.worldName.text = string.Format("{0}\n({1})", world.Name, world.GetPvPTypeDescription());
                 characterPanel.toggleComponent.onValueChanged.AddListener((value) => { if (value) _selectedCharacterIndex = characterIndex; });

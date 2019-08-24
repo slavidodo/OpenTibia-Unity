@@ -12,18 +12,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae9e286897f658f45b2e6d15a6d38ea1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Resizable: 1
-  m_MinimizedHeight: 18
-  m_MinHeight: 18
-  m_MaxHeight: -1
-  m_PanelContent: {fileID: 6357324742265880738}
-  m_ParentContainer: {fileID: 0}
-  m_TitleLabel: {fileID: 2129220585434311244}
-  m_CloseButton: {fileID: 2630987419476728751}
-  m_MinimizeButton: {fileID: 9061772425111600183}
-  m_MaximizeButton: {fileID: 654977903458494250}
-  m_ItemsScrollRect: {fileID: 7820408233784728935}
-  m_UpButton: {fileID: 4969182052969208643}
+  _resizable: 1
+  _minimizedHeight: 23
+  _minContentHeight: 50
+  _maxContentHeight: -1
+  _preferredContentHeight: 50
+  _panelContent: {fileID: 6357324742265880738}
+  _titleLabel: {fileID: 2129220585434311244}
+  _closeButton: {fileID: 0}
+  _minimizeButton: {fileID: 9061772425111600183}
+  _maximizeButton: {fileID: 654977903458494250}
+  _itemsScrollRect: {fileID: 7820408233784728935}
+  _upButton: {fileID: 4969182052969208643}
 --- !u!114 &1298711957
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -294,6 +294,11 @@ PrefabInstance:
       propertyPath: m_SizeDelta.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5301063029104128377, guid: a5ddc2e2a5a73e448b4ab83fc88d3cb5,
+        type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7839350299977522590, guid: a5ddc2e2a5a73e448b4ab83fc88d3cb5,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -466,18 +471,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &2630987419476728751 stripped
-MonoBehaviour:
-  m_CorrespondingSourceObject: {fileID: 3831380796377459316, guid: a5ddc2e2a5a73e448b4ab83fc88d3cb5,
-    type: 3}
-  m_PrefabInstance: {fileID: 1272523728227037659}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 1392445389, guid: f70555f144d8491a825f0804e09c671c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &9061772425111600183 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7811787762541956588, guid: a5ddc2e2a5a73e448b4ab83fc88d3cb5,
@@ -639,7 +632,7 @@ PrefabInstance:
     - target: {fileID: 8975592622985898134, guid: 40dee3dca139fc94595d30807d888dc3,
         type: 3}
       propertyPath: m_Size
-      value: 1
+      value: 0.9714286
       objectReference: {fileID: 0}
     - target: {fileID: 3971681045354460173, guid: 40dee3dca139fc94595d30807d888dc3,
         type: 3}
@@ -694,7 +687,7 @@ PrefabInstance:
     - target: {fileID: 1970024145670434700, guid: 40dee3dca139fc94595d30807d888dc3,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 8971189566979353510, guid: 40dee3dca139fc94595d30807d888dc3,
         type: 3}

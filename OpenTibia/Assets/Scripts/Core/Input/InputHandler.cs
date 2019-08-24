@@ -56,7 +56,7 @@ namespace OpenTibiaUnity.Core.Input
             var optionStorage = OpenTibiaUnity.OptionStorage;
 
             Mapping.Mapping mapping = null;
-            MappingSet mappingSet = optionStorage.GetMappingSet(optionStorage.GeneralInputSet_id);
+            MappingSet mappingSet = optionStorage.GetMappingSet(optionStorage.GeneralInputSetId);
             if (mappingSet != null) {
                 if (optionStorage.GeneralInputSetMode == MappingSet.ChatModeOFF)
                     mapping = mappingSet.ChatModeOffMapping;

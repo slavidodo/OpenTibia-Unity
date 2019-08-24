@@ -16,17 +16,17 @@ namespace OpenTibiaUnity.Core.Appearances.Provider
             _cachedSpriteInformations = new Utils.RingBuffer<Rendering.CachedSpriteInformation>(Constants.MapSizeX * Constants.MapSizeY * Constants.MapSizeZ * Constants.MapSizeW);
         }
 
-        public Rendering.CachedSpriteInformation GetCachedSpriteInformation(uint sprite_id) {
+        public Rendering.CachedSpriteInformation GetCachedSpriteInformation(uint spriteId) {
             // have we loaded this one recently?
-            var cachedSpriteInformation = FindCachedSpriteInformation(sprite_id);
+            var cachedSpriteInformation = FindCachedSpriteInformation(spriteId);
             if (!!cachedSpriteInformation)
                 return cachedSpriteInformation;
 
-            var asset = _spritesInformation.FindSpritesAsset(sprite_id);
+            var asset = _spritesInformation.FindSpritesAsset(spriteId);
             if (!asset)
                 return null;
 
-            cachedSpriteInformation = asset.GetCachedSpriteInformation(sprite_id, _assetBundle);
+            cachedSpriteInformation = asset.GetCachedSpriteInformation(spriteId, _assetBundle);
             if (!cachedSpriteInformation)
                 return null;
 
@@ -35,15 +35,15 @@ namespace OpenTibiaUnity.Core.Appearances.Provider
             return cachedSpriteInformation;
         }
 
-        private Rendering.CachedSpriteInformation FindCachedSpriteInformation(uint sprite_id) {
+        private Rendering.CachedSpriteInformation FindCachedSpriteInformation(uint spriteId) {
             int lastIndex = _cachedSpriteInformations.Length - 1;
             int index = 0;
             while (index < lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
                 var cachedSpriteInformation = _cachedSpriteInformations.GetItemAt(tmpIndex);
-                if (cachedSpriteInformation.Sprite_id > sprite_id)
+                if (cachedSpriteInformation.SpriteId > spriteId)
                     index = tmpIndex + 1;
-                else if (cachedSpriteInformation.Sprite_id < sprite_id)
+                else if (cachedSpriteInformation.SpriteId < spriteId)
                     lastIndex = tmpIndex - 1;
                 else
                     return cachedSpriteInformation;
@@ -58,9 +58,9 @@ namespace OpenTibiaUnity.Core.Appearances.Provider
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
                 var foundCachedSpriteInformation = _cachedSpriteInformations.GetItemAt(tmpIndex);
-                if (foundCachedSpriteInformation.Sprite_id < cachedSpriteInformation.Sprite_id)
+                if (foundCachedSpriteInformation.SpriteId < cachedSpriteInformation.SpriteId)
                     index = tmpIndex + 1;
-                else if (foundCachedSpriteInformation.Sprite_id > cachedSpriteInformation.Sprite_id)
+                else if (foundCachedSpriteInformation.SpriteId > cachedSpriteInformation.SpriteId)
                     lastIndex = tmpIndex - 1;
                 else
                     return;

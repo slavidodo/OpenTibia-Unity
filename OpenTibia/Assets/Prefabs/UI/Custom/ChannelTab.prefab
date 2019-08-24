@@ -32,7 +32,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 09ec603c990e318488ea56c7c091bf8b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ChannelNameLabel: {fileID: 3343621506608058245}
+  _channelNameLabel: {fileID: 3343621506608058245}
 --- !u!114 &8719823734738887578
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -58,7 +58,7 @@ PrefabInstance:
     - target: {fileID: 1225904021088943946, guid: 6ad8373a7bca5c64a89914afd4a53d70,
         type: 3}
       propertyPath: m_Name
-      value: ChannelButton
+      value: ChannelTab
       objectReference: {fileID: 0}
     - target: {fileID: 4837015657985786659, guid: 6ad8373a7bca5c64a89914afd4a53d70,
         type: 3}

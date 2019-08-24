@@ -252,7 +252,7 @@ namespace OpenTibiaUnity.Core.WorldMap
         public int GetCreatureObjectForCreature(Creatures.Creature creature, out Appearances.ObjectInstance @object) {
             if (!!creature) {
                 var mapPosition = ToMap(creature.Position);
-                return GetField(mapPosition).GetCreatureObjectForCreature_id(creature.Id, out @object);
+                return GetField(mapPosition).GetCreatureObjectForCreatureId(creature.Id, out @object);
             }
 
             @object = null;
@@ -267,11 +267,11 @@ namespace OpenTibiaUnity.Core.WorldMap
             return AddOnscreenMessage(null, -1, null, 0, mode, text, int.MaxValue);
         }
 
-        public OnscreenMessageBox AddOnscreenMessage(UnityEngine.Vector3Int? absolutePosition, int statement_id, string speaker, int speakerLevel, MessageModeType mode, string text) {
-            return AddOnscreenMessage(absolutePosition, statement_id, speaker, speakerLevel, mode, text, int.MaxValue);
+        public OnscreenMessageBox AddOnscreenMessage(UnityEngine.Vector3Int? absolutePosition, int statementId, string speaker, int speakerLevel, MessageModeType mode, string text) {
+            return AddOnscreenMessage(absolutePosition, statementId, speaker, speakerLevel, mode, text, int.MaxValue);
         }
 
-        public OnscreenMessageBox AddOnscreenMessage(UnityEngine.Vector3Int? absolutePosition, int statement_id, string speaker, int speakerLevel, MessageModeType mode, Utils.UnionStrInt text, int color) {
+        public OnscreenMessageBox AddOnscreenMessage(UnityEngine.Vector3Int? absolutePosition, int statementId, string speaker, int speakerLevel, MessageModeType mode, Utils.UnionStrInt text, int color) {
             var messageFilterSet = OpenTibiaUnity.OptionStorage.GetMessageFilterSet(Chat.MessageFilterSet.DefaultSet);
             var messageMode = messageFilterSet.GetMessageMode(mode);
             if (messageMode == null || !messageMode.ShowOnScreen || messageMode.ScreenTarget == MessageScreenTargets.None)
@@ -331,7 +331,7 @@ namespace OpenTibiaUnity.Core.WorldMap
                 messageBox = MessageBoxes[(int)screenTarget];
             }
 
-            message = new OnscreenMessage(statement_id, speaker, speakerLevel, mode, text);
+            message = new OnscreenMessage(statementId, speaker, speakerLevel, mode, text);
             message.FormatMessage(messageMode.GetOnscreenMessagePrefix(speaker, speakerLevel), messageMode.TextARGB, messageMode.HighlightARGB);
             messageBox.AppendMessage(message);
             messageBox.Visible = true;

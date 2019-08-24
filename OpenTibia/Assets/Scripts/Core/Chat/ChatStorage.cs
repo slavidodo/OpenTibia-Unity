@@ -8,51 +8,46 @@ namespace OpenTibiaUnity.Core.Chat
         public class ChannelAddEvent : UnityEvent<Channel> { }
         public class ChannelsClearEvent : UnityEvent { }
 
-        public const int MainAdvertisingChannel_id = 5;
-        public const int RookAdvertisingChannel_id = 6;
-        public const int HelpChannel_id = 7;
+        public const int MainAdvertisingChannelId = 5;
+        public const int RookAdvertisingChannelId = 6;
+        public const int HelpChannelId = 7;
 
-        public const int FirstPrivateChannel_id = 10;
-        public const int LastPrivateChannel_id = 9999;
-        public const int FirstGuildChannel_id = 10000;
-        public const int LastGuildChannel_id = 19999;
-        public const int FirstPartyChannel_id = 20000;
-        public const int LastPartyChannel_id = 65533;
+        public const int FirstPrivateChannelId = 10;
+        public const int LastPrivateChannelId = 9999;
+        public const int FirstGuildChannelId = 10000;
+        public const int LastGuildChannelId = 19999;
+        public const int FirstPartyChannelId = 20000;
+        public const int LastPartyChannelId = 65533;
 
-        public const int NpcChannel_id = 65534;
-        public const int PrivateChannel_id = 65535;
-        public const int LootChannel_id = 131067;
-        //public const int SessionDumpChannel_id = 131068;
-        public const int DebugChannel_id = 131069;
-        public const int ServerChannel_id = 131070;
-        public const int LocalChannel_id = 131071;
-        public const int RVRChannel_id = 131072;
+        public const int NpcChannelId = 65534;
+        public const int PrivateChannelId = 65535;
+        public const int LootChannelId = 131067;
+        //public const int SessionDumpChannelId = 131068;
+        public const int DebugChannelId = 131069;
+        public const int ServerChannelId = 131070;
+        public const int LocalChannelId = 131071;
+        public const int RVRChannelId = 131072;
 
         public const int ChannelActivationTimeout = 500;
 
         private List<Channel> _channels;
-        private int _ownPrivateChannel_id = -1;
+        private int _ownPrivateChannelId = -1;
         private int _channelActivationTimeout = 0;
 
         public ChannelAddEvent onAddChannel = new ChannelAddEvent();
         public ChannelsClearEvent onClearChannels = new ChannelsClearEvent();
 
-        public int OwnPrivateChannel_id {
-            get { return _ownPrivateChannel_id; }
-            set { _ownPrivateChannel_id = value; }
-        }
+        public int OwnPrivateChannelId { get => _ownPrivateChannelId; set => _ownPrivateChannelId = value; }
 
-        public bool HasOwnPrivateChannel {
-            get { return s_IsPrivateChannel(OwnPrivateChannel_id); }
-        }
+        public bool HasOwnPrivateChannel { get => s_IsPrivateChannel(OwnPrivateChannelId); }
 
         public ChatStorage(Options.OptionStorage optionStorage) {
             _channels = new List<Channel>();
         }
 
-        public int GetChannelIndex(Utils.UnionStrInt channel_id) {
+        public int GetChannelIndex(Utils.UnionStrInt channelId) {
             for (int i = 0; i < _channels.Count; i++) {
-                if (_channels[i].Id == channel_id) {
+                if (_channels[i].Id == channelId) {
                     return i;
                 }
             }
@@ -60,75 +55,75 @@ namespace OpenTibiaUnity.Core.Chat
             return -1;
         }
 
-        public void LeaveChannel(Utils.UnionStrInt channel_id) {
+        public void LeaveChannel(Utils.UnionStrInt channelId) {
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             if (protocolGame == null || protocolGame.IsGameRunning)
                 return;
 
-            if (s_IsPrivateChannel(channel_id)) {
-                var channel = GetChannel(channel_id);
+            if (s_IsPrivateChannel(channelId)) {
+                var channel = GetChannel(channelId);
                 if (channel != null && channel.SendAllowed)
-                    protocolGame.SendLeaveChannel(channel_id);
-            } else if (channel_id == NpcChannel_id) {
+                    protocolGame.SendLeaveChannel(channelId);
+            } else if (channelId == NpcChannelId) {
                 protocolGame.SendCloseNPCChannel();
             } else {
-                protocolGame.SendLeaveChannel(channel_id);
+                protocolGame.SendLeaveChannel(channelId);
             }
             
-            if (channel_id == _ownPrivateChannel_id)
-                _ownPrivateChannel_id = -1;
+            if (channelId == _ownPrivateChannelId)
+                _ownPrivateChannelId = -1;
 
-            RemoveChannel(channel_id);
+            RemoveChannel(channelId);
         }
 
-        public void CloseChannel(Utils.UnionStrInt channel_id) {
-            AddChannelMessage(channel_id, -1, null, 0, MessageModeType.ChannelManagement, TextResources.CHANNEL_MSG_CHANNEL_CLOSED);
+        public void CloseChannel(Utils.UnionStrInt channelId) {
+            AddChannelMessage(channelId, -1, null, 0, MessageModeType.ChannelManagement, TextResources.CHANNEL_MSG_CHANNEL_CLOSED);
 
-            Channel channel = GetChannel(channel_id);
+            Channel channel = GetChannel(channelId);
             if (channel != null) {
                 channel.SendAllowed = false;
                 channel.Closable = true;
                 //channel.ClearNicklist(); TODO
             }
 
-            if (_ownPrivateChannel_id == channel_id)
-                _ownPrivateChannel_id = -1;
+            if (_ownPrivateChannelId == channelId)
+                _ownPrivateChannelId = -1;
         }
 
         public Channel GetChannelAt(int channelIndex) {
             return channelIndex >= 0 && channelIndex < _channels.Count ? _channels[channelIndex] : null; 
         }
 
-        public Channel GetChannel(Utils.UnionStrInt channel_id) {
+        public Channel GetChannel(Utils.UnionStrInt channelId) {
             foreach (var channel in _channels) {
-                if (channel.Id == channel_id)
+                if (channel.Id == channelId)
                     return channel;
             }
             
             return null;
         }
 
-        public Channel AddChannel(Utils.UnionStrInt channel_id, string name, MessageModeType mode) {
-            Channel channel = GetChannel(channel_id);
+        public Channel AddChannel(Utils.UnionStrInt channelId, string name, MessageModeType mode) {
+            Channel channel = GetChannel(channelId);
 
             if (channel != null) {
                 channel.Name = name;
                 channel.SendAllowed = true;
             } else {
-                channel = new Channel(channel_id, name, mode);
+                channel = new Channel(channelId, name, mode);
                 _channels.Add(channel);
                 onAddChannel.Invoke(channel);
 
-                switch ((int)channel_id) {
-                    case HelpChannel_id:
+                switch ((int)channelId) {
+                    case HelpChannelId:
                         if (OpenTibiaUnity.GameManager.ClientVersion >= 854)
-                            AddChannelMessage(channel_id, -1, null, 0, MessageModeType.ChannelManagement, TextResources.CHANNEL_MSG_HELP);
+                            AddChannelMessage(channelId, -1, null, 0, MessageModeType.ChannelManagement, TextResources.CHANNEL_MSG_HELP);
                         else
-                            AddChannelMessage(channel_id, -1, null, 0, MessageModeType.GamemasterChannel, TextResources.CHANNEL_MSG_HELP_LEGACY);
+                            AddChannelMessage(channelId, -1, null, 0, MessageModeType.GamemasterChannel, TextResources.CHANNEL_MSG_HELP_LEGACY);
                         break;
-                    case MainAdvertisingChannel_id:
-                    case RookAdvertisingChannel_id:
-                        AddChannelMessage(channel_id, -1, null, 0, MessageModeType.ChannelManagement, TextResources.CHANNEL_MSG_ADVERTISING);
+                    case MainAdvertisingChannelId:
+                    case RookAdvertisingChannelId:
+                        AddChannelMessage(channelId, -1, null, 0, MessageModeType.ChannelManagement, TextResources.CHANNEL_MSG_ADVERTISING);
                         break;
                     default:
                         break;
@@ -142,13 +137,13 @@ namespace OpenTibiaUnity.Core.Chat
             return channel;
         }
 
-        public Channel RemoveChannel(Utils.UnionStrInt channel_id) {
-            var channel = GetChannel(channel_id);
+        public Channel RemoveChannel(Utils.UnionStrInt channelId) {
+            var channel = GetChannel(channelId);
             if (channel != null)
                 _channels.Remove(channel);
 
-            if (channel != null && channel.Id == _ownPrivateChannel_id)
-                _ownPrivateChannel_id = -1;
+            if (channel != null && channel.Id == _ownPrivateChannelId)
+                _ownPrivateChannelId = -1;
 
             return channel;
         }
@@ -161,24 +156,24 @@ namespace OpenTibiaUnity.Core.Chat
             _channels.Clear();
             onClearChannels.Invoke();
 
-            var tmpChannel = GetChannel(ChatStorage.LocalChannel_id);
+            var tmpChannel = GetChannel(ChatStorage.LocalChannelId);
             if (tmpChannel == null) {
                 if (OpenTibiaUnity.GameManager.ClientVersion >= 870)
-                    tmpChannel = AddChannel(ChatStorage.LocalChannel_id, TextResources.CHANNEL_NAME_DEFAULT, MessageModeType.Say);
+                    tmpChannel = AddChannel(ChatStorage.LocalChannelId, TextResources.CHANNEL_NAME_DEFAULT, MessageModeType.Say);
                 else
-                    tmpChannel = AddChannel(ChatStorage.LocalChannel_id, TextResources.CHANNEL_NAME_DEFAULT_LEGACY, MessageModeType.Say);
+                    tmpChannel = AddChannel(ChatStorage.LocalChannelId, TextResources.CHANNEL_NAME_DEFAULT_LEGACY, MessageModeType.Say);
                 tmpChannel.Closable = false;
             }
             
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameServerLog)) {
-                tmpChannel = GetChannel(ServerChannel_id);
+                tmpChannel = GetChannel(ServerChannelId);
                 if (tmpChannel == null) {
-                    tmpChannel = AddChannel(ServerChannel_id, TextResources.CHANNEL_NAME_SERVERLOG, MessageModeType.Say);
+                    tmpChannel = AddChannel(ServerChannelId, TextResources.CHANNEL_NAME_SERVERLOG, MessageModeType.Say);
                     tmpChannel.Closable = false;
                 }
             }
             
-            _ownPrivateChannel_id = -1;
+            _ownPrivateChannelId = -1;
             ResetChannelActivationTimeout();
         }
 
@@ -186,7 +181,7 @@ namespace OpenTibiaUnity.Core.Chat
             _channelActivationTimeout = OpenTibiaUnity.TicksMillis + ChannelActivationTimeout;
         }
 
-        public ChannelMessage AddChannelMessage(Utils.UnionStrInt channel_id, int statement_id, string speaker, int speakerLevel, MessageModeType mode, string text) {
+        public ChannelMessage AddChannelMessage(Utils.UnionStrInt channelId, int statementId, string speaker, int speakerLevel, MessageModeType mode, string text) {
             var messageFilterSet = OpenTibiaUnity.OptionStorage.GetMessageFilterSet(MessageFilterSet.DefaultSet);
             var messageMode = messageFilterSet.GetMessageMode(mode);
             if (messageMode == null || !messageMode.ShowChannelMessage)
@@ -196,10 +191,10 @@ namespace OpenTibiaUnity.Core.Chat
             if (!messageMode.IgnoreNameFilter && (nameFilterSet == null || !nameFilterSet.AcceptMessage(mode, speaker, text)))
                 return null;
 
-            bool isReportName = speaker != null && channel_id.IsInt && ((int)channel_id == ChatStorage.HelpChannel_id || speakerLevel > 0);
-            bool isReportStatement = statement_id > 0;
+            bool isReportName = speaker != null && channelId.IsInt && ((int)channelId == ChatStorage.HelpChannelId || speakerLevel > 0);
+            bool isReportStatement = statementId > 0;
             Channel channel = null;
-            ChannelMessage channelMessage = new ChannelMessage(statement_id, speaker, speakerLevel, mode, text);
+            ChannelMessage channelMessage = new ChannelMessage(statementId, speaker, speakerLevel, mode, text);
             channelMessage.FormatMessage(messageFilterSet.ShowTimeStamps, messageFilterSet.ShowLevels, messageMode.TextARGB, messageMode.HighlightARGB);
             
             switch (mode) {
@@ -208,51 +203,51 @@ namespace OpenTibiaUnity.Core.Chat
                 case MessageModeType.Whisper:
                     channelMessage.SetReportTypeAllowed(ReportTypes.Name, isReportName);
                     channelMessage.SetReportTypeAllowed(ReportTypes.Statement, isReportStatement);
-                    channel = GetChannel(ChatStorage.LocalChannel_id);
+                    channel = GetChannel(ChatStorage.LocalChannelId);
                     break;
                 case MessageModeType.PrivateFrom:
                     channelMessage.SetReportTypeAllowed(ReportTypes.Name, isReportName);
                     channelMessage.SetReportTypeAllowed(ReportTypes.Statement, isReportStatement);
-                    channel = GetChannel(channel_id);
+                    channel = GetChannel(channelId);
                     if (channel == null)
-                        channel = GetChannel(ChatStorage.LocalChannel_id);
+                        channel = GetChannel(ChatStorage.LocalChannelId);
                     break;
                 case MessageModeType.PrivateTo:
                     channelMessage.SetReportTypeAllowed(ReportTypes.Name, isReportName);
                     channelMessage.SetReportTypeAllowed(ReportTypes.Statement, isReportStatement);
-                    channel = GetChannel(channel_id);
+                    channel = GetChannel(channelId);
                     if (channel == null)
-                        channel = GetChannel(ChatStorage.LocalChannel_id);
+                        channel = GetChannel(ChatStorage.LocalChannelId);
                     break;
                 case MessageModeType.ChannelManagement:
-                    channel = GetChannel(channel_id);
+                    channel = GetChannel(channelId);
                     if (channel == null)
-                        channel = GetChannel(ChatStorage.LocalChannel_id);
+                        channel = GetChannel(ChatStorage.LocalChannelId);
                     break;
                 case MessageModeType.Channel:
                 case MessageModeType.ChannelHighlight:
                     channelMessage.SetReportTypeAllowed(ReportTypes.Name, isReportName);
                     channelMessage.SetReportTypeAllowed(ReportTypes.Statement, isReportStatement);
-                    channel = GetChannel(channel_id);
+                    channel = GetChannel(channelId);
                     break;
                 case MessageModeType.Spell:
                     channelMessage.SetReportTypeAllowed(ReportTypes.Name, isReportName);
-                    channel = GetChannel(ChatStorage.LocalChannel_id);
+                    channel = GetChannel(ChatStorage.LocalChannelId);
                     break;
                 case MessageModeType.NpcFromStartBlock:
                 case MessageModeType.NpcFrom:
                 case MessageModeType.NpcTo:
-                    channel = AddChannel(ChatStorage.NpcChannel_id, "NPCs", MessageModeType.NpcTo);
+                    channel = AddChannel(ChatStorage.NpcChannelId, "NPCs", MessageModeType.NpcTo);
                     break;
                 case MessageModeType.GamemasterBroadcast:
-                    channel = GetChannel(ChatStorage.ServerChannel_id);
+                    channel = GetChannel(ChatStorage.ServerChannelId);
                     break;
                 case MessageModeType.GamemasterChannel:
-                    channel = GetChannel(channel_id);
+                    channel = GetChannel(channelId);
                     break;
                 case MessageModeType.GamemasterPrivateFrom:
                 case MessageModeType.GamemasterPrivateTo:
-                    channel = GetChannel(ChatStorage.ServerChannel_id);
+                    channel = GetChannel(ChatStorage.ServerChannelId);
                     break;
                 case MessageModeType.Login:
                 case MessageModeType.Admin:
@@ -275,40 +270,40 @@ namespace OpenTibiaUnity.Core.Chat
                 case MessageModeType.TutorialHint:
                 case MessageModeType.Thankyou:
                     if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameServerLog))
-                        channel = GetChannel(ChatStorage.ServerChannel_id);
+                        channel = GetChannel(ChatStorage.ServerChannelId);
                     else
-                        channel = GetChannel(ChatStorage.LocalChannel_id);
+                        channel = GetChannel(ChatStorage.LocalChannelId);
                     break;
                 case MessageModeType.Guild:
                     channelMessage.SetReportTypeAllowed(ReportTypes.Name, isReportName);
                     channelMessage.SetReportTypeAllowed(ReportTypes.Statement, isReportStatement);
-                    channel = GetChannel(channel_id);
+                    channel = GetChannel(channelId);
                     if (channel == null) {
                         if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameServerLog))
-                            channel = GetChannel(ChatStorage.ServerChannel_id);
+                            channel = GetChannel(ChatStorage.ServerChannelId);
                         else
-                            channel = GetChannel(ChatStorage.LocalChannel_id);
+                            channel = GetChannel(ChatStorage.LocalChannelId);
                     }
                     break;
                 case MessageModeType.PartyManagement:
                 case MessageModeType.Party:
                     channelMessage.SetReportTypeAllowed(ReportTypes.Name, isReportName);
                     channelMessage.SetReportTypeAllowed(ReportTypes.Statement, isReportStatement);
-                    channel = GetChannel(channel_id);
+                    channel = GetChannel(channelId);
                     if (channel == null) {
                         if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameServerLog))
-                            channel = GetChannel(ChatStorage.ServerChannel_id);
+                            channel = GetChannel(ChatStorage.ServerChannelId);
                         else
-                            channel = GetChannel(ChatStorage.LocalChannel_id);
+                            channel = GetChannel(ChatStorage.LocalChannelId);
                     }
                     break;
                 case MessageModeType.BarkLow:
                 case MessageModeType.BarkLoud:
                     if (channel == null) {
                         if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameServerLog))
-                            channel = GetChannel(ChatStorage.ServerChannel_id);
+                            channel = GetChannel(ChatStorage.ServerChannelId);
                         else
-                            channel = GetChannel(ChatStorage.LocalChannel_id);
+                            channel = GetChannel(ChatStorage.LocalChannelId);
                     }
                     break;
 
@@ -319,7 +314,7 @@ namespace OpenTibiaUnity.Core.Chat
                 case MessageModeType.Blue:
                 case MessageModeType.Red:
                     if (channel == null)
-                        channel = GetChannel(ChatStorage.LocalChannel_id);
+                        channel = GetChannel(ChatStorage.LocalChannelId);
                     break;
 
                 default:
@@ -340,12 +335,12 @@ namespace OpenTibiaUnity.Core.Chat
             UnityEngine.Debug.LogWarning(text);
 #endif
 
-            if (GetChannel(DebugChannel_id) == null) {
-                var channel = AddChannel(DebugChannel_id, "Debug", MessageModeType.ChannelManagement);
+            if (GetChannel(DebugChannelId) == null) {
+                var channel = AddChannel(DebugChannelId, "Debug", MessageModeType.ChannelManagement);
                 channel.SendAllowed = false;
             }
 
-            return AddChannelMessage(DebugChannel_id, -1, null, 0, MessageModeType.ChannelManagement, text);
+            return AddChannelMessage(DebugChannelId, -1, null, 0, MessageModeType.ChannelManagement, text);
         }
 
         public string SendChannelMessage(string text, Channel channel, MessageModeType mode) {
@@ -363,9 +358,9 @@ namespace OpenTibiaUnity.Core.Chat
 
             mode = mode != MessageModeType.None ? mode : channel.SendMode;
 
-            Utils.UnionStrInt channel_id = null;
-            if ((!channel.Id.IsInt || (channel.Id != DebugChannel_id && channel.Id != LocalChannel_id && channel.Id != ServerChannel_id)) && channel.SendAllowed)
-                channel_id = channel.Id;
+            Utils.UnionStrInt channelId = null;
+            if ((!channel.Id.IsInt || (channel.Id != DebugChannelId && channel.Id != LocalChannelId && channel.Id != ServerChannelId)) && channel.SendAllowed)
+                channelId = channel.Id;
             
             string channelName = null;
 
@@ -400,24 +395,24 @@ namespace OpenTibiaUnity.Core.Chat
                 else if (externalCommand == "@")
                     mode = MessageModeType.GamemasterPrivateTo;
 
-                channel_id = match.Groups[2].ToString();
-                channelName = channel_id;
+                channelId = match.Groups[2].ToString();
+                channelName = channelId;
                 if (channelName.Length > Constants.MaxChannelLength)
                     channelName = channelName.Substring(0, Constants.MaxChannelLength);
 
                 text = match.Groups[3].ToString();
             }
 
-            if (mode == MessageModeType.GamemasterChannel && (!channel_id.IsInt || channel_id == NpcChannel_id)) {
+            if (mode == MessageModeType.GamemasterChannel && (!channelId.IsInt || channelId == NpcChannelId)) {
                 OpenTibiaUnity.WorldMapStorage.AddOnscreenMessage(MessageModeType.Failure, TextResources.MSG_CHANNEL_NO_ANONYMOUS);
                 return "";
             }
 
             if (HasOwnPrivateChannel) {
                 if (externalCommand == "i") {
-                    protocolGame.SendInviteToChannel(text, OwnPrivateChannel_id);
+                    protocolGame.SendInviteToChannel(text, OwnPrivateChannelId);
                 } else if (externalCommand == "x") {
-                    protocolGame.SendExcludeFromChannel(text, OwnPrivateChannel_id);
+                    protocolGame.SendExcludeFromChannel(text, OwnPrivateChannelId);
                 }
             }
 
@@ -432,38 +427,38 @@ namespace OpenTibiaUnity.Core.Chat
 
                 case MessageModeType.Channel:
                 case MessageModeType.GamemasterChannel:
-                    protocolGame.SendTalk(mode, channel_id, null, text);
+                    protocolGame.SendTalk(mode, channelId, null, text);
                     break;
 
                 case MessageModeType.PrivateTo:
                 case MessageModeType.GamemasterPrivateTo:
-                    AddChannelMessage(channel_id, -1, player.Name, (ushort)player.Level, mode, text);
-                    if (channel_id != player.Name.ToLower())
-                        protocolGame.SendTalk(mode, 0, channel_id, text);
+                    AddChannelMessage(channelId, -1, player.Name, (ushort)player.Level, mode, text);
+                    if (channelId != player.Name.ToLower())
+                        protocolGame.SendTalk(mode, 0, channelId, text);
                     break;
                 case MessageModeType.NpcTo:
-                    AddChannelMessage(channel_id, -1, player.Name, (ushort)player.Level, mode, text);
+                    AddChannelMessage(channelId, -1, player.Name, (ushort)player.Level, mode, text);
                     protocolGame.SendTalk(mode, 0, null, text);
                     break;
             }
 
-            if (channel_id != channel.Id && (mode == MessageModeType.PrivateTo || mode == MessageModeType.GamemasterPrivateTo))
+            if (channelId != channel.Id && (mode == MessageModeType.PrivateTo || mode == MessageModeType.GamemasterPrivateTo))
                 return "*" + channelName + "* ";
 
             return "";
         }
 
-        public static bool s_IsRestorableChannel(int channel_id) {
-            return channel_id < FirstPrivateChannel_id;
+        public static bool s_IsRestorableChannel(int channelId) {
+            return channelId < FirstPrivateChannelId;
         }
-        public static bool s_IsPrivateChannel(Utils.UnionStrInt channel_id) {
-            return channel_id >= FirstPrivateChannel_id && channel_id <= LastPrivateChannel_id;
+        public static bool s_IsPrivateChannel(Utils.UnionStrInt channelId) {
+            return channelId >= FirstPrivateChannelId && channelId <= LastPrivateChannelId;
         }
-        public static bool s_IsGuildChannel(int channel_id) {
-            return channel_id >= FirstGuildChannel_id && channel_id <= LastGuildChannel_id;
+        public static bool s_IsGuildChannel(int channelId) {
+            return channelId >= FirstGuildChannelId && channelId <= LastGuildChannelId;
         }
-        public static bool s_IsPartyChannel(int channel_id) {
-            return channel_id >= FirstPartyChannel_id && channel_id <= LastPartyChannel_id;
+        public static bool s_IsPartyChannel(int channelId) {
+            return channelId >= FirstPartyChannelId && channelId <= LastPartyChannelId;
         }
     }
 }

@@ -245,8 +245,8 @@ namespace OpenTibiaUnity.Core.WorldMap
             Appearances.ObjectInstance _ = null;
             return GetTopCreatureObject(out _);
         }
-        public int GetCreatureObjectForCreature_id(uint creature_id, out Appearances.ObjectInstance @object) {
-            if (creature_id == 0 || ObjectsCount == 0) {
+        public int GetCreatureObjectForCreatureId(uint creatureId, out Appearances.ObjectInstance @object) {
+            if (creatureId == 0 || ObjectsCount == 0) {
                 @object = null;
                 return -1;
             }
@@ -254,7 +254,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             for (int i = 0; i < ObjectsCount; i++) {
                 var otherObj = ObjectsNetwork[i];
                 var type = otherObj.Type;
-                if (type.IsCreature && otherObj.Data == creature_id) {
+                if (type.IsCreature && otherObj.Data == creatureId) {
                     @object = otherObj;
                     return i;
                 }

@@ -42,11 +42,11 @@ namespace OpenTibiaUnity.Core.Components
         private bool _lastCreatureVisiblity = true;
         private float _lastLightFactor = 1f;
 
-        private uint _creature_id = 0;
+        private uint _creatureId = 0;
 
-        public uint Creature_id {
-            get => _creature_id;
-            set { if (_creature_id == 0) _creature_id = value; }
+        public uint CreatureId {
+            get => _creatureId;
+            set { if (_creatureId == 0) _creatureId = value; }
         }
 
         public static Color GetHealthColor(float percent) {

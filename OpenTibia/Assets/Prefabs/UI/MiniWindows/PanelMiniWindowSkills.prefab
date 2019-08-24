@@ -51,37 +51,37 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0614c11299ee13747b0dd6cd835c00c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Resizable: 1
-  m_MinimizedHeight: 23
-  m_MinContentHeight: 50
-  m_MaxContentHeight: -1
-  m_PreferredContentHeight: 50
-  m_PanelContent: {fileID: 1970024144774547344}
-  m_TitleLabel: {fileID: 5595678395539085298}
-  m_CloseButton: {fileID: 8406091934384465425}
-  m_MinimizeButton: {fileID: 3308658153492136329}
-  m_MaximizeButton: {fileID: 6430480437284575892}
-  m_SkillRawPanelPrefab: {fileID: 8273837743971610291, guid: 8423691b3e4e3ad4fbcd6edb9e27a3f9,
+  _resizable: 0
+  _minimizedHeight: 23
+  _minContentHeight: 50
+  _maxContentHeight: -1
+  _preferredContentHeight: 50
+  _panelContent: {fileID: 1970024144774547344}
+  _titleLabel: {fileID: 5595678395539085298}
+  _closeButton: {fileID: 8406091934384465425}
+  _minimizeButton: {fileID: 3308658153492136329}
+  _maximizeButton: {fileID: 6430480437284575892}
+  _skillRawPanelPrefab: {fileID: 8273837743971610291, guid: 8423691b3e4e3ad4fbcd6edb9e27a3f9,
     type: 3}
-  m_SkillProgressPanelPrefab: {fileID: 544754915290273977, guid: 3fcf4055cb4d8a1488673540ee9825af,
+  _skillProgressPanelPrefab: {fileID: 544754915290273977, guid: 3fcf4055cb4d8a1488673540ee9825af,
     type: 3}
-  m_SkillProgressIconPanelPrefab: {fileID: 3691997985527484479, guid: fa2753a8bb06cf34b8bba0baca9b8f60,
+  _skillProgressIconPanelPrefab: {fileID: 3691997985527484479, guid: fa2753a8bb06cf34b8bba0baca9b8f60,
     type: 3}
-  m_MagicIcon: {fileID: -8609973278846354255, guid: 732fa8aab5563a4469f0f76509c8bc22,
+  _magicIcon: {fileID: -8609973278846354255, guid: 732fa8aab5563a4469f0f76509c8bc22,
     type: 3}
-  m_FistIcon: {fileID: 2084251073510830269, guid: 732fa8aab5563a4469f0f76509c8bc22,
+  _fistIcon: {fileID: 2084251073510830269, guid: 732fa8aab5563a4469f0f76509c8bc22,
     type: 3}
-  m_ClubIcon: {fileID: -2682230801280520428, guid: 732fa8aab5563a4469f0f76509c8bc22,
+  _clubIcon: {fileID: -2682230801280520428, guid: 732fa8aab5563a4469f0f76509c8bc22,
     type: 3}
-  m_SwordIcon: {fileID: -3657551050585085934, guid: 732fa8aab5563a4469f0f76509c8bc22,
+  _swordIcon: {fileID: -3657551050585085934, guid: 732fa8aab5563a4469f0f76509c8bc22,
     type: 3}
-  m_AxeIcon: {fileID: 8833201262336938822, guid: 732fa8aab5563a4469f0f76509c8bc22,
+  _axeIcon: {fileID: 8833201262336938822, guid: 732fa8aab5563a4469f0f76509c8bc22,
     type: 3}
-  m_DistIcon: {fileID: -4484031599090707101, guid: 732fa8aab5563a4469f0f76509c8bc22,
+  _distIcon: {fileID: -4484031599090707101, guid: 732fa8aab5563a4469f0f76509c8bc22,
     type: 3}
-  m_ShieldingIcon: {fileID: -6438049549955649529, guid: 732fa8aab5563a4469f0f76509c8bc22,
+  _shieldingIcon: {fileID: -6438049549955649529, guid: 732fa8aab5563a4469f0f76509c8bc22,
     type: 3}
-  m_FishingIcon: {fileID: -7128870388000165283, guid: 732fa8aab5563a4469f0f76509c8bc22,
+  _fishingIcon: {fileID: -7128870388000165283, guid: 732fa8aab5563a4469f0f76509c8bc22,
     type: 3}
 --- !u!1001 &2107254812
 PrefabInstance:
@@ -208,7 +208,7 @@ PrefabInstance:
     - target: {fileID: 8975592622985898134, guid: 40dee3dca139fc94595d30807d888dc3,
         type: 3}
       propertyPath: m_Size
-      value: 0.98734176
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3971681045354460173, guid: 40dee3dca139fc94595d30807d888dc3,
         type: 3}
@@ -253,7 +253,7 @@ PrefabInstance:
     - target: {fileID: 1970024145670434700, guid: 40dee3dca139fc94595d30807d888dc3,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 40dee3dca139fc94595d30807d888dc3, type: 3}

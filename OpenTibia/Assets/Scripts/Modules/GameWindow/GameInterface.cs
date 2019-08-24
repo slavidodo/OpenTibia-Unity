@@ -12,6 +12,8 @@ namespace OpenTibiaUnity.Modules.GameWindow
         public GamePanelContainer GameLeftContainer = null;
         public GamePanelContainer GameBottomContainer = null;
         public GamePanelContainer GameMapContainer = null;
+
+        [SerializeField] private Camera _camera = null;
         
         private Canvas _gameCanvas;
         public Canvas gameCanvas {
@@ -56,14 +58,16 @@ namespace OpenTibiaUnity.Modules.GameWindow
         }
 
         public void ScaleToScreen() {
-            var camera = OpenTibiaUnity.GameManager.MainCamera;
-            float distance = Vector3.Distance(camera.transform.position, transform.position);
+            if (!_camera)
+                return;
+
+            float distance = Vector3.Distance(_camera.transform.position, transform.position);
             float camHeight;
 
-            if (camera.orthographic)
-                camHeight = camera.orthographicSize * 2;
+            if (_camera.orthographic)
+                camHeight = _camera.orthographicSize * 2;
             else
-                camHeight = 2.0f * distance * Mathf.Tan(Mathf.Deg2Rad * camera.fieldOfView * 0.5f);
+                camHeight = 2.0f * distance * Mathf.Tan(Mathf.Deg2Rad * _camera.fieldOfView * 0.5f);
             
             float scale = (camHeight / Screen.height);
             transform.localScale = new Vector3(scale, scale, scale);

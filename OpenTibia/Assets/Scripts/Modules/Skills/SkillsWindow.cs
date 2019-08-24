@@ -14,7 +14,7 @@ namespace OpenTibiaUnity.Modules.Skills
 
         [SerializeField] private Sprite _magicIcon = null;
         [SerializeField] private Sprite _fistIcon = null;
-        [SerializeField] private Sprite _blubIcon = null;
+        [SerializeField] private Sprite _clubIcon = null;
         [SerializeField] private Sprite _swordIcon = null;
         [SerializeField] private Sprite _axeIcon = null;
         [SerializeField] private Sprite _distIcon = null;
@@ -101,7 +101,7 @@ namespace OpenTibiaUnity.Modules.Skills
             if (newVersion > 1150) {
                 _magicPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_MAGIC, 0, 0, greenColor, _magicIcon);
                 _fistPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_FIST, 0, 0, greenColor, _fistIcon);
-                _clubPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_CLUB, 0, 0, greenColor, _blubIcon);
+                _clubPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_CLUB, 0, 0, greenColor, _clubIcon);
                 _swordPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_SWORD, 0, 0, greenColor, _swordIcon);
                 _axePanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_AXE, 0, 0, greenColor, _axeIcon);
                 _distancePanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_DISTANCE, 0, 0, greenColor, _distIcon);

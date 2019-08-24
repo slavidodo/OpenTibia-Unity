@@ -450,12 +450,12 @@ namespace OpenTibiaUnity.Core.Creatures
         }
 
         public override void Reset() {
-            uint my_id = _id;
+            uint myId = _id;
             base.Reset();
             ResetAutowalk();
             ResetFlags();
             ResetSkills();
-            _id = my_id;
+            _id = myId;
             _knownSpells.Clear();
             _premium = false;
             _premiumUntil = 0;

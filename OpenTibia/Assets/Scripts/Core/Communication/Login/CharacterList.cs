@@ -15,7 +15,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
 
         public struct Character
         {
-            public int World_id;
+            public int WorldId;
             public string Name;
         }
 
@@ -46,7 +46,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
                 byte characters = message.ReadUnsignedByte();
                 for (int i = 0; i < characters; i++) {
                     Character character = new Character {
-                        World_id = message.ReadUnsignedByte(),
+                        WorldId = message.ReadUnsignedByte(),
                         Name = message.ReadString()
                     };
                     Characters.Add(character);
@@ -62,7 +62,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
                     var world = GetOrCreateWorld(worldName, worldIpLong, worldPort);
                     var character = new Character {
                         Name = characterName,
-                        World_id = world._id
+                        WorldId = world._id
                     };
                     Characters.Add(character);
                 }

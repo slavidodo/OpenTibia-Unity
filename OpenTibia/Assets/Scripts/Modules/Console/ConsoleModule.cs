@@ -76,7 +76,7 @@ namespace OpenTibiaUnity.Modules.Console
             var channelButton = GetChannelTab(channel, true);
 
             // if there is no channel or this channel is NPC, then select it!
-            if (channel.Id == ChatStorage.NpcChannel_id || _activeChannel == null) {
+            if (channel.Id == ChatStorage.NpcChannelId || _activeChannel == null) {
                 SelectChannelButton(channelButton);
             } else {
                 channelButton.SetState(ChannelButtonState.Inactive);
@@ -97,7 +97,7 @@ namespace OpenTibiaUnity.Modules.Console
         }
         
         private void OnAddChannelMessage(Channel channel, ChannelMessage channelMessage) {
-            if (channel.Id == ChatStorage.NpcChannel_id || channel.Id == ChatStorage.DebugChannel_id)
+            if (channel.Id == ChatStorage.NpcChannelId || channel.Id == ChatStorage.DebugChannelId)
                 SelectChannelButton(GetChannelTab(channel, true));
             else
                 GetChannelTab(channel, true);

@@ -257,8 +257,8 @@ namespace OpenTibiaUnity.Modules.Hotkeys
                 return;
             }
 
-            var object_id = @object.Id;
-            if (object_id < 100)
+            var objectId = @object.Id;
+            if (objectId < 100)
                 return;
 
             var objectAction = GetHotkeyActionForPanel<HotkeyObjectAction>(_activeActionPanel);

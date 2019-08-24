@@ -74,7 +74,7 @@ namespace OpenTibiaUnity.Core.Chat
             _textPieces.Add(text);
             MessageModeType mode = _nextOnscreenMessageIndex == 0 ? MessageModeType.NpcFromStartBlock : MessageModeType.NpcFrom;
 
-            OpenTibiaUnity.ChatStorage.AddChannelMessage(ChatStorage.NpcChannel_id, 0, _speaker, 0, mode, text);
+            OpenTibiaUnity.ChatStorage.AddChannelMessage(ChatStorage.NpcChannelId, 0, _speaker, 0, mode, text);
             if (_nextOnscreenMessageIndex == 0 || _nextOnscreenMessageIndex > 0 && OpenTibiaUnity.TicksMillis > _minTimeForNextOnscreenMessage) {
                 ShowNextOnscreenMessage();
             } else if (!_timerEventRegistered) {

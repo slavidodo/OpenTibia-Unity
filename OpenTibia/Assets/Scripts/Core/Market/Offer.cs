@@ -5,7 +5,7 @@
         private MarketOfferTypes _offerType;
         private MarketOfferStates _offerState;
 
-        private ushort _type_id;
+        private ushort _typeId;
         private ushort _amount;
         private uint _piecePrice;
 
@@ -17,16 +17,16 @@
         public MarketOfferTypes OfferType { get => _offerType; }
         public MarketOfferStates OfferState { get => _offerState; }
 
-        public ushort Type_id { get => _type_id; }
+        public ushort TypeId { get => _typeId; }
         public ushort Amount { get => _amount; }
         public uint PiecePrice { get => _piecePrice; }
 
         public string Character { get => _character; }
 
-        public Offer(OfferId offer_id, MarketOfferTypes offerType, ushort type_id, ushort amount, uint piecePrice, string character, MarketOfferStates state) {
-            _id = offer_id;
+        public Offer(OfferId offerId, MarketOfferTypes offerType, ushort typeId, ushort amount, uint piecePrice, string character, MarketOfferStates state) {
+            _id = offerId;
             _offerType = offerType;
-            _type_id = type_id;
+            _typeId = typeId;
             _amount = amount;
             _piecePrice = piecePrice;
             _character = character;

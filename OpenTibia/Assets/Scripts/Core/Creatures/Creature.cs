@@ -35,7 +35,7 @@ namespace OpenTibiaUnity.Core.Creatures
         public class GuildFlagsCreatureChangeEvent : UnityEvent<Creature, GuildFlag, GuildFlag> {};
         public class SpeechCategoryCreatureChangeEvent : UnityEvent<Creature, SpeechCategory, SpeechCategory> {};
 
-        public static UIntCreatureChangeEvent on_idChange = new UIntCreatureChangeEvent();
+        public static UIntCreatureChangeEvent onIdChange = new UIntCreatureChangeEvent();
         public static StringCreatureChangeEvent onNameChange = new StringCreatureChangeEvent();
         public static CreatureTypesCreatureChangeEvent onTypeChange = new CreatureTypesCreatureChangeEvent();
         public static UIntCreatureChangeEvent onSummonerChange = new UIntCreatureChangeEvent();
@@ -59,7 +59,7 @@ namespace OpenTibiaUnity.Core.Creatures
         protected uint _id = 0;
         public uint Id {
             get { return _id; }
-            set { if (_id != value) { var old = _id;  _id = value; on_idChange.Invoke(this, _id, old); } }
+            set { if (_id != value) { var old = _id;  _id = value; onIdChange.Invoke(this, _id, old); } }
         }
 
         protected string _name;
@@ -74,10 +74,10 @@ namespace OpenTibiaUnity.Core.Creatures
             set { if (_type != value) { var old = _type;  _type = value; onTypeChange.Invoke(this, _type, old); } }
         }
 
-        protected uint _summoner_id = 0;
-        public uint Summoner_id {
-            get { return _summoner_id; }
-            set { if (_summoner_id != value) { var old = _summoner_id;  _summoner_id = value; onSummonerChange.Invoke(this, _summoner_id, old); } }
+        protected uint _summonerId = 0;
+        public uint SummonerId {
+            get { return _summonerId; }
+            set { if (_summonerId != value) { var old = _summonerId;  _summonerId = value; onSummonerChange.Invoke(this, _summonerId, old); } }
         }
 
         protected bool _trapper = false;
@@ -455,15 +455,15 @@ namespace OpenTibiaUnity.Core.Creatures
             GuildFlag = guildFlag;
         }
 
-        public void SetSummoner_id(uint summoner_id) {
-            if (summoner_id == OpenTibiaUnity.Player._id)
+        public void SetSummonerId(uint summonerId) {
+            if (summonerId == OpenTibiaUnity.Player._id)
                 SummonTypeFlag = SummonTypeFlags.Own;
-            else if (summoner_id != 0)
+            else if (summonerId != 0)
                 SummonTypeFlag = SummonTypeFlags.Other;
             else
                 SummonTypeFlag = SummonTypeFlags.None;
 
-            Summoner_id = summoner_id;
+            SummonerId = summonerId;
         }
         
         public bool IsReportTypeAllowed(ReportTypes reportType) {

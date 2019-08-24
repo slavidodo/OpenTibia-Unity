@@ -8,7 +8,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
         private void ParseMarketStatistics(Internal.ByteArray message) {
             int count = message.ReadUnsignedShort();
             for (int i = 0; i < count; i++) {
-                ushort object_id = message.ReadUnsignedShort();
+                ushort objectId = message.ReadUnsignedShort();
                 uint objectPrice = message.ReadUnsignedInt();
             }
         }
@@ -27,7 +27,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             int offers = message.ReadUnsignedByte();
             int depotCount = message.ReadUnsignedByte();
             for (int i = 0; i < depotCount; i++) {
-                message.ReadUnsignedShort(); // object_id
+                message.ReadUnsignedShort(); // objectId
                 message.ReadUnsignedShort(); // objectCount
             }
         }
@@ -37,7 +37,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseMarketDetail(Internal.ByteArray message) {
-            ushort object_id = message.ReadUnsignedShort();
+            ushort objectId = message.ReadUnsignedShort();
 
             var last = MarketDetails.Weight;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameImbuing))
@@ -95,14 +95,14 @@ namespace OpenTibiaUnity.Core.Communication.Game
             uint timestamp = message.ReadUnsignedInt();
             ushort counter = message.ReadUnsignedShort();
 
-            ushort object_id;
+            ushort objectId;
             switch (var) {
                 case Constants.MarketRequestOwnOffers:
                 case Constants.MarketRequestOwnHistory:
-                    object_id = message.ReadUnsignedShort();
+                    objectId = message.ReadUnsignedShort();
                     break;
                 default:
-                    object_id = var;
+                    objectId = var;
                     break;
             }
 
@@ -123,7 +123,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     break;
             }
 
-            return new Market.Offer(new Market.OfferId(counter, timestamp), offerType, object_id, amount, piecePrice, character, state);
+            return new Market.Offer(new Market.OfferId(counter, timestamp), offerType, objectId, amount, piecePrice, character, state);
         }
     }
 }
