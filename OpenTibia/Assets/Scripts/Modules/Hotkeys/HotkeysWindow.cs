@@ -34,18 +34,18 @@ namespace OpenTibiaUnity.Modules.Hotkeys
 
         private IHotkeyAction[] _plainKeys;
         private IHotkeyAction[] _shiftKeys;
-        private IHotkeyAction[] _bontrolKeys;
+        private IHotkeyAction[] _controlKeys;
 
         private HotkeyActionPanel _activeActionPanel = null;
         private Core.Appearances.ObjectInstance _objectInstance = null;
-        private bool _bhangingSelectedAction = false;
+        private bool _changingSelectedAction = false;
 
         protected override void Start() {
             base.Start();
 
             _plainKeys = new IHotkeyAction[12];
             _shiftKeys = new IHotkeyAction[12];
-            _bontrolKeys = new IHotkeyAction[12];
+            _controlKeys = new IHotkeyAction[12];
 
             // setup input
             OpenTibiaUnity.InputHandler.AddKeyDownListener(Core.Utils.EventImplPriority.UpperMedium, OnKeyDown);
@@ -161,7 +161,7 @@ namespace OpenTibiaUnity.Modules.Hotkeys
         }
         
         private void OnHotkeyTextInputValueChanged(string text) {
-            if (_bhangingSelectedAction)
+            if (_changingSelectedAction)
                 return;
 
             if (text.Length == 0)
@@ -179,7 +179,7 @@ namespace OpenTibiaUnity.Modules.Hotkeys
         }
 
         private void OnAutoSendValueChanged(bool value) {
-            if (_bhangingSelectedAction)
+            if (_changingSelectedAction)
                 return;
 
             if (value)
@@ -287,7 +287,7 @@ namespace OpenTibiaUnity.Modules.Hotkeys
             if (!value)
                 return;
 
-            _bhangingSelectedAction = true;
+            _changingSelectedAction = true;
             
             var action = GetHotkeyActionForPanel<IHotkeyAction>(actionPanel);
 
@@ -319,7 +319,7 @@ namespace OpenTibiaUnity.Modules.Hotkeys
             }
 
             _activeActionPanel = actionPanel;
-            _bhangingSelectedAction = false;
+            _changingSelectedAction = false;
         }
         
         private T GetHotkeyActionForPanel<T>(HotkeyActionPanel panel) where T : IHotkeyAction {
@@ -330,7 +330,7 @@ namespace OpenTibiaUnity.Modules.Hotkeys
             if (panel.EventModifiers == EventModifiers.Shift)
                 actionList = _shiftKeys;
             else if (panel.EventModifiers == EventModifiers.Control)
-                actionList = _bontrolKeys;
+                actionList = _controlKeys;
             else
                 actionList = _plainKeys;
 
@@ -346,7 +346,7 @@ namespace OpenTibiaUnity.Modules.Hotkeys
             if (panel.EventModifiers == EventModifiers.Shift)
                 actionList = _shiftKeys;
             else if (panel.EventModifiers == EventModifiers.Control)
-                actionList = _bontrolKeys;
+                actionList = _controlKeys;
             else
                 actionList = _plainKeys;
 
@@ -359,7 +359,7 @@ namespace OpenTibiaUnity.Modules.Hotkeys
             if ((e.modifiers & EventModifiers.Shift) != 0)
                 actionList = _shiftKeys;
             else if ((e.modifiers & EventModifiers.Control) != 0)
-                actionList = _bontrolKeys;
+                actionList = _controlKeys;
             else
                 actionList = _plainKeys;
 

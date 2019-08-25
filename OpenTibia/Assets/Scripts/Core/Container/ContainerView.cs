@@ -31,6 +31,7 @@ namespace OpenTibiaUnity.Core.Container
         public int IndexOfFirstObject { get => _indexOfFirstObject; }
 
         public string Name { get => _name; }
+        public ObjectInstance Icon { get => _icon; }
 
         public bool IsSubContainer { get => _isSubContainer; }
         public bool IsDragAndDropEnabled { get => _isDragAndDropEnabled; }

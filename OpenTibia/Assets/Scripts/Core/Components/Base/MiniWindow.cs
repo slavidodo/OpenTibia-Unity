@@ -69,7 +69,7 @@ namespace OpenTibiaUnity.Core.Components.Base
         public float MinHeight {
             get {
                 return verticalLayoutGroup.padding.top + verticalLayoutGroup.padding.bottom
-                    + verticalLayoutGroup.spacing + _minContentHeight;
+                    + verticalLayoutGroup.spacing + _minContentHeight + 15;
             }
         }
 
@@ -78,14 +78,14 @@ namespace OpenTibiaUnity.Core.Components.Base
                 if (_maxContentHeight == -1)
                     return -1;
                 return verticalLayoutGroup.padding.top + verticalLayoutGroup.padding.bottom
-                    + verticalLayoutGroup.spacing + _maxContentHeight;
+                    + verticalLayoutGroup.spacing + _maxContentHeight + 15;
             }
         }
 
         public float PreferredHeight {
             get {
                 return verticalLayoutGroup.padding.top + verticalLayoutGroup.padding.bottom
-                    + verticalLayoutGroup.spacing + _preferredContentHeight;
+                    + verticalLayoutGroup.spacing + _preferredContentHeight + 15;
             }
         }
 

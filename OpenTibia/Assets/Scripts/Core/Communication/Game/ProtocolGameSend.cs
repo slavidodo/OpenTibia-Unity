@@ -242,6 +242,18 @@ namespace OpenTibiaUnity.Core.Communication.Game
             message.WriteUnsignedByte((byte)stackPos);
             _packetWriter.FinishMessage();
         }
+        public void SendCloseContainer(int containerId) {
+            var message = _packetWriter.CreateMessage();
+            message.WriteEnum(GameclientMessageType.CloseContainer);
+            message.WriteUnsignedByte((byte)containerId);
+            _packetWriter.FinishMessage();
+        }
+        public void SendUpContainer(int containerId) {
+            var message = _packetWriter.CreateMessage();
+            message.WriteEnum(GameclientMessageType.UpContainer);
+            message.WriteUnsignedByte((byte)containerId);
+            _packetWriter.FinishMessage();
+        }
 
         public void SendToggleWrapState(UnityEngine.Vector3Int absolute, uint typeId, int stackPos) {
             var message = _packetWriter.CreateMessage();

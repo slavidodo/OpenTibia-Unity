@@ -44,23 +44,23 @@
 
     public class OfferId
     {
-        private ushort _bounter = 0;
+        private ushort _counter = 0;
         private uint _timestamp = 0;
 
-        public ushort Counter { get => _bounter; }
+        public ushort Counter { get => _counter; }
         public uint Timestamp { get => _timestamp; }
 
         public OfferId(ushort counter, uint timestamp) {
-            _bounter = counter;
+            _counter = counter;
             _timestamp = timestamp;
         }
 
         public bool IsLessThan(OfferId other) {
-            return _timestamp < other.Timestamp || _timestamp == other.Timestamp && _bounter < other.Counter;
+            return _timestamp < other.Timestamp || _timestamp == other.Timestamp && _counter < other.Counter;
         }
 
         public bool IsEqual(OfferId other) {
-            return _timestamp == other.Timestamp && _bounter == other.Counter;
+            return _timestamp == other.Timestamp && _counter == other.Counter;
         }
     }
 }

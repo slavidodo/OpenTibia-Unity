@@ -13,7 +13,7 @@ namespace OpenTibiaUnity.Modules.Container
         [SerializeField] private TMPro.TextMeshProUGUI _itemText = null;
         [SerializeField] private bool _showAmount = false;
         [SerializeField] private int _objectAmount = 1;
-        [SerializeField] private ClothSlots _blothSlot = ClothSlots.Head;
+        [SerializeField] private ClothSlots _clothSlot = ClothSlots.Head;
 
         public ItemViewPointerEvent onPointerEnter;
         public ItemViewPointerEvent onPointerExit;
@@ -42,7 +42,7 @@ namespace OpenTibiaUnity.Modules.Container
                 }
             }
         }
-        public ClothSlots clothSlot { get => _blothSlot; }
+        public ClothSlots clothSlot { get => _clothSlot; }
 
         private Core.Appearances.ObjectInstance _objectInstance = null;
         public Core.Appearances.ObjectInstance objectInstance {
@@ -65,11 +65,11 @@ namespace OpenTibiaUnity.Modules.Container
         }
 
         public void OnPointerEnter(PointerEventData eventData) {
-            onPointerEnter.Invoke(_blothSlot);
+            onPointerEnter.Invoke(_clothSlot);
         }
 
         public void OnPointerExit(PointerEventData eventData) {
-            onPointerExit.Invoke(_blothSlot);
+            onPointerExit.Invoke(_clothSlot);
         }
     }
 }

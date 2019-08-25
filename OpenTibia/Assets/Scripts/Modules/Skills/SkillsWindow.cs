@@ -42,8 +42,8 @@ namespace OpenTibiaUnity.Modules.Skills
         private SkillPanel _shieldingPanel = null;
         private SkillPanel _fishingPanel = null;
 
-        private SkillPanel _briticalChancePanel = null;
-        private SkillPanel _briticalExtraDamagePanel = null;
+        private SkillPanel _criticalChancePanel = null;
+        private SkillPanel _criticalExtraDamagePanel = null;
         private SkillPanel _lifeLeechChancePanel = null;
         private SkillPanel _lifeLeechAmountPanel = null;
         private SkillPanel _manaLeechChancePanel = null;
@@ -122,8 +122,8 @@ namespace OpenTibiaUnity.Modules.Skills
                 CreateSeparator();
 
                 CreateSkillLabel(TextResources.SKILLS_CRITICALHIT);
-                _briticalChancePanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_CRITICALHIT_CHANCE);
-                _briticalExtraDamagePanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_CRITICALHIT_EXTRADMG);
+                _criticalChancePanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_CRITICALHIT_CHANCE);
+                _criticalExtraDamagePanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_CRITICALHIT_EXTRADMG);
                 CreateSkillLabel(TextResources.SKILLS_LIFELEECH);
                 _lifeLeechChancePanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_LIFELEECH_CHANCE);
                 _lifeLeechAmountPanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_LIFELEECH_AMOUNT);
@@ -132,7 +132,7 @@ namespace OpenTibiaUnity.Modules.Skills
                 _manaLeechAmountPanel = CreateSkillPanel(_skillRawPanelPrefab, TextResources.SKILLS_MANALEECH_AMOUNT);
 
                 var skillPanels = new SkillPanel[] {
-                    _briticalChancePanel, _briticalExtraDamagePanel,
+                    _criticalChancePanel, _criticalExtraDamagePanel,
                     _lifeLeechChancePanel, _lifeLeechAmountPanel,
                     _manaLeechChancePanel, _manaLeechAmountPanel
                 };
@@ -166,8 +166,8 @@ namespace OpenTibiaUnity.Modules.Skills
             if (_distancePanel) { Destroy(_distancePanel.gameObject); _distancePanel = null; }
             if (_shieldingPanel) { Destroy(_shieldingPanel.gameObject); _shieldingPanel = null; }
 
-            if (_briticalChancePanel) { Destroy(_briticalChancePanel.gameObject); _briticalChancePanel = null; }
-            if (_briticalExtraDamagePanel) { Destroy(_briticalExtraDamagePanel.gameObject); _briticalExtraDamagePanel = null; }
+            if (_criticalChancePanel) { Destroy(_criticalChancePanel.gameObject); _criticalChancePanel = null; }
+            if (_criticalExtraDamagePanel) { Destroy(_criticalExtraDamagePanel.gameObject); _criticalExtraDamagePanel = null; }
             if (_lifeLeechChancePanel) { Destroy(_lifeLeechChancePanel.gameObject); _lifeLeechChancePanel = null; }
             if (_lifeLeechAmountPanel) { Destroy(_lifeLeechAmountPanel.gameObject); _lifeLeechAmountPanel = null; }
             if (_manaLeechChancePanel) { Destroy(_manaLeechChancePanel.gameObject); _manaLeechChancePanel = null; }
@@ -248,8 +248,8 @@ namespace OpenTibiaUnity.Modules.Skills
                 case SkillType.Axe: return _axePanel;
                 case SkillType.Distance: return _distancePanel;
                 case SkillType.Shield: return _shieldingPanel;
-                case SkillType.CriticalHitChance: return _briticalChancePanel;
-                case SkillType.CriticalHitDamage: return _briticalExtraDamagePanel;
+                case SkillType.CriticalHitChance: return _criticalChancePanel;
+                case SkillType.CriticalHitDamage: return _criticalExtraDamagePanel;
                 case SkillType.LifeLeechChance: return _lifeLeechChancePanel;
                 case SkillType.LifeLeechAmount: return _lifeLeechAmountPanel;
                 case SkillType.ManaLeechChance: return _manaLeechChancePanel;

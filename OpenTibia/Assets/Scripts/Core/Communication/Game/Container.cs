@@ -36,8 +36,10 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     throw new System.Exception("ProtocolGame.ParseOpenContainer: Number of content objects " + nOfContentObjects + " exceeds the capaciy " + nOfSlotsPerPage);
             }
             
-            var containerView = ContainerStorage.CreateContainerView(containerId, objectIcon, name, isSubContainer, isDragAndDropEnabled, isPaginationEnabled, nOfSlotsPerPage, nOfTotalObjects - nOfContentObjects, indexOfFirstObject);
-            
+            var containerView = ContainerStorage.CreateContainerView(containerId, objectIcon, name, isSubContainer,
+                                    isDragAndDropEnabled, isPaginationEnabled, nOfSlotsPerPage,
+                                    nOfTotalObjects - nOfContentObjects, indexOfFirstObject);
+
             for (int i = 0; i < nOfContentObjects; i++)
                 containerView.AddObject(indexOfFirstObject + i, ReadObjectInstance(message));
         }

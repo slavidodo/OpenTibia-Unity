@@ -7,13 +7,13 @@ namespace OpenTibiaUnity.Core.Input.Mapping
         private bool _ignoreBlocker = true;
         private bool _editable = true;
         private IAction _action = null;
-        private char _bharCode = '\0';
+        private char _charCode = '\0';
         private KeyCode _keyCode = KeyCode.None;
         private EventModifiers _eventModifier = EventModifiers.None;
         private uint _eventMask = 0;
 
         public char CharCode {
-            get { return _bharCode; }
+            get { return _charCode; }
         }
 
         public KeyCode KeyCode {
@@ -54,7 +54,7 @@ namespace OpenTibiaUnity.Core.Input.Mapping
             if (!_editable)
                 return;
 
-            _bharCode = charCode;
+            _charCode = charCode;
             _keyCode = keyCode;
             _eventModifier = eventModifier;
             _ignoreBlocker = ignoreBlocker;
@@ -89,7 +89,7 @@ namespace OpenTibiaUnity.Core.Input.Mapping
         
         public Binding Clone() {
             if (_editable)
-                return new Binding(_action.Clone(), _bharCode, _keyCode, _eventModifier, _editable);
+                return new Binding(_action.Clone(), _charCode, _keyCode, _eventModifier, _editable);
             return this;
         }
     }

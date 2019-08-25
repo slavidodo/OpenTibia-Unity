@@ -265,6 +265,11 @@ namespace OpenTibiaUnity.Core.WorldMap
         }
 
         public void UpdateObjectsCache() {
+            if (!CacheObjectsDirty)
+                return;
+
+            CacheObjectsDirty = false;
+
             int index = 0;
             if (ObjectsCount > 0) {
                 // ground, borders, bottom items

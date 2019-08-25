@@ -10,6 +10,7 @@ namespace OpenTibiaUnity.Modules.Container
 {
     public class ContainerWindow : Core.Components.Base.MiniWindow, IUseWidget, IMoveWidget, IWidgetContainerWidget
     {
+        [SerializeField] private RawImage _iconImage = null;
         [SerializeField] private OTU_ScrollRect _itemsScrollRect = null;
         [SerializeField] private Button _upButton = null;
 
@@ -29,6 +30,9 @@ namespace OpenTibiaUnity.Modules.Container
             ObjectMultiUseHandler.RegisterContainer(this);
 
             OpenTibiaUnity.InputHandler.AddMouseUpListener(Core.Utils.EventImplPriority.Default, OnMouseUp);
+            OpenTibiaUnity.GameManager.onGameEnd.AddListener(OnGameEnd);
+
+            _upButton.onClick.AddListen(OnUpButtonClick);
         }
 
         protected void OnGUI() {
@@ -48,7 +52,6 @@ namespace OpenTibiaUnity.Modules.Container
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < _rows; j++) {
                     int index = j * 4 + i;
-
                     if (index < _containerView.NumberOfTotalObjects) {
                         var @object = _containerView.GetObject(index + _containerView.IndexOfFirstObject);
                         if (@object) {
@@ -58,13 +61,30 @@ namespace OpenTibiaUnity.Modules.Container
                     }
                 }
             }
-            
+
+            int iconColumn = _numberOfSlots % 4;
+            int iconRow = _numberOfSlots / 4;
+            _containerView.Icon.DrawTo(new Vector2(Constants.FieldSize * iconColumn, Constants.FieldSize * iconRow), zoom, 0, 0, 0);
+
             RenderTexture.active = null;
         }
 
         protected void OnMouseUp(Event e, MouseButton mouseButton, bool repeat) {
             if (publicStartMouseAction(e.mousePosition, mouseButton, true, false))
                 e.Use();
+        }
+
+        private void OnGameEnd() {
+            var gameManager = OpenTibiaUnity.GameManager;
+            gameManager.InvokeOnMainThread(() => gameManager.onGameEnd.RemoveListener(OnGameEnd));
+
+            CloseWithoutNotifying();
+        }
+
+        private void OnUpButtonClick() {
+            var protocolGame = OpenTibiaUnity.ProtocolGame;
+            if (!!protocolGame && protocolGame.IsGameRunning)
+                protocolGame.SendUpContainer(_containerView.Id);
         }
 
         private bool publicStartMouseAction(Vector3 mousePosition, MouseButton mouseButton, bool applyAction = false, bool updateCursor = false) {
@@ -182,15 +202,26 @@ namespace OpenTibiaUnity.Modules.Container
 
         public void UpdateProperties(ContainerView containerView) {
             containerView.onObjectAdded.AddListener(OnAddedObject);
+            containerView.onObjectChanged.AddListener(OnChangedObject);
             containerView.onObjectRemoved.AddListener(OnRemovedObject);
 
+            if (_itemViews != null) {
+                foreach (var itemView in _itemViews)
+                    Destroy(itemView.gameObject);
+
+                _itemViews = null;
+            }
+
+            if (_slotsRenderTexture != null) {
+                _slotsRenderTexture.Release();
+                _slotsRenderTexture.DiscardContents();
+                _slotsRenderTexture = null;
+            }
+
             _numberOfSlots = containerView.NumberOfSlotsPerPage;
-            _rows = (int)Mathf.Ceil(_numberOfSlots / 4f);
-
+            _rows = (int)Mathf.Ceil((_numberOfSlots + 1) / 4f); // extra slot for the container's icon
             _slotsRenderTexture = new RenderTexture(Constants.FieldSize * 4, Constants.FieldSize * _rows, 0, RenderTextureFormat.ARGB32);
-
             _itemViews = new ItemView[_numberOfSlots];
-
             _containerView = containerView;
 
             int paginationHeight = 0;
@@ -198,44 +229,78 @@ namespace OpenTibiaUnity.Modules.Container
                 paginationHeight += 25;
 
             _minContentHeight = 34 + paginationHeight;
-            _maxContentHeight = _rows * 34 + (_rows - 1) * 3 + paginationHeight;
 
-            int activeRows = (containerView.NumberOfTotalObjects / 4);
+            int effectiveRows = (int)Mathf.Ceil(_numberOfSlots / 4f);
+            _maxContentHeight = effectiveRows * 34 + (effectiveRows - 1) * 3 + paginationHeight;
+
+            int activeRows = (int)Mathf.Ceil(containerView.NumberOfTotalObjects / 4f);
             _preferredContentHeight = activeRows * 34 + (activeRows - 1) * 3 + paginationHeight;
             
             _upButton.gameObject.SetActive(containerView.IsSubContainer);
 
             _titleLabel.SetText(containerView.Name);
 
+            float w = (float)Constants.FieldSize / _slotsRenderTexture.width;
+            float h = (float)Constants.FieldSize / _slotsRenderTexture.height;
             for (int i = 0; i < _numberOfSlots; i++) {
+                var slot = i; // obtain a local variable to hook the slot under mouse correctly!
                 var itemView = Instantiate(ModulesManager.Instance.ItemViewPrefab, _itemsScrollRect.content);
-                itemView.onPointerEnter.AddListener((ClothSlots _) => _slotUnderMouse = i);
+                itemView.onPointerEnter.AddListener((ClothSlots _) => _slotUnderMouse = slot);
                 itemView.onPointerExit.AddListener((ClothSlots _) => _slotUnderMouse = -1);
-
+                
                 itemView.itemImage.enabled = false;
                 itemView.itemImage.texture = _slotsRenderTexture;
-                float w = (float)Constants.FieldSize / _slotsRenderTexture.width;
-                float h = (float)Constants.FieldSize / _slotsRenderTexture.height;
+                
                 itemView.itemImage.uvRect = new Rect(w * (i % 4), 1 - h * (i / 4 + 1), w, h);
                 _itemViews[i] = itemView;
             }
-
+            
+            _iconImage.enabled = true;
+            _iconImage.texture = _slotsRenderTexture;
+            _iconImage.uvRect = new Rect(w * (_numberOfSlots % 4), 1 - h * (_numberOfSlots / 4 + 1), w, h);
             UpdateLayout();
         }
 
         protected void OnAddedObject(ContainerView _, int index, ObjectInstance @object) {
             index -= _containerView.IndexOfFirstObject;
+            for (int i = index; i < _containerView.NumberOfTotalObjects; i++) {
+                @object = _containerView.GetObject(i + _containerView.IndexOfFirstObject);
+                var itemView = _itemViews[i];
+                itemView.itemImage.enabled = true;
+                itemView.showAmount = @object.Data > 1;
+                itemView.objectAmount = (int)@object.Data;
+            }
+        }
 
-            var itemView = _itemViews[index];
-
+        private void OnChangedObject(ContainerView _, int index, ObjectInstance @object) {
+            var itemView = _itemViews[index - _containerView.IndexOfFirstObject];
             itemView.itemImage.enabled = true;
             itemView.showAmount = @object.Data > 1;
             itemView.objectAmount = (int)@object.Data;
         }
-        
+
         protected void OnRemovedObject(ContainerView _, int index, ObjectInstance appendObject) {
             index -= _containerView.IndexOfFirstObject;
-            _itemViews[index].itemImage.enabled = !!appendObject;
+            for (int i = index; i < _containerView.NumberOfTotalObjects; i++) {
+                var @object = _containerView.GetObject(i + _containerView.IndexOfFirstObject);
+                var itemView = _itemViews[i];
+                itemView.itemImage.enabled = true;
+                itemView.showAmount = @object.Data > 1;
+                itemView.objectAmount = (int)@object.Data;
+            }
+        }
+
+
+        public override void Close() {
+            base.Close();
+
+            var protocolGame = OpenTibiaUnity.ProtocolGame;
+            if (!!protocolGame && protocolGame.IsGameRunning)
+                protocolGame.SendCloseContainer(_containerView.Id);
+        }
+
+        public void CloseWithoutNotifying() {
+            base.Close();
         }
 
         public ObjectInstance GetObjectUnderMouse() {

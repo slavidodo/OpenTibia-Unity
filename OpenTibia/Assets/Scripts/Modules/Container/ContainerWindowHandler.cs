@@ -5,7 +5,7 @@ namespace OpenTibiaUnity.Modules.Container
 {
     public class ContainerWindowHandler : MonoBehaviour
     {
-        private ContainerWindow[] _bontainerWindows;
+        private ContainerWindow[] _containerWindows;
 
         protected void Start() {
             var containerStorage = OpenTibiaUnity.ContainerStorage;
@@ -14,23 +14,30 @@ namespace OpenTibiaUnity.Modules.Container
                 containerStorage.onContainerClosed.AddListener(OnClosedContainer);
             }
 
-            _bontainerWindows = new ContainerWindow[Constants.MaxContainerViews];
+            _containerWindows = new ContainerWindow[Constants.MaxContainerViews];
         }
 
         protected void OnAddedContainer(ContainerView containerView) {
-            var containerWindow = Instantiate(ModulesManager.Instance.ContainerWindowPrefab);
-            containerWindow.UpdateProperties(containerView);
+            var oldWindow = _containerWindows[containerView.Id];
+            if (oldWindow) {
+                oldWindow.UpdateProperties(containerView);
+            } else {
+                var containerWindow = Instantiate(ModulesManager.Instance.ContainerWindowPrefab);
+                containerWindow.UpdateProperties(containerView);
 
-            var gameWindowLayout = OpenTibiaUnity.GameManager.GetModule<GameWindow.GameInterface>();
-            gameWindowLayout.AddMiniWindow(containerWindow);
+                var gameWindowLayout = OpenTibiaUnity.GameManager.GetModule<GameWindow.GameInterface>();
+                gameWindowLayout.AddMiniWindow(containerWindow);
 
-            _bontainerWindows[containerView.Id] = containerWindow;
+                _containerWindows[containerView.Id] = containerWindow;
+            }
         }
 
         protected void OnClosedContainer(ContainerView containerView) {
-            var containerWindow = _bontainerWindows[containerView.Id];
-            if (containerWindow)
-                Destroy(containerWindow.gameObject);
+            var containerWindow = _containerWindows[containerView.Id];
+            if (containerWindow) {
+                containerWindow.CloseWithoutNotifying();
+                _containerWindows[containerView.Id] = null;
+            }
         }
     }
 }
