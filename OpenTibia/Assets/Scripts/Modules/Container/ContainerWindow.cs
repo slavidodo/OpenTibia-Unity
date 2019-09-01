@@ -47,8 +47,8 @@ namespace OpenTibiaUnity.Modules.Container
 
             Vector2 zoom = new Vector2(Screen.width / (float)_slotsRenderTexture.width, Screen.height / (float)_slotsRenderTexture.height);
 
-            _slotsRenderTexture.Release();
             RenderTexture.active = _slotsRenderTexture;
+            Core.Utils.GraphicsUtility.ClearWithTransparency();
             for (int i = 0; i < 4; i++) {
                 for (int j = 0; j < _rows; j++) {
                     int index = j * 4 + i;
@@ -67,6 +67,15 @@ namespace OpenTibiaUnity.Modules.Container
             _containerView.Icon.Draw(new Vector2(Constants.FieldSize * iconColumn, Constants.FieldSize * iconRow), zoom, 0, 0, 0);
 
             RenderTexture.active = null;
+        }
+
+        protected override void OnDestroy() {
+            base.OnDestroy();
+
+            if (_slotsRenderTexture != null) {
+                _slotsRenderTexture.Release();
+                _slotsRenderTexture = null;
+            }
         }
 
         protected void OnMouseUp(Event e, MouseButton mouseButton, bool repeat) {
@@ -212,15 +221,22 @@ namespace OpenTibiaUnity.Modules.Container
                 _itemViews = null;
             }
 
-            if (_slotsRenderTexture != null) {
-                _slotsRenderTexture.Release();
-                _slotsRenderTexture.DiscardContents();
-                _slotsRenderTexture = null;
-            }
-
             _numberOfSlots = containerView.NumberOfSlotsPerPage;
             _rows = (int)Mathf.Ceil((_numberOfSlots + 1) / 4f); // extra slot for the container's icon
-            _slotsRenderTexture = new RenderTexture(Constants.FieldSize * 4, Constants.FieldSize * _rows, 0, RenderTextureFormat.ARGB32);
+
+            bool shouldCreateRenderTexture = true;
+            if (_slotsRenderTexture != null) {
+                if (_slotsRenderTexture.height == Constants.FieldSize * _rows) {
+                    shouldCreateRenderTexture = false;
+                } else {
+                    _slotsRenderTexture.Release();
+                    _slotsRenderTexture = null;
+                }
+            }
+
+            if (shouldCreateRenderTexture)
+                _slotsRenderTexture = new RenderTexture(Constants.FieldSize * 4, Constants.FieldSize * _rows, 0, RenderTextureFormat.ARGB32);
+
             _itemViews = new ItemView[_numberOfSlots];
             _containerView = containerView;
 

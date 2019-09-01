@@ -113,18 +113,15 @@ namespace OpenTibiaUnity.Modules.Outfit
                 return;
 
             if (_renderTexture == null) {
-                var descriptor = new RenderTextureDescriptor(Constants.FieldSize * 2 * 2, Constants.FieldSize * 2, RenderTextureFormat.ARGB32, 0);
-                _renderTexture = new RenderTexture(descriptor);
+                _renderTexture = new RenderTexture(Constants.FieldSize * 2 * 2, Constants.FieldSize * 2, 0, RenderTextureFormat.ARGB32);
                 _renderTexture.filterMode = FilterMode.Point;
 
                 _rawImageOutfit.texture = _renderTexture;
                 _rawImageMount.texture = _renderTexture;
-            } else {
-                _renderTexture.Release();
             }
 
             RenderTexture.active = _renderTexture;
-            GL.Clear(false, true, new Color(0, 0, 0, 0));
+            Core.Utils.GraphicsUtility.ClearWithTransparency();
 
             if (!!_currentOutfit) {
                 var screenPosition = new Vector2(Constants.FieldSize, Constants.FieldSize);
@@ -234,11 +231,6 @@ namespace OpenTibiaUnity.Modules.Outfit
             _panelOutfitName.gameObject.SetActive(hasNewProtocol);
             _panelAddons.gameObject.SetActive(hasAddons);
             _panelMount.gameObject.SetActive(hasMounts);
-
-            if (_renderTexture) {
-                _renderTexture.Release();
-                _renderTexture = null;
-            }
         }
 
         private void OnHeadToggleValueChanged(bool value) {

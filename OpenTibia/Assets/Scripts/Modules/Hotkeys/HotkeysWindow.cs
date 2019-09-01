@@ -123,12 +123,10 @@ namespace OpenTibiaUnity.Modules.Hotkeys
                 s_RenderTexture.filterMode = FilterMode.Point;
 
                 _objectImage.texture = s_RenderTexture;
-            } else {
-                s_RenderTexture.Release();
             }
 
             RenderTexture.active = s_RenderTexture;
-            GL.Clear(false, true, new Color(0, 0, 0, 0));
+            Core.Utils.GraphicsUtility.ClearWithTransparency();
 
             var zoom = new Vector2(Screen.width / (float)s_RenderTexture.width, Screen.height / (float)s_RenderTexture.height);
             _objectInstance.Draw(new Vector2(0, 0), zoom, 0, 0, 0);

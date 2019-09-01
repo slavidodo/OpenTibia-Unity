@@ -110,13 +110,10 @@ namespace OpenTibiaUnity.Core.Components
                 _renderTexture = new RenderTexture(Constants.FieldSize, Constants.FieldSize, 0, RenderTextureFormat.ARGB32);
                 _renderTexture.filterMode = FilterMode.Point;
                 _itemImage.texture = _renderTexture;
-            } else {
-                _renderTexture.Release();
             }
 
             RenderTexture.active = _renderTexture;
-            GL.Clear(false, true, new Color(0, 0, 0, 0));
-
+            Utils.GraphicsUtility.ClearWithTransparency();
             if (!!_objectType) {
                 if (_objectInstance == null || _objectInstance.Id != _objectType._id)
                     _objectInstance = OpenTibiaUnity.AppearanceStorage.CreateObjectInstance(_objectType._id, _objectAmount);

@@ -73,8 +73,8 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             }
 
             var previousRenderTexture = RenderTexture.active;
-            _renderTexture.Release();
             RenderTexture.active = _renderTexture;
+            Utils.GraphicsUtility.ClearWithTransparency();
 
             OpenTibiaUnity.GameManager.InternalColoredMaterial.SetPass(0);
             Graphics.DrawMeshNow(_lightMesh, _lightTransformationMatrix);

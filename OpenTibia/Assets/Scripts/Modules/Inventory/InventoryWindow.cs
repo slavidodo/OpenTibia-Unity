@@ -182,8 +182,8 @@ namespace OpenTibiaUnity.Modules.Inventory
 
             Vector2 zoom = new Vector2(Screen.width / (float)_slotsRenderTexture.width, Screen.height / (float)_slotsRenderTexture.height);
 
-            _slotsRenderTexture.Release();
             RenderTexture.active = _slotsRenderTexture;
+            Core.Utils.GraphicsUtility.ClearWithTransparency();
             for (int i = 0; i < (int)ClothSlots.Hip; i++) {
                 var @object = BodyContainerView.Objects[i];
                 if (@object) {
@@ -199,6 +199,7 @@ namespace OpenTibiaUnity.Modules.Inventory
             base.OnDestroy();
 
             _slotsRenderTexture.Release();
+            _slotsRenderTexture = null;
         }
 
         public void OnMouseUp(Event e, MouseButton mouseButton, bool repeat) {

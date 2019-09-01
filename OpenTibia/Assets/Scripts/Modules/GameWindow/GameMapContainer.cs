@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using OpenTibiaUnity.Core.Appearances;
 using OpenTibiaUnity.Core.Components;
 using OpenTibiaUnity.Core.Creatures;
@@ -104,8 +103,8 @@ namespace OpenTibiaUnity.Modules.GameWindow
                 if (ContextMenuBase.CurrentContextMenu != null || ObjectDragImpl.AnyDraggingObject)
                     worldMapRenderer.HighlightTile = null;
                 
-                gameManager.WorldMapRenderTexture.Release();
                 RenderTexture.active = gameManager.WorldMapRenderTexture;
+                Core.Utils.GraphicsUtility.ClearWithTransparency();
                 var error = worldMapRenderer.RenderWorldMap(worldMapRectTransform.rect);
                 RenderTexture.active = null;
                 
@@ -115,11 +114,10 @@ namespace OpenTibiaUnity.Modules.GameWindow
                         _onscreenTextRenderTexture?.Release();
                         _onscreenTextRenderTexture = new RenderTexture(_lastScreenWidth, _lastScreenHeight, 0, RenderTextureFormat.ARGB32);
                         _onscreenTextImage.texture = _onscreenTextRenderTexture;
-                    } else {
-                        _onscreenTextRenderTexture.Release();
                     }
 
                     RenderTexture.active = _onscreenTextRenderTexture;
+                    Core.Utils.GraphicsUtility.ClearWithTransparency();
                     worldMapRenderer.RenderOnscreenText(_cachedScreenRect);
                     RenderTexture.active = null;
 

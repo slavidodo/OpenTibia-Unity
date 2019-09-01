@@ -11,6 +11,10 @@ namespace OpenTibiaUnity.Core.Utils
             _mesh.MarkDynamic();
         }
 
+        public static void ClearWithTransparency() {
+            GL.Clear(false, true, new Color(0, 0, 0, 0));
+        }
+
         public static void DrawRect(Rect rect, Vector3 scale, Color color) {
             _mesh.vertices = new Vector3[] {
                 new Vector3(0, 0, 0),

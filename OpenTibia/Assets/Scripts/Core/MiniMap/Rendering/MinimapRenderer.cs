@@ -67,7 +67,6 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
                 return RenderError.MiniMapNotValid;
 
             GL.Clear(false, true, Color.black);
-
             if (PositionX < Constants.MapMinX || PositionX > Constants.MapMaxX
                 || PositionY < Constants.MapMinY || PositionY > Constants.MapMaxY
                 || PositionZ < Constants.MapMinZ || PositionZ > Constants.MapMaxZ) {
