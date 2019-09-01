@@ -44,13 +44,13 @@ namespace OpenTibiaUnity.Core.Appearances
             return base.GetSpriteIndex(layer, patternX, patternY, patternZ);
         }
 
-        public override void DrawTo(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+        public override void Draw(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
             if (_hasSpecialPattern) {
                 patternX = -1;
                 patternY = -1;
             }
             
-            base.DrawTo(screenPosition, zoom, patternX, patternY, patternZ, highlighted, highlightOpacity);
+            base.Draw(screenPosition, zoom, patternX, patternY, patternZ, highlighted, highlightOpacity);
         }
 
         protected void UpdateSpecialPattern() {

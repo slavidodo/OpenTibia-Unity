@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 
 namespace OpenTibiaUnity.Core.WorldMap.Rendering
@@ -10,27 +9,19 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         private int _drawnTextualEffectsCount = 0;
         private int _maxZPlane = 0;
         private int _playerZPlane = 0;
-        private float _hangPixelX = 0;
-        private float _hangPixelY = 0;
-        private int _hangPatternX = 0;
-        private int _hangPatternY = 0;
-        private int _hangPatternZ = 0;
         private float _highlightOpacity = Constants.HighlightMinOpacity;
-        protected Vector3Int HelperCoordinate;
-        protected Vector2Int HelperPoint;
+        private Vector2 _hangPixel = Vector2.zero;
+        private Vector3Int _hangPattern = Vector3Int.zero;
+        private Creatures.Creature _highlightCreature;
+        private Dictionary<int, CreatureStatus> _creatureStatusCache = new Dictionary<int, CreatureStatus>();
+
         private readonly int[] _minZPlane;
-        private float[] _cachedHighlightOpacities;
-
-        private Vector2 _screenZoom = new Vector2();
-        private Vector2 _layerZoom = new Vector2();
-
-        private int[] _creatureCount;
+        private readonly float[] _highlightOpacities;
+        private readonly int[] _creatureCount;
         private readonly RenderAtom[][] _creatureField;
         private readonly RenderAtom[] _drawnCreatures;
         private readonly RenderAtom[] _drawnTextualEffects;
-        private List<Components.CreatureStatusPanel> _creaturesStatus;
-        private Creatures.Creature _highlightCreature;
-        
+
         private TileCursor _tileCursor = new TileCursor();
         private Appearances.ObjectInstance _previousHang = null;
         private LightmapRenderer _lightmapRenderer = new MeshBasedLightmapRenderer();
@@ -44,6 +35,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         private Rect _lastWorldMapLayerRect = Rect.zero;
         private Rect _clipRect = Rect.zero;
         private Rect _unclamppedClipRect = Rect.zero;
+        private Vector2 _realScreenTranslation = Vector2.zero;
 
         private uint _renderCounter = 0; // initially the first render
         private uint _lastRenderCounter = 0;
@@ -55,6 +47,9 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         public Vector3Int? HighlightTile { get; set; }
         public object HighlightObject { get; set; }
 
+        public Vector2 ScreenZoom { get; private set; } = new Vector2();
+        public Vector2 LayerZoom { get; private set; } = new Vector2();
+
         public WorldMapRenderer() {
             int mapCapacity = Constants.MapSizeX * Constants.MapSizeY;
 
@@ -62,7 +57,6 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             _creatureField = new RenderAtom[mapCapacity][];
             _creatureCount = new int[mapCapacity];
             _drawnCreatures = new RenderAtom[mapCapacity * Constants.MapSizeW];
-            _creaturesStatus = new List<Components.CreatureStatusPanel>();
 
             for (int i = 0; i < mapCapacity; i++) {
                 _creatureField[i] = new RenderAtom[Constants.MapSizeW];
@@ -84,24 +78,13 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 
             _tileCursor.FrameDuration = 100;
 
-            _cachedHighlightOpacities = new float[8 * 2 - 2];
+            _highlightOpacities = new float[8 * 2 - 2];
             for (int i = 0; i < 8; i++)
-                _cachedHighlightOpacities[i] = Constants.HighlightMinOpacity + (i / 7f) * (Constants.HighlightMaxOpacity - Constants.HighlightMinOpacity);
+                _highlightOpacities[i] = Constants.HighlightMinOpacity + (i / 7f) * (Constants.HighlightMaxOpacity - Constants.HighlightMinOpacity);
             for (int i = 1; i < 7; i++)
-                _cachedHighlightOpacities[7 + i] = Constants.HighlightMaxOpacity - (i / 7f) * (Constants.HighlightMaxOpacity - Constants.HighlightMinOpacity);
-            
+                _highlightOpacities[7 + i] = Constants.HighlightMaxOpacity - (i / 7f) * (Constants.HighlightMaxOpacity - Constants.HighlightMinOpacity);
+
             // enable this if you intend to change the name during the game..
-            // Creatures.Creature.onNameChange.AddListener(OnCreatureNameChange);
-            Creatures.Creature.onSkillChange.AddListener(OnCreatureSkillChange);
-        }
-
-        public void DestroyUIElements() {
-            foreach (var panel in _creaturesStatus) {
-                if (panel && !panel.IsDestroyed())
-                    UnityEngine.Object.Destroy(panel.gameObject);
-            }
-
-            _creaturesStatus = new List<Components.CreatureStatusPanel>();
         }
         
         public Rect CalculateClipRect() {
@@ -127,74 +110,83 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             return _clipRect;
         }
 
-        public RenderError Render(Rect worldMapLayerRect) {
+        public RenderError RenderWorldMap(Rect worldMapLayerRect) {
             if (WorldMapStorage == null || CreatureStorage == null || Player == null || !WorldMapStorage.Valid)
                 return RenderError.WorldMapNotValid;
-
+            
             _lastWorldMapLayerRect = worldMapLayerRect;
             if (_lastWorldMapLayerRect.width < Constants.WorldMapMinimumWidth || _lastWorldMapLayerRect.height < Constants.WorldMapMinimumHeight)
                 return RenderError.SizeNotEffecient;
-
+            
             var screenSize = new Vector2(Screen.width, Screen.height);
-            _screenZoom.Set(screenSize.x / Constants.WorldMapScreenWidth,
+            ScreenZoom = new Vector2(screenSize.x / Constants.WorldMapScreenWidth,
                             screenSize.y / Constants.WorldMapScreenHeight);
-
-            _layerZoom.Set( _lastWorldMapLayerRect.width / Constants.WorldMapRealWidth,
-                            _lastWorldMapLayerRect.height / Constants.WorldMapRealHeight);
-
+            
+            LayerZoom = new Vector2(_lastWorldMapLayerRect.width / Constants.WorldMapRealWidth,
+                           _lastWorldMapLayerRect.height / Constants.WorldMapRealHeight);
+            
             WorldMapStorage.Animate();
             CreatureStorage.Animate();
-            _highlightOpacity = _cachedHighlightOpacities[(OpenTibiaUnity.TicksMillis / 50) % _cachedHighlightOpacities.Length];
+            _highlightOpacity = _highlightOpacities[(OpenTibiaUnity.TicksMillis / Constants.HighlightObjectOpacityInterval) % _highlightOpacities.Length];
 
             _drawnCreaturesCount = 0;
             _drawnTextualEffectsCount = 0;
             _renderCounter++;
-
-            if (Time.time - _lastRenderTime > 1f) {
-                Framerate = (int)((_renderCounter - _lastRenderCounter) / (Time.time - _lastRenderTime));
-                _lastRenderTime = Time.time;
+            
+            if (Time.time - _lastRenderTime > 0.5f) {
+                var currentTime = Time.time;
+                Framerate = (int)((_renderCounter - _lastRenderCounter) / (currentTime - _lastRenderTime));
+                _lastRenderTime = currentTime;
                 _lastRenderCounter = _renderCounter;
             }
-
-            WorldMapStorage.ToMap(Player.Position, out HelperCoordinate);
-            _playerZPlane = HelperCoordinate.z;
-
+            
+            _playerZPlane = WorldMapStorage.ToMap(Player.Position).z;
+            
             UpdateMinMaxZPlane();
-
+            
             if (HighlightObject is Creatures.Creature tmpCreature)
                 _highlightCreature = tmpCreature;
             else if (HighlightObject is Appearances.ObjectInstance tmpObject && tmpObject.IsCreature)
                 _highlightCreature = CreatureStorage.GetCreature(tmpObject.Data);
             else
                 _highlightCreature = null;
-
+            
             for (int z = 0; z <= _maxZPlane; z++) {
-                UpdateFloorCreatures(z);
+                for (int i = 0; i < _creatureCount.Length; i++)
+                    _creatureCount[i] = 0;
+            
+                InternalUpdateFloor(z);
                 InternalDrawFields(z);
             }
             
-            var lightmapTexture = _lightmapRenderer.CreateLightmap();
-            var lightmapRect = new Rect() {
-                x = (Constants.FieldSize / 2) * _screenZoom.y,
-                y = (Constants.FieldSize / 2) * _screenZoom.y,
-                width = Constants.WorldMapScreenWidth * _screenZoom.x,
-                height = Constants.WorldMapScreenHeight * _screenZoom.y,
-            };
-
-            Graphics.DrawTexture(lightmapRect, lightmapTexture, OpenTibiaUnity.GameManager.LightSurfaceMaterial);
-
-            InternelUpdateCreaturesStatus();
-            InternalUpdateTextualEffects();
-            InternalUpdateOnscreenMessages();
+            if (OptionStorage.ShowLightEffects) {
+                var lightmapTexture = _lightmapRenderer.CreateLightmap();
+                var lightmapRect = new Rect() {
+                    x = (Constants.FieldSize / 2) * ScreenZoom.y,
+                    y = (Constants.FieldSize / 2) * ScreenZoom.y,
+                    width = Constants.WorldMapScreenWidth * ScreenZoom.x,
+                    height = Constants.WorldMapScreenHeight * ScreenZoom.y,
+                };
+            
+                Graphics.DrawTexture(lightmapRect, lightmapTexture, OpenTibiaUnity.GameManager.LightSurfaceMaterial);
+            }
+            
             return RenderError.None;
+        }
+
+        public void RenderOnscreenText(Rect viewport) {
+            _realScreenTranslation = viewport.position;
+
+            InternelDrawCreatureStatus();
+            InternalDrawTextualEffects();
+            InternalDrawOnscreenMessages();
         }
         
         private void UpdateMinMaxZPlane() {
             if (!WorldMapStorage.CacheUnsight) {
                 _maxZPlane = Constants.MapSizeZ - 1;
-                while (_maxZPlane > _playerZPlane && WorldMapStorage.GetObjectPerLayer(_maxZPlane) <= 0) {
+                while (_maxZPlane > _playerZPlane && WorldMapStorage.GetObjectPerLayer(_maxZPlane) <= 0)
                     _maxZPlane--;
-                }
 
                 for (int x = Constants.PlayerOffsetX - 1; x <= Constants.PlayerOffsetX + 1; x++) {
                     for (int y = Constants.PlayerOffsetY - 1; y <= Constants.PlayerOffsetY + 1; y++) {
@@ -253,12 +245,10 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             }
         }
         
-        private void UpdateFloorCreatures(int z) {
+        private void InternalUpdateFloor(int z) {
             RenderAtom renderAtom = null;
             
             bool aboveGround = Player.Position.z <= 7;
-            float optionsLevelSeparator = OptionStorage.LightLevelSeparator / 100f;
-            int defaultBrightness = WorldMapStorage.AmbientCurrentBrightness;
             int brightness = aboveGround ? WorldMapStorage.AmbientCurrentBrightness : 0;
             for (int i = 0; i < _creatureCount.Length; i++)
                 _creatureCount[i] = 0;
@@ -266,29 +256,36 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             for (int x = 0; x < Constants.MapSizeX; x++) {
                 for (int y = 0; y < Constants.MapSizeY; y++) {
                     Field field = WorldMapStorage.GetField(x, y, z);
+
+                    // update field light
+                    // todo; this shouldn't be called every frame unless
+                    // light probes has changed
                     if (OptionStorage.ShowLightEffects) {
                         var colorIndex = _lightmapRenderer.ToColorIndex(x, y);
                         if (z == _playerZPlane && z > 0)
-                            _lightmapRenderer[colorIndex] = Utils.Utility.MulColor32(_lightmapRenderer[colorIndex], optionsLevelSeparator);
+                            _lightmapRenderer[colorIndex] = Utils.Utility.MulColor32(_lightmapRenderer[colorIndex], OptionStorage.LightLevelSeparator / 100f);
 
                         Appearances.ObjectInstance @object;
                         if (z == 0 || (@object = field.ObjectsRenderer[0]) != null && @object.Type.IsGround) {
                             var color = _lightmapRenderer[colorIndex];
                             _lightmapRenderer.SetFieldBrightness(x, y, brightness, aboveGround);
                             if (z > 0 && field.CacheTranslucent) {
-                                color = Utils.Utility.MulColor32(color, optionsLevelSeparator);
+                                color = Utils.Utility.MulColor32(color, OptionStorage.LightLevelSeparator / 100f);
                                 var alterColor = _lightmapRenderer[colorIndex];
-                                color.r = Math.Max(color.r, alterColor.r);
-                                color.g = Math.Max(color.g, alterColor.g);
-                                color.b = Math.Max(color.b, alterColor.b);
+                                if (color.r < alterColor.r)
+                                    color.r = alterColor.r;
+                                if (color.g < alterColor.g)
+                                    color.g = alterColor.g;
+                                if (color.b < alterColor.b)
+                                    color.b = alterColor.b;
                                 _lightmapRenderer[colorIndex] = color;
                             }
                         }
 
                         if (x > 0 && y > 0 && z < 7 && z == _playerZPlane + WorldMapStorage.Position.z - 8 && WorldMapStorage.IsTranslucent(x - 1, y - 1, z + 1))
-                            _lightmapRenderer.SetFieldBrightness(x, y, defaultBrightness, aboveGround);
+                            _lightmapRenderer.SetFieldBrightness(x, y, WorldMapStorage.AmbientCurrentBrightness, aboveGround);
                     }
-                    
+
                     for (int i = field.ObjectsCount - 1; i >= 0; i--) {
                         var @object = field.ObjectsRenderer[i];
                         if (!@object.IsCreature)
@@ -334,8 +331,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         }
         
         private void InternalDrawFields(int z) {
-            HelperCoordinate.Set(0, 0, z);
-            WorldMapStorage.ToAbsolute(HelperCoordinate, out HelperCoordinate);
+            var absolutePosition = WorldMapStorage.ToAbsolute(new Vector3Int(0, 0, z));
             int size = Constants.MapSizeX + Constants.MapSizeY;
             for (int i = 0; i < size; i++) {
                 int y = Math.Max(i - Constants.MapSizeX + 1, 0);
@@ -344,9 +340,9 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                     InternalDrawField(
                         (x + 1) * Constants.FieldSize,
                         (y + 1) * Constants.FieldSize,
-                        HelperCoordinate.x + x,
-                        HelperCoordinate.y + y,
-                        HelperCoordinate.z,
+                        absolutePosition.x + x,
+                        absolutePosition.y + y,
+                        absolutePosition.z,
                         x, y, z,
                         true);
                     x--;
@@ -354,7 +350,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                 }
                 
                 if (OptionStorage.HighlightMouseTarget && HighlightTile.HasValue && HighlightTile.Value.z == z) {
-                    _tileCursor.DrawTo((HighlightTile.Value.x + 1f) * Constants.FieldSize, (HighlightTile.Value.y + 1f) * Constants.FieldSize, _screenZoom, OpenTibiaUnity.TicksMillis);
+                    _tileCursor.DrawTo((HighlightTile.Value.x + 1f) * Constants.FieldSize, (HighlightTile.Value.y + 1f) * Constants.FieldSize, ScreenZoom, OpenTibiaUnity.TicksMillis);
                 }
             }
         }
@@ -362,7 +358,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         private void InternalDrawField(float rectX, float rectY, int absoluteX, int absoluteY, int absoluteZ, int positionX, int positionY, int positionZ, bool drawLyingObjects) {
 
             Field field = WorldMapStorage.GetField(positionX, positionY, positionZ);
-
+            
             int objectsCount = field.ObjectsCount;
             int fieldIndex = positionY * Constants.MapSizeX + positionX;
             
@@ -370,101 +366,83 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                 || (positionX == 0 || positionZ >= _minZPlane[fieldIndex - 1])
                 || (positionY == 0 || positionZ >= _minZPlane[fieldIndex - Constants.MapSizeX])
                 || (positionX == 0 && positionY == 0 || positionZ >= _minZPlane[fieldIndex - Constants.MapSizeX - 1]);
-
+            
             int objectsHeight = 0;
-            Appearances.ObjectInstance previousHang = null;
-
-            // Draw objects
-            if (drawLyingObjects && objectsCount > 0 && isCovered) {
-                //Appearances.ObjectInstance @object;
-                bool isLying = false;
-
-                // draw Items in reverse order
-                for (int i = 0; i < objectsCount; i++) {
-                    var @object = field.ObjectsRenderer[i];
-                    var type = @object.Type;
-                    if (@object.IsCreature || type.IsTop)
-                        break;
-
-                    if (OptionStorage.ShowLightEffects && type.IsLight) {
-                        // check how correct those are
-                        int lightX = ((int)rectX - objectsHeight - (int)type.OffsetX) / Constants.FieldSize;
-                        int lightY = ((int)rectY - objectsHeight - (int)type.OffsetY) / Constants.FieldSize;
-                        Color32 color32 = Colors.ColorFrom8Bit((byte)type.LightColor);
-
-                        _lightmapRenderer.SetLightSource(lightX, lightY, positionZ, type.Brightness, color32);
-                    }
-
-                    var screenPosition = new Vector2(rectX - objectsHeight, rectY - objectsHeight);
-                    bool highlighted = HighlightObject is Appearances.ObjectInstance && HighlightObject == @object;
-                    @object.DrawTo(screenPosition, _screenZoom, absoluteX, absoluteY, absoluteZ, highlighted, _highlightOpacity);
-
-                    isLying = isLying || type.IsLyingCorpse;
-                    if (type.IsHangable && @object.Hang == Appearances.AppearanceInstance.HookSouth)
-                        previousHang = @object;
-
-                    if (type.HasElevation)
-                        objectsHeight = Mathf.Min(objectsHeight + (int)type.Elevation, Constants.FieldHeight);
-                }
-
-                // lying tile, draw lying tile
-                if (isLying) {
-                    if (positionX > 0 && positionY > 0) {
-                        InternalDrawField(rectX - Constants.FieldSize, rectY - Constants.FieldSize, absoluteX - 1, absoluteY - 1, absoluteZ, positionX - 1, positionY - 1, positionZ, false);
-                    } else if (positionX > 0) {
-                        InternalDrawField(rectX - Constants.FieldSize, rectY, absoluteX - 1, absoluteY, absoluteZ, positionX - 1, positionY, positionZ, false);
-                    } else if (positionY > 0) {
-                        InternalDrawField(rectX, rectY - Constants.FieldSize, absoluteX, absoluteY - 1, absoluteZ, positionX, positionY - 1, positionZ, false);
-                    }
-                }
-
-                // draw hang object
-                if (!!_previousHang) {
-                    var screenPosition = new Vector2(_hangPixelX, _hangPixelY);
-                    bool highlighted = HighlightObject is Appearances.ObjectInstance && HighlightObject == _previousHang;
-                    _previousHang.DrawTo(screenPosition, _screenZoom, _hangPatternX, _hangPatternY, _hangPatternZ, highlighted, _highlightOpacity);
-                    _previousHang = null;
-                }
-
-                if (!!previousHang) {
-                    _previousHang = previousHang;
-                    _hangPixelX = rectX;
-                    _hangPixelY = rectY;
-                    _hangPatternX = absoluteX;
-                    _hangPatternY = absoluteY;
-                    _hangPatternZ = absoluteZ;
-                }
-            }
+            // draw ground/bottom objects
+            if (drawLyingObjects && objectsCount > 0 && isCovered)
+                InternalDrawFieldObjects(rectX, rectY, absoluteX, absoluteY, absoluteZ, positionX, positionY, positionZ, field, ref objectsHeight);
 
             // draw creatures
-            publicFieldDrawCreatures(positionX, positionY, positionZ, drawLyingObjects, isCovered, objectsHeight);
+            InternalDrawFieldCreatures(positionX, positionY, positionZ, drawLyingObjects, isCovered, objectsHeight);
 
             // draw effects
-            publicFieldDrawEffects(rectX, rectY, absoluteX, absoluteY, absoluteZ, positionZ, drawLyingObjects, field, objectsHeight);
+            InternalDrawFieldEffects(rectX, rectY, absoluteX, absoluteY, absoluteZ, positionZ, drawLyingObjects, field, objectsHeight);
 
-            // TODO: this should be drawn on a separate render texture (atmosphere texture)
-            // this is likely to be fog and such effects
-            //if (!!field.EnvironmentalEffect) {
-            //    var screenPosition = new Vector2(rectX, rectY);
-            //    field.EnvironmentalEffect.DrawTo(screenPosition, _screenZoom, absoluteX, absoluteY, absoluteZ);
-            //}
-            
-            if (drawLyingObjects) {
-                for (int i = 0; i < objectsCount; i++) {
-                    var @object = field.ObjectsRenderer[i];
-                    if (@object.Type.IsTop) {
-                        var screenPosition = new Vector2(rectX, rectY);
-                        bool highlighted = HighlightObject is Appearances.ObjectInstance && HighlightObject == @object;
-                        @object.DrawTo(screenPosition, _screenZoom, absoluteX, absoluteY, absoluteZ, highlighted, _highlightOpacity);
-                    }
+            // draw top objects
+            if (drawLyingObjects)
+                InternalDrawFieldTopObjects(rectX, rectY, absoluteX, absoluteY, absoluteZ, field);
+        }
+
+        private void InternalDrawFieldObjects(float rectX, float rectY, int absoluteX, int absoluteY, int absoluteZ, int positionX, int positionY, int positionZ, Field field, ref int objectsHeight) {
+            Appearances.ObjectInstance hangObject = null;
+            bool isLying = false;
+
+            // draw Items in reverse order
+            for (int i = 0; i < field.ObjectsCount; i++) {
+                var @object = field.ObjectsRenderer[i];
+                var type = @object.Type;
+                if (@object.IsCreature || type.IsTop)
+                    break;
+
+                if (OptionStorage.ShowLightEffects && type.IsLight) {
+                    // check how correct those are
+                    int lightX = ((int)rectX - objectsHeight - (int)type.OffsetX) / Constants.FieldSize;
+                    int lightY = ((int)rectY - objectsHeight - (int)type.OffsetY) / Constants.FieldSize;
+                    Color32 color32 = Colors.ColorFrom8Bit((byte)type.LightColor);
+
+                    _lightmapRenderer.SetLightSource(lightX, lightY, positionZ, type.Brightness, color32);
                 }
+
+                var screenPosition = new Vector2(rectX - objectsHeight, rectY - objectsHeight);
+                bool highlighted = HighlightObject is Appearances.ObjectInstance && HighlightObject == @object;
+                @object.Draw(screenPosition, ScreenZoom, absoluteX, absoluteY, absoluteZ, highlighted, _highlightOpacity);
+
+                isLying = isLying || type.IsLyingCorpse;
+                if (type.IsHangable && @object.Hang == Appearances.AppearanceInstance.HookSouth)
+                    hangObject = @object;
+
+                if (type.HasElevation)
+                    objectsHeight = Mathf.Min(objectsHeight + (int)type.Elevation, Constants.FieldHeight);
+            }
+
+            // lying tile, draw lying tile
+            if (isLying) {
+                if (positionX > 0 && positionY > 0)
+                    InternalDrawField(rectX - Constants.FieldSize, rectY - Constants.FieldSize, absoluteX - 1, absoluteY - 1, absoluteZ, positionX - 1, positionY - 1, positionZ, false);
+                else if (positionX > 0)
+                    InternalDrawField(rectX - Constants.FieldSize, rectY, absoluteX - 1, absoluteY, absoluteZ, positionX - 1, positionY, positionZ, false);
+                else if (positionY > 0)
+                    InternalDrawField(rectX, rectY - Constants.FieldSize, absoluteX, absoluteY - 1, absoluteZ, positionX, positionY - 1, positionZ, false);
+            }
+
+            // draw hang object
+            if (!!_previousHang) {
+                bool highlighted = HighlightObject is Appearances.ObjectInstance && HighlightObject == _previousHang;
+                _previousHang.Draw(_hangPixel, ScreenZoom, _hangPattern.x, _hangPattern.y, _hangPattern.z, highlighted, _highlightOpacity);
+                _previousHang = null;
+            }
+
+            if (!!hangObject) {
+                _previousHang = hangObject;
+                _hangPixel.Set(rectX, rectY);
+                _hangPattern.Set(absoluteX, absoluteY, absoluteZ);
             }
         }
 
-        private void publicFieldDrawCreatures(int positionX, int positionY, int positionZ, bool drawLyingObjects, bool isCovered, int objectsHeight) {
+        private void InternalDrawFieldCreatures(int positionX, int positionY, int positionZ, bool drawLyingObjects, bool isCovered, int objectsHeight) {
             RenderAtom[] renderAtomArray = _creatureField[positionY * Constants.MapSizeX + positionX];
             int creatureCount = _creatureCount[positionY * Constants.MapSizeX + positionX];
-            for (int i = 0; i < creatureCount; i++) {
+            for (int i = creatureCount - 1; i >= 0; i--) {
                 RenderAtom renderAtom = null;
                 Creatures.Creature creature = null;
                 if (!(renderAtom = renderAtomArray[i]) || !(creature = renderAtom.Object as Creatures.Creature) || !creature.Outfit)
@@ -478,19 +456,19 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                 bool highlighted = !!_highlightCreature && _highlightCreature.Id == creature.Id;
 
                 // marks
-                _creaturesMarksView.DrawMarks(creature.Marks, renderAtom.x, renderAtom.y, _screenZoom);
+                _creaturesMarksView.DrawMarks(creature.Marks, renderAtom.x, renderAtom.y, ScreenZoom);
 
-                HelperPoint.Set(0, 0);
+                var offset = Vector2Int.zero;
                 if (isCovered && !!creature.MountOutfit) {
-                    HelperPoint += creature.MountOutfit.Type.Offset;
-                    var screenPosition = new Vector2(renderAtom.x + HelperPoint.x, renderAtom.y + HelperPoint.y);
-                    creature.MountOutfit.DrawTo(screenPosition, _screenZoom, (int)creature.Direction, 0, 0, highlighted, _highlightOpacity);
+                    offset += creature.MountOutfit.Type.Offset;
+                    var screenPosition = new Vector2(renderAtom.x + offset.x, renderAtom.y + offset.y);
+                    creature.MountOutfit.Draw(screenPosition, ScreenZoom, (int)creature.Direction, 0, 0, highlighted, _highlightOpacity);
                 }
 
                 if (isCovered) {
-                    HelperPoint += creature.Outfit.Type.Offset;
-                    var screenPosition = new Vector2(renderAtom.x + HelperPoint.x, renderAtom.y + HelperPoint.y);
-                    creature.Outfit.DrawTo(screenPosition, _screenZoom, (int)creature.Direction, 0, !!creature.MountOutfit ? 1 : 0, highlighted, _highlightOpacity);
+                    offset += creature.Outfit.Type.Offset;
+                    var screenPosition = new Vector2(renderAtom.x + offset.x, renderAtom.y + offset.y);
+                    creature.Outfit.Draw(screenPosition, ScreenZoom, (int)creature.Direction, 0, !!creature.MountOutfit ? 1 : 0, highlighted, _highlightOpacity);
                 }
 
                 if (positionZ == _playerZPlane && (CreatureStorage.IsOpponent(creature) || creature.Id == Player.Id)) {
@@ -522,7 +500,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             }
         }
 
-        private void publicFieldDrawEffects(float rectX, float rectY, int absoluteX, int absoluteY, int absoluteZ, int positionZ, bool drawLyingObjects, Field field, int objectsHeight) {
+        private void InternalDrawFieldEffects(float rectX, float rectY, int absoluteX, int absoluteY, int absoluteZ, int positionZ, bool drawLyingObjects, Field field, int objectsHeight) {
             int effectRectX = (int)rectX - objectsHeight;
             int effectRectY = (int)rectY - objectsHeight;
             int effectLightX = effectRectX / Constants.FieldSize;
@@ -539,8 +517,8 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                 if (effect is Appearances.TextualEffectInstance textualEffect) {
                     if (drawLyingObjects) {
                         var renderAtom = _drawnTextualEffects[_drawnTextualEffectsCount];
-                        int x = effectRectX - Constants.FieldSize / 2 + totalTextualEffectsWidth;
-                        int y = effectRectY - Constants.FieldSize - 2 * textualEffect.Phase;
+                        int x = effectRectX + Constants.FieldSize / 2 + totalTextualEffectsWidth;
+                        int y = effectRectY + Constants.FieldSize / 8 - 2 * textualEffect.Phase;
                         renderAtom.Update(textualEffect, x, y, 0);
 
                         if (renderAtom.y + textualEffect.Height > lastTextualEffectY)
@@ -553,7 +531,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                     }
                 } else if (effect is Appearances.MissileInstance missileEffect) {
                     var screenPosition = new Vector2(effectRectX + missileEffect.AnimationDelta.x, effectRectY + missileEffect.AnimationDelta.y);
-                    effect.DrawTo(screenPosition, _screenZoom, absoluteX, absoluteY, absoluteZ);
+                    effect.Draw(screenPosition, ScreenZoom, absoluteX, absoluteY, absoluteZ);
 
                     if (drawLyingObjects && OptionStorage.ShowLightEffects && effect.Type.IsLight) {
                         var color = Colors.ColorFrom8Bit((byte)effect.Type.LightColor);
@@ -561,7 +539,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                     }
                 } else { // EffectInstance
                     var screenPosition = new Vector2(effectRectX, effectRectY);
-                    effect.DrawTo(screenPosition, _screenZoom, absoluteX, absoluteY, absoluteZ);
+                    effect.Draw(screenPosition, ScreenZoom, absoluteX, absoluteY, absoluteZ);
 
                     if (drawLyingObjects && OptionStorage.ShowLightEffects && effect.Type.IsLight) {
                         uint activeBrightness = (uint)((Math.Min(effect.Phase, effect.Type.FrameGroups[0].SpriteInfo.Phases + 1 - effect.Phase) * effect.Type.Brightness + 2) / 3);
@@ -572,213 +550,489 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             }
         }
 
-        private void InternelUpdateCreaturesStatus() {
+        private void InternalDrawFieldTopObjects(float rectX, float rectY, int absoluteX, int absoluteY, int absoluteZ, Field field) {
+            for (int i = 0; i < field.ObjectsCount; i++) {
+                var @object = field.ObjectsRenderer[i];
+                if (@object.Type.IsTop) {
+                    var screenPosition = new Vector2(rectX, rectY);
+                    bool highlighted = HighlightObject is Appearances.ObjectInstance && HighlightObject == @object;
+                    @object.Draw(screenPosition, ScreenZoom, absoluteX, absoluteY, absoluteZ, highlighted, _highlightOpacity);
+                }
+            }
+        }
+
+        private void InternelDrawCreatureStatus() {
+            int playerIndex = -1;
+
+            var gameManager = OpenTibiaUnity.GameManager;
             var optionStorage = OpenTibiaUnity.OptionStorage;
-            
-            int myPlayerIndex = -1;
+
             for (int i = 0; i < _drawnCreaturesCount; i++) {
                 var renderAtom = _drawnCreatures[i];
-                var creature = renderAtom.Object as Creatures.Creature;
-                if (!!creature) {
-                    if (creature == Player) {
-                        myPlayerIndex = i;
-                        continue;
+                if (renderAtom.Object is Creatures.Creature creature) {
+                    if (creature.Id == Player.Id) {
+                        playerIndex = i;
+                    } else if (optionStorage.ShowHUDForOtherCreatures) {
+                        int positionX = renderAtom.x / Constants.FieldSize;
+                        int positionY = renderAtom.y / Constants.FieldSize;
+                        var explicitlyVisible = renderAtom.z >= _minZPlane[positionY * Constants.MapSizeX + positionX];
+                        
+                        InternelDrawCreatureStatusClassic(creature, renderAtom.x, renderAtom.y, explicitlyVisible,
+                            optionStorage.ShowNameForOtherCreatures,
+                            optionStorage.ShowHealthForOtherCreatures && (!creature.IsNPC || !gameManager.GetFeature(GameFeature.GameHideNpcNames)),
+                            false,
+                            optionStorage.ShowMarksForOtherCreatures,
+                            optionStorage.ShowNPCIcons);
                     }
-                    
-                    bool isExplicitlyVisible = renderAtom.z >= _minZPlane[renderAtom.fieldY * Constants.MapSizeX + renderAtom.fieldX];
-                    InternalUpdateCreatureStatusClassic(
-                        renderAtom, renderAtom.x, renderAtom.y, isExplicitlyVisible,
-                        optionStorage.ShowNameForOtherCreatures,
-                        optionStorage.ShowHealthForOtherCreatures && !creature.IsNPC,
-                        false,
-                        optionStorage.ShowMarksForOtherCreatures);
                 }
             }
 
-            if (myPlayerIndex != -1) {
-                var renderAtom = _drawnCreatures[myPlayerIndex];
-                InternalUpdateCreatureStatusClassic(renderAtom, renderAtom.x, renderAtom.y, true,
-                    optionStorage.ShowNameForOwnCharacter,
-                    optionStorage.ShowHealthForOwnCharacter,
-                    optionStorage.ShowManaForOwnCharacter && OpenTibiaUnity.GameManager.ClientVersion >= 1100,
-                    optionStorage.ShowMarksForOwnCharacter);
+            if (playerIndex != -1) {
+                var renderAtom = _drawnCreatures[playerIndex];
+                int positionX = renderAtom.x / Constants.FieldSize;
+                int positionY = renderAtom.y / Constants.FieldSize;
+                var explicitlyVisible = renderAtom.z >= _minZPlane[positionY * Constants.MapSizeX + positionX];
+
+                InternelDrawCreatureStatusClassic(renderAtom.Object as Creatures.Creature, renderAtom.x, renderAtom.y, explicitlyVisible,
+                           optionStorage.ShowNameForOwnCharacter,
+                           optionStorage.ShowHealthForOwnCharacter,
+                           optionStorage.ShowManaForOwnCharacter,
+                           optionStorage.ShowMarksForOwnCharacter,
+                           false);
             }
-
-            _creaturesStatus = _creaturesStatus.Where((x) => {
-                if (x.CachedRenderCount == _renderCounter)
-                    return true;
-
-                UnityEngine.Object.Destroy(x.gameObject);
-                return false;
-            }).ToList();
         }
 
-        private void InternalUpdateTextualEffects() {
+        private void InternalDrawTextualEffects() {
             for (int i = 0; i < _drawnTextualEffectsCount; i++) {
                 var renderAtom = _drawnTextualEffects[i];
                 if (renderAtom.Object is Appearances.TextualEffectInstance textualEffect) {
-                    Vector3Int mapPosition = WorldMapStorage.ToMapClosest(new Vector3Int(renderAtom.x, renderAtom.y, renderAtom.z));
-                    float x = (renderAtom.x - Player.AnimationDelta.x - Constants.FieldSize) * _layerZoom.x;
-                    float y = (renderAtom.y - Player.AnimationDelta.y - Constants.FieldSize) * _layerZoom.y;
-                    textualEffect.UpdateTextMeshPosition(x, -y);
+                    var screenPosition = new Vector2(renderAtom.x, renderAtom.y);
+                    screenPosition.x = (screenPosition.x - 2 * Constants.FieldSize) * LayerZoom.x + _realScreenTranslation.x;
+                    screenPosition.y = (screenPosition.y - 2 * Constants.FieldSize) * LayerZoom.y + _realScreenTranslation.y;
+                    screenPosition.x -= Player.AnimationDelta.x * LayerZoom.x;
+                    screenPosition.y -= Player.AnimationDelta.y * LayerZoom.y;
+
+                    textualEffect.Draw(screenPosition, Vector2.one, 0, 0, 0);
                 }
             }
         }
         
-        private void InternalUpdateOnscreenMessages() {
+        private void InternalDrawOnscreenMessages() {
             if (WorldMapStorage.LayoutOnscreenMessages) {
-                LayoutOnscreenMessages();
+                InternalLayoutOnscreenMessages();
                 WorldMapStorage.LayoutOnscreenMessages = false;
             }
 
-            int animationDeltaX = 0;
-            int animationDeltaY = 0;
-
-            if (Player != null) {
-                animationDeltaX = Player.AnimationDelta.x;
-                animationDeltaY = Player.AnimationDelta.y;
-            }
-
             var messageBoxes = WorldMapStorage.MessageBoxes;
-            var length = messageBoxes.Count - 1;
-            while (length >= (int)MessageScreenTargets.BoxCoordinate) {
-                var messageBox = messageBoxes[length];
-                Vector3Int mapPosition = WorldMapStorage.ToMapClosest(messageBox.Position.Value);
-                float x = ((mapPosition.x - 0.5f) * Constants.FieldSize - Player.AnimationDelta.x) * _layerZoom.x;
-                float y = ((mapPosition.y - 1f) * Constants.FieldSize - Player.AnimationDelta.y) * _layerZoom.y;
-                messageBox.UpdateTextMeshPosition(x, -y);
-                length--;
-            }
-        }
-
-        private void InternalUpdateCreatureStatusClassic(RenderAtom renderAtom, float rectX, float rectY, bool isVisible, bool drawNames, bool drawHealth, bool drawMana, bool drawFlags) {
-            var creature = renderAtom.Object as Creatures.Creature;
-            if (creature.Position.z != Player.Position.z) {
-                RemoveCreatureStatusPanel(creature.Id);
-                return;
-            }
-
-            var statusPanel = AddOrGetCreatureStatusPanel(creature);
-            statusPanel.CachedRenderCount = _renderCounter;
-            statusPanel.UpdateCreatureMisc(isVisible, _lightmapRenderer.CalculateCreatureBrightnessFactor(creature, creature.Id == Player.Id));
-            statusPanel.SetDrawingProperties(drawNames, drawHealth, drawMana);
-            statusPanel.SetFlags(drawFlags, creature.PartyFlag, creature.PKFlag, creature.SummonTypeFlag, creature.SpeechCategory, creature.GuildFlag);
-
-            // the animation delta is already applied earlier on creatures check
-            // but we need to add the animation delta of the screen
-            float x = renderAtom.x - 2 * Constants.FieldSize - Player.AnimationDelta.x + 27 / 2f;
-            float y = renderAtom.y - 2 * Constants.FieldSize - Player.AnimationDelta.y - 8;
             
-            statusPanel.rectTransform.anchoredPosition = new Vector2(x * _layerZoom.x, -y * _layerZoom.y);
-        }
-
-        private void publicDrawCreatureStatusHUD(RenderAtom renderAtom, int rectX, int rectY, bool isVisible, bool drawNames, bool drawHealth, bool drawMana, bool drawFlags) {
-            // TODO
-        }
-
-        private Components.CreatureStatusPanel AddOrGetCreatureStatusPanel(Creatures.Creature creature) {
-            int index = 0;
-            int lastIndex = _creaturesStatus.Count - 1;
-            while (index <= lastIndex) {
-                int tmpIndex = index + lastIndex >> 1;
-                var foundPanel = _creaturesStatus[tmpIndex];
-                if (foundPanel.CreatureId < creature.Id)
-                    index = tmpIndex + 1;
-                else if (foundPanel.CreatureId > creature.Id)
-                    lastIndex = tmpIndex - 1;
-                else
-                    return foundPanel;
+            float animationDeltaX = 0;
+            float animationDeltaY = 0;
+            if (Player != null) {
+                animationDeltaX = Player.AnimationDelta.x * LayerZoom.x;
+                animationDeltaY = Player.AnimationDelta.y * LayerZoom.y;
             }
+            
+            float bottomBoxHeight = 0;
+            var bottomBox = messageBoxes[(int)MessageScreenTargets.BoxBottom];
+            if (bottomBox != null && bottomBox.Visible && !bottomBox.Empty)
+                bottomBoxHeight = bottomBox.Height;
+            
+            for (int i = messageBoxes.Count - 1; i >= (int)MessageScreenTargets.BoxLow; i--) {
+                var messageBox = messageBoxes[i];
+                if (messageBox != null && messageBox.Visible && !messageBox.Empty) {
+                    var messagePosition = new Vector2(messageBox.X, messageBox.Y);
 
-            var panel = UnityEngine.Object.Instantiate(OpenTibiaUnity.GameManager.CreatureStatusPanelPrefab,
-                    OpenTibiaUnity.GameManager.CreatureStatusContainer);
+                    // if this text should be fixed to player's screen, then move it with his animation
+                    if ((messageBox.Fixing & OnscreenMessageFixing.X) == 0)
+                        messagePosition.x -= animationDeltaX;
+                    if ((messageBox.Fixing & OnscreenMessageFixing.Y) == 0)
+                        messagePosition.y -= animationDeltaY;
+                    
+                    //messagePosition.x = Mathf.Clamp(messagePosition.x, messageBox.Width / 2, Constants.WorldMapRealWidth - messageBox.Width / 2);
+                    //messagePosition.y = Mathf.Clamp(messagePosition.y, messageBox.Height / 2, Constants.WorldMapRealHeight - bottomBoxHeight - messageBox.Height / 2);
+                    
+                    for (int j = 0; j < messageBox.VisibleMessages; j++) {
+                        var message = messageBox.GetMessage(j);
+                        var screenPosition = Vector2.zero;
+                        screenPosition.x = messagePosition.x;
 
-            panel.CreatureId = creature.Id;
-            panel.name = "CreatureStatus_" + creature.Name;
-            panel.UpdateProperties(creature.Name, creature.HealthPercent, creature.ManaPercent);
-
-            _creaturesStatus.Insert(index, panel);
-            return panel;
-        }
-
-        private bool RemoveCreatureStatusPanel(uint _id) {
-            int lastIndex = _creaturesStatus.Count - 1;
-            int index = 0;
-            int foundIndex = -1;
-            Components.CreatureStatusPanel foundPanel = null;
-            while (index < lastIndex) {
-                int tmpIndex = index + lastIndex >> 1;
-                foundPanel = _creaturesStatus[tmpIndex];
-                if (foundPanel.CreatureId > _id) {
-                    index = tmpIndex + 1;
-                } else if (foundPanel.CreatureId < _id) {
-                    lastIndex = tmpIndex - 1;
-                } else {
-                    foundIndex = tmpIndex;
-                    break;
+                        // if we have passed half the message, start aligning to the bottom
+                        screenPosition.y = messagePosition.y - (messageBox.Height - message.Height) / 2;
+                        message.Draw(screenPosition + _realScreenTranslation);
+                        messagePosition.y += message.Height;
+                    }
                 }
             }
 
-            if (foundIndex == -1)
-                return false;
-
-            _creaturesStatus.RemoveAt(foundIndex);
-            UnityEngine.Object.Destroy(foundPanel.gameObject);
-            return true;
-        }
-
-        public Components.CreatureStatusPanel FindCreatureStatusPanel(Creatures.Creature creature) {
-            int index = 0;
-            int lastIndex = _creaturesStatus.Count - 1;
-            while (index <= lastIndex) {
-                int tmpIndex = index + lastIndex >> 1;
-                var foundPanel = _creaturesStatus[tmpIndex];
-                if (foundPanel.CreatureId < creature.Id)
-                    index = tmpIndex + 1;
-                else if (foundPanel.CreatureId > creature.Id)
-                    lastIndex = tmpIndex - 1;
-                else
-                    return foundPanel;
+            if (bottomBox != null && bottomBox.Visible && !bottomBox.Empty) {
+                var message = bottomBox.GetMessage(0);
+                
+                var messagePosition = new Vector2() {
+                    x = Constants.WorldMapRealWidth * LayerZoom.x / 2,
+                    y = Constants.WorldMapRealHeight * LayerZoom.y - (message.Height + Constants.OnscreenMessageGap) / 2
+                };
+                
+                message.Draw(messagePosition + _realScreenTranslation);
             }
-
-            return null;
         }
         
-        private void LayoutOnscreenMessages() {
-            foreach (var messageBox in WorldMapStorage.MessageBoxes) {
-                if (messageBox.Visible) {
-                    messageBox.ResetTextMesh();
-                    if (!messageBox.Empty)
-                        messageBox.ArrangeMessages();
+        private void InternelDrawCreatureStatusClassic(Creatures.Creature creature, float rectX, float rectY, bool visible, bool showNames, bool showHealth, bool showMana, bool showMarks, bool showIcons) {
+            bool isLocalPlayer = creature.Id == Player.Id;
+            Color32 healthColor, manaColor;
+            if (visible) {
+                healthColor = Creatures.Creature.GetHealthColor(creature.HealthPercent);
+                manaColor = Colors.ColorFromRGB(0, 0, 255);
+            } else {
+                healthColor = Colors.ColorFromRGB(192, 192, 192);
+                manaColor = Colors.ColorFromRGB(192, 192, 192);
+            }
+
+            if (OptionStorage.ShowLightEffects) {
+                float mod = _lightmapRenderer.CalculateCreatureBrightnessFactor(creature, isLocalPlayer);
+                healthColor = Utils.Utility.MulColor32(healthColor, mod);
+                manaColor = Utils.Utility.MulColor32(manaColor, mod);
+            }
+
+            var initialScreenPosition = new Vector2 {
+                x = (rectX - 1.5f * Constants.FieldSize - Player.AnimationDelta.x) * LayerZoom.x + _realScreenTranslation.x,
+                y = (rectY - 2 * Constants.FieldSize - Player.AnimationDelta.y) * LayerZoom.y + _realScreenTranslation.y
+            };
+
+            var screenPosition = initialScreenPosition;
+
+            CreatureStatus status = null;
+            if (showNames) {
+                status = GetCreatureStatusCache(creature.Name, healthColor);
+                screenPosition.y -= status.Height / 2;
+            }
+
+            if (showHealth)
+                screenPosition.y -= 4 + 1;
+
+            if (showMana)
+                screenPosition.y -= 4 + 1;
+            
+            if (showNames) {
+                status.Draw(screenPosition);
+                screenPosition.y += (status.Height / 2) + 1;
+            }
+
+            if (showHealth || showMana) {
+                var baseRect = new Rect {
+                    x = screenPosition.x - 27 / 2f,
+                    y = screenPosition.y + 4,
+                    width = 27,
+                    height = 4,
+                };
+
+                var actualRect = new Rect {
+                    x = baseRect.x + 1,
+                    y = baseRect.y - 1,
+                    width = (creature.HealthPercent / 4f),
+                    height = 2,
+                };
+
+                if (showHealth) {
+                    Utils.GraphicsUtility.DrawRect(baseRect, Vector3.one, Color.black);
+                    Utils.GraphicsUtility.DrawRect(actualRect, Vector3.one, healthColor);
+                    screenPosition.y += 4 + 1;
+                    baseRect.y += 4 + 1;
+                    actualRect.y += 4 + 1;
+                }
+
+                if (showMana) {
+                    actualRect.width = (creature.ManaPercent / 4f);
+                
+                    Utils.GraphicsUtility.DrawRect(baseRect, Vector3.one, Color.black);
+                    Utils.GraphicsUtility.DrawRect(actualRect, Vector3.one, manaColor);
+                    screenPosition.y += 4 + 1;
+                }
+            }
+
+            if (showMarks && !creature.IsNPC || showIcons && creature.IsNPC)
+                InternalDrawCreatureFlags(creature, initialScreenPosition.x, initialScreenPosition.y, visible);
+        }
+
+        private void InternalDrawCreatureFlags(Creatures.Creature creature, float rectX, float rectY, bool visible) {
+            if (!(creature.IsHuman || creature.IsSummon || creature.IsNPC) || !creature.HasFlag)
+                return;
+            
+            var screenPosition = new Vector2(rectX + 16 - Constants.StateFlagSize + 4, rectY + 1);
+            var flagSize = new Vector2(Constants.StateFlagSize, Constants.StateFlagSize);
+            int dX = 0;
+            
+            var flagsTexture = OpenTibiaUnity.GameManager.StateFlagsTexture;
+            if (creature.PartyFlag > PartyFlag.None) {
+                var textureRect = NormalizeFlagRect(GetPartyFlagTextureRect(creature.PartyFlag), flagsTexture);
+                Graphics.DrawTexture(new Rect(screenPosition, flagSize), flagsTexture, textureRect, 0, 0, 0, 0);
+
+                dX += Constants.StateFlagGap + Constants.StateFlagSize;
+                screenPosition.x += Constants.StateFlagGap + Constants.StateFlagSize;
+            }
+
+            if (creature.PKFlag > PKFlag.None) {
+                var textureRect = NormalizeFlagRect(GetPKFlagTextureRect(creature.PKFlag), flagsTexture);
+                Graphics.DrawTexture(new Rect(screenPosition, flagSize), flagsTexture, textureRect, 0, 0, 0, 0);
+
+                screenPosition.x += Constants.StateFlagGap + Constants.StateFlagSize;
+            }
+
+            if (creature.SummonType > SummonType.None) {
+                var textureRect = NormalizeFlagRect(GetSummonFlagTextureRect(creature.SummonType), flagsTexture);
+                Graphics.DrawTexture(new Rect(screenPosition, flagSize), flagsTexture, textureRect, 0, 0, 0, 0);
+
+                dX += Constants.StateFlagGap + Constants.StateFlagSize;
+                screenPosition.x += Constants.StateFlagGap + Constants.StateFlagSize;
+            }
+
+            var speechCategory = creature.SpeechCategory;
+            if (speechCategory == SpeechCategory.QuestTrader)
+                speechCategory = OpenTibiaUnity.TicksMillis % 2048 <= 1024 ? SpeechCategory.Quest : SpeechCategory.Trader;
+
+            if (speechCategory > SpeechCategory.None) {
+                var speechTexture = OpenTibiaUnity.GameManager.SpeechFlagsTexture;
+                var textureRect = NormalizeFlagRect(GetSpeechFlagTextureRect(speechCategory), speechTexture);
+                var screenRect = new Rect(screenPosition, new Vector2(Constants.SpeechFlagSize, Constants.SpeechFlagSize));
+                Graphics.DrawTexture(screenRect, speechTexture, textureRect, 0, 0, 0, 0);
+
+                dX += Constants.StateFlagGap + Constants.SpeechFlagSize;
+                screenPosition.x += Constants.StateFlagGap + Constants.SpeechFlagSize;
+            }
+            
+            if (dX > 0)
+                screenPosition.x -= dX;
+            
+            var gameManager = OpenTibiaUnity.GameManager;
+            if ((gameManager.GetFeature(GameFeature.GameCreatureMarks) && gameManager.ClientVersion < 1185) || dX > 0)
+                screenPosition.y += Constants.StateFlagGap + Constants.StateFlagSize;
+            
+            if (creature.GuildFlag > GuildFlag.None) {
+                var textureRect = NormalizeFlagRect(GetGuildFlagTextureRect(creature.GuildFlag), flagsTexture);
+                Graphics.DrawTexture(new Rect(screenPosition, flagSize), flagsTexture, textureRect, 0, 0, 0, 0);
+
+                screenPosition.y += Constants.StateFlagGap + Constants.StateFlagSize;
+            }
+            
+            if (creature.RisknessFlag > RisknessFlag.None) {
+                var textureRect = NormalizeFlagRect(GetRisknessFlagTextureRect(creature.RisknessFlag), flagsTexture);
+                Graphics.DrawTexture(new Rect(screenPosition, flagSize), flagsTexture, textureRect, 0, 0, 0, 0);
+            }
+        }
+
+        private void InternalLayoutOnscreenMessages() {
+            var messageBoxes = WorldMapStorage.MessageBoxes;
+            for (int i = messageBoxes.Count - 1; i >= 0; i--) {
+                var messageBox = WorldMapStorage.MessageBoxes[i];
+                if (messageBox != null && messageBox.Visible && !messageBox.Empty)
+                    messageBox.ArrangeMessages();
+            }
+            
+            var helperPoint = new Vector2();
+
+            var points = new List<Vector2>();
+            var workerRects = new List<Rect>();
+            var actualRects = new List<Rect>();
+
+            // the screen zoom is mapped to the size of the field, so
+            // in order to match the preferred zoom of the text, we must
+            // multiply the field/screen size by the precaculated zoom
+            // of the text
+            var fieldSize = new Vector2(Constants.FieldSize, Constants.FieldSize) * LayerZoom;
+            var unscaledSize = _lastWorldMapLayerRect.size;
+
+            for (int i = messageBoxes.Count - 1; i >= (int)MessageScreenTargets.BoxLow; i--) {
+                var messageBox = WorldMapStorage.MessageBoxes[i];
+                if (messageBox != null && messageBox.Visible && !messageBox.Empty) {
+                    if (i == (int)MessageScreenTargets.BoxLow) {
+                        messageBox.Fixing = OnscreenMessageFixing.Both;
+                        helperPoint.x = unscaledSize.x / 2;
+                        helperPoint.y = (unscaledSize.y + fieldSize.y + messageBox.Height + Constants.OnscreenMessageGap) / 2;
+                    } else if (i == (int)MessageScreenTargets.BoxHigh) {
+                        messageBox.Fixing = OnscreenMessageFixing.Both;
+                        helperPoint.x = unscaledSize.x / 2;
+                        helperPoint.y = unscaledSize.y / 2;
+                    } else if (i == (int)MessageScreenTargets.BoxTop) {
+                        messageBox.Fixing = OnscreenMessageFixing.Both;
+                        helperPoint.x = unscaledSize.x / 2;
+                        helperPoint.y = unscaledSize.y / 4;
+                    } else {
+                        messageBox.Fixing = OnscreenMessageFixing.None;
+                        var closestMapPosition = WorldMapStorage.ToMapClosest(messageBox.Position.Value);
+                        helperPoint.x = (closestMapPosition.x - 0.5f) * fieldSize.x + Mathf.Max(0, Constants.FieldSize * Constants.MapWidth * LayerZoom.x - unscaledSize.x) / 2;
+                        helperPoint.y = (closestMapPosition.y - 1) * fieldSize.y + Mathf.Max(0, Constants.FieldSize * Constants.MapHeight * LayerZoom.y - unscaledSize.y) / 2;
+                    }
+
+                    float w1 = messageBox.Width + Constants.OnscreenMessageGap;
+                    float h1 = messageBox.Height + Constants.OnscreenMessageGap;
+                    float x1 = helperPoint.x - w1 / 2;
+                    float y1 = helperPoint.y - h1 / 2;
+
+                    points.Add(new Vector2(0, 0));
+                    workerRects.Add(new Rect(x1, y1, w1, h1));
+                    actualRects.Add(new Rect(x1 + w1 / 2, y1 - h1 / 2, w1, h1));
+                }
+            }
+
+            float sumMagnitude = float.MaxValue;
+            float lastMagnitude = 0;
+            do {
+                lastMagnitude = sumMagnitude;
+                sumMagnitude = 0;
+                for (int i = workerRects.Count - 1; i >= 0; i--) {
+                    Vector2 point = Vector2.zero;
+                    var rect = workerRects[i];
+                    var tmpLength = rect.size.magnitude;
+
+                    // Explanation:
+                    // for every other rectangle, calculate the intersection area
+                    // the intersections' sizes are summed together, and then used to move the
+                    // the resepctive rectangle either left/right
+                    for (int j = workerRects.Count - 1; j >= 0; j--) {
+                        if (i == j)
+                            continue;
+
+                        var otherRect = workerRects[j];
+                        var intersection = Utils.Utility.Intersect(rect, otherRect);
+                        if (intersection != Rect.zero) {
+                            var center = new Vector2() {
+                                x = Mathf.Floor(rect.x + rect.width / 2) - Mathf.Floor(otherRect.x + otherRect.width / 2),
+                                y = Mathf.Floor(rect.y + rect.height / 2) - Mathf.Floor(otherRect.y + otherRect.height / 2)
+                            };
+                            
+                            sumMagnitude += intersection.width * intersection.height * Mathf.Pow(0.5f, center.magnitude / tmpLength - 1);
+
+                            if (center.x < 0)
+                                point.x -= intersection.width;
+                            else if (center.x > 0)
+                                point.x += intersection.width;
+
+                            if (center.y < 0)
+                                point.y -= intersection.height;
+                            else if (center.y > 0)
+                                point.y += intersection.height;
+
+                            if (center.x == 0 && center.y == 0 && j == workerRects.Count - 1)
+                                point.x += i - j;
+                        }
+                    }
+
+                    points[i] = point;
+                }
+
+                for (int i = workerRects.Count - 1; i >= 0; i--) {
+                    var point = points[i];
+                    var rect = workerRects[i];
+                    var centerRect = actualRects[i];
+                    rect.x = Mathf.Clamp(rect.x + (point.x > 0 ? 1 : -1), centerRect.xMin, centerRect.xMax);
+                    rect.y = Mathf.Clamp(rect.y + (point.y > 0 ? 1 : -1), centerRect.yMin, centerRect.yMax);
+                    workerRects[i] = rect;
+                }
+            } while (sumMagnitude < lastMagnitude);
+
+            int pointIndex = 0;
+            for (int i = messageBoxes.Count - 1; i >= (int)MessageScreenTargets.BoxLow; i--) {
+                var messageBox = WorldMapStorage.MessageBoxes[i];
+                if (messageBox != null && messageBox.Visible && !messageBox.Empty) {
+                    var rect = workerRects[pointIndex];
+                    var otherRect = actualRects[pointIndex];
+
+                    messageBox.X = Mathf.Max(otherRect.xMin, Mathf.Min(rect.x, otherRect.xMax)) + Constants.OnscreenMessageGap / 2;
+                    messageBox.Y = Mathf.Max(otherRect.yMin, Mathf.Min(rect.y, otherRect.yMax)) + Constants.OnscreenMessageGap / 2;
+                    pointIndex++;
                 }
             }
         }
 
-        public void OnCreatureNameChange(Creatures.Creature creature, string newName, string oldName) {
-            Components.CreatureStatusPanel statusPanel = FindCreatureStatusPanel(creature);
-            if (statusPanel)
-                statusPanel.SetCharacterName(newName);
+        private CreatureStatus GetCreatureStatusCache(string name, Color32 color) {
+            int hashCode = (name + color.ToString()).GetHashCode();
+            if (_creatureStatusCache.TryGetValue(hashCode, out CreatureStatus creatureStatus))
+                return creatureStatus;
+
+            creatureStatus = new CreatureStatus(name, color);
+            _creatureStatusCache.Add(hashCode, creatureStatus);
+            return creatureStatus;
         }
 
-        public void OnCreatureSkillChange(Creatures.Creature creature, SkillType skillType, Creatures.Skill skill) {
-            Components.CreatureStatusPanel statusPanel = FindCreatureStatusPanel(creature);
-            if (!statusPanel)
-                return;
+        private Rect NormalizeFlagRect(Rect rect, Texture2D tex2D) {
+            rect.x /= tex2D.width;
+            rect.y = (tex2D.height - rect.y) / tex2D.height;
+            rect.width /= tex2D.width;
+            rect.height /= tex2D.height;
+            return rect;
+        }
 
-            if (skillType == SkillType.HealthPercent) {
-                statusPanel.SetHealthPercent((int)skill.Level);
-                statusPanel.UpdateHealthColor();
-            } else if (skillType == SkillType.Mana) {
-                statusPanel.SetMana((int)skill.Level, (int)skill.BaseLevel);
-            } else if (skillType == SkillType.Health) {
-                statusPanel.SetHealth((int)skill.Level, (int)skill.BaseLevel);
-                statusPanel.UpdateHealthColor();
+        private Rect GetPartyFlagTextureRect(PartyFlag partyFlag) {
+            if (partyFlag == PartyFlag.Leader_SharedXP_Inactive_Innocent)
+                partyFlag = PartyFlag.Leader_SharedXP_Inactive_Guilty;
+            else if (partyFlag == PartyFlag.Member_SharedXP_Inactive_Innocent)
+                partyFlag = PartyFlag.Leader_SharedXP_Inactive_Guilty;
+            else if (partyFlag == PartyFlag.Other)
+                partyFlag = PartyFlag.Member_SharedXP_Inactive_Innocent;
+
+            return new Rect {
+                x = (int)partyFlag * Constants.StateFlagSize,
+                y = Constants.StateFlagSize,
+                width = Constants.StateFlagSize,
+                height = Constants.StateFlagSize
+            };
+        }
+
+        private Rect GetPKFlagTextureRect(PKFlag pkFlag) {
+            return new Rect {
+                x = (int)pkFlag * Constants.StateFlagSize,
+                y = 2 * Constants.StateFlagSize,
+                width = Constants.StateFlagSize,
+                height = Constants.StateFlagSize
+            };
+        }
+
+        private Rect GetGuildFlagTextureRect(GuildFlag guildFlag) {
+            return new Rect {
+                x = (int)guildFlag * Constants.StateFlagSize,
+                y = 3 * Constants.StateFlagSize,
+                width = Constants.StateFlagSize,
+                height = Constants.StateFlagSize
+            };
+        }
+
+        private Rect GetSummonFlagTextureRect(SummonType summonType) {
+            return new Rect {
+                x = (int)summonType * Constants.StateFlagSize,
+                y = 4 * Constants.StateFlagSize,
+                width = Constants.StateFlagSize,
+                height = Constants.StateFlagSize
+            };
+        }
+
+        private Rect GetRisknessFlagTextureRect(RisknessFlag riskness) {
+            return new Rect {
+                x = (int)riskness * Constants.StateFlagSize,
+                y = 5 * Constants.StateFlagSize,
+                width = Constants.StateFlagSize,
+                height = Constants.StateFlagSize
+            };
+        }
+
+        private Rect GetSpeechFlagTextureRect(SpeechCategory speechCategory) {
+            int x = 0;
+            switch (speechCategory) {
+                case SpeechCategory.Normal: x = 1; break;
+                case SpeechCategory.Trader: x = 2; break;
+                case SpeechCategory.Quest: x = 3; break;
+                case SpeechCategory.QuestTrader: x = 4; break;
             }
-        }
 
+            return new Rect {
+                x = x * Constants.SpeechFlagSize,
+                y = 0,
+                width = Constants.SpeechFlagSize,
+                height = Constants.SpeechFlagSize
+            };
+        }
+        
         public Vector3Int? PointToMap(Vector2 point) {
-            int x = (int)(point.x / (Constants.FieldSize * _layerZoom.x)) + 1;
-            int y = (int)(point.y / (Constants.FieldSize * _layerZoom.y)) + 1;
+            int x = (int)(point.x / (Constants.FieldSize * LayerZoom.x)) + 1;
+            int y = (int)(point.y / (Constants.FieldSize * LayerZoom.y)) + 1;
 
             if (x < 0 || x > Constants.MapWidth || y < 0 || y > Constants.MapHeight)
                 return null;
@@ -840,5 +1094,5 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             
             return CreatureStorage.GetCreature(@object.Data);
         }
-    } // class 
-} // ns
+    }
+}

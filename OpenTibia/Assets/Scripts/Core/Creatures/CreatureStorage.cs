@@ -363,7 +363,7 @@ namespace OpenTibiaUnity.Core.Creatures
             if ((filter & OpponentFilters.Party) > 0 && creature.PartyFlag != PartyFlag.None)
                 return false;
 
-            if ((filter & OpponentFilters.Summons) > 0 && creature.SummonTypeFlag != SummonTypeFlags.None)
+            if ((filter & OpponentFilters.Summons) > 0 && creature.SummonType != SummonType.None)
                 return false;
             
             return true;

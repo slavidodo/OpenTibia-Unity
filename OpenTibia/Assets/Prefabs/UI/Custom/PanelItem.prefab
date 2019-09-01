@@ -40,10 +40,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _itemImage: {fileID: 82320535}
-  _itemText: {fileID: 596662722835986782}
+  _itemText: {fileID: 1347496187973657899}
   _showAmount: 0
   _objectAmount: 1
-  _blothSlot: 1
+  _clothSlot: 1
 --- !u!114 &82320535
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -252,11 +252,10 @@ PrefabInstance:
         type: 3}
       propertyPath: m_sharedMaterial
       value: 
-      objectReference: {fileID: 21963141150122312, guid: 09788a34279d69c4b801d0781c4b76db,
-        type: 2}
+      objectReference: {fileID: 2100000, guid: 71577e056d201e94a8c596cba2ab2f5c, type: 2}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 54eba66ce4c99784c9bc8796c90e8b87, type: 3}
---- !u!114 &596662722835986782 stripped
+--- !u!114 &1347496187973657899 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
     type: 3}

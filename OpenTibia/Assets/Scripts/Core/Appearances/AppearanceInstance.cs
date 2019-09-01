@@ -3,6 +3,17 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Appearances
 {
+    public class CachedSpriteRequest
+    {
+        public CachedSpriteRequest(SpriteLoadingStatus status, CachedSprite cachedSprite) {
+            Status = status;
+            CachedSprite = cachedSprite;
+        }
+
+        public SpriteLoadingStatus Status;
+        public CachedSprite CachedSprite;
+    }
+
     public abstract class AppearanceInstance {
         public const int UnknownCreature = 97;
         public const int OutdatedCreature = 98;
@@ -30,7 +41,7 @@ namespace OpenTibiaUnity.Core.Appearances
 
         protected AppearanceType _type;
         protected Animation.IAppearanceAnimator[] _animators;
-        protected List<CachedSpriteInformation[]> _cachedSpriteInformations;
+        protected List<CachedSpriteRequest[]> _cachedSprites;
 
         protected Protobuf.Appearances.FrameGroup _activeFrameGroup {
             get {
@@ -48,9 +59,7 @@ namespace OpenTibiaUnity.Core.Appearances
 
         private int _activeFrameGroupIndexpublic = -1;
         private Protobuf.Appearances.FrameGroup _activeFrameGrouppublic = null;
-
-        protected CachedSpriteInformation _cachedSpriteInformation = null;
-
+        
         public uint Id {
             get => _id;
         }
@@ -101,52 +110,72 @@ namespace OpenTibiaUnity.Core.Appearances
             return _lastCachedSpriteIndex + (layer >= 0 ? layer % (int)_activeFrameGroup.SpriteInfo.Layers : 0);
         }
 
-        public CachedSpriteInformation GetSprite(int layer, int patternX, int patternY, int patternZ, bool animation) {
+        public CachedSprite GetSprite(int layer, int patternX, int patternY, int patternZ, bool animation) {
             if (_type.FrameGroups == null)
                 return null;
 
-            var appearanceStorage = OpenTibiaUnity.AppearanceStorage;
-            
             var spriteIndex = GetSpriteIndex(layer, patternX, patternY, patternZ);
-            if (_cachedSpriteInformations == null) {
-                _cachedSpriteInformations = new List<CachedSpriteInformation[]>();
+            if (_cachedSprites == null) {
+                _cachedSprites = new List<CachedSpriteRequest[]>();
                 foreach (var frameGroup in _type.FrameGroups)
-                    _cachedSpriteInformations.Add(new CachedSpriteInformation[frameGroup.SpriteInfo.SpriteIDs.Count]);
-                
-                uint spriteId = _activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
-                _cachedSpriteInformations[_activeFrameGroupIndex][spriteIndex] = appearanceStorage.GetSprite(spriteId);
-            } else if (_cachedSpriteInformations[_activeFrameGroupIndex][spriteIndex] == null) {
-                var spriteId = _activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
-                _cachedSpriteInformations[_activeFrameGroupIndex][spriteIndex] = appearanceStorage.GetSprite(spriteId);
+                    _cachedSprites.Add(new CachedSpriteRequest[frameGroup.SpriteInfo.SpriteIDs.Count]);
             }
 
-            return _cachedSpriteInformations[_activeFrameGroupIndex][spriteIndex];
+            var cachedRequest = _cachedSprites[_activeFrameGroupIndex][spriteIndex];
+            if (cachedRequest == null) {
+                CachedSprite cachedSprite;
+
+                var spriteId = _activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
+                var status = OpenTibiaUnity.AppearanceStorage.GetSprite(spriteId, out cachedSprite);
+                _cachedSprites[_activeFrameGroupIndex][spriteIndex] = new CachedSpriteRequest(status, cachedSprite);
+                return cachedSprite; // may be null if this is the first time to load this texture
+            }
+
+            // if it was loading, then update status
+            if (cachedRequest.Status == SpriteLoadingStatus.Loading) {
+                var spriteId = _activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
+                cachedRequest.Status = OpenTibiaUnity.AppearanceStorage.GetSprite(spriteId, out cachedRequest.CachedSprite);
+            }
+
+            return cachedRequest.CachedSprite;
         }
         
-        public virtual void DrawTo(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+        public virtual void Draw(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
             // this requires a bit of explanation
             // on outfits, layers are not useful, instead it relies on phases
             // while on the rest of categories, layers are treated as indepedant sprites..
             // the phase is used to determine the initial sprite index (at the animation property)
             // then the amount of layers based on that index is drawn
             // mostly you'd see this in objects like doors, or in effects like assassin outfit
+
+            bool dontDraw = false;
+            var cachedSprites = new CachedSprite[_activeFrameGroup.SpriteInfo.Layers];
             for (int layer = 0; layer < _activeFrameGroup.SpriteInfo.Layers; layer++) {
-                var cachedInformation = GetSprite(layer, patternX, patternY, patternZ, _activeFrameGroup.SpriteInfo.IsAnimation);
-                publicDrawTo(screenPosition.x, screenPosition.y, zoom, highlighted, highlightOpacity, cachedInformation);
+                var cachedSprite = GetSprite(layer, patternX, patternY, patternZ, _activeFrameGroup.SpriteInfo.IsAnimation);
+                if (cachedSprite == null)
+                    dontDraw = true;
+
+                cachedSprites[layer] = cachedSprite;
             }
+
+            if (dontDraw)
+                return;
+
+            foreach (var cachedSprite in cachedSprites)
+                InternalDrawTo(screenPosition.x, screenPosition.y, zoom, highlighted, highlightOpacity, cachedSprite);
         }
         
-        protected void publicDrawTo(float screenX, float screenY, Vector2 zoom, bool highlighted, float highlightOpacity,
-            CachedSpriteInformation cachedSpriteInfo, Material material = null) {
+        protected void InternalDrawTo(float screenX, float screenY, Vector2 zoom, bool highlighted, float highlightOpacity,
+            CachedSprite cachedSprite, Material material = null) {
             s_TempPoint.Set(screenX - _type.OffsetX, screenY - _type.OffsetY);
-            s_TempRect.position = (s_TempPoint - cachedSpriteInfo.spriteSize + s_FieldVector) * zoom;
-            s_TempRect.size = cachedSpriteInfo.spriteSize * zoom;
+            s_TempRect.position = (s_TempPoint - cachedSprite.spriteSize + s_FieldVector) * zoom;
+            s_TempRect.size = cachedSprite.spriteSize * zoom;
 
             if (material == null)
                 material = OpenTibiaUnity.GameManager.AppearanceTypeMaterial;
 
             material.SetFloat("_HighlightOpacity", highlighted ? highlightOpacity : 0);
-            Graphics.DrawTexture(s_TempRect, cachedSpriteInfo.texture, cachedSpriteInfo.rect, 0, 0, 0, 0, material);
+            Graphics.DrawTexture(s_TempRect, cachedSprite.texture, cachedSprite.rect, 0, 0, 0, 0, material);
         }
 
         public virtual void SwitchFrameGroup(int _, int __) { }

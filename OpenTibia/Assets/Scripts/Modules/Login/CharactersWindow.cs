@@ -364,7 +364,10 @@ namespace OpenTibiaUnity.Modules.Login
         }
 
         protected void SwitchToBackgroundCanvas() {
-            OpenTibiaUnity.GameManager.BackgroundCanvas.gameObject.SetActive(true);
+            if (OpenTibiaUnity.GameManager.BackgroundCanvas) {
+                OpenTibiaUnity.GameManager.BackgroundCanvas.gameObject.SetActive(true);
+            }
+
             OpenTibiaUnity.GameManager.EventSystem.SetSelectedGameObject(gameObject);
         }
 
@@ -425,7 +428,7 @@ namespace OpenTibiaUnity.Modules.Login
                 gameManager.LoadingAppearancesWindow.gameObject.SetActive(true);
 
                 while (gameManager.IsLoadingClientAssets)
-                    await System.Threading.Tasks.Task.Yield();
+                    await Task.Yield();
 
                 gameManager.LobbyPanel.gameObject.SetActive(OpenTibiaUnity.GameManager.ClientVersion >= 1200);
                 gameManager.LoadingAppearancesWindow.gameObject.SetActive(false);

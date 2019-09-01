@@ -22,19 +22,18 @@ namespace OpenTibiaUnity.Core.WorldMap
         
         public int GetObjectPriority(Appearances.ObjectInstance objectInstance) {
             Appearances.AppearanceType appearanceType = objectInstance.Type;
-            if (appearanceType.IsGround) {
+            if (appearanceType.IsGround)
                 return 0;
-            } else if (appearanceType.IsGroundBorder) {
+            else if (appearanceType.IsGroundBorder)
                 return 1;
-            } else if (appearanceType.IsBottom) {
+            else if (appearanceType.IsBottom)
                 return 2;
-            } else if (appearanceType.IsTop) {
+            else if (appearanceType.IsTop)
                 return 3;
-            } else if (objectInstance.Id == Appearances.AppearanceInstance.Creature) {
+            else if (objectInstance.Id == Appearances.AppearanceInstance.Creature)
                 return 4;
-            } else {
+            else
                 return 5;
-            }
         }
 
         public Appearances.AppearanceInstance GetEffect(int stackPos) {
@@ -267,7 +266,7 @@ namespace OpenTibiaUnity.Core.WorldMap
         public void UpdateObjectsCache() {
             if (!CacheObjectsDirty)
                 return;
-
+            
             CacheObjectsDirty = false;
 
             int index = 0;

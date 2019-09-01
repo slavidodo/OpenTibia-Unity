@@ -32,7 +32,7 @@ namespace OpenTibiaUnity.Modules.Container
             OpenTibiaUnity.InputHandler.AddMouseUpListener(Core.Utils.EventImplPriority.Default, OnMouseUp);
             OpenTibiaUnity.GameManager.onGameEnd.AddListener(OnGameEnd);
 
-            _upButton.onClick.AddListen(OnUpButtonClick);
+            _upButton.onClick.AddListener(OnUpButtonClick);
         }
 
         protected void OnGUI() {
@@ -56,7 +56,7 @@ namespace OpenTibiaUnity.Modules.Container
                         var @object = _containerView.GetObject(index + _containerView.IndexOfFirstObject);
                         if (@object) {
                             @object.Animate(OpenTibiaUnity.TicksMillis);
-                            @object.DrawTo(new Vector2(Constants.FieldSize * i, Constants.FieldSize * j), zoom, 0, 0, 0);
+                            @object.Draw(new Vector2(Constants.FieldSize * i, Constants.FieldSize * j), zoom, 0, 0, 0);
                         }
                     }
                 }
@@ -64,7 +64,7 @@ namespace OpenTibiaUnity.Modules.Container
 
             int iconColumn = _numberOfSlots % 4;
             int iconRow = _numberOfSlots / 4;
-            _containerView.Icon.DrawTo(new Vector2(Constants.FieldSize * iconColumn, Constants.FieldSize * iconRow), zoom, 0, 0, 0);
+            _containerView.Icon.Draw(new Vector2(Constants.FieldSize * iconColumn, Constants.FieldSize * iconRow), zoom, 0, 0, 0);
 
             RenderTexture.active = null;
         }

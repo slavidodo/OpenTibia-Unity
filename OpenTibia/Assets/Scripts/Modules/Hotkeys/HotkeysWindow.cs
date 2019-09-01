@@ -131,7 +131,7 @@ namespace OpenTibiaUnity.Modules.Hotkeys
             GL.Clear(false, true, new Color(0, 0, 0, 0));
 
             var zoom = new Vector2(Screen.width / (float)s_RenderTexture.width, Screen.height / (float)s_RenderTexture.height);
-            _objectInstance.DrawTo(new Vector2(0, 0), zoom, 0, 0, 0);
+            _objectInstance.Draw(new Vector2(0, 0), zoom, 0, 0, 0);
 
             RenderTexture.active = null;
 

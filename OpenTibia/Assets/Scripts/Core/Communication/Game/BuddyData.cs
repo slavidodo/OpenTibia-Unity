@@ -30,7 +30,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
         private void ParseBuddyState(Internal.ByteArray message) {
             uint creatureId = message.ReadUnsignedInt();
-            byte status = message.ReadUnsignedByte();
+            byte state = 1;
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameLoginPending))
+                state = message.ReadUnsignedByte();
         }
 
         private void ParseBuddyLogout(Internal.ByteArray message) {

@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace OpenTibiaUnity.Core.Chat
+﻿namespace OpenTibiaUnity.Core.Chat
 {
     public class MessageFilterSet
     {
@@ -16,7 +14,7 @@ namespace OpenTibiaUnity.Core.Chat
         // [TODO] Allowment to have custom filter sets (changing the default colors of anything)
         public MessageFilterSet(int id) {
             _id = id;
-            _messageModes = new MessageMode[(int)MessageModeType.Invalid];
+            _messageModes = new MessageMode[(int)MessageModeType.LastMessage];
 
             for (MessageModeType i = MessageModeType.None; i < MessageModeType.BeyondLast; i++)
                 AddMessageMode(new MessageMode(i));

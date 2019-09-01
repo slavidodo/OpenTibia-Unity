@@ -2,33 +2,40 @@
 
 namespace OpenTibiaUnity.Core.WorldMap
 {
+    public enum OnscreenMessageFixing
+    {
+        None = 0,
+        X = 1,
+        Y = 2,
+        Both = X | Y,
+    }
+
     public class OnscreenMessageBox
     {
-        public Utils.RingBuffer<OnscreenMessage> _messages;
+        private Utils.RingBuffer<OnscreenMessage> _messages;
         private Vector3Int? _position;
         private int _speakerLevel;
         private int m_VisibleMessages = 0;
-        private TMPro.TextMeshProUGUI _textMesh;
 
         private float _width = 0;
         private float _height = 0;
+        private bool _visible = true;
+        private OnscreenMessageFixing _fixing = 0;
 
-        public Vector3Int? Position {
-            get { return _position; }
-        }
+        public Vector3Int? Position { get => _position; }
+        public OnscreenMessageFixing Fixing { get => _fixing; set => _fixing = value; }
 
         public MessageModeType Mode { get; }
         public string Speaker { get; }
-        public bool Visible {
-            get { return _textMesh != null ? _textMesh.gameObject.activeSelf : false; }
-            set { if (_textMesh) _textMesh.gameObject.SetActive(value); }
-        }
-        public int VisibleMessages {
-            get { return !!Visible ? m_VisibleMessages : 0; }
-        }
-        public bool Empty {
-            get { return _messages.Length - GetFirstNonHeaderIndex() <= 0; }
-        }
+        public bool Visible { get => _visible; set => _visible = value; }
+        public int VisibleMessages { get => !!Visible ? m_VisibleMessages : 0; }
+        public bool Empty { get => _messages.Length - GetFirstNonHeaderIndex() <= 0; }
+        public float Width { get => _width; }
+        public float Height { get => _height; }
+
+        // assigned after layouting
+        public float X { get; set; }
+        public float Y { get; set; }
 
         public int MinExpirationTime {
             get {
@@ -36,33 +43,28 @@ namespace OpenTibiaUnity.Core.WorldMap
                 var riskIndex = GetFirstNonHeaderIndex();
                 for (int i = riskIndex; i <  _messages.Length; i++) {
                     var message = _messages.GetItemAt(i);
-                    if (message.VisibleSince < int.MaxValue) {
+                    if (message.VisibleSince < int.MaxValue)
                         min = System.Math.Min(message.VisibleSince + message.TTL, min);
-                    }
                 }
 
                 return min;
             }
         }
 
-        public OnscreenMessageBox(Vector3Int? position, string speaker, int speakerLevel,MessageModeType mode, int messagesSize, TMPro.TextMeshProUGUI textMesh = null) {
+        public OnscreenMessageBox(Vector3Int? position, string speaker, int speakerLevel, MessageModeType mode, int messagesSize) {
             _position = position;
             Speaker = speaker;
             _speakerLevel = speakerLevel;
             Mode = mode;
             _messages = new Utils.RingBuffer<OnscreenMessage>(messagesSize);
-            _textMesh = textMesh;
         }
-
-        public void DestroyTextMesh() {
-            if (_textMesh != null) {
-                Object.Destroy(_textMesh.gameObject);
-                _textMesh = null;
-            }
-        }
-
+        
         public void RemoveMessages() {
             _messages.RemoveAll();
+        }
+
+        public OnscreenMessage GetMessage(int index) {
+            return _messages.GetItemAt(index);
         }
 
         public int ExpireMessages(int ticks) {
@@ -99,37 +101,28 @@ namespace OpenTibiaUnity.Core.WorldMap
                 case MessageModeType.NpcFrom:
                 case MessageModeType.BarkLoud:
                 case MessageModeType.BarkLow:
-                    int i = 0;
                     while (m_VisibleMessages < _messages.Length) {
                         var onscreenMessage = _messages.GetItemAt(m_VisibleMessages);
-                        var size = _textMesh.GetPreferredValues(onscreenMessage.RichText);
-                        if (_height + size.y <= Constants.OnscreenMessageHeight) {
+                        if (_height + onscreenMessage.Height <= Constants.OnscreenMessageHeight) {
                             m_VisibleMessages++;
-                            _width = Mathf.Max(_width, size.x);
-                            _height += size.y;
+                            _width = Mathf.Max(_width, onscreenMessage.Width);
+                            _height += onscreenMessage.Height;
                             onscreenMessage.VisibleSince = Mathf.Min(OpenTibiaUnity.TicksMillis, onscreenMessage.VisibleSince);
-
-                            _textMesh.text += (i++ == 0 ? "" : "\n") + onscreenMessage.RichText;
                             continue;
                         }
                         break;
                     }
-
                     break;
                 default:
                     if (_messages.Length > 0) {
                         var onscreenMessage = _messages.GetItemAt(0);
-                        _textMesh.text = onscreenMessage.RichText;
-                        var size = _textMesh.GetPreferredValues();
                         m_VisibleMessages = 1;
-                        _width = size.x;
-                        _height = size.y;
+                        _width = onscreenMessage.Width;
+                        _height = onscreenMessage.Height;
                         onscreenMessage.VisibleSince = Mathf.Min(OpenTibiaUnity.TicksMillis, onscreenMessage.VisibleSince);
                     }
                     break;
             }
-
-            _textMesh.ForceMeshUpdate();
         }
 
         public void AppendMessage(OnscreenMessage message) {
@@ -160,27 +153,6 @@ namespace OpenTibiaUnity.Core.WorldMap
             }
 
             return i;
-        }
-
-        public void ResetTextMesh() {
-            _textMesh.text = string.Empty;
-        }
-
-        public void UpdateTextMeshPosition(float x, float y) {
-            var rectTransform = _textMesh.rectTransform;
-
-            float width = Mathf.Min(_textMesh.preferredWidth, Constants.OnscreenMessageWidth);
-            float height = _textMesh.preferredHeight;
-            
-            var parentRT = rectTransform.parent as RectTransform;
-            
-            x = Mathf.Clamp(x, width / 2, parentRT.rect.width - width / 2);
-            y = Mathf.Clamp(y, -parentRT.rect.height + height / 2, -height / 2);
-
-            if (rectTransform.anchoredPosition.x == x && rectTransform.anchoredPosition.y == y)
-                return;
-
-            rectTransform.anchoredPosition = new Vector3(x, y, 0);
         }
     }
 }

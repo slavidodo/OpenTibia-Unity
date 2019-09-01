@@ -716,10 +716,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return true;
         }
 
-        private void MessageProcessingFinished(bool miniMap = true) {
+        private void MessageProcessingFinished() {
             WorldMapStorage.RefreshFields();
-            if (miniMap)
-                MiniMapStorage.RefreshSectors();
+            MiniMapStorage.RefreshSectors();
             CreatureStorage.RefreshOpponents();
         }
 

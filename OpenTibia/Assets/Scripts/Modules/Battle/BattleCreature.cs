@@ -14,7 +14,7 @@ namespace OpenTibiaUnity.Modules.Battle
         public Slider healthProgressBar = null;
         public RawImage healthProgressFillArea = null;
 
-        protected CachedSpriteInformation _cachedSpriteInformation;
+        protected CachedSprite _cachedSprite;
         private Creature _creature = null;
 
         public Creature Creature { get => _creature; }
@@ -31,13 +31,13 @@ namespace OpenTibiaUnity.Modules.Battle
 
             nameTextComponent.text = creature.Name;
             healthProgressBar.value = creature.HealthPercent;
-            healthProgressFillArea.color = CreatureStatusPanel.GetHealthColor(healthProgressBar.value / 100f);
+            healthProgressFillArea.color = Creature.GetHealthColor((int)healthProgressBar.value);
 
             var outfit = creature.Outfit;
             if (outfit) {
-                _cachedSpriteInformation = outfit.GetSprite(0, (int)Direction.South, 0, 0, false);
-                outfitImageCompoenent.texture = _cachedSpriteInformation.texture;
-                outfitImageCompoenent.uvRect = _cachedSpriteInformation.rect;
+                _cachedSprite = outfit.GetSprite(0, (int)Direction.South, 0, 0, false);
+                outfitImageCompoenent.texture = _cachedSprite.texture;
+                outfitImageCompoenent.uvRect = _cachedSprite.rect;
             }
 
             var markColor = creature.Marks.GetMarkColor(MarkType.ClientBattleList);

@@ -51,8 +51,14 @@
         public const int ObjectsUpdateInterval = 40;
         public const int AmbientUpdateInterval = 1000;
 
+        public const int NumPvpHelpersForRisknessDangerous = 5;
+        public const int StateFlagSize = 11;
+        public const int StateFlagGap = 2;
+        public const int SpeechFlagSize = 18;
+
         public const int OnscreenMessageHeight = 195;
-        public const int OnscreenMessageWidth = 360;
+        public const int OnscreenMessageWidth = 290;
+        public const int OnscreenMessageGap = 10;
 
         public const int MaxTalkLength = 255;
         public const int MaxChannelLength = 255;
@@ -71,6 +77,9 @@
 
         public const int WorldMapRealWidth = MapWidth * FieldSize;
         public const int WorldMapRealHeight = MapHeight * FieldSize;
+
+        public const int WorldMapUnscaledWidth = WorldMapScreenWidth - FieldSize;
+        public const int WorldMapUnscaledHeight = WorldMapScreenHeight - FieldSize;
 
         public const int WorldMapMinimumWidth = (int)(WorldMapRealWidth * 0.6667f);
         public const int WorldMapMinimumHeight = (int)(WorldMapRealHeight * 0.6667f);
@@ -106,6 +115,8 @@
         public const int SecondsPerDay = 24 * 60 * 60;
         public const int MarketRequestOwnOffers = 65534;
         public const int MarketRequestOwnHistory = 65535;
+
+        public const int HighlightObjectOpacityInterval = 50;
     }
 
     public enum ClientSpecification
@@ -203,7 +214,7 @@
         First = None,
         Last = Revenge,
     }
-    public enum SummonTypeFlags : byte
+    public enum SummonType : byte
     {
         None,
         Own,
@@ -236,6 +247,11 @@
         First = None,
         Last = Other,
     }
+    public enum RisknessFlag
+    {
+        None = 0,
+        Dangerous = 1,
+    }
 
     public enum SkillType : byte
     {
@@ -264,7 +280,7 @@
         ManaLeechChance,
         ManaLeechAmount,
 
-        // public usage only
+        // internal usage only
         ExperienceGain = 253,
         None = 254,
         Experience = 255,

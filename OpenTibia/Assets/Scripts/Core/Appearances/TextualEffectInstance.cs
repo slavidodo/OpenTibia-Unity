@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Appearances
 {
@@ -10,48 +12,62 @@ namespace OpenTibiaUnity.Core.Appearances
         private int _phase = 0;
         private int _lastPhaseChange;
 
-        private bool _dirty = false;
-        private TMPro.TextMeshProUGUI _textMesh = null;
+        private int _value;
+        private string _text;
+        private int _rawColor;
+        private Color _color;
+
+        private bool _integral = false;
+        private bool _dirty = true;
+
+        // dirty; should only be accessed if cache is built
         private Vector2 _size = Vector2.zero;
-
-        public bool Visible {
-            get { return _textMesh != null ? _textMesh.gameObject.activeSelf : false; }
-            set { if (_textMesh) _textMesh.gameObject.SetActive(value); }
-        }
-
+        private Mesh _mesh = null;
+        
         public float Width {
             get {
-                CheckDirty();
+                RebuildCache();
                 return _size.x;
             }
         }
 
         public float Height {
             get {
-                CheckDirty();
+                RebuildCache();
                 return _size.y;
             }
         }
 
-        public override int Phase {
-            get {
-                return _phase;
-            }
-        }
+        public override int Phase { get => _phase; }
         
-        public TextualEffectInstance(int color, string text, TMPro.TextMeshProUGUI textMesh) : base(0, null) {
+        public TextualEffectInstance(int color, string text, int value = -1) : base(0, null) {
+            _rawColor = color;
+            _color = Colors.ColorFrom8Bit(color);
             _lastPhaseChange = OpenTibiaUnity.TicksMillis;
-            _textMesh = textMesh;
-            _textMesh.text = text;
-            _textMesh.color = Colors.ColorFrom8Bit(color);
-            _size = _textMesh.GetPreferredValues();
-            _dirty = false;
+
+            if (text == null) {
+                text = value.ToString();
+                _integral = true;
+            }
+
+            _value = value;
+            _text = text;
+        }
+
+        public override void Draw(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+            RebuildCache();
+            if (!OpenTibiaUnity.GameManager.OutlinedVerdanaFontMaterial.SetPass(0))
+                return;
+            
+            var matrix = Matrix4x4.TRS(screenPosition, Quaternion.Euler(180, 0, 0), zoom);
+            Graphics.DrawMeshNow(_mesh, matrix);
         }
 
         public bool Merge(AppearanceInstance other) {
             var textualEffect = other as TextualEffectInstance;
-            if (!!textualEffect && textualEffect._phase <= 0 && _phase <= 0 && textualEffect._textMesh.color != _textMesh.color) {
-                _textMesh.text = textualEffect._textMesh.text;
+            if (!!textualEffect && _integral && textualEffect._phase <= 0 && _phase <= 0 && _rawColor == textualEffect._rawColor) {
+                _value += textualEffect._value;
+                _text = _value.ToString();
                 _dirty = true;
                 return true;
             }
@@ -67,36 +83,30 @@ namespace OpenTibiaUnity.Core.Appearances
             return _phase < PhaseCount;
         }
 
-        public void DestroyTextMesh() {
-            if (_textMesh) {
-                Object.Destroy(_textMesh.gameObject);
-                _textMesh = null;
+        private void RebuildCache() {
+            if (_dirty) {
+                _dirty = false;
+
+                var textComponent = OpenTibiaUnity.GameManager.LabelOnscreenText; // an instance of a textmeshpro (ugui since we are in canvas)
+                textComponent.color = _color;
+                textComponent.text = _text;
+                textComponent.ForceMeshUpdate(true); // force update now to obtain mesh data
+                
+                if (_mesh == null)
+                    _mesh = new Mesh();
+                
+                var textMesh = textComponent.textInfo.meshInfo[0]; // clearly, there are no submeshes
+                _mesh.vertices = textMesh.vertices;
+                _mesh.normals = textMesh.normals;
+                _mesh.uv = textMesh.uvs0;
+                _mesh.uv2 = textMesh.uvs2;
+                _mesh.triangles = textMesh.triangles;
+                _mesh.tangents = textMesh.tangents;
+                _mesh.colors32 = textMesh.colors32;
+                _mesh.Optimize(); // optimize the mesh for rendering
+
+                _size = textComponent.GetPreferredValues();
             }
-        }
-
-        private void CheckDirty() {
-            if (!_dirty)
-                return;
-
-            _size = _textMesh.GetPreferredValues();
-            _dirty = false;
-        }
-
-        public void UpdateTextMeshPosition(float x, float y) {
-            var rectTransform = _textMesh.rectTransform;
-
-            float width = Mathf.Min(_textMesh.preferredWidth, Constants.OnscreenMessageWidth);
-            float height = _textMesh.preferredHeight;
-
-            var parentRT = rectTransform.parent as RectTransform;
-
-            x = Mathf.Clamp(x, width / 2, parentRT.rect.width - width / 2);
-            y = Mathf.Clamp(y, -parentRT.rect.height + height / 2, -height / 2);
-
-            if (rectTransform.anchoredPosition.x == x && rectTransform.anchoredPosition.y == y)
-                return;
-
-            rectTransform.anchoredPosition = new Vector3(x, y, 0);
         }
     }
 }

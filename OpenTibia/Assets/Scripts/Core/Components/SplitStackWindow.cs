@@ -122,7 +122,7 @@ namespace OpenTibiaUnity.Core.Components
                     _objectInstance = OpenTibiaUnity.AppearanceStorage.CreateObjectInstance(_objectType._id, _objectAmount);
 
                 var zoom = new Vector2(Screen.width / (float)_renderTexture.width, Screen.height / (float)_renderTexture.height);
-                _objectInstance.DrawTo(new Vector2(0, 0), zoom, 0, 0, 0);
+                _objectInstance.Draw(new Vector2(0, 0), zoom, 0, 0, 0);
             }
 
             RenderTexture.active = null;

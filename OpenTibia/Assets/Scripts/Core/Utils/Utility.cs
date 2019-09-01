@@ -57,6 +57,23 @@ namespace OpenTibiaUnity.Core.Utils
             return c;
         }
 
+
+        public static Rect Intersect(Rect a, Rect b) {
+            float xMin = Mathf.Max(a.xMin, b.xMin);
+            float yMin = Mathf.Max(a.yMin, b.yMin);
+            float xMax = Mathf.Min(a.xMax, b.xMax);
+            float yMax = Mathf.Min(a.yMax, b.yMax);
+            if (xMax > xMin && yMax > yMin)
+                return new Rect(xMin, yMin, xMax - xMin, yMax - yMin);
+            return Rect.zero;
+        }
+
+        public static bool IntersectsWith(Rect a, Rect b) {
+            if (b.xMin < a.xMax && a.xMin < b.x + b.width && b.y < a.y + a.height)
+                return a.y < b.y + b.height;
+            return false;
+        }
+
         public static string Commafy(long value) {
             if (value == 0)
                 return "0";

@@ -25,6 +25,8 @@ namespace OpenTibiaUnity.Core
         /// </summary>
         public static GameManager Instance { get; private set; }
 
+        public Material InternalColoredMaterial;
+
 #if !UNITY_EDITOR && UNITY_STANDALONE_WIN
         [DllImport("user32.dll", EntryPoint = "SetWindowText")]
         public static extern bool SetWindowText(System.IntPtr hwnd, string lpString);
@@ -45,12 +47,16 @@ namespace OpenTibiaUnity.Core
         public GameObject MiniWindowShadowVariant = null;
         public Components.ExitWindow ExitWindowPrefab = null;
         public Components.PopupWindow PopupWindowPrefab = null;
-        public Components.CreatureStatusPanel CreatureStatusPanelPrefab = null;
         public TMPro.TextMeshProUGUI LabelOnscreenMessageBoxPrefab = null;
         public Components.SplitStackWindow SplitStackWindowPrefab = null;
         public GameObject ContextMenuBasePrefab = null;
         public LayoutElement ContextMenuItemPrefab = null;
         public Components.CheckboxWrapper PanelCheckBox = null;
+
+        // Utility objects for rendering
+        [Header("Utility Invariants")]
+        public TMPro.TextMeshProUGUI LabelOnscreenText = null;
+        public TMPro.TextMeshProUGUI LabelOnscreenMessage = null; // optimized for onscreen messages (290x195)
 
         // UI Default Objects
         [Header("Canvases & Overlays")]
@@ -75,9 +81,11 @@ namespace OpenTibiaUnity.Core
         public Material MarksViewMaterial = null;
         public Material LightmapMaterial = null;
         public Material LightSurfaceMaterial = null;
+        public Material VerdanaFontMaterial = null;
+        public Material OutlinedVerdanaFontMaterial = null;
 
         [Header("Render Textures")]
-        public CustomRenderTexture WorldMapRenderingTexture = null;
+        public CustomRenderTexture WorldMapRenderTexture = null;
         public RenderTexture MiniMapRenderingTexture = null;
 
         [Header("Main Elements")]
@@ -95,11 +103,8 @@ namespace OpenTibiaUnity.Core
         [Header("Textures & Sprites")]
         public Texture2D MarksViewTexture = null;
         public Texture2D TileCursorTexture = null;
-        public Sprite[] PartySprites = null;
-        public Sprite[] PKSprites = null;
-        public Sprite[] TypeSprites = null;
-        public Sprite[] SpeechSprites = null;
-        public Sprite[] GuildSprites = null;
+        public Texture2D StateFlagsTexture = null;
+        public Texture2D SpeechFlagsTexture = null;
 
         // Properties
         public Options.OptionStorage OptionStorage { get; private set; }
@@ -202,6 +207,8 @@ namespace OpenTibiaUnity.Core
             _exitWindow = null;
             OpenTibiaUnity.Quiting = false;
 
+            InternalColoredMaterial = new Material(Shader.Find("Hidden/Internal-Colored"));
+
             // events
             onSecondaryTimeCheck = new UnityEvent();
             onTacticsChangeEvent = new TacticsChangeEvent();
@@ -242,13 +249,13 @@ namespace OpenTibiaUnity.Core
 
             // Load options
             OptionStorage.LoadOptions();
-
+            
             // update input settings
             InputHandler.UpdateMapping();
 
             // initialize rendering textures
-            WorldMapRenderingTexture.Initialize();
-            WorldMapRenderingTexture.IncrementUpdateCount();
+            WorldMapRenderTexture.Initialize();
+            WorldMapRenderTexture.IncrementUpdateCount();
             
             // initialize core game actions
             Game.ObjectMultiUseHandler.Initialize();
@@ -264,8 +271,8 @@ namespace OpenTibiaUnity.Core
             Application.wantsToQuit += Application_wantsToQuit;
 #endif
 
-            QualitySettings.SetQualityLevel(0);
             //QualitySettings.vSyncCount = 1;
+            QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = 1000;
         }
 
@@ -331,7 +338,7 @@ namespace OpenTibiaUnity.Core
             ChatStorage = null;
             MessageStorage = null;
 
-            WorldMapRenderingTexture.Release();
+            WorldMapRenderTexture.Release();
             MiniMapRenderingTexture.Release();
         }
 
@@ -517,8 +524,7 @@ namespace OpenTibiaUnity.Core
 
         public void ProcessGameEnd() {
             onGameEnd.Invoke();
-
-            WorldMapRenderer.DestroyUIElements();
+            
             CursorController.SetCursorState(CursorState.Default, CursorPriority.High);
 
             CancelInvoke("OnCheckAlive");

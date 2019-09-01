@@ -57,6 +57,7 @@ namespace OpenTibiaUnity.Core.Options
         public bool ShowNameForOtherCreatures = true;
         public bool ShowHealthForOtherCreatures = true;
         public bool ShowMarksForOtherCreatures = true;
+        public bool ShowNPCIcons = true;
         public bool ShowCustomizableStatusBars = false;
         public bool ShowStatusBars = false;
         public bool ShowInfoMessages = true;

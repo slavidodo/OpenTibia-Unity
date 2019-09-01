@@ -11,8 +11,7 @@
                 if (isPlayer) {
                     var slot = message.ReadEnum<ClothSlots>();
                 }
-
-
+                
                 int imbuementSlots = message.ReadUnsignedByte();
                 for (int j = 0; j < imbuementSlots; j++) {
                     int imbuementId = message.ReadUnsignedByte();

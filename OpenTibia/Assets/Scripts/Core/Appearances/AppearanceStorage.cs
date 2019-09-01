@@ -52,7 +52,9 @@ namespace OpenTibiaUnity.Core.Appearances
 
         public void SetSpriteProvider(SpritesProvider spriteProvider) => _spritesProvider = spriteProvider;
         public void UnloadSpriteProvider() => _spritesProvider?.Unload();
-        public CachedSpriteInformation GetSprite(uint spriteId) => _spritesProvider.GetSprite(spriteId);
+        public SpriteLoadingStatus GetSprite(uint spriteId, out CachedSprite cachedSprite) {
+            return _spritesProvider.GetSprite(spriteId, out cachedSprite);
+        }
 
         public void Unload() {
             UnloadSpriteProvider();
@@ -134,8 +136,8 @@ namespace OpenTibiaUnity.Core.Appearances
             return null;
         }
         
-        public TextualEffectInstance CreateTextualEffect(int color, string value, TMPro.TextMeshProUGUI textMesh) {
-            return new TextualEffectInstance(color, value, textMesh);
+        public TextualEffectInstance CreateTextualEffect(int color, string text, int value = -1) {
+            return new TextualEffectInstance(color, text, value);
         }
 
         public ObjectInstance CreateEnvironmentalEffect(uint id) {

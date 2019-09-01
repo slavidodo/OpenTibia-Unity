@@ -15,25 +15,24 @@ namespace OpenTibiaUnity.Core.Creatures
         }
     }
 
-    public class Creature
-    {
-        public class StringCreatureChangeEvent : UnityEvent<Creature, string, string> {}
-        public class UIntCreatureChangeEvent : UnityEvent<Creature, uint, uint> {}
-        public class IntCreatureChangeEvent : UnityEvent<Creature, int, int> {}
-        public class IntCreatureChangeEvent2 : UnityEvent<Creature, int> {}
-        public class DirectionCreatureChangeEvent : UnityEvent<Creature, Direction, Direction> {}
-        public class BoolCreatureChangeEvent : UnityEvent<Creature, bool> {};
-        public class SkillsCreatureChangeEvent : UnityEvent<Creature, SkillType, Skill> {};
-        public class LightCreatureChangeEvent : UnityEvent<Creature, UnityEngine.Color> {};
-        public class PositionCreatureChangeEvent : UnityEvent<Creature, UnityEngine.Vector3Int, UnityEngine.Vector3Int> {};
-        public class MarksCreatureChangeEvent : UnityEvent<Creature, Appearances.Marks> {};
-        public class OutfitCreatureChangeEvent : UnityEvent<Creature, Appearances.AppearanceInstance> {};
+    public class Creature {
+        public class StringCreatureChangeEvent : UnityEvent<Creature, string, string> { }
+        public class UIntCreatureChangeEvent : UnityEvent<Creature, uint, uint> { }
+        public class IntCreatureChangeEvent : UnityEvent<Creature, int, int> { }
+        public class IntCreatureChangeEvent2 : UnityEvent<Creature, int> { }
+        public class DirectionCreatureChangeEvent : UnityEvent<Creature, Direction, Direction> { }
+        public class BoolCreatureChangeEvent : UnityEvent<Creature, bool> { };
+        public class SkillsCreatureChangeEvent : UnityEvent<Creature, SkillType, Skill> { };
+        public class LightCreatureChangeEvent : UnityEvent<Creature, UnityEngine.Color> { };
+        public class PositionCreatureChangeEvent : UnityEvent<Creature, UnityEngine.Vector3Int, UnityEngine.Vector3Int> { };
+        public class MarksCreatureChangeEvent : UnityEvent<Creature, Appearances.Marks> { };
+        public class OutfitCreatureChangeEvent : UnityEvent<Creature, Appearances.AppearanceInstance> { };
 
-        public class CreatureTypesCreatureChangeEvent : UnityEvent<Creature, CreatureType, CreatureType> {};
-        public class PartyFlagsCreatureChangeEvent : UnityEvent<Creature, PartyFlag, PartyFlag> {};
-        public class PKFlagsCreatureChangeEvent : UnityEvent<Creature, PKFlag, PKFlag> {};
-        public class GuildFlagsCreatureChangeEvent : UnityEvent<Creature, GuildFlag, GuildFlag> {};
-        public class SpeechCategoryCreatureChangeEvent : UnityEvent<Creature, SpeechCategory, SpeechCategory> {};
+        public class CreatureTypesCreatureChangeEvent : UnityEvent<Creature, CreatureType, CreatureType> { };
+        public class PartyFlagsCreatureChangeEvent : UnityEvent<Creature, PartyFlag, PartyFlag> { };
+        public class PKFlagsCreatureChangeEvent : UnityEvent<Creature, PKFlag, PKFlag> { };
+        public class GuildFlagsCreatureChangeEvent : UnityEvent<Creature, GuildFlag, GuildFlag> { };
+        public class SpeechCategoryCreatureChangeEvent : UnityEvent<Creature, SpeechCategory, SpeechCategory> { };
 
         public static UIntCreatureChangeEvent onIdChange = new UIntCreatureChangeEvent();
         public static StringCreatureChangeEvent onNameChange = new StringCreatureChangeEvent();
@@ -59,7 +58,7 @@ namespace OpenTibiaUnity.Core.Creatures
         protected uint _id = 0;
         public uint Id {
             get { return _id; }
-            set { if (_id != value) { var old = _id;  _id = value; onIdChange.Invoke(this, _id, old); } }
+            set { if (_id != value) { var old = _id; _id = value; onIdChange.Invoke(this, _id, old); } }
         }
 
         protected string _name;
@@ -71,13 +70,13 @@ namespace OpenTibiaUnity.Core.Creatures
         protected CreatureType _type = 0;
         public CreatureType Type {
             get { return _type; }
-            set { if (_type != value) { var old = _type;  _type = value; onTypeChange.Invoke(this, _type, old); } }
+            set { if (_type != value) { var old = _type; _type = value; onTypeChange.Invoke(this, _type, old); } }
         }
 
         protected uint _summonerId = 0;
         public uint SummonerId {
             get { return _summonerId; }
-            set { if (_summonerId != value) { var old = _summonerId;  _summonerId = value; onSummonerChange.Invoke(this, _summonerId, old); } }
+            set { if (_summonerId != value) { var old = _summonerId; _summonerId = value; onSummonerChange.Invoke(this, _summonerId, old); } }
         }
 
         protected bool _trapper = false;
@@ -110,16 +109,24 @@ namespace OpenTibiaUnity.Core.Creatures
             set { if (_pKFlag != value) { var old = _pKFlag; _pKFlag = value; onPKFlagChange.Invoke(this, _pKFlag, old); } }
         }
 
-        protected SummonTypeFlags _summonTypeFlag = SummonTypeFlags.None;
-        public SummonTypeFlags SummonTypeFlag {
-            get { return _summonTypeFlag; }
-            set { if (_summonTypeFlag != value) { _summonTypeFlag = value; } }
+        protected SummonType _summonType = SummonType.None;
+        public SummonType SummonType {
+            get { return _summonType; }
+            set { if (_summonType != value) { _summonType = value; } }
         }
 
         protected SpeechCategory _speechCategory = SpeechCategory.None;
         public SpeechCategory SpeechCategory {
             get { return _speechCategory; }
-            set { if (_speechCategory != value) { var old = _speechCategory;  _speechCategory = value; onSpeechCategoryChange.Invoke(this, _speechCategory, old); } }
+            set { if (_speechCategory != value) { var old = _speechCategory; _speechCategory = value; onSpeechCategoryChange.Invoke(this, _speechCategory, old); } }
+        }
+
+        public RisknessFlag RisknessFlag {
+            get {
+                if (_numberOfPvPHelpers >= Constants.NumPvpHelpersForRisknessDangerous)
+                    return RisknessFlag.Dangerous;
+                return RisknessFlag.None;
+            }
         }
 
         protected GuildFlag _guildFlag = GuildFlag.None;
@@ -182,28 +189,14 @@ namespace OpenTibiaUnity.Core.Creatures
             set { if (_knownSince != value) { _knownSince = value; } }
         }
 
-        public virtual int HealthPercent {
-            get {
-                return (int)GetSkillValue(SkillType.HealthPercent);
-            }
-        }
+        public virtual int HealthPercent { get => (int)GetSkillValue(SkillType.HealthPercent); }
 
-        public virtual int ManaPercent {
-            get { return 100; }
-        }
+        public virtual int ManaPercent { get => 100; }
 
-        public bool IsHuman {
-            get { return _type == CreatureType.Player; }
-        }
-        public bool IsMonster {
-            get { return _type == CreatureType.Monster; }
-        }
-        public bool IsNPC {
-            get { return _type == CreatureType.NPC; }
-        }
-        public bool IsSummon {
-            get { return _type == CreatureType.Summon; }
-        }
+        public bool IsHuman { get => _type == CreatureType.Player; }
+        public bool IsMonster { get => _type == CreatureType.Monster; }
+        public bool IsNPC { get => _type == CreatureType.NPC; }
+        public bool IsSummon { get => _type == CreatureType.Summon; }
         public bool IsConfirmedPartyMember {
             get => _partyFlag == PartyFlag.Leader_SharedXP_Active
                 || _partyFlag == PartyFlag.Leader_SharedXP_Inactive_Guilty
@@ -235,6 +228,14 @@ namespace OpenTibiaUnity.Core.Creatures
                 || _partyFlag == PartyFlag.Member_SharedXP_Inactive_Guilty
                 || _partyFlag == PartyFlag.Member_SharedXP_Inactive_Innocent
                 || _partyFlag == PartyFlag.Member_SharedXP_Off;
+        }
+        public bool HasFlag {
+            get => PKFlag != PKFlag.None
+                || PartyFlag != PartyFlag.None
+                || SummonType != SummonType.None
+                || GuildFlag != GuildFlag.None
+                || RisknessFlag != RisknessFlag.None
+                || SpeechCategory != SpeechCategory.None;
         }
 
         public UnityEngine.Vector3Int AnimationDelta {
@@ -457,17 +458,39 @@ namespace OpenTibiaUnity.Core.Creatures
 
         public void SetSummonerId(uint summonerId) {
             if (summonerId == OpenTibiaUnity.Player._id)
-                SummonTypeFlag = SummonTypeFlags.Own;
+                SummonType = SummonType.Own;
             else if (summonerId != 0)
-                SummonTypeFlag = SummonTypeFlags.Other;
+                SummonType = SummonType.Other;
             else
-                SummonTypeFlag = SummonTypeFlags.None;
+                SummonType = SummonType.None;
 
             SummonerId = summonerId;
         }
         
         public bool IsReportTypeAllowed(ReportTypes reportType) {
             return IsHuman && (reportType == ReportTypes.Name || reportType == ReportTypes.Bot);
+        }
+
+        public UnityEngine.Color GetHealthColor() {
+            return GetHealthColor(HealthPercent);
+        }
+
+        public static UnityEngine.Color32 GetHealthColor(int percent) {
+            UnityEngine.Color healthColor;
+            if (percent < 4) {
+                healthColor = Colors.ColorFromRGB(96, 0, 0);
+            } else if (percent < 10) {
+                healthColor = Colors.ColorFromRGB(192, 0, 0);
+            } else if (percent < 30) {
+                healthColor = Colors.ColorFromRGB(192, 48, 48);
+            } else if (percent < 60) {
+                healthColor = Colors.ColorFromRGB(192, 192, 0);
+            } else if (percent < 95) {
+                healthColor = Colors.ColorFromRGB(96, 192, 96);
+            } else {
+                healthColor = Colors.ColorFromRGB(0, 192, 0);
+            }
+            return healthColor;
         }
 
         public static bool operator !(Creature creature) {

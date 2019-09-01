@@ -165,9 +165,8 @@ namespace OpenTibiaUnity.Core.MiniMap
                 int it = _sectorCache.Count - 1;
                 while (it >= 0) {
                     var sector = _sectorCache[it];
-                    if (sector.Dirty) {
+                    if (sector.Dirty)
                         Enqueue(_saveQueue, sector);
-                    }
 
                     it--;
                 }

@@ -12,10 +12,10 @@ namespace OpenTibiaUnity.Core.Appearances
         protected int _detailHsiColor = 0;
         protected int _addOns = 0;
 
-        private Color _headColor = Color.black;
-        private Color _torsoColor = Color.black;
-        private Color _legsColor = Color.black;
-        private Color _detailColor = Color.black;
+        private Color _headColor = Color.white;
+        private Color _torsoColor = Color.white;
+        private Color _legsColor = Color.white;
+        private Color _detailColor = Color.white;
 
         private int _phase = 0;
         private bool _walking = false;
@@ -63,34 +63,45 @@ namespace OpenTibiaUnity.Core.Appearances
                 * _activeFrameGroup.SpriteInfo.PatternWidth + (patternX >= 0 ? (int)(patternX % _activeFrameGroup.SpriteInfo.PatternWidth) : 0))
                 * _activeFrameGroup.SpriteInfo.Layers);
         }
-        
-        public override void DrawTo(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+
+        public override void Draw(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
             if (_activeFrameGroup.SpriteInfo.Layers != 2) {
-                var cachedInformation = GetSprite(-1, patternX, patternY, patternZ, _activeFrameGroup.SpriteInfo.IsAnimation);
-                publicDrawTo(screenPosition.x, screenPosition.y, zoom, highlighted, highlightOpacity, cachedInformation);
+                var cachedSprite = GetSprite(-1, patternX, patternY, patternZ, _activeFrameGroup.SpriteInfo.IsAnimation);
+                if (cachedSprite != null)
+                    InternalDrawTo(screenPosition.x, screenPosition.y, zoom, highlighted, highlightOpacity, cachedSprite);
                 return;
             }
-            
+
             var colouriseMaterial = OpenTibiaUnity.GameManager.OutfitTypeMaterial;
             colouriseMaterial.SetColor("_HeadColor", _headColor);
             colouriseMaterial.SetColor("_TorsoColor", _torsoColor);
             colouriseMaterial.SetColor("_LegsColor", _legsColor);
             colouriseMaterial.SetColor("_DetailColor", _detailColor);
-            
+
+            bool dontDraw = false;
             for (patternY = 0; patternY < _activeFrameGroup.SpriteInfo.PatternHeight; patternY++) {
                 if (patternY > 0 && (_addOns & 1 << (patternY - 1)) == 0)
                     continue;
-                
+
                 int spriteIndex = GetSpriteIndex(-1, patternX, patternY, patternZ);
                 uint spriteId = _activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
-                var baseCachedSprite = OpenTibiaUnity.GameManager.AppearanceStorage.GetSprite(_activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex++]);
-                var channelsCachedSprites = OpenTibiaUnity.GameManager.AppearanceStorage.GetSprite(_activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex]);
 
-                colouriseMaterial.SetTexture("_ChannelsTex", channelsCachedSprites.texture);
-                colouriseMaterial.SetTextureOffset("_ChannelsTex", channelsCachedSprites.rect.position - baseCachedSprite.rect.position);
+                CachedSprite baseSprite, colorSprite;
+                OpenTibiaUnity.AppearanceStorage.GetSprite(_activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex++], out baseSprite);
+                OpenTibiaUnity.AppearanceStorage.GetSprite(_activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex], out colorSprite);
 
-                publicDrawTo(screenPosition.x, screenPosition.y, zoom, highlighted, highlightOpacity, baseCachedSprite);
-                publicDrawTo(screenPosition.x, screenPosition.y, zoom, highlighted, highlightOpacity, baseCachedSprite, colouriseMaterial);
+                // if these are not loaded yet we should still continue to
+                // ensure that next time all the needed layers are loaded!
+                if (baseSprite == null || colorSprite == null)
+                    dontDraw = true;
+
+                if (!dontDraw) {
+                    colouriseMaterial.SetTexture("_ChannelsTex", colorSprite.texture);
+                    colouriseMaterial.SetTextureOffset("_ChannelsTex", colorSprite.rect.position - baseSprite.rect.position);
+
+                    InternalDrawTo(screenPosition.x, screenPosition.y, zoom, highlighted, highlightOpacity, baseSprite);
+                    InternalDrawTo(screenPosition.x, screenPosition.y, zoom, highlighted, highlightOpacity, baseSprite, colouriseMaterial);
+                }
             }
         }
 

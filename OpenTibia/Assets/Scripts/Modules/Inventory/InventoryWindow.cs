@@ -188,7 +188,7 @@ namespace OpenTibiaUnity.Modules.Inventory
                 var @object = BodyContainerView.Objects[i];
                 if (@object) {
                     @object.Animate(OpenTibiaUnity.TicksMillis);
-                    @object.DrawTo(new Vector2(Constants.FieldSize * i, 0), zoom, 0, 0, 0);
+                    @object.Draw(new Vector2(Constants.FieldSize * i, 0), zoom, 0, 0, 0);
                 }
             }
 

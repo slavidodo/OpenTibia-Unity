@@ -7,7 +7,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
     {
         private RenderTexture _renderTexture = new RenderTexture(Constants.WorldMapScreenWidth, Constants.WorldMapScreenHeight, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
         private Mesh _lightMesh = new Mesh();
-        private Material _lightMaterial;
+        private MeshRenderer meshRendere;
         private Matrix4x4 _lightTransformationMatrix = new Matrix4x4();
         private Color32[] _colorData = new Color32[(Constants.MapSizeX + 1) * (Constants.MapSizeY + 1)];
         
@@ -21,7 +21,6 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 
         public MeshBasedLightmapRenderer() {
             CreateMeshBuffers();
-            _lightMaterial = new Material(Shader.Find("Hidden/Internal-Colored"));
 
             for (int i = 0; i < _colorData.Length; i++)
                 _colorData[i] = new Color32(255, 255, 255, 255);
@@ -77,7 +76,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             _renderTexture.Release();
             RenderTexture.active = _renderTexture;
 
-            _lightMaterial.SetPass(0);
+            OpenTibiaUnity.GameManager.InternalColoredMaterial.SetPass(0);
             Graphics.DrawMeshNow(_lightMesh, _lightTransformationMatrix);
 
             RenderTexture.active = previousRenderTexture;
@@ -126,17 +125,15 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         }
 
         public override void SetFieldBrightness(int x, int y, int brightness, bool aboveGround) {
-            var ambient = OpenTibiaUnity.WorldMapStorage.AmbientCurrentColor;
             brightness = Mathf.Clamp(brightness, 0, 255);
 
-            Color32 color32 = Utils.Utility.MulColor32(ambient, brightness / 255f);
-            Color32 staticColor = aboveGround ? Constants.ColorAboveGround : Constants.ColorBelowGround;
+            Color color = Utils.Utility.MulColor32(OpenTibiaUnity.WorldMapStorage.AmbientCurrentColor, brightness / 255f);
+            Color staticColor = aboveGround ? Constants.ColorAboveGround : Constants.ColorBelowGround;
 
-            float publicFactor = (OpenTibiaUnity.OptionStorage.AmbientBrightness / 100f) * ((255f - color32.r) / 255f);
-            color32 = (Color)color32 + Utils.Utility.MulColor32(staticColor, publicFactor);
+            color += staticColor * (OpenTibiaUnity.OptionStorage.AmbientBrightness / 100f) * (1f - color.r);
 
             int index = ToColorIndex(x, y);
-            _colorData[index] = color32;
+            _colorData[index] = color;
         }
 
         public override int GetFieldBrightness(int x, int y) {

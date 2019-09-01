@@ -134,9 +134,9 @@ namespace OpenTibiaUnity.Modules.Outfit
                     screenPosition *= _spacingFactor;
 
                 if (_currentOutfit is OutfitInstance)
-                    _currentOutfit.DrawTo(screenPosition, zoom, (int)_currentDirection, 0, 0);
+                    _currentOutfit.Draw(screenPosition, zoom, (int)_currentDirection, 0, 0);
                 else
-                    _currentOutfit.DrawTo(screenPosition, zoom, 0, 0, 0);
+                    _currentOutfit.Draw(screenPosition, zoom, 0, 0, 0);
                 
                 if (!_rawImageOutfit.enabled)
                     _rawImageOutfit.enabled = true;
@@ -150,9 +150,9 @@ namespace OpenTibiaUnity.Modules.Outfit
                 screenPosition += new Vector2(Constants.FieldSize * 2, 0);
 
                 if (_currentMount is OutfitInstance)
-                    _currentMount.DrawTo(screenPosition, zoom, (int)_currentDirection, 0, 0);
+                    _currentMount.Draw(screenPosition, zoom, (int)_currentDirection, 0, 0);
                 else
-                    _currentMount.DrawTo(screenPosition, zoom, 0, 0, 0);
+                    _currentMount.Draw(screenPosition, zoom, 0, 0, 0);
                 
                 if (!_rawImageMount.enabled)
                     _rawImageMount.enabled = true;

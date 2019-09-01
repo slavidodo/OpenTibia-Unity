@@ -17,6 +17,7 @@
             
             ReadArea(message, 0, 0, Constants.MapSizeX - 1, Constants.MapSizeY - 1);
             WorldMapStorage.Valid = true;
+            WorldMapStorage.CacheRefresh = true;
         }
 
         private void ParseMapTopRow(Internal.ByteArray message) {
@@ -28,6 +29,7 @@
             WorldMapStorage.ScrollMap(0, 1);
             WorldMapStorage.InvalidateOnscreenMessages();
             ReadArea(message, 0, 0, Constants.MapSizeX - 1, 0);
+            WorldMapStorage.CacheRefresh = true;
         }
 
         private void ParseMapRightRow(Internal.ByteArray message) {
@@ -39,6 +41,7 @@
             WorldMapStorage.ScrollMap(-1, 0);
             WorldMapStorage.InvalidateOnscreenMessages();
             ReadArea(message, Constants.MapSizeX - 1, 0, Constants.MapSizeX - 1, Constants.MapSizeY - 1);
+            WorldMapStorage.CacheRefresh = true;
         }
 
         private void ParseMapBottomRow(Internal.ByteArray message) {
@@ -50,6 +53,7 @@
             WorldMapStorage.ScrollMap(0, -1);
             WorldMapStorage.InvalidateOnscreenMessages();
             ReadArea(message, 0, Constants.MapSizeY - 1, Constants.MapSizeX - 1, Constants.MapSizeY - 1);
+            WorldMapStorage.CacheRefresh = true;
         }
 
         private void ParseMapLeftRow(Internal.ByteArray message) {
@@ -61,6 +65,7 @@
             WorldMapStorage.ScrollMap(1, 0);
             WorldMapStorage.InvalidateOnscreenMessages();
             ReadArea(message, 0, 0, 0, Constants.MapSizeY - 1);
+            WorldMapStorage.CacheRefresh = true;
         }
 
         private void ParseFieldData(Internal.ByteArray message) {
@@ -78,6 +83,8 @@
                 int cost = WorldMapStorage.GetMiniMapCost(mapPosition);
                 MiniMapStorage.UpdateField(absolutePosition, color, cost, false);
             }
+
+            WorldMapStorage.CacheRefresh = true;
         }
 
         private void ParseCreateOnMap(Internal.ByteArray message) {
@@ -118,6 +125,8 @@
                 int cost = WorldMapStorage.GetMiniMapCost(mapPosition);
                 MiniMapStorage.UpdateField(absolutePosition, color, cost, false);
             }
+
+            WorldMapStorage.CacheRefresh = true;
         }
 
         private void ParseChangeOnMap(Internal.ByteArray message) {
@@ -183,6 +192,8 @@
                 int cost = WorldMapStorage.GetMiniMapCost(mapPosition);
                 MiniMapStorage.UpdateField(absolutePosition, color, cost, false);
             }
+
+            WorldMapStorage.CacheRefresh = true;
         }
 
         private void ParseDeleteOnMap(Internal.ByteArray message) {
@@ -237,6 +248,8 @@
                 int cost = WorldMapStorage.GetMiniMapCost(mapPosition);
                 MiniMapStorage.UpdateField(absolutePosition, color, cost, false);
             }
+
+            WorldMapStorage.CacheRefresh = true;
         }
 
         private void ParseCreatureMove(Internal.ByteArray message) {
@@ -325,6 +338,8 @@
                 int cost = WorldMapStorage.GetMiniMapCost(newMapPosition);
                 MiniMapStorage.UpdateField(newAbsolutePosition, color, cost, false);
             }
+
+            WorldMapStorage.CacheRefresh = true;
         }
 
         private void ParseCancelWalk(Internal.ByteArray message) {
@@ -386,6 +401,8 @@
                     MiniMapStorage.UpdateField(absolutePosition, color, cost, false);
                 }
             }
+
+            WorldMapStorage.CacheRefresh = true;
         }
 
         private void ParseMapBottomFloor(Internal.ByteArray message) {
@@ -424,6 +441,8 @@
                     MiniMapStorage.UpdateField(absolutePosition, color, cost, false);
                 }
             }
+
+            WorldMapStorage.CacheRefresh = true;
         }
 
         private void ParseAutomapFlag(Internal.ByteArray message) {

@@ -1,10 +1,12 @@
-﻿using OpenTibiaUnity.Core.Appearances;
+﻿using System.Collections.Generic;
+using System.IO;
+using OpenTibiaUnity.Core.Appearances;
 using OpenTibiaUnity.Core.Components;
 using OpenTibiaUnity.Core.Creatures;
 using OpenTibiaUnity.Core.Game;
 using OpenTibiaUnity.Core.Input.GameAction;
 using UnityEngine;
-
+using UnityEngine.UI;
 using PlayerAction = OpenTibiaUnity.Protobuf.Shared.PlayerAction;
 
 namespace OpenTibiaUnity.Modules.GameWindow
@@ -14,9 +16,12 @@ namespace OpenTibiaUnity.Modules.GameWindow
     {
         [SerializeField] private GameWorldMap _gameWorldMap = null;
         [SerializeField] private TMPro.TextMeshProUGUI _framecounterText = null;
+        [SerializeField] private RawImage _onscreenTextImage = null;
+
+        public bool shouldTakeScreenshot = false;
         
         private Rect _cachedScreenRect = Rect.zero;
-        private bool _screenRectCached = false;
+        private bool _screenRectDirty = false;
         private bool _mouseCursorOverRenderer = false;
 
         private int _lastScreenWidth = 0;
@@ -24,11 +29,10 @@ namespace OpenTibiaUnity.Modules.GameWindow
         private int _lastFramerate = 0;
         private int _lastPing = 9999;
 
+        private RenderTexture _onscreenTextRenderTexture = null;
         private ObjectDragImpl<GameMapContainer> _dragHandler;
         
-        private RectTransform worldMapRectTransform {
-            get => _gameWorldMap.rectTransform;
-        }
+        private RectTransform worldMapRectTransform { get => _gameWorldMap.rectTransform; }
 
         protected override void Start() {
             base.Start();
@@ -57,6 +61,10 @@ namespace OpenTibiaUnity.Modules.GameWindow
                 RenderWorldMap();
         }
 
+        protected override void OnRectTransformDimensionsChange() {
+            InvalidateScreenRect();
+        }
+
         protected void OnWorldMapPointerEnter() {
             _mouseCursorOverRenderer = true;
         }
@@ -74,8 +82,11 @@ namespace OpenTibiaUnity.Modules.GameWindow
                 return;
 #endif
 
-            if (!_screenRectCached)
+            bool shouldCreateOnscreenTexture = false;
+            if (_screenRectDirty) {
+                shouldCreateOnscreenTexture = true;
                 CacheScreenRect();
+            }
 
             var gameManager = OpenTibiaUnity.GameManager;
             var worldMapStorage = OpenTibiaUnity.WorldMapStorage;
@@ -92,52 +103,129 @@ namespace OpenTibiaUnity.Modules.GameWindow
 
                 if (ContextMenuBase.CurrentContextMenu != null || ObjectDragImpl.AnyDraggingObject)
                     worldMapRenderer.HighlightTile = null;
-
-                gameManager.WorldMapRenderingTexture.Release();
-                RenderTexture.active = gameManager.WorldMapRenderingTexture;
-                worldMapRenderer.Render(worldMapRectTransform.rect);
+                
+                gameManager.WorldMapRenderTexture.Release();
+                RenderTexture.active = gameManager.WorldMapRenderTexture;
+                var error = worldMapRenderer.RenderWorldMap(worldMapRectTransform.rect);
                 RenderTexture.active = null;
+                
+                // no point in rendering text if rendering worldmap failed
+                if (error == RenderError.None) {
+                    if (_onscreenTextRenderTexture == null || shouldCreateOnscreenTexture) {
+                        _onscreenTextRenderTexture?.Release();
+                        _onscreenTextRenderTexture = new RenderTexture(_lastScreenWidth, _lastScreenHeight, 0, RenderTextureFormat.ARGB32);
+                        _onscreenTextImage.texture = _onscreenTextRenderTexture;
+                    } else {
+                        _onscreenTextRenderTexture.Release();
+                    }
+
+                    RenderTexture.active = _onscreenTextRenderTexture;
+                    worldMapRenderer.RenderOnscreenText(_cachedScreenRect);
+                    RenderTexture.active = null;
+
+                    if (!_onscreenTextImage.enabled)
+                        _onscreenTextImage.enabled = true;
+                }
 
                 // setting the clip area
-                _gameWorldMap.rawImage.uvRect = worldMapRenderer.CalculateClipRect();
+                var clipRect = worldMapRenderer.CalculateClipRect();
+                if (clipRect != _gameWorldMap.rawImage.uvRect)
+                    _gameWorldMap.rawImage.uvRect = clipRect;
 
-                if (worldMapRenderer.Framerate != _lastFramerate) {
+                if (worldMapRenderer.Framerate != _lastFramerate || _lastPing != protocolGame.Ping) {
                     _lastFramerate = worldMapRenderer.Framerate;
                     _lastPing = protocolGame.Ping;
-                    _framecounterText.text = string.Format("FPS: <color=#{0:X6}>{1}</color>\nPing:{2}", GetFramerateColor(_lastFramerate), _lastFramerate, _lastPing);
+                    var fpsColor = GetFramerateColor(_lastFramerate);
+                    var pingColor = GetPingColor(_lastPing);
+                    _framecounterText.text = string.Format("FPS: <color=#{0:X6}>{1}</color>\nPing: <color=#{2:X6}>{3}</color>", fpsColor, _lastFramerate, pingColor, _lastPing);
+                }
+
+                // tho, this is a very effecient way of taking screenshots
+                // it doesn't consider windows ontop of the gamewindow that
+                // may be blocking it the view
+                if (shouldTakeScreenshot && error == RenderError.None) {
+                    shouldTakeScreenshot = false;
+
+                    var tmpTex2D = ScreenCapture.CaptureScreenshotAsTexture();
+                    tmpTex2D.Apply();
+
+                    int startX = (int)_cachedScreenRect.x;
+                    int startY = (int)(_lastScreenHeight - _cachedScreenRect.height - _cachedScreenRect.y);
+                    int width = (int)_cachedScreenRect.width;
+                    int height = (int)_cachedScreenRect.height;
+                    
+                    var tex2D = new Texture2D((int)_cachedScreenRect.width, (int)_cachedScreenRect.height, TextureFormat.ARGB32, false);
+                    tex2D.SetPixels(0, 0, tex2D.width, tex2D.height, tmpTex2D.GetPixels(startX, startY, width, height));
+                    tex2D.Apply();
+                    byte[] texBytes = tex2D.EncodeToPNG();
+
+                    if (!Directory.Exists(Path.Combine(Application.persistentDataPath, "Screenshots")))
+                        Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, "Screenshots"));
+
+                    var texPath = Path.Combine(Application.persistentDataPath, "Screenshots/Screenshot_" + protocolGame.CharacterName + "_" +
+                        System.DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss") + ".png");
+
+                    File.WriteAllBytes(texPath, texBytes);
+                    Debug.Log($"Saved Screenshot to : {texPath}");
+                } else if (shouldTakeScreenshot) {
+                    shouldTakeScreenshot = false;
                 }
             } else {
                 _framecounterText.text = "";
             }
         }
-
-        protected override void OnDestroy() => base.OnDestroy();
-
+        
         private static uint GetFramerateColor(int framerate) {
             if (framerate < 10)
-                return 0xFFFF00;
+                return Core.Chat.MessageColors.Red;
             else if (framerate < 30)
-                return 0xF55E5E;
+                return Core.Chat.MessageColors.Orange;
             else if (framerate < 58)
-                return 0xFE6500;
+                return Core.Chat.MessageColors.Yellow;
+            else
+                return Core.Chat.MessageColors.Green;
+        }
 
-            return 0x00EB00;
+        private static uint GetPingColor(int ping) {
+            if (ping < 200)
+                return Core.Chat.MessageColors.Green;
+            else if (ping < 500)
+                return Core.Chat.MessageColors.Yellow;
+            else if (ping < 1000)
+                return Core.Chat.MessageColors.Orange;
+            else
+                return Core.Chat.MessageColors.Red;
         }
         
         public void CacheScreenRect() {
-            if (!_screenRectCached) {
-                Vector2 size = Vector2.Scale(worldMapRectTransform.rect.size, worldMapRectTransform.lossyScale);
-                _cachedScreenRect = new Rect(worldMapRectTransform.position.x, Screen.height - worldMapRectTransform.position.y, size.x, size.y);
-                _cachedScreenRect.x -= worldMapRectTransform.pivot.x * size.x;
-                _cachedScreenRect.y -= (1.0f - worldMapRectTransform.pivot.y) * size.y;
+            if (_screenRectDirty) {
+                _screenRectDirty = false;
+
+                var position = worldMapRectTransform.position;
+                var pivot = worldMapRectTransform.pivot;
+                var size = Vector2.Scale(worldMapRectTransform.rect.size, worldMapRectTransform.lossyScale);
+                
+                _cachedScreenRect = new Rect {
+                    x = position.x - pivot.x * size.x,
+                    y = Screen.height - position.y - (1.0f - pivot.y) * size.y,
+                    size = size,
+                };
 
                 _lastScreenWidth = Screen.width;
                 _lastScreenHeight = Screen.height;
-                _screenRectCached = true;
+
+                _onscreenTextImage.rectTransform.offsetMin = new Vector2 {
+                    x = -_cachedScreenRect.x,
+                    y = -(Screen.height - _cachedScreenRect.height - _cachedScreenRect.y),
+                };
+                _onscreenTextImage.rectTransform.offsetMax = new Vector2 {
+                    x = Screen.width - _cachedScreenRect.width - _cachedScreenRect.x,
+                    y = _cachedScreenRect.y
+                };
             }
         }
 
-        public void InvalidateScreenRect() => _screenRectCached = false;
+        public void InvalidateScreenRect() => _screenRectDirty = true;
 
         public void OnMouseUp(Event e, MouseButton mouseButton, bool repeat) {
             if (publicStartMouseAction(e.mousePosition, mouseButton, true, false, false))

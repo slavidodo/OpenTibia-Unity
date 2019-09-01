@@ -73,8 +73,8 @@ namespace OpenTibiaUnity.Core
             return new Color(red, green, blue);
         }
 
-        public static Color ColorFromRGBA(uint r, uint g, uint b, uint a) {
-            return new Color((r & 255) / 255f, (g & 255) / 255f, (b & 255) / 255f, (a & 255) / 255f);
+        public static Color ColorFromRGBA(byte r, byte g, byte b, byte a) {
+            return new Color32(r, g, b, a);
         }
 
         public static Color ColorFromARGB(uint ARGB) {
@@ -83,11 +83,11 @@ namespace OpenTibiaUnity.Core
             uint g = ARGB >> 8;
             uint b = ARGB;
 
-            return ColorFromRGBA(r, g, b, a);
+            return ColorFromRGBA((byte)r, (byte)g, (byte)b, (byte)a);
         }
 
-        public static Color ColorFromRGB(uint r, uint g, uint b) {
-            return new Color((r & 255) / 255f, (g & 255) / 255f, (b & 255) / 255f, 1f);
+        public static Color ColorFromRGB(byte r, byte g, byte b) {
+            return new Color32(r, g, b, 255);
         }
 
         public static Color ColorFromRGB(uint rgb) {
@@ -95,7 +95,7 @@ namespace OpenTibiaUnity.Core
             uint g = rgb >> 8;
             uint b = rgb;
 
-            return ColorFromRGB(r, g, b);
+            return ColorFromRGB((byte)r, (byte)g, (byte)b);
         }
 
         public static Color ColorFrom8Bit(int eightBit) {
@@ -116,7 +116,7 @@ namespace OpenTibiaUnity.Core
             return eightBit;
         }
 
-        private static uint ARGBFormatpublic(uint r, uint g, uint b, uint a) {
+        private static uint ARGBFormatInternal(uint r, uint g, uint b, uint a) {
             return a << 24 | r << 16 | g << 8 | b;
         }
 
@@ -124,7 +124,7 @@ namespace OpenTibiaUnity.Core
             uint r = (eightBit / 36) % 6 * 51;
             uint g = (eightBit / 6) % 6 * 51;
             uint b = eightBit % 6 * 51;
-            return ARGBFormatpublic(r, g, b, 255U);
+            return ARGBFormatInternal(r, g, b, 255U);
         }
 
         public static uint ARGBFromColor(Color color) {
@@ -132,7 +132,7 @@ namespace OpenTibiaUnity.Core
             uint g = (uint)(color.g * 255);
             uint b = (uint)(color.b * 255);
             uint a = (uint)(color.a * 255);
-            return ARGBFormatpublic(r, g, b, a);
+            return ARGBFormatInternal(r, g, b, a);
         }
     }
 }

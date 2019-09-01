@@ -6,7 +6,6 @@ namespace OpenTibiaUnity.Core.Appearances.Rendering
     public class MarksView
     {
         private static Color[] s_FrameColors;
-        private static Material s_Material;
 
         private const int FrameSizesCount = 15;
         private const int CacheDimention = 10;
@@ -21,8 +20,6 @@ namespace OpenTibiaUnity.Core.Appearances.Rendering
             s_FrameColors[Marks.MarkAimFollow] = Colors.ColorFromRGB(0x88FF88);
             s_FrameColors[Marks.MarkAttack] = Colors.ColorFromRGB(0xFF0000);
             s_FrameColors[Marks.MarkFollow] = Colors.ColorFromRGB(0x00FF00);
-
-            s_Material = new Material(Shader.Find("Hidden/Internal-Colored"));
         }
 
         private List<MarksViewInformation> _marksViewInformations;

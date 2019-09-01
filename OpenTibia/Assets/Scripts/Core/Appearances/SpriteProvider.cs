@@ -5,6 +5,13 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Appearances
 {
+    public enum SpriteLoadingStatus
+    {
+        Loading,
+        Failed,
+        Completed,
+    }
+
     public class SpriteTypeImpl
     {
         public string File;
@@ -13,7 +20,7 @@ namespace OpenTibiaUnity.Core.Appearances
         public uint LastSpriteId;
     }
 
-    public class CachedSpriteInformation
+    public class CachedSprite
     {
         public uint id = 0;
         public Texture2D texture = null;
@@ -26,9 +33,10 @@ namespace OpenTibiaUnity.Core.Appearances
 
         List<SpriteTypeImpl> _spriteSheet = new List<SpriteTypeImpl>();
         Dictionary<string, Texture2D> _cachedTextures = new Dictionary<string, Texture2D>();
-        List<CachedSpriteInformation> _spriteCachedInformation = new List<CachedSpriteInformation>();
+        Dictionary<string, AssetBundleRequest> _activeTextureRequests = new Dictionary<string, AssetBundleRequest>();
+        List<CachedSprite> _cachedSprites = new List<CachedSprite>();
 
-        private static Vector2[] s_SpriteTypesSizesRef = new Vector2[] {
+        private static Vector2[] SpriteTypeSizeRefs = new Vector2[] {
             new Vector2(1.0f, 1.0f),
             new Vector2(1.0f, 2.0f),
             new Vector2(2.0f, 1.0f),
@@ -69,98 +77,116 @@ namespace OpenTibiaUnity.Core.Appearances
 
             _spriteSheet.Clear();
             _cachedTextures.Clear();
-            _spriteCachedInformation.Clear();
+            _activeTextureRequests.Clear();
+            _cachedSprites.Clear();
         }
 
-        private bool GetSpriteInfo(uint spriteId, out string filename, out Rect spriteRect, out Vector2 realSpriteSize, out Texture2D tex2D) {
+        private SpriteLoadingStatus GetSpriteInfo(uint spriteId, out string filename, out Rect spriteRect, out Vector2 realSpriteSize, out Texture2D tex2D) {
             SpriteTypeImpl match = _spriteSheet.Find(m => spriteId >= m.FirstSpriteId && spriteId <= m.LastSpriteId);
-            tex2D = match != null ? GetOrLoadTexture(match.File) : null;
+
+            SpriteLoadingStatus loadingStatus = SpriteLoadingStatus.Failed;
+            if (match != null)
+                loadingStatus = GetOrLoadTexture(match.File, out tex2D);
+            else
+                tex2D = null;
 
             if (match == null || match.SpriteType < 1 || match.SpriteType > 4 || tex2D == null) {
                 filename = null;
                 spriteRect = Rect.zero;
                 realSpriteSize = Vector2.zero;
-                tex2D = null;
-                return false;
+                return loadingStatus;
             }
 
             filename = match.File;
-            realSpriteSize = s_SpriteTypesSizesRef[match.SpriteType - 1] * Constants.FieldSize;
+            realSpriteSize = SpriteTypeSizeRefs[match.SpriteType - 1] * Constants.FieldSize;
             uint realId = spriteId - match.FirstSpriteId;
             int texPerRow = (int)(tex2D.width / realSpriteSize.x);
 
             float x = (realId % texPerRow) * realSpriteSize.x;
             float y = tex2D.width - (realId / texPerRow * realSpriteSize.y) - realSpriteSize.y;
             spriteRect = new Rect(x / tex2D.width, y / tex2D.height, realSpriteSize.x / tex2D.width, realSpriteSize.y / tex2D.height);
-            return true;
+            return loadingStatus;
         }
 
-        public CachedSpriteInformation GetSprite(uint spriteId) {
-            var cachedInformation = FindCachedInformation(spriteId);
-            if (cachedInformation != null)
-                return cachedInformation;
+        public SpriteLoadingStatus GetSprite(uint spriteId, out CachedSprite cachedSprite) {
+            cachedSprite = FindCachedSprite(spriteId);
+            if (cachedSprite != null)
+                return SpriteLoadingStatus.Completed;
 
             string filename;
             Rect spriteRect;
             Vector2 realSize;
             Texture2D tex2D;
-            if (!GetSpriteInfo(spriteId, out filename, out spriteRect, out realSize, out tex2D))
-                return null;
+
+            var loadingStatus = GetSpriteInfo(spriteId, out filename, out spriteRect, out realSize, out tex2D);
+            if (loadingStatus != SpriteLoadingStatus.Completed)
+                return loadingStatus;
             
-            cachedInformation = new CachedSpriteInformation();
-            cachedInformation.id = spriteId;
-            cachedInformation.rect = spriteRect;
-            cachedInformation.spriteSize = realSize;
-            cachedInformation.texture = tex2D;
+            cachedSprite = new CachedSprite();
+            cachedSprite.id = spriteId;
+            cachedSprite.rect = spriteRect;
+            cachedSprite.spriteSize = realSize;
+            cachedSprite.texture = tex2D;
 
-            BinaryInsert(cachedInformation);
-            return cachedInformation;
+            BinaryInsert(cachedSprite);
+            return SpriteLoadingStatus.Completed;
         }
 
-        private Texture2D GetOrLoadTexture(string filename) {
-            Texture2D tex2D;
+        private SpriteLoadingStatus GetOrLoadTexture(string filename, out Texture2D tex2D) {
             if (_cachedTextures.TryGetValue(filename, out tex2D))
-                return tex2D;
+                return SpriteLoadingStatus.Completed;
 
-            tex2D = _spritesAssetBundle.LoadAsset<Texture2D>(filename);
-            if (tex2D)
-                _cachedTextures.Add(filename, tex2D);
+            AssetBundleRequest asyncRequest;
+            if (!_activeTextureRequests.TryGetValue(filename, out asyncRequest)) {
+                asyncRequest = _spritesAssetBundle.LoadAssetAsync<Texture2D>(filename);
+                _activeTextureRequests.Add(filename, asyncRequest);
+            }
 
-            return tex2D;
+            if (!asyncRequest.isDone) {
+                return SpriteLoadingStatus.Loading;
+            } else if (asyncRequest.asset == null) {
+                _activeTextureRequests.Remove(filename);
+                return SpriteLoadingStatus.Failed;
+            }
+
+            tex2D = asyncRequest.asset as Texture2D;
+            _activeTextureRequests.Remove(filename);
+            _cachedTextures.Add(filename, tex2D);
+            return SpriteLoadingStatus.Completed;
         }
 
-        private CachedSpriteInformation FindCachedInformation(uint spriteId) {
-            int lastIndex = _spriteCachedInformation.Count - 1;
+        private CachedSprite FindCachedSprite(uint spriteId) {
+            int lastIndex = _cachedSprites.Count - 1;
             int index = 0;
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
-                var cachedInformation = _spriteCachedInformation[tmpIndex];
-                if (cachedInformation.id > spriteId)
+                var cachedSprite = _cachedSprites[tmpIndex];
+                if (cachedSprite.id > spriteId)
                     index = tmpIndex + 1;
-                else if (cachedInformation.id < spriteId)
+                else if (cachedSprite.id < spriteId)
                     lastIndex = tmpIndex - 1;
                 else
-                    return cachedInformation;
+                    return cachedSprite;
             }
 
             return null;
         }
 
-        private void BinaryInsert(CachedSpriteInformation cachedInformation) {
+        private void BinaryInsert(CachedSprite cachedSprite) {
             int index = 0;
-            int lastIndex = _spriteCachedInformation.Count - 1;
+            int lastIndex = _cachedSprites.Count - 1;
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
-                var foundCache = _spriteCachedInformation[tmpIndex];
-                if (foundCache.id < cachedInformation.id)
+                var foundCache = _cachedSprites[tmpIndex];
+                if (foundCache.id < cachedSprite.id)
                     index = tmpIndex + 1;
-                else if (foundCache.id > cachedInformation.id)
+                else if (foundCache.id > cachedSprite.id)
                     lastIndex = tmpIndex - 1;
                 else
                     return;
             }
 
-            _spriteCachedInformation.Insert(index, cachedInformation);
+            _cachedSprites.Insert(index, cachedSprite);
         }
     }
 }
