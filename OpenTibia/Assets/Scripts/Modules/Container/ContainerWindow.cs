@@ -153,10 +153,10 @@ namespace OpenTibiaUnity.Modules.Container
                     else if (eventModifiers == EventModifiers.Control)
                         action = AppearanceActions.ContextMenu;
                     else if (eventModifiers == EventModifiers.Alt)
-                        action = AppearanceActions.Open;
+                        action = @object.Type.IsContainer ? AppearanceActions.Open : AppearanceActions.Use;
                 } else if (mouseButton == MouseButton.Right) {
                     if (eventModifiers == EventModifiers.None)
-                        action = AppearanceActions.Open;
+                        action = @object.Type.IsContainer ? AppearanceActions.Open : AppearanceActions.Use;
                     else if (eventModifiers == EventModifiers.Control)
                         action = AppearanceActions.ContextMenu;
                 } else if (mouseButton == MouseButton.Both) {

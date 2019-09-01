@@ -235,7 +235,6 @@ namespace OpenTibiaUnity.Modules.Inventory
             if (optionStorage.MousePreset == MousePresets.LeftSmartClick) {
                 if (eventModifiers == EventModifiers.None || eventModifiers == EventModifiers.Control) {
                     if (mouseButton == MouseButton.Left || mouseButton == MouseButton.None) {
-                        action = @object.Type.IsContainer ? AppearanceActions.Open : AppearanceActions.Use;
                         var defaultAction = @object.Type.DefaultAction;
                         if (defaultAction == Protobuf.Shared.PlayerAction.Open)
                             action = AppearanceActions.Open;
