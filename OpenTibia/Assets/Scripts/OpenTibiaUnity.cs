@@ -2,13 +2,18 @@
 {
     public static class OpenTibiaUnity
     {
-        public static int TicksMillis { get => (int)(UnityEngine.Time.time * 1000); }
-        public static int TicksSeconds { get => (int)UnityEngine.Time.time; }
-        public static System.Threading.Thread MainThread { get; set; }
+        public static float TicksMillisF { get => GameManager.TicksMillisF; }
+        public static int TicksMillis { get => GameManager.TicksMillis; }
+        public static float TicksSecondsF { get => GameManager.TicksSecondsF; }
+        public static int TicksSeconds { get => GameManager.TicksSeconds; }
+        public static float DeltaTicksMillisF { get => GameManager.DeltaTicksMillisF; }
+        public static int DeltaTicksMillis { get => GameManager.DeltaTicksMillis; }
+        public static float DeltaTicksSecondsF { get => GameManager.DeltaTicksSecondsF; }
+        public static int DeltaTicksSeconds { get => GameManager.DeltaTicksSeconds; }
+        public static System.Threading.Thread MainThread { get => GameManager.MainThread; }
         public static string GraphicsVendor { get; set; }
         public static string GraphicsDevice { get; set; }
         public static string GraphicsVersion { get; set; }
-        public static int StartupTimeMillis { get; set; } = 0;
         public static int DeltaTimeMillis { get => (int)(UnityEngine.Time.deltaTime * 1000); }
         public static bool Quiting { get; set; }
 

@@ -256,8 +256,7 @@ namespace OpenTibiaUnity.Modules.Hotkeys
         private void OnUseOnYourselfValueChanged(bool value) {
             if (_changingVisibility || _changingSelectedAction)
                 return;
-
-            print("Changing to self");
+            
             var objectAction = GetHotkeyActionForPanel<HotkeyObjectAction>(_activeActionPanel);
             if (objectAction == null)
                 return;
@@ -270,7 +269,6 @@ namespace OpenTibiaUnity.Modules.Hotkeys
             if (_changingVisibility || _changingSelectedAction)
                 return;
 
-            print("Changing to target");
             var objectAction = GetHotkeyActionForPanel<HotkeyObjectAction>(_activeActionPanel);
             if (objectAction == null)
                 return;
@@ -283,7 +281,6 @@ namespace OpenTibiaUnity.Modules.Hotkeys
             if (_changingVisibility || _changingSelectedAction)
                 return;
             
-            print("Changing to crosshair");
             var objectAction = GetHotkeyActionForPanel<HotkeyObjectAction>(_activeActionPanel);
             if (objectAction == null)
                 return;

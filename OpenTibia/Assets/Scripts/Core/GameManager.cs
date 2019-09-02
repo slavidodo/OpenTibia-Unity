@@ -107,6 +107,15 @@ namespace OpenTibiaUnity.Core
         public Texture2D SpeechFlagsTexture = null;
 
         // Properties
+        public Thread MainThread { get; private set; }
+        public float TicksSecondsF { get; private set; }
+        public int TicksSeconds { get; private set; }
+        public float TicksMillisF { get; private set; }
+        public int TicksMillis { get; private set; }
+        public float DeltaTicksSecondsF { get; private set; }
+        public int DeltaTicksSeconds { get; private set; }
+        public float DeltaTicksMillisF { get; private set; }
+        public int DeltaTicksMillis { get; private set; }
         public Options.OptionStorage OptionStorage { get; private set; }
         public Input.InputHandler InputHandler { get; private set; }
         public Appearances.AppearanceStorage AppearanceStorage { get; private set; }
@@ -191,11 +200,12 @@ namespace OpenTibiaUnity.Core
         private void Awake() {
             // setup static fields
             Instance = this;
+            MainThread = Thread.CurrentThread;
+
             OpenTibiaUnity.GraphicsVendor = SystemInfo.graphicsDeviceVendor;
             OpenTibiaUnity.GraphicsDevice = SystemInfo.graphicsDeviceName;
             OpenTibiaUnity.GraphicsVersion = SystemInfo.graphicsDeviceVersion;
-            OpenTibiaUnity.MainThread = Thread.CurrentThread;
-
+            
 #if !UNITY_EDITOR && UNITY_STANDALONE_WIN
             WindowPtr = FindWindow(null, "OpenTibiaUnity");
 #endif
@@ -277,8 +287,22 @@ namespace OpenTibiaUnity.Core
             QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = 1000;
         }
-
+        
         private void FixedUpdate() {
+            // this is called before any other action
+            float time = Time.time;
+            float deltaTime = Time.deltaTime;
+
+            TicksSecondsF = time;
+            TicksSeconds = (int)TicksSecondsF;
+            TicksMillisF = time * 1000;
+            TicksMillis = (int)TicksMillisF;
+
+            DeltaTicksSecondsF = deltaTime;
+            DeltaTicksSeconds = (int)DeltaTicksSecondsF;
+            DeltaTicksMillisF = deltaTime * 1000;
+            DeltaTicksMillis = (int)DeltaTicksMillisF;
+
             DequeueMainThreadActions();
 
             if (ShouldSendPingAt != -1 && OpenTibiaUnity.TicksMillis >= ShouldSendPingAt) {
