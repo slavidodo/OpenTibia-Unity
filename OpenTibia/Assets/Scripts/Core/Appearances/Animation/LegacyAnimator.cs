@@ -33,7 +33,7 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
                     else
                         _currentPhase = 0;
                 } else {
-                    CalculateSynchronousPhase();
+                    CalculateSynchronousPhase(OpenTibiaUnity.TicksMillis);
                 }
             }
         }
@@ -51,7 +51,7 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
             else if (_phaseCount != 0)
                 PhaseDuration = 1000 / _phaseCount;
             else
-                PhaseDuration = 40;
+                PhaseDuration = 80;
         }
 
         public void Initialise(AppearanceType type) {
@@ -80,7 +80,7 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
                             : CalculateMovementPhaseDuration(delay);
 
                         if (duration < 0 && !Async) {
-                            CalculateSynchronousPhase();
+                            CalculateSynchronousPhase(ticks);
                         } else {
                             _currentPhase = nextPhase;
                             _currentPhaseDuration = Mathf.Max(0, duration);
@@ -104,17 +104,15 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
             _nextFrameStrategy.Reset();
         }
 
-        private void CalculateSynchronousPhase() {
-            int totalDurations = PhaseDuration * _phaseCount;
-            int ticks = OpenTibiaUnity.TicksMillis;
-            int loc4 = ticks % totalDurations;
+        private void CalculateSynchronousPhase(int ticks) {
+            int fullCycleDuration = PhaseDuration * _phaseCount;
+            int durationLeft = ticks % fullCycleDuration;
 
             int tmpDurations = 0;
             for (int i = 0; i < _phaseCount; i++) {
-                if (loc4 >= PhaseDuration && loc4 < PhaseDuration + tmpDurations) {
+                if (durationLeft >= PhaseDuration && durationLeft < PhaseDuration + tmpDurations) {
                     _currentPhase = i;
-                    int loc8 = loc4 - tmpDurations;
-                    _currentPhaseDuration = PhaseDuration - loc8;
+                    _currentPhaseDuration = PhaseDuration - (durationLeft - tmpDurations);
                     break;
                 }
 

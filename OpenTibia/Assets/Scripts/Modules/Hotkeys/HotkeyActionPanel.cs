@@ -47,7 +47,6 @@ namespace OpenTibiaUnity.Modules.Hotkeys
         public override void Select() {
             base.Select();
             toggleComponent.isOn = true;
-            toggleComponent.Select();
         }
 
     }

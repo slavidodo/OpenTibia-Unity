@@ -208,23 +208,11 @@ namespace OpenTibiaUnity.Core.Options
             return list[index];
         }
 
-        private const string GeneralFileName = "general.json";
+        public const string GeneralFileName = "general.json";
+        public const string LegacyHotkeysFileName = "legacy_hotkeys.json";
 
         private bool LoadGeneral() {
-            string jsonData = null;
-
-            var path = Path.Combine(Application.persistentDataPath, GeneralFileName);
-            if (!File.Exists(path))
-                return false;
-
-            FileStream stream = new FileStream(path, FileMode.Open);
-            if (stream == null)
-                return false;
-
-            using (StreamReader reader = new StreamReader(stream))
-                jsonData = reader.ReadToEnd();
-
-            stream.Close();
+            string jsonData = LoadCustomOptions(GeneralFileName);
             if (jsonData == null || jsonData.Length == 0)
                 return false;
 
@@ -233,12 +221,33 @@ namespace OpenTibiaUnity.Core.Options
         }
 
         private bool SaveGeneral() {
-            FileStream stream = new FileStream(Path.Combine(Application.persistentDataPath, GeneralFileName), FileMode.Create);
+            return SaveCustomOptions(GeneralFileName, JsonUtility.ToJson(this, true));
+        }
+
+        public string LoadCustomOptions(string filename) {
+            string jsonData = null;
+
+            var path = Path.Combine(Application.persistentDataPath, filename);
+            if (!File.Exists(path))
+                return null;
+
+            FileStream stream = new FileStream(path, FileMode.Open);
+            if (stream == null)
+                return null;
+
+            using (StreamReader reader = new StreamReader(stream))
+                jsonData = reader.ReadToEnd();
+
+            stream.Close();
+            return jsonData;
+        }
+
+        public bool SaveCustomOptions(string filename, string data) {
+            FileStream stream = new FileStream(Path.Combine(Application.persistentDataPath, filename), FileMode.Create);
             if (stream == null)
                 return false;
-
-            var jsonData = JsonUtility.ToJson(this, true);
-            var bytes = new UTF8Encoding(true).GetBytes(jsonData);
+            
+            var bytes = new UTF8Encoding(true).GetBytes(data);
             stream.Write(bytes, 0, bytes.Length);
             stream.Close();
             return true;

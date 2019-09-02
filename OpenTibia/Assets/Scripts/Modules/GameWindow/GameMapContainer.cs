@@ -130,12 +130,19 @@ namespace OpenTibiaUnity.Modules.GameWindow
                 if (clipRect != _gameWorldMap.rawImage.uvRect)
                     _gameWorldMap.rawImage.uvRect = clipRect;
 
-                if (worldMapRenderer.Framerate != _lastFramerate || _lastPing != protocolGame.Ping) {
+                bool hasPingFeature = gameManager.GetFeature(GameFeature.GameClientPing) || gameManager.GetFeature(GameFeature.GameExtendedClientPing);
+                if (worldMapRenderer.Framerate != _lastFramerate || (hasPingFeature && _lastPing != protocolGame.Ping)) {
                     _lastFramerate = worldMapRenderer.Framerate;
-                    _lastPing = protocolGame.Ping;
                     var fpsColor = GetFramerateColor(_lastFramerate);
-                    var pingColor = GetPingColor(_lastPing);
-                    _framecounterText.text = string.Format("FPS: <color=#{0:X6}>{1}</color>\nPing: <color=#{2:X6}>{3}</color>", fpsColor, _lastFramerate, pingColor, _lastPing);
+                    
+                    string text = string.Format("FPS: <color=#{0:X6}>{1}</color>", fpsColor, _lastFramerate);
+                    if (hasPingFeature) {
+                        _lastPing = protocolGame.Ping;
+                        var pingColor = GetPingColor(_lastPing);
+                        text += string.Format("\nPing: <color=#{0:X6}>{1}</color>", pingColor, _lastPing);
+                    }
+
+                    _framecounterText.text = text;
                 }
 
                 // tho, this is a very effecient way of taking screenshots

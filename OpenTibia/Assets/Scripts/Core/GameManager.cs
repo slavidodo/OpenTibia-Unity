@@ -135,6 +135,7 @@ namespace OpenTibiaUnity.Core
         public VersionChangeEvent onProtocolVersionChange { get; private set; }
         public VersionChangeEvent onBuildVersionChange { get; private set; }
         public ClientSpecificationChangeEvent onClientSpecificationChange { get; private set; }
+        public UnityEvent onLoadedGameAssets { get; private set; }
         public UnityEvent onGameStart { get; private set; }
         public UnityEvent onGameEnd { get; private set; }
         public UnityEvent onProcessChangeCharacter { get; private set; }
@@ -216,6 +217,7 @@ namespace OpenTibiaUnity.Core
             onProtocolVersionChange = new VersionChangeEvent();
             onBuildVersionChange = new VersionChangeEvent();
             onClientSpecificationChange = new ClientSpecificationChangeEvent();
+            onLoadedGameAssets = new UnityEvent();
             onGameStart = new UnityEvent();
             onGameEnd = new UnityEvent();
             onProcessChangeCharacter = new UnityEvent();
@@ -456,6 +458,11 @@ namespace OpenTibiaUnity.Core
                 _loadedClientAssets = true;
                 _loadedClientVersion = clientVersion;
                 _loadedBuildVersion = buildVersion;
+
+                if (Thread.CurrentThread == OpenTibiaUnity.MainThread)
+                    onLoadedGameAssets.Invoke();
+                else
+                    InvokeOnMainThread(() => onLoadedGameAssets.Invoke());
             } catch (System.Exception) {
                 _loadedClientAssets = false;
             }

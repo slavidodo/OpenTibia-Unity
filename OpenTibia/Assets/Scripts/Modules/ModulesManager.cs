@@ -47,6 +47,9 @@ namespace OpenTibiaUnity.Modules
 
         protected void Awake() {
             Instance = this;
+
+            HotkeysWindow.gameObject.SetActive(true);
+            HotkeysWindow.gameObject.SetActive(false);
         }
 
         protected void Start() {

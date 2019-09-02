@@ -32,7 +32,7 @@ namespace OpenTibiaUnity.Core.Appearances
             }
 
             _objectTypes.Sort((a, b) => {
-                return a._id.CompareTo(b._id);
+                return a.Id.CompareTo(b.Id);
             });
             
             _effectTypes = new List<AppearanceType>(_protoAppearances.Effects.Count);
@@ -125,9 +125,9 @@ namespace OpenTibiaUnity.Core.Appearances
             while (index <= lastIndex) {
                 int tmpIndex = index + lastIndex >> 1;
                 var appearanceType = list[tmpIndex];
-                if (appearanceType._id < id)
+                if (appearanceType.Id < id)
                     index = tmpIndex + 1;
-                else if (appearanceType._id > id)
+                else if (appearanceType.Id > id)
                     lastIndex = tmpIndex - 1;
                 else
                     return appearanceType;
@@ -160,7 +160,7 @@ namespace OpenTibiaUnity.Core.Appearances
 
                 var type = objectInstance.Type;
                 //uint data = !!objectInstance.Atmospheric ? 1 : 0;
-                return new ObjectInstance(type._id, type, 0);
+                return new ObjectInstance(type.Id, type, 0);
             }
 
             return null;

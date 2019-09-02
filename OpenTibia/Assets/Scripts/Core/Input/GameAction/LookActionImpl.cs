@@ -33,7 +33,7 @@ namespace OpenTibiaUnity.Core.Input.GameAction
         public void Perform(bool repeat = false) {
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             if (!!protocolGame && protocolGame.IsGameRunning)
-                protocolGame.SendLook(_absolutePosition, _appearanceType._id, _stackPos);
+                protocolGame.SendLook(_absolutePosition, _appearanceType.Id, _stackPos);
         }
     }
 }

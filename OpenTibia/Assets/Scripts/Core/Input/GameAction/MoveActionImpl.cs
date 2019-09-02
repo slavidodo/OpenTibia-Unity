@@ -58,7 +58,7 @@
 
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             if (!!protocolGame && protocolGame.IsGameRunning)
-                protocolGame.SendMoveObject(_sourceAbsolute, (ushort)_objectType._id, _stackPos, _destAbsolute, moveAmount);
+                protocolGame.SendMoveObject(_sourceAbsolute, (ushort)_objectType.Id, _stackPos, _destAbsolute, moveAmount);
         }
 
         protected void OnSplitStackWindowOk(Components.SplitStackWindow splitStackWindow) {

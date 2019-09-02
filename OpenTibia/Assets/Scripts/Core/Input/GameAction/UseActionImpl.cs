@@ -64,13 +64,13 @@ namespace OpenTibiaUnity.Core.Input.GameAction
             // aimbot check!
             if (_absolutePosition.x == 65535 && _absolutePosition.y == 0) {
                 if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameEquipHotkey)) {
-                    if (containerStorage.GetAvailableInventory(_appearanceType._id, _stackPosOrData) < 1)
+                    if (containerStorage.GetAvailableInventory(_appearanceType.Id, _stackPosOrData) < 1)
                         return;
                 }
 
                 if (_appearanceType.IsMultiUse) {
                     // todo verify what version the client receives profession details (basic data)
-                    var rune = Magic.SpellStorage.GetRune((int)_appearanceType._id);
+                    var rune = Magic.SpellStorage.GetRune((int)_appearanceType.Id);
                     if (rune != null && player.GetRuneUses(rune) < 1)
                         return;
                 }
@@ -83,21 +83,21 @@ namespace OpenTibiaUnity.Core.Input.GameAction
                 else if (64 <= _absolutePosition.y && _absolutePosition.y < 64 + Constants.MaxContainerViews)
                     index = _absolutePosition.y - 64;
 
-                protocolGame.SendUseObject(_absolutePosition, _appearanceType._id, _stackPosOrData, index);
+                protocolGame.SendUseObject(_absolutePosition, _appearanceType.Id, _stackPosOrData, index);
             } else if (!_appearanceType.IsMultiUse) {
-                protocolGame.SendUseObject(_absolutePosition, _appearanceType._id, _stackPosOrData, 0);
+                protocolGame.SendUseObject(_absolutePosition, _appearanceType.Id, _stackPosOrData, 0);
             } else if (_useActionTarget == UseActionTarget.Self) {
-                protocolGame.SendUseOnCreature(_absolutePosition, _appearanceType._id, _stackPosOrData, player.Id);
+                protocolGame.SendUseOnCreature(_absolutePosition, _appearanceType.Id, _stackPosOrData, player.Id);
             } else if (_useActionTarget == UseActionTarget.Target && creatureStorage.AttackTarget != null) {
-                protocolGame.SendUseOnCreature(_absolutePosition, _appearanceType._id, _stackPosOrData, creatureStorage.AttackTarget.Id);
+                protocolGame.SendUseOnCreature(_absolutePosition, _appearanceType.Id, _stackPosOrData, creatureStorage.AttackTarget.Id);
             } else {
-                if (_absolutePosition.x < 65535)
-                    GameActionFactory.CreateAutowalkAction(_absolutePosition, false, false).Perform();
+                //if (_absolutePosition.x < 65535)
+                //    GameActionFactory.CreateAutowalkAction(_absolutePosition, false, false).Perform();
 
                 if (_targetObject.Id == Appearances.AppearanceInstance.Creature)
-                    protocolGame.SendUseOnCreature(_absolutePosition, _appearanceType._id, _stackPosOrData, _targetObject.Data);
+                    protocolGame.SendUseOnCreature(_absolutePosition, _appearanceType.Id, _stackPosOrData, _targetObject.Data);
                 else
-                    protocolGame.SendUseTwoObjects(_absolutePosition, _appearanceType._id, _stackPosOrData, _targetAbsolutePosition, _targetObject.Id, _targetStackPosOrData);
+                    protocolGame.SendUseTwoObjects(_absolutePosition, _appearanceType.Id, _stackPosOrData, _targetAbsolutePosition, _targetObject.Id, _targetStackPosOrData);
             }
         }
     }

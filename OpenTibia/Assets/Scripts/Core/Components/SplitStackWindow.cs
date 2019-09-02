@@ -115,8 +115,8 @@ namespace OpenTibiaUnity.Core.Components
             RenderTexture.active = _renderTexture;
             Utils.GraphicsUtility.ClearWithTransparency();
             if (!!_objectType) {
-                if (_objectInstance == null || _objectInstance.Id != _objectType._id)
-                    _objectInstance = OpenTibiaUnity.AppearanceStorage.CreateObjectInstance(_objectType._id, _objectAmount);
+                if (_objectInstance == null || _objectInstance.Id != _objectType.Id)
+                    _objectInstance = OpenTibiaUnity.AppearanceStorage.CreateObjectInstance(_objectType.Id, _objectAmount);
 
                 var zoom = new Vector2(Screen.width / (float)_renderTexture.width, Screen.height / (float)_renderTexture.height);
                 _objectInstance.Draw(new Vector2(0, 0), zoom, 0, 0, 0);

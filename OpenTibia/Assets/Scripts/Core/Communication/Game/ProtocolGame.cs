@@ -730,7 +730,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
         private void ParsePingBack(Internal.ByteArray message) {
             _pingReceived++;
-
+            
             if (_pingReceived == _pingSent)
                 _ping = (int)_pingTimer.ElapsedMilliseconds;
             else
@@ -741,14 +741,14 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
         private void ParsePing(Internal.ByteArray message) {
             // onPing.Invoke();
-            publicSendPingBack();
+            InternalSendPingBack();
         }
 
         public void SendPing() {
             if (_pingReceived != _pingSent)
                 return;
 
-            publicSendPing();
+            InternalSendPing();
             _pingSent++;
             _pingTimer.Restart();
         }

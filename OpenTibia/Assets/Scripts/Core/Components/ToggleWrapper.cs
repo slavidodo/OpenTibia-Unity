@@ -10,6 +10,8 @@ namespace OpenTibiaUnity.Core.Components
         public TMPro.TextMeshProUGUI label = null;
 
         private bool _pointerDown = false;
+        private bool _lastValue = false;
+        private bool _havingEffect = false;
 
         private Toggle _toggle = null;
         public Toggle toggle {
@@ -41,10 +43,12 @@ namespace OpenTibiaUnity.Core.Components
         void IPointerDownHandler.OnPointerDown(PointerEventData eventData) {
             if (_pointerDown)
                 return;
-
+            
             _pointerDown = true;
-            if (!toggle.isOn && label)
-                label.margin += new Vector4(1, -1, 0, 0);
+            if (!_havingEffect && label) {
+                _havingEffect = !toggle.isOn;
+                label.margin += new Vector4(1, 1, 0, 0);
+            }
         }
 
         void IPointerUpHandler.OnPointerUp(PointerEventData eventData) {
@@ -52,8 +56,10 @@ namespace OpenTibiaUnity.Core.Components
                 return;
 
             _pointerDown = false;
-            if (!toggle.isOn && label)
-                label.margin -= new Vector4(1, -1, 0, 0);
+            if (_havingEffect && label) {
+                _havingEffect = false;
+                label.margin -= new Vector4(1, 1, 0, 0);
+            }
         }
 
         void OnToggleValueChanged(bool value) {
@@ -61,16 +67,18 @@ namespace OpenTibiaUnity.Core.Components
                 if (_pointerDown)
                     return;
 
-                if (label)
-                    label.margin += new Vector4(1, -1, 0, 0);
+                if (!_havingEffect && label) {
+                    _havingEffect = true;
+                    label.margin += new Vector4(1, 1, 0, 0);
+                }
             } else {
-                // if pointer was down, and we suddenly toggled off
-                // we want to avoid unnessecary margin
                 if (_pointerDown)
                     _pointerDown = false;
 
-                if (label)
-                    label.margin -= new Vector4(1, -1, 0, 0);
+                if (_havingEffect && label) {
+                    _havingEffect = false;
+                    label.margin -= new Vector4(1, 1, 0, 0);
+                }
             }
         }
     }

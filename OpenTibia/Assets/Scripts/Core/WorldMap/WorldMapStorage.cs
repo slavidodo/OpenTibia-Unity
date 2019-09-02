@@ -616,10 +616,10 @@ namespace OpenTibiaUnity.Core.WorldMap
         }
 
         private UnityEngine.Vector3Int? ToMapInternal(UnityEngine.Vector3Int absolutePosition) {
-            return ToMappublic(absolutePosition.x, absolutePosition.y, absolutePosition.z);
+            return ToMapInternal(absolutePosition.x, absolutePosition.y, absolutePosition.z);
         }
 
-        private UnityEngine.Vector3Int? ToMappublic(int absoluteX, int absoluteY, int absoluteZ) {
+        private UnityEngine.Vector3Int? ToMapInternal(int absoluteX, int absoluteY, int absoluteZ) {
             int dZ = _position.z - absoluteZ;
             absoluteX -= (_position.x - Constants.PlayerOffsetX) + dZ;
             absoluteY -= (_position.y - Constants.PlayerOffsetY) + dZ;
@@ -661,9 +661,9 @@ namespace OpenTibiaUnity.Core.WorldMap
             return mapPosition.HasValue && (param4 || _position.z == absolutePosition.z);
         }
 
-        public bool IsVisible(int x, int y, int z, bool param4) {
-            UnityEngine.Vector3Int? mapPosition = ToMappublic(x, y, z);
-            return mapPosition.HasValue && (param4 || _position.z == z);
+        public bool IsVisible(int absoluteX, int absoluteY, int absoluteZ, bool ignorePlayerFloor) {
+            UnityEngine.Vector3Int? mapPosition = ToMapInternal(absoluteX, absoluteY, absoluteZ);
+            return mapPosition.HasValue && (ignorePlayerFloor || _position.z == absoluteZ);
         }
 
         public bool IsLookPossible(int x, int y, int z) {

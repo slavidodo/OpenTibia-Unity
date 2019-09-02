@@ -14,6 +14,8 @@ namespace OpenTibiaUnity.Core.Components.Base
         
         public bool Visible { get => enabled && gameObject.activeSelf; }
 
+        protected bool _changingVisibility = false;
+
         public void Open(bool resetPosition = true) {
             Show();
             LockToOverlay();
@@ -29,7 +31,9 @@ namespace OpenTibiaUnity.Core.Components.Base
         }
 
         public virtual void Show() {
+            _changingVisibility = true;
             gameObject.SetActive(true);
+            _changingVisibility = false;
 
             if (ResetPositionOnShow)
                 ResetLocalPosition();
@@ -37,7 +41,9 @@ namespace OpenTibiaUnity.Core.Components.Base
 
 
         public virtual void Hide() {
+            _changingVisibility = true;
             gameObject.SetActive(false);
+            _changingVisibility = false;
         }
     }
 }

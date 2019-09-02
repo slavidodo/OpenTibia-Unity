@@ -1,16 +1,29 @@
-﻿using OpenTibiaUnity.Core.Components;
+﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using OpenTibiaUnity.Core.Components;
+using OpenTibiaUnity.Core.Input;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Hotkeys
 {
-    public class HotkeysWindow : Core.Components.Base.Window
-    {
+    public class HotkeysWindow : Core.Components.Base.Window {
+        private static EventModifiers[] AllowedEventModifiers = {
+            EventModifiers.None,
+            EventModifiers.Shift,
+            EventModifiers.Control,
+        };
+
+        private const KeyCode StartKeyCode = KeyCode.F1;
+        private const KeyCode EndKeyCode = KeyCode.F12;
+
         private static RenderTexture s_RenderTexture;
 
         public const string TextUseOnYourself = "<color=#AFFEAF>{0}: (use object on yourself)</color>";
-        public const string TextUseOnTarget = "<color=#FEAFAF>{0}:(use object on target)</color>";
+        public const string TextUseOnTarget = "<color=#FEAFAF>{0}: (use object on target)</color>";
         public const string TextUseWithCrosshairs = "<color=#C37A7A>{0}: (use object with crosshairs)</color>";
+        public const string TextUseAuto= "<color=#AFAFFE>{0}: (use object)</color>";
 
         public static Color NormalColor = new Color(0, 0, 0, 0);
         public static Color HighlightColor = Core.Colors.ColorFromRGB(0x585858);
@@ -19,33 +32,33 @@ namespace OpenTibiaUnity.Modules.Hotkeys
         [SerializeField] private ToggleGroup _hotkeyActionsToggleGroup = null;
 
         [SerializeField] private TMPro.TMP_InputField _hotkeyTextInputField = null;
-        [SerializeField] private Core.Components.CheckboxWrapper _autoSendCheckboxWrapper = null;
+        [SerializeField] private CheckboxWrapper _autoSendCheckboxWrapper = null;
 
         [SerializeField] private RawImage _objectImage = null;
         [SerializeField] private Button _selectObjectButton = null;
         [SerializeField] private Button _blearObjectButton = null;
 
-        [SerializeField] private Core.Components.ToggleWrapper _useOnYourselfToggle = null;
-        [SerializeField] private Core.Components.ToggleWrapper _useOnTargetToggle = null;
-        [SerializeField] private Core.Components.ToggleWrapper _useWithCrosshairsToggle = null;
+        [SerializeField] private ToggleWrapper _useOnYourselfToggle = null;
+        [SerializeField] private ToggleWrapper _useOnTargetToggle = null;
+        [SerializeField] private ToggleWrapper _useWithCrosshairsToggle = null;
 
         [SerializeField] private Button _oKButton = null;
         [SerializeField] private Button _cancelButton = null;
 
-        private IHotkeyAction[] _plainKeys;
-        private IHotkeyAction[] _shiftKeys;
-        private IHotkeyAction[] _controlKeys;
+        private Dictionary<EventModifiers, HotkeyAction[]> _lists;
 
         private HotkeyActionPanel _activeActionPanel = null;
         private Core.Appearances.ObjectInstance _objectInstance = null;
         private bool _changingSelectedAction = false;
 
-        protected override void Start() {
-            base.Start();
+        protected override void Awake() {
+            base.Awake();
 
-            _plainKeys = new IHotkeyAction[12];
-            _shiftKeys = new IHotkeyAction[12];
-            _controlKeys = new IHotkeyAction[12];
+            _lists = new Dictionary<EventModifiers, HotkeyAction[]>();
+            foreach (var eventModifiers in AllowedEventModifiers)
+                _lists.Add(eventModifiers, new HotkeyAction[EndKeyCode - StartKeyCode + 1]);
+
+            OpenTibiaUnity.GameManager.onLoadedGameAssets.AddListener(OnLoadedGameAssets);
 
             // setup input
             OpenTibiaUnity.InputHandler.AddKeyDownListener(Core.Utils.EventImplPriority.UpperMedium, OnKeyDown);
@@ -61,42 +74,37 @@ namespace OpenTibiaUnity.Modules.Hotkeys
             _useWithCrosshairsToggle.toggle.onValueChanged.AddListener(OnUseWithCrosshairsValueChanged);
             _oKButton.onClick.AddListener(OnOKButtonClick);
             _cancelButton.onClick.AddListener(OnCancelButtonClick);
+        }
+
+        protected override void Start() {
+            base.Start();
 
             // initialize action panels
-            for (int i = 0; i < 12 * 3; i++) {
-                KeyCode keyCode;
-                EventModifiers eventModifiers;
+            foreach (var eventModifiers in AllowedEventModifiers) {
+                for (int i = 0; i < (EndKeyCode - StartKeyCode + 1); i++) {
+                    var keyCode = StartKeyCode + i;
+                    string baseText = string.Empty;
+                    if (eventModifiers != EventModifiers.None)
+                        baseText += eventModifiers.ToString() + "+";
 
-                string baseText = string.Empty;
-                if (i < 12) {
-                    keyCode = KeyCode.F1 + i;
-                    eventModifiers = EventModifiers.None;
-                } else if (i < 24) {
-                    keyCode = KeyCode.F1 + i - 12;
-                    eventModifiers = EventModifiers.Shift;
-                    baseText += "Shift+";
-                } else {
-                    keyCode = KeyCode.F1 + i - 12 * 2;
-                    eventModifiers = EventModifiers.Control;
-                    baseText += "Control+";
+                    baseText += keyCode.ToString();
+
+                    var hotkeysActionPanel = Instantiate(ModulesManager.Instance.HotkeysActionPanelPrefab, _hotkeysScrollRect.content);
+                    hotkeysActionPanel.gameObject.name = ModulesManager.Instance.HotkeysActionPanelPrefab.name + "(" + baseText + ")";
+                    hotkeysActionPanel.KeyCode = keyCode;
+                    hotkeysActionPanel.EventModifiers = eventModifiers;
+                    hotkeysActionPanel.BaseText = baseText;
+                    hotkeysActionPanel.normalColor = NormalColor;
+                    hotkeysActionPanel.highlightColor = HighlightColor;
+
+                    hotkeysActionPanel.textComponent.text = hotkeysActionPanel.BaseText + ":";
+                    hotkeysActionPanel.toggleComponent.onValueChanged.AddListener((value) =>
+                        OnHotkeyActionToggleValueChanged(hotkeysActionPanel, value));
+
+                    hotkeysActionPanel.toggleComponent.group = _hotkeyActionsToggleGroup;
+
+                    UpdateHotkeyPanelWithAction(hotkeysActionPanel, _lists[eventModifiers][i]);
                 }
-
-                baseText += keyCode.ToString();
-
-                var hotkeysActionPanel = Instantiate(ModulesManager.Instance.HotkeysActionPanelPrefab, _hotkeysScrollRect.content);
-                hotkeysActionPanel.KeyCode = keyCode;
-                hotkeysActionPanel.EventModifiers = eventModifiers;
-                hotkeysActionPanel.BaseText = baseText;
-                hotkeysActionPanel.textComponent.text = hotkeysActionPanel.BaseText + ":";
-                hotkeysActionPanel.toggleComponent.group = _hotkeyActionsToggleGroup;
-                hotkeysActionPanel.normalColor = NormalColor;
-                hotkeysActionPanel.highlightColor = HighlightColor;
-                hotkeysActionPanel.toggleComponent.onValueChanged.AddListener((value) => {
-                    OnHotkeyActionToggleValueChanged(hotkeysActionPanel, value);
-                });
-
-                if (i == 0)
-                    hotkeysActionPanel.Select();
             }
         }
 
@@ -117,7 +125,7 @@ namespace OpenTibiaUnity.Modules.Hotkeys
                     _objectImage.enabled = false;
                 return;
             }
-            
+
             if (s_RenderTexture == null) {
                 s_RenderTexture = new RenderTexture(Constants.FieldSize, Constants.FieldSize, 0, RenderTextureFormat.ARGB32);
                 s_RenderTexture.filterMode = FilterMode.Point;
@@ -127,14 +135,31 @@ namespace OpenTibiaUnity.Modules.Hotkeys
 
             RenderTexture.active = s_RenderTexture;
             Core.Utils.GraphicsUtility.ClearWithTransparency();
-
             var zoom = new Vector2(Screen.width / (float)s_RenderTexture.width, Screen.height / (float)s_RenderTexture.height);
             _objectInstance.Draw(new Vector2(0, 0), zoom, 0, 0, 0);
-
             RenderTexture.active = null;
 
             if (!_objectImage.enabled)
                 _objectImage.enabled = true;
+        }
+
+        protected override void OnEnable() {
+            base.OnEnable();
+
+            _hotkeyTextInputField.ActivateInputField();
+            _hotkeyTextInputField.MoveTextEnd(false);
+        }
+
+        private void OnLoadedGameAssets() {
+            var clientVersion = OpenTibiaUnity.GameManager.ClientVersion;
+            string jsonData = OpenTibiaUnity.OptionStorage.LoadCustomOptions(clientVersion + "_" + Core.Options.OptionStorage.LegacyHotkeysFileName);
+            if (jsonData != null && jsonData.Length > 0) {
+                try {
+                    JObject jObject = (JObject)JsonConvert.DeserializeObject(jsonData);
+                    if (jObject != null)
+                        Unserialize(jObject);
+                } catch (System.Exception) { }
+            }
         }
 
         private void OnKeyDown(Event e, bool repeat) {
@@ -143,32 +168,48 @@ namespace OpenTibiaUnity.Modules.Hotkeys
         }
 
         private void OnKeyUp(Event e, bool _) {
-            if (e.keyCode < KeyCode.F1 || e.keyCode > KeyCode.F12)
-                return;
-
-            bool shift = (e.modifiers & EventModifiers.Shift) != 0;
-            bool control = (e.modifiers & EventModifiers.Control) != 0;
-            bool alt = (e.modifiers & EventModifiers.Alt) != 0;
-
-            if (alt || (shift && control))
-                return;
-
-            var action = GetHotkeyActionForEvent(e);
-            if (action != null)
+            var action = GetHotkeyActionForEvent<HotkeyAction>(e);
+            if (action != null) {
+                e.Use();
                 action.Apply();
-        }
-        
-        private void OnHotkeyTextInputValueChanged(string text) {
-            if (_changingSelectedAction)
+                return;
+            }
+
+            if (e.alt || e.shift || e.control || !InputHandler.IsHighlighted(this))
                 return;
 
-            if (text.Length == 0)
-                _activeActionPanel.textComponent.text = _activeActionPanel.BaseText + ":";
-            else
-                _activeActionPanel.textComponent.text = string.Format("{0}: {1}", _activeActionPanel.BaseText, Core.StringHelper.RichTextSpecialChars(text));
+            switch (e.keyCode) {
+                case KeyCode.DownArrow:
+                    e.Use();
+                    SelectNextHotkeyPanel();
+                    break;
+                case KeyCode.UpArrow:
+                    e.Use();
+                    SelectPrevHotkeyPanel();
+                    break;
+                case KeyCode.Return:
+                case KeyCode.KeypadEnter:
+                    e.Use();
+                    OnOKButtonClick();
+                    break;
+                case KeyCode.Escape:
+                    e.Use();
+                    OnCancelButtonClick();
+                    break;
+            }
+        }
+
+        private void OnHotkeyTextInputValueChanged(string text) {
+            if (_changingVisibility || _changingSelectedAction)
+                return;
+
+            UpdateHotkeyPanelWithText(_activeActionPanel, text);
 
             var textAction = GetHotkeyActionForPanel<HotkeyTextAction>(_activeActionPanel);
-            if (textAction == null) {
+            if (text.Length == 0) {
+                if (textAction != null)
+                    SetHotketActionForPanel<HotkeyAction>(_activeActionPanel, null);
+            } else if (textAction == null) {
                 textAction = new HotkeyTextAction(text, _autoSendCheckboxWrapper.checkbox.Checked);
                 SetHotketActionForPanel(_activeActionPanel, textAction);
             } else {
@@ -206,49 +247,72 @@ namespace OpenTibiaUnity.Modules.Hotkeys
         }
 
         private void OnClearObjectButtonClick() {
-            // should stop drawing //
-            SetHotketActionForPanel<IHotkeyAction>(_activeActionPanel, null);
+            SetHotketActionForPanel<HotkeyAction>(_activeActionPanel, null);
 
             DisableObjectToggles();
+            UpdateHotkeyPanelWithAction(_activeActionPanel, null);
         }
 
         private void OnUseOnYourselfValueChanged(bool value) {
+            if (_changingVisibility || _changingSelectedAction)
+                return;
+
+            print("Changing to self");
             var objectAction = GetHotkeyActionForPanel<HotkeyObjectAction>(_activeActionPanel);
             if (objectAction == null)
                 return;
 
             objectAction.ActionTarget = UseActionTarget.Self;
-            _activeActionPanel.textComponent.text = string.Format(TextUseOnYourself, _activeActionPanel.BaseText);
+            UpdateHotkeyPanelWithUseTarget(_activeActionPanel, objectAction.ActionTarget);
         }
 
         private void OnUseOnTargetValueChanged(bool value) {
+            if (_changingVisibility || _changingSelectedAction)
+                return;
+
+            print("Changing to target");
             var objectAction = GetHotkeyActionForPanel<HotkeyObjectAction>(_activeActionPanel);
             if (objectAction == null)
                 return;
 
             objectAction.ActionTarget = UseActionTarget.Target;
-            _activeActionPanel.textComponent.text = string.Format(TextUseOnTarget, _activeActionPanel.BaseText);
+            UpdateHotkeyPanelWithUseTarget(_activeActionPanel, objectAction.ActionTarget);
         }
 
         private void OnUseWithCrosshairsValueChanged(bool value) {
+            if (_changingVisibility || _changingSelectedAction)
+                return;
+            
+            print("Changing to crosshair");
             var objectAction = GetHotkeyActionForPanel<HotkeyObjectAction>(_activeActionPanel);
             if (objectAction == null)
                 return;
 
             objectAction.ActionTarget = UseActionTarget.CrossHair;
-            _activeActionPanel.textComponent.text = string.Format(TextUseWithCrosshairs, _activeActionPanel.BaseText);
+            UpdateHotkeyPanelWithUseTarget(_activeActionPanel, objectAction.ActionTarget);
         }
 
         private void OnOKButtonClick() {
-            // save //
             Close();
+
+            // todo, only if anything has changed
+            SaveHotkeys();
         }
 
         private void OnCancelButtonClick() {
             Close();
+
+            // reset hotkeys
+            foreach (Transform child in _hotkeysScrollRect.content) {
+                var panel = child.GetComponent<HotkeyActionPanel>();
+                var action = GetHotkeyActionForPanel<HotkeyAction>(panel);
+                UpdateHotkeyPanelWithAction(panel, action);
+            }
         }
 
         private void OnObjectMultiUseHandlerUse(Vector3Int _, Core.Appearances.ObjectInstance @object, int __) {
+            _activeActionPanel.toggleComponent.isOn = true;
+
             Core.Game.ObjectMultiUseHandler.onUse = null;
             if (!@object) {
                 Open();
@@ -260,34 +324,41 @@ namespace OpenTibiaUnity.Modules.Hotkeys
                 return;
 
             var objectAction = GetHotkeyActionForPanel<HotkeyObjectAction>(_activeActionPanel);
-            if (objectAction == null) {
+            bool firstAdd = objectAction == null;
+            if (firstAdd) {
                 objectAction = new HotkeyObjectAction(@object.Type, UseActionTarget.CrossHair);
                 SetHotketActionForPanel(_activeActionPanel, objectAction);
 
-                EnableObjectToggles();
-
-                _activeActionPanel.textComponent.text = string.Format(TextUseWithCrosshairs, _activeActionPanel.BaseText);
                 _useWithCrosshairsToggle.toggle.isOn = true;
-
                 _hotkeyTextInputField.interactable = false;
                 _autoSendCheckboxWrapper.DisableComponent();
             } else {
                 objectAction.AppearanceType = @object.Type;
+                if (@object.Type.IsMultiUse && objectAction.ActionTarget == UseActionTarget.Auto)
+                    objectAction.ActionTarget = UseActionTarget.CrossHair;
+                else if (!@object.Type.IsMultiUse && objectAction.ActionTarget != UseActionTarget.Auto)
+                    objectAction.ActionTarget = UseActionTarget.Auto;
             }
 
-            if (!_objectInstance || _objectInstance.Id != objectAction.AppearanceType._id)
-                _objectInstance = new Core.Appearances.ObjectInstance(objectAction.AppearanceType._id, objectAction.AppearanceType, 0);
+            if (objectAction.ActionTarget != UseActionTarget.Auto)
+                EnableObjectToggles();
+            else
+                DisableObjectToggles();
+
+            UpdateHotkeyPanelWithAction(_activeActionPanel, objectAction);
+            if (!_objectInstance || _objectInstance.Id != objectAction.AppearanceType.Id)
+                _objectInstance = new Core.Appearances.ObjectInstance(objectAction.AppearanceType.Id, objectAction.AppearanceType, 0);
 
             Open();
         }
 
         private void OnHotkeyActionToggleValueChanged(HotkeyActionPanel actionPanel, bool value) {
-            if (!value)
+            if (_changingVisibility || !value)
                 return;
 
             _changingSelectedAction = true;
-            
-            var action = GetHotkeyActionForPanel<IHotkeyAction>(actionPanel);
+
+            var action = GetHotkeyActionForPanel<HotkeyAction>(actionPanel);
 
             bool isObjectAction = action is HotkeyObjectAction;
             if (isObjectAction)
@@ -307,61 +378,99 @@ namespace OpenTibiaUnity.Modules.Hotkeys
             }
 
             if (action is HotkeyObjectAction objectAction) {
-                EnableObjectToggles();
-                SelectObjectToggle(objectAction.ActionTarget);
+                if (objectAction.ActionTarget != UseActionTarget.Auto) {
+                    EnableObjectToggles();
+                    SelectObjectToggle(objectAction.ActionTarget);
+                } else {
+                    DisableObjectToggles();
+                }
 
-                if (!_objectInstance || _objectInstance.Id != objectAction.AppearanceType._id)
-                    _objectInstance = new Core.Appearances.ObjectInstance(objectAction.AppearanceType._id, objectAction.AppearanceType, 0);
+                if (!_objectInstance || _objectInstance.Id != objectAction.AppearanceType.Id)
+                    _objectInstance = new Core.Appearances.ObjectInstance(objectAction.AppearanceType.Id, objectAction.AppearanceType, 0);
             } else {
+
+                OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
+                    if (action == null || action is HotkeyTextAction) {
+                        _hotkeyTextInputField.ActivateInputField();
+                        _hotkeyTextInputField.MoveTextEnd(false);
+                    }
+                });
+
                 DisableObjectToggles();
+
+                if (action == null || action is HotkeyTextAction) {
+                    OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
+                        _hotkeyTextInputField.ActivateInputField();
+                        _hotkeyTextInputField.MoveTextEnd(false);
+                    });
+                }
             }
 
             _activeActionPanel = actionPanel;
             _changingSelectedAction = false;
         }
-        
-        private T GetHotkeyActionForPanel<T>(HotkeyActionPanel panel) where T : IHotkeyAction {
-            if (!panel)
-                return default;
 
-            IHotkeyAction[] actionList = null;
-            if (panel.EventModifiers == EventModifiers.Shift)
-                actionList = _shiftKeys;
-            else if (panel.EventModifiers == EventModifiers.Control)
-                actionList = _controlKeys;
-            else
-                actionList = _plainKeys;
+        protected void SelectNextHotkeyPanel() {
+            int index = -1;
+            if (!_activeActionPanel)
+                index = 0;
+            else if (_hotkeysScrollRect.content.childCount > 1)
+                index = Mathf.Min(_activeActionPanel.transform.GetSiblingIndex() + 1, _hotkeysScrollRect.content.childCount - 1);
 
-            var action = actionList[panel.KeyCode - KeyCode.F1];
-            if (action is T t)
-                return t;
-
-            return default; // which is null //
+            if (index != -1) {
+                var child = _hotkeysScrollRect.content.GetChild(index);
+                var characterPanel = child.GetComponent<HotkeyActionPanel>();
+                characterPanel.Select();
+            }
         }
 
-        private T SetHotketActionForPanel<T>(HotkeyActionPanel panel, T action) where T : IHotkeyAction {
-            IHotkeyAction[] actionList = null;
-            if (panel.EventModifiers == EventModifiers.Shift)
-                actionList = _shiftKeys;
-            else if (panel.EventModifiers == EventModifiers.Control)
-                actionList = _controlKeys;
-            else
-                actionList = _plainKeys;
+        protected void SelectPrevHotkeyPanel() {
+            int index = -1;
+            if (!_activeActionPanel)
+                index = 0;
+            else if (_hotkeysScrollRect.content.childCount > 1)
+                index = Mathf.Max(_activeActionPanel.transform.GetSiblingIndex() - 1, 0);
 
-            actionList[panel.KeyCode - KeyCode.F1] = action;
+            if (index != -1) {
+                var child = _hotkeysScrollRect.content.GetChild(index);
+                var characterPanel = child.GetComponent<HotkeyActionPanel>();
+                characterPanel.Select();
+            }
+        }
+
+        private T GetHotkeyActionForPanel<T>(HotkeyActionPanel panel) where T : HotkeyAction {
+            HotkeyAction[] actionList;
+            if (!!panel && _lists.TryGetValue(panel.EventModifiers, out actionList)) {
+                if (actionList[panel.KeyCode - StartKeyCode] is T action)
+                    return action;
+            }
+
+            return default;
+        }
+
+        private T SetHotketActionForPanel<T>(HotkeyActionPanel panel, T action) where T : HotkeyAction {
+            HotkeyAction[] actionList;
+            if (!!panel && _lists.TryGetValue(panel.EventModifiers, out actionList))
+                actionList[panel.KeyCode - StartKeyCode] = action;
+
             return action;
         }
+        
+        private T GetHotkeyActionForEvent<T>(Event e) where T : HotkeyAction {
+            if (e.keyCode < StartKeyCode || e.keyCode > EndKeyCode)
+                return default;
 
-        private IHotkeyAction GetHotkeyActionForEvent(Event e) {
-            IHotkeyAction[] actionList = null;
-            if ((e.modifiers & EventModifiers.Shift) != 0)
-                actionList = _shiftKeys;
-            else if ((e.modifiers & EventModifiers.Control) != 0)
-                actionList = _controlKeys;
-            else
-                actionList = _plainKeys;
+            var modifiers = e.modifiers;
+            if ((modifiers & EventModifiers.FunctionKey) != 0)
+                modifiers &= ~EventModifiers.FunctionKey;
 
-            return actionList[e.keyCode - KeyCode.F1];
+            HotkeyAction[] actionList;
+            if (_lists.TryGetValue(modifiers, out actionList)) {
+                if (actionList[e.keyCode - StartKeyCode] is T action)
+                    return action;
+            }
+
+            return default;
         }
 
         private void DisableObjectToggles() {
@@ -393,6 +502,116 @@ namespace OpenTibiaUnity.Modules.Hotkeys
             _useOnYourselfToggle.toggle.isOn = isSelf;
             _useOnTargetToggle.toggle.isOn = isTarget;
             _useWithCrosshairsToggle.toggle.isOn = !isSelf && !isTarget;
+        }
+
+        private void UpdateHotkeyPanelWithAction(HotkeyActionPanel panel, HotkeyAction action) {
+            if (action is HotkeyTextAction textAction) {
+                UpdateHotkeyPanelWithText(panel, textAction.Text);
+                if (textAction.AutoSend)
+                    panel.textComponent.color = Core.Colors.ColorFromRGB(0xFEFEFE);
+                else
+                    panel.textComponent.color = Core.Colors.ColorFromRGB(0xC0C0C0);
+            } else if (action is HotkeyObjectAction objectAction) {
+                UpdateHotkeyPanelWithUseTarget(panel, objectAction.ActionTarget);
+                panel.textComponent.color = Core.Colors.ColorFromRGB(0xC0C0C0);
+            } else {
+                UpdateHotkeyPanelWithText(panel, null);
+                panel.textComponent.color = Core.Colors.ColorFromRGB(0xC0C0C0);
+            }
+        }
+
+        private void UpdateHotkeyPanelWithText(HotkeyActionPanel panel, string text) {
+            if (string.IsNullOrEmpty(text))
+                panel.textComponent.text = panel.BaseText + ":";
+            else
+                panel.textComponent.text = string.Format("{0}: {1}", panel.BaseText, Core.StringHelper.RichTextSpecialChars(text));
+        }
+
+        private void UpdateHotkeyPanelWithUseTarget(HotkeyActionPanel panel, UseActionTarget useTarget) {
+            switch (useTarget) {
+                case UseActionTarget.Self:
+                    panel.textComponent.text = string.Format(TextUseOnYourself, panel.BaseText);
+                    break;
+                case UseActionTarget.Target:
+                    panel.textComponent.text = string.Format(TextUseOnTarget, panel.BaseText);
+                    break;
+                case UseActionTarget.CrossHair:
+                    panel.textComponent.text = string.Format(TextUseWithCrosshairs, panel.BaseText);
+                    break;
+                case UseActionTarget.Auto:
+                    panel.textComponent.text = string.Format(TextUseAuto, panel.BaseText);
+                    break;
+            }
+        }
+
+        private void SaveHotkeys() {
+            var clientVersion = OpenTibiaUnity.GameManager.ClientVersion;
+            OpenTibiaUnity.OptionStorage.SaveCustomOptions(clientVersion + "_" + Core.Options.OptionStorage.LegacyHotkeysFileName, Serialize().ToString());
+        }
+
+        public JObject Serialize() {
+            JObject jobject = new JObject();
+            foreach (var list in _lists) {
+                JArray listArray = null;
+                for (int i = 0; i < list.Value.Length; i++) {
+                    var action = list.Value[i];
+                    if (action != null) {
+                        if (listArray == null)
+                            listArray = new JArray();
+
+                        var actionObject = action.Serialize();
+                        actionObject.Add("keyCode", (int)StartKeyCode + i);
+                        listArray.Add(actionObject);
+                    }
+                }
+
+                if (listArray != null) {
+                    jobject.Add(list.Key.ToString().ToLower(), listArray);
+                }
+            }
+
+            return jobject;
+        }
+
+        public void Unserialize(JObject data) {
+            foreach (var listProp in data.Properties()) {
+                if (listProp.Value.Type != JTokenType.Array)
+                    continue;
+
+                string name = listProp.Name;
+
+                HotkeyAction[] actionList = null;
+                foreach (var list in _lists) {
+                    if (list.Key.ToString().ToLower() == name) {
+                        actionList = list.Value;
+                        break;
+                    }
+                }
+
+                if (actionList == null)
+                    continue;
+
+                JArray listArray = listProp.Value as JArray;
+                foreach (var actionObject in listArray) {
+                    if (actionObject.Type != JTokenType.Object)
+                        continue;
+
+                    int rawKeyCode;
+                    if (actionObject["keyCode"] == null || !int.TryParse(actionObject["keyCode"].ToString(), out rawKeyCode))
+                        continue;
+                    
+                    if (rawKeyCode < (int)StartKeyCode || rawKeyCode > (int)EndKeyCode)
+                        continue;
+                    
+                    try {
+                        var action = HotkeyAction.Unserialize(actionObject as JObject);
+                        if (action == null)
+                            continue;
+                        
+                        actionList[rawKeyCode - (int)StartKeyCode] = action;
+                    } catch (System.Exception) {}
+                }
+            }
         }
     }
 }

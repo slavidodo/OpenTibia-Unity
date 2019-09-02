@@ -75,8 +75,8 @@
         public bool IsAnimation { get; }
         public bool IsCachable { get; }
         
-        public uint _id { get; }
-        public bool IsCreature { get => _id == AppearanceInstance.Creature; }
+        public uint Id { get; }
+        public bool IsCreature { get => Id == AppearanceInstance.Creature; }
         public AppearanceCategory Category { get; }
         public int IdleAnimationPhases { get; } = 0;
         public int WalkingAnimationPhases { get; } = 0;
@@ -85,7 +85,7 @@
         public int BoundingSquare { get; }
 
         public AppearanceType(uint id, Protobuf.Appearances.Appearance appearance, AppearanceCategory category) {
-            _id = id;
+            Id = id;
             Category = category;
             ProtoAppearance = appearance;
             BoundingSquare = 0;

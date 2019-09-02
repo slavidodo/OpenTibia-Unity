@@ -62,6 +62,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   textComponent: {fileID: 1112518620548769155}
+  normalColor: {r: 0, g: 0, b: 0, a: 0}
+  highlightColor: {r: 0, g: 0, b: 0, a: 0}
+  KeyCode: 0
+  EventModifiers: 0
+  BaseText: 
 --- !u!114 &6819045635219079869
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -85,17 +90,20 @@ MonoBehaviour:
     m_NormalColor: {r: 0.28235295, g: 0.28235295, b: 0.28235295, a: 1}
     m_HighlightedColor: {r: 0.34509805, g: 0.34509805, b: 0.34509805, a: 1}
     m_PressedColor: {r: 0.34509805, g: 0.34509805, b: 0.34509805, a: 1}
+    m_SelectedColor: {r: 0.34509805, g: 0.34509805, b: 0.34509805, a: 1}
     m_DisabledColor: {r: 0, g: 0, b: 0, a: 0}
     m_ColorMultiplier: 1
     m_FadeDuration: 0.1
   m_SpriteState:
     m_HighlightedSprite: {fileID: 0}
     m_PressedSprite: {fileID: 0}
+    m_SelectedSprite: {fileID: 0}
     m_DisabledSprite: {fileID: 0}
   m_AnimationTriggers:
     m_NormalTrigger: Normal
     m_HighlightedTrigger: Highlighted
     m_PressedTrigger: Pressed
+    m_SelectedTrigger: Highlighted
     m_DisabledTrigger: Disabled
   m_Interactable: 1
   m_TargetGraphic: {fileID: 3315238421043018405}
@@ -119,6 +127,76 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: LabelAction
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_havePropertiesChanged
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_isInputParsingRequired
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_text
+      value: <color=#affeaf>(use object on yourself)</color>
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_textInfo.characterCount
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_textInfo.wordCount
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_textInfo.lineCount
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_textInfo.pageCount
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_textInfo.spaceCount
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_firstOverflowCharacterIndex
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_fontSize
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_fontSizeBase
+      value: 11
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_textAlignment
+      value: 8193
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_overflowMode
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
+        type: 3}
+      propertyPath: m_isTextTruncated
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 1861785186114806433, guid: 54eba66ce4c99784c9bc8796c90e8b87,
         type: 3}
@@ -224,66 +302,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Pivot.y
       value: 0.5
-      objectReference: {fileID: 0}
-    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
-        type: 3}
-      propertyPath: m_havePropertiesChanged
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
-        type: 3}
-      propertyPath: m_isInputParsingRequired
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
-        type: 3}
-      propertyPath: m_text
-      value: <color=#affeaf>(use object on yourself)</color>
-      objectReference: {fileID: 0}
-    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
-        type: 3}
-      propertyPath: m_textInfo.characterCount
-      value: 24
-      objectReference: {fileID: 0}
-    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
-        type: 3}
-      propertyPath: m_textInfo.wordCount
-      value: 4
-      objectReference: {fileID: 0}
-    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
-        type: 3}
-      propertyPath: m_textInfo.lineCount
-      value: 21
-      objectReference: {fileID: 0}
-    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
-        type: 3}
-      propertyPath: m_textInfo.pageCount
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
-        type: 3}
-      propertyPath: m_textInfo.spaceCount
-      value: 3
-      objectReference: {fileID: 0}
-    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
-        type: 3}
-      propertyPath: m_firstOverflowCharacterIndex
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
-        type: 3}
-      propertyPath: m_fontSize
-      value: 11
-      objectReference: {fileID: 0}
-    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
-        type: 3}
-      propertyPath: m_fontSizeBase
-      value: 11
-      objectReference: {fileID: 0}
-    - target: {fileID: 1942319386908416228, guid: 54eba66ce4c99784c9bc8796c90e8b87,
-        type: 3}
-      propertyPath: m_textAlignment
-      value: 8193
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 54eba66ce4c99784c9bc8796c90e8b87, type: 3}

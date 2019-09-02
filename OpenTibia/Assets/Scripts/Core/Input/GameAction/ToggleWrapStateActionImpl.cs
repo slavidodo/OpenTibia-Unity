@@ -16,7 +16,7 @@
         public void Perform(bool _ = false) {
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             if (!!protocolGame && protocolGame.IsGameRunning)
-                protocolGame.SendToggleWrapState(_absolute, _appearanceType._id, _stackPos);
+                protocolGame.SendToggleWrapState(_absolute, _appearanceType.Id, _stackPos);
         }
     }
 }

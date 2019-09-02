@@ -153,10 +153,9 @@ namespace OpenTibiaUnity.Modules.Console
 
         public void SendChannelMessage() {
             var text = _chatInputField.text;
-            if (text.Length == 0)
-                return;
-            
-            _chatInputField.text = OpenTibiaUnity.ChatStorage.SendChannelMessage(text, _activeChannel, MessageModeType.None);
+            if (text.Length != 0)
+                _chatInputField.text = OpenTibiaUnity.ChatStorage.SendChannelMessage(text, _activeChannel, MessageModeType.None);
+
             OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
                 _chatInputField.ActivateInputField();
                 _chatInputField.MoveTextEnd(false);

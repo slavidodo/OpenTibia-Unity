@@ -78,13 +78,13 @@ namespace OpenTibiaUnity.Core.Communication.Game
             message.WriteEnum(GameclientMessageType.QuitGame);
             _packetWriter.FinishMessage();
         }
-        private void publicSendPing() {
+        private void InternalSendPing() {
             // this function should only be called from protocolgame
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.Ping);
             _packetWriter.FinishMessage();
         }
-        public void publicSendPingBack() {
+        public void InternalSendPingBack() {
             var message = _packetWriter.CreateMessage();
             message.WriteEnum(GameclientMessageType.PingBack);
             _packetWriter.FinishMessage();
