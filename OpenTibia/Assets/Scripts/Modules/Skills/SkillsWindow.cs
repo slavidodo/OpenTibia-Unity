@@ -8,6 +8,9 @@ namespace OpenTibiaUnity.Modules.Skills
 {
     public class SkillsWindow : MiniWindow
     {
+        private static Color RedColor = new Color(1, 0, 0);
+        private static Color GreenColor = new Color(0, 1, 0);
+
         [SerializeField] private SkillRawPanel _skillRawPanelPrefab = null;
         [SerializeField] private SkillProgressPanel _skillProgressPanelPrefab = null;
         [SerializeField] private SkillProgressIconPanel _skillProgressIconPanelPrefab = null;
@@ -31,6 +34,7 @@ namespace OpenTibiaUnity.Modules.Skills
         private SkillPanel _speedPanel = null;
         private SkillPanel _regenerationPanel = null;
         private SkillPanel _staminaPanel = null;
+        private SkillPanel _offlineTrainingPanel = null;
 
         // known skills
         private SkillPanel _magicPanel = null;
@@ -55,18 +59,69 @@ namespace OpenTibiaUnity.Modules.Skills
             Creature.onSkillChange.AddListener(OnCreatureSkillChange);
         }
 
+        protected override void Start() {
+            base.Start();
+
+            if (OpenTibiaUnity.GameManager.IsGameRunning) {
+                var player = OpenTibiaUnity.Player;
+                for (SkillType skillType = SkillType.First; skillType < SkillType.Last; skillType++)
+                    OnCreatureSkillChange(player, skillType, player.GetSkill(skillType));
+
+                OnCreatureSkillChange(player, SkillType.Experience, player.GetSkill(SkillType.Experience));
+            }
+        }
+
         private void OnCreatureSkillChange(Creature creature, SkillType skillType, Skill skill) {
             if (creature != OpenTibiaUnity.Player)
                 return;
 
             var skillPanel = GetSkillPanelForSkillType(skillType);
-            skillPanel.SetValue(skill.Level, skill.Percentage);
+            if (!skillPanel)
+                return;
+
+            switch (skillType) {
+                case SkillType.Stamina:
+                case SkillType.Food:
+                case SkillType.OfflineTraining: {
+                    int value = (int)Mathf.Round(Mathf.Max(0, skill.Level - skill.BaseLevel) / 60000f);
+                    float percentage = 0;
+                    if (skillType == SkillType.Stamina) {
+                        int happyHour = 1;
+                        int totalHours = 56;
+                        if (OpenTibiaUnity.GameManager.ClientVersion >= 841) {
+                            happyHour = 2;
+                            totalHours = 42;
+                        }
+
+                        percentage = value / (totalHours * 60f);
+                        if ((totalHours * 60) - value > happyHour * 60)
+                            skillPanel.SetProgressColor(RedColor);
+                        else
+                            skillPanel.SetProgressColor(GreenColor);
+                    } else if (skillType == SkillType.OfflineTraining) {
+                        percentage = value / (12 * 60f);
+                    }
+
+                    skillPanel.SetValue(string.Format("{0:D2}:{1:D2}", value / 60, value % 60), percentage * 100);
+                    break;
+                }
+
+                default: {
+                    long skillLevel = skill.Level;
+                    if (skillType == SkillType.Capacity)
+                        skillLevel /= 100;
+
+                    skillPanel.SetValue(skillLevel, skill.Percentage);
+                    break;
+                }
+            }
+
+            
         }
 
         protected override void OnClientVersionChange(int _, int newVersion) {
             base.OnClientVersionChange(_, newVersion);
             var gameManager = OpenTibiaUnity.GameManager;
-            var greenColor = Core.Colors.ColorFromRGB(Core.Chat.MessageColors.Green);
 
             DestroyOldComponents();
 
@@ -96,26 +151,30 @@ namespace OpenTibiaUnity.Modules.Skills
 
             if (gameManager.GetFeature(GameFeature.GamePlayerStamina))
                 _staminaPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_STAMINA);
-            
-            CreateSeparator();
+
+            if (gameManager.GetFeature(GameFeature.GameOfflineTrainingTime))
+                _offlineTrainingPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_OFFLINETRAINING);
+
             if (newVersion > 1150) {
-                _magicPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_MAGIC, 0, 0, greenColor, _magicIcon);
-                _fistPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_FIST, 0, 0, greenColor, _fistIcon);
-                _clubPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_CLUB, 0, 0, greenColor, _clubIcon);
-                _swordPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_SWORD, 0, 0, greenColor, _swordIcon);
-                _axePanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_AXE, 0, 0, greenColor, _axeIcon);
-                _distancePanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_DISTANCE, 0, 0, greenColor, _distIcon);
-                _shieldingPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_SHIELDING, 0, 0, greenColor, _shieldingIcon);
-                _fishingPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_FISHING, 0, 0, greenColor, _fishingIcon);
+                CreateSeparator();
+                _magicPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_MAGIC, 0, 0, GreenColor, _magicIcon);
+                _fistPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_FIST, 0, 0, GreenColor, _fistIcon);
+                _clubPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_CLUB, 0, 0, GreenColor, _clubIcon);
+                _swordPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_SWORD, 0, 0, GreenColor, _swordIcon);
+                _axePanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_AXE, 0, 0, GreenColor, _axeIcon);
+                _distancePanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_DISTANCE, 0, 0, GreenColor, _distIcon);
+                _shieldingPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_SHIELDING, 0, 0, GreenColor, _shieldingIcon);
+                _fishingPanel = CreateSkillPanel(_skillProgressIconPanelPrefab, TextResources.SKILLS_FISHING, 0, 0, GreenColor, _fishingIcon);
             } else {
-                _magicPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_MAGIC, 0, 0, greenColor);
-                _fistPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_FIST_LEGACY, 0, 0, greenColor);
-                _clubPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_CLUB_LEGACY, 0, 0, greenColor);
-                _swordPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_SWORD_LEGACY, 0, 0, greenColor);
-                _axePanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_AXE_LEGACY, 0, 0, greenColor);
-                _distancePanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_DISTANCE_LEGACY, 0, 0, greenColor);
-                _shieldingPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_SHIELDING, 0, 0, greenColor);
-                _shieldingPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_FISHING, 0, 0, greenColor);
+                _magicPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_MAGIC, 0, 0, RedColor);
+                CreateSeparator();
+                _fistPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_FIST_LEGACY, 0, 0, GreenColor);
+                _clubPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_CLUB_LEGACY, 0, 0, GreenColor);
+                _swordPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_SWORD_LEGACY, 0, 0, GreenColor);
+                _axePanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_AXE_LEGACY, 0, 0, GreenColor);
+                _distancePanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_DISTANCE_LEGACY, 0, 0, GreenColor);
+                _shieldingPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_SHIELDING, 0, 0, GreenColor);
+                _shieldingPanel = CreateSkillPanel(_skillProgressPanelPrefab, TextResources.SKILLS_FISHING, 0, 0, GreenColor);
             }
             
             if (gameManager.GetFeature(GameFeature.GameAdditionalSkills)) {
@@ -157,6 +216,7 @@ namespace OpenTibiaUnity.Modules.Skills
             if (_speedPanel) { Destroy(_speedPanel.gameObject); _speedPanel = null; }
             if (_regenerationPanel) { Destroy(_regenerationPanel.gameObject); _regenerationPanel = null; }
             if (_staminaPanel) { Destroy(_staminaPanel.gameObject); _staminaPanel = null; }
+            if (_offlineTrainingPanel) { Destroy(_offlineTrainingPanel.gameObject); _offlineTrainingPanel = null; }
 
             if (_magicPanel) { Destroy(_magicPanel.gameObject); _magicPanel = null; }
             if (_fistPanel) { Destroy(_fistPanel.gameObject); _fistPanel = null; }
@@ -173,9 +233,8 @@ namespace OpenTibiaUnity.Modules.Skills
             if (_manaLeechChancePanel) { Destroy(_manaLeechChancePanel.gameObject); _manaLeechChancePanel = null; }
             if (_manaLeechAmountPanel) { Destroy(_manaLeechAmountPanel.gameObject); _manaLeechAmountPanel = null; }
 
-            foreach (Transform child in _panelContent) {
+            foreach (Transform child in _panelContent)
                 Destroy(child.gameObject);
-            }
         }
 
         private SkillPanel CreateSkillPanel(SkillPanel prefab, string name, long value = 0, float percent = 0, Color? color = null, Sprite icon = null) {
@@ -203,7 +262,7 @@ namespace OpenTibiaUnity.Modules.Skills
             hrRectTransform.anchoredPosition = Vector2.zero;
 
             newGameObject.AddComponent<LayoutElement>().minHeight = 10;
-            newGameObject.transform.parent = _panelContent;
+            newGameObject.transform.SetParent(_panelContent);
             newGameObject.name = "Separator_" + newGameObject.transform.GetSiblingIndex();
             return newGameObject;
         }
@@ -241,6 +300,7 @@ namespace OpenTibiaUnity.Modules.Skills
                 case SkillType.Speed: return _speedPanel;
                 case SkillType.Food: return _regenerationPanel;
                 case SkillType.Stamina: return _staminaPanel;
+                case SkillType.OfflineTraining: return _offlineTrainingPanel;
                 case SkillType.MagLevel: return _magicPanel;
                 case SkillType.Fist: return _fistPanel;
                 case SkillType.Club: return _clubPanel;

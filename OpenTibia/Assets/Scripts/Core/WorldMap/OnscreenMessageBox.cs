@@ -15,7 +15,7 @@ namespace OpenTibiaUnity.Core.WorldMap
         private Utils.RingBuffer<OnscreenMessage> _messages;
         private Vector3Int? _position;
         private int _speakerLevel;
-        private int m_VisibleMessages = 0;
+        private int _visibleMessages = 0;
 
         private float _width = 0;
         private float _height = 0;
@@ -28,7 +28,7 @@ namespace OpenTibiaUnity.Core.WorldMap
         public MessageModeType Mode { get; }
         public string Speaker { get; }
         public bool Visible { get => _visible; set => _visible = value; }
-        public int VisibleMessages { get => !!Visible ? m_VisibleMessages : 0; }
+        public int VisibleMessages { get => !!Visible ? _visibleMessages : 0; }
         public bool Empty { get => _messages.Length - GetFirstNonHeaderIndex() <= 0; }
         public float Width { get => _width; }
         public float Height { get => _height; }
@@ -86,7 +86,7 @@ namespace OpenTibiaUnity.Core.WorldMap
         }
 
         public void ArrangeMessages() {
-            m_VisibleMessages = 0;
+            _visibleMessages = 0;
             _height = 0;
             _width = 0;
 
@@ -101,10 +101,10 @@ namespace OpenTibiaUnity.Core.WorldMap
                 case MessageModeType.NpcFrom:
                 case MessageModeType.BarkLoud:
                 case MessageModeType.BarkLow:
-                    while (m_VisibleMessages < _messages.Length) {
-                        var onscreenMessage = _messages.GetItemAt(m_VisibleMessages);
+                    while (_visibleMessages < _messages.Length) {
+                        var onscreenMessage = _messages.GetItemAt(_visibleMessages);
                         if (_height + onscreenMessage.Height <= Constants.OnscreenMessageHeight) {
-                            m_VisibleMessages++;
+                            _visibleMessages++;
                             _width = Mathf.Max(_width, onscreenMessage.Width);
                             _height += onscreenMessage.Height;
                             onscreenMessage.VisibleSince = Mathf.Min(OpenTibiaUnity.TicksMillis, onscreenMessage.VisibleSince);
@@ -116,7 +116,7 @@ namespace OpenTibiaUnity.Core.WorldMap
                 default:
                     if (_messages.Length > 0) {
                         var onscreenMessage = _messages.GetItemAt(0);
-                        m_VisibleMessages = 1;
+                        _visibleMessages = 1;
                         _width = onscreenMessage.Width;
                         _height = onscreenMessage.Height;
                         onscreenMessage.VisibleSince = Mathf.Min(OpenTibiaUnity.TicksMillis, onscreenMessage.VisibleSince);

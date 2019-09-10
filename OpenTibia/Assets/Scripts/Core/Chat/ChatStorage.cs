@@ -196,7 +196,7 @@ namespace OpenTibiaUnity.Core.Chat
             Channel channel = null;
             ChannelMessage channelMessage = new ChannelMessage(statementId, speaker, speakerLevel, mode, text);
             channelMessage.FormatMessage(messageFilterSet.ShowTimeStamps, messageFilterSet.ShowLevels, messageMode.TextARGB, messageMode.HighlightARGB);
-            
+
             switch (mode) {
                 case MessageModeType.Say:
                 case MessageModeType.Yell:
@@ -299,12 +299,8 @@ namespace OpenTibiaUnity.Core.Chat
                     break;
                 case MessageModeType.BarkLow:
                 case MessageModeType.BarkLoud:
-                    if (channel == null) {
-                        if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameServerLog))
-                            channel = GetChannel(ChatStorage.ServerChannelId);
-                        else
-                            channel = GetChannel(ChatStorage.LocalChannelId);
-                    }
+                    if (channel == null)
+                        channel = GetChannel(ChatStorage.LocalChannelId);
                     break;
 
                 case MessageModeType.MonsterSay:

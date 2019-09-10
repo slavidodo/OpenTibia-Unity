@@ -34,7 +34,14 @@ namespace OpenTibiaUnity.Core.Creatures
         }
 
         public override int ManaPercent {
-            get => (int)((GetSkillValue(SkillType.Mana) / (float)GetSkillbase(SkillType.Mana)) * 100);
+            get {
+                long maxMana = GetSkillbase(SkillType.Mana);
+                if (maxMana == 0)
+                    return 100;
+                
+                long mana = GetSkillValue(SkillType.Mana);
+                return (int)((mana / (float)maxMana) * 100);
+            }
         }
 
         public long Mana {
@@ -408,13 +415,7 @@ namespace OpenTibiaUnity.Core.Creatures
                         _experienceCounter.Reset();
                     }
 
-                    var skill = new Skill() {
-                        Level = level,
-                        BaseLevel = baseLevel,
-                        Percentage = percentage
-                    };
-                    
-                    onSkillChange.Invoke(this, skillType, skill);
+                    base.SetSkill(skillType, level, baseLevel, percentage);
                     break;
                 case SkillType.Food:
                     base.SetSkill(skillType, level, baseLevel, percentage);
@@ -469,7 +470,8 @@ namespace OpenTibiaUnity.Core.Creatures
 
         public void UpdateStateFlags(uint? value = null) {
             var flags = value ?? _stateFlags;
-            if (GetSkillValue(SkillType.Food) <= GetSkillbase(SkillType.Food))
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerRegenerationTime)
+                && GetSkillValue(SkillType.Food) <= GetSkillbase(SkillType.Food))
                 flags |= 1U << (int)States.Hungry;
 
             if (_stateFlags != flags) {

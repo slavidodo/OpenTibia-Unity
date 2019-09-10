@@ -111,6 +111,7 @@
         public const string SKILLS_SPEED = "Speed";
         public const string SKILLS_REGENERATION = "Food";
         public const string SKILLS_STAMINA = "Stamina";
+        public const string SKILLS_OFFLINETRAINING = "Offline Training";
         public const string SKILLS_MAGIC = "Magic";
         public const string SKILLS_FIST = "Fist";
         public const string SKILLS_FIST_LEGACY = "Fist Fighting";

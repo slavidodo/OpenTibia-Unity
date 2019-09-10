@@ -590,7 +590,7 @@ namespace OpenTibiaUnity.Core
         private void OnConnectionError(string message, bool disconnected) {
             Debug.Log("ProcessGameError: " + message + ", " + disconnected);
             if (disconnected) {
-                if (System.Threading.Thread.CurrentThread == OpenTibiaUnity.MainThread)
+                if (Thread.CurrentThread == OpenTibiaUnity.MainThread)
                     ProcessGameEnd();
                 else
                     InvokeOnMainThread(() => ProcessGameEnd());

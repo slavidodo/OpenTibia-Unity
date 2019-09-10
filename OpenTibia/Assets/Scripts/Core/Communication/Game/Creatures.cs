@@ -12,9 +12,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
             if (!!creature) {
                 creature.Marks.SetMark(MarkType.OneSecondTemp, mark);
                 CreatureStorage.InvalidateOpponents();
-            } else {
-                throw new System.Exception("ProtocolGame.ParseCreatureMarks: Unknown creature id: " + creatureId);
-            }
+            }/*else {
+                throw new System.Exception("ProtocolGame.ParseCreatureMark: Unknown creature id: " + creatureId);
+            }*/
         }
 
         private void ParseTrappers(Internal.ByteArray message) {
@@ -38,9 +38,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
             if (!!creature) {
                 creature.SetSkill(SkillType.HealthPercent, healthPercent);
                 CreatureStorage.InvalidateOpponents();
-            } else {
+            }/*else {
                 throw new System.Exception("ProtocolGame.ParseCreatureHealth: Unknown creature id: " + creatureId);
-            }
+            }*/
         }
 
         private void ParseCreatureLight(Internal.ByteArray message) {
@@ -53,9 +53,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
             if (!!creature) {
                 creature.Brightness = intensity;
                 creature.LightColor = Colors.ColorFrom8Bit(color);
-            } else {
+            }/*else {
                 throw new System.Exception("ProtocolGame.ParseCreatureLight: Unknown creature id: " + creatureId);
-            }
+            }*/
         }
 
         private void ParseCreatureOutfit(Internal.ByteArray message) {
@@ -67,9 +67,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 creature.Outfit = outfit;
                 if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerMounts))
                     creature.MountOutfit = ReadMountOutfit(message, creature.MountOutfit);
-            } else {
+            }/*else {
                 throw new System.Exception("ProtocolGame.ParseCreatureOutfit: Unknown creature id: " + creatureId);
-            }
+            }*/
         }
 
         private void ParseCreatureSpeed(Internal.ByteArray message) {
@@ -81,10 +81,12 @@ namespace OpenTibiaUnity.Core.Communication.Game
             int speed = message.ReadUnsignedShort();
 
             var creature = CreatureStorage.GetCreature(creatureId);
-            if (!!creature)
+            if (!!creature) {
                 creature.SetSkill(SkillType.Speed, speed, baseSpeed);
-            else
+                CreatureStorage.InvalidateOpponents();
+            }/*else {
                 throw new System.Exception("ProtocolGame.ParseCreatureSpeed: Unknown creature id: " + creatureId);
+            }*/
         }
 
         private void ParseCreatureSkull(Internal.ByteArray message) {
@@ -92,21 +94,25 @@ namespace OpenTibiaUnity.Core.Communication.Game
             byte pkFlag = message.ReadUnsignedByte();
 
             var creature = CreatureStorage.GetCreature(creatureId);
-            if (!!creature)
+            if (!!creature) {
                 creature.SetPKFlag((PKFlag)pkFlag);
-            else
-                throw new System.Exception("ProtocolGame.ParseCreatureSkull: Unknown creature id: " + creatureId);    
+                CreatureStorage.InvalidateOpponents();
+            }/*else {
+                throw new System.Exception("ProtocolGame.ParseCreatureSkull: Unknown creature id: " + creatureId);
+            }*/
         }
 
         private void ParseCreatureShield(Internal.ByteArray message) {
             uint creatureId = message.ReadUnsignedInt();
-            byte partyFlag = message.ReadUnsignedByte();
+            var partyFlag = message.ReadEnum<PartyFlag>();
 
             var creature = CreatureStorage.GetCreature(creatureId);
-            if (!!creature)
-                creature.SetPartyFlag((PartyFlag)partyFlag);
-            else
+            if (!!creature) {
+                creature.SetPartyFlag(partyFlag);
+                CreatureStorage.InvalidateOpponents();
+            }/*else {
                 throw new System.Exception("ProtocolGame.ParseCreatureShield: Unknown creature id: " + creatureId);
+            }*/
         }
 
         private void ParseCreatureUnpass(Internal.ByteArray message) {
@@ -114,10 +120,11 @@ namespace OpenTibiaUnity.Core.Communication.Game
             bool unpass = message.ReadBoolean();
 
             var creature = CreatureStorage.GetCreature(creatureId);
-            if (!!creature)
+            if (!!creature) {
                 creature.Unpassable = unpass;
-            else
+            }/*else {
                 throw new System.Exception("ProtocolGame.ParseCreatureUnpass: Unknown creature id: " + creatureId);
+            }*/
         }
 
         private void ParseCreatureMarks(Internal.ByteArray message) {
@@ -136,9 +143,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 if (!!creature) {
                     creature.Marks.SetMark(permenant ? MarkType.Permenant : MarkType.OneSecondTemp, mark);
                     CreatureStorage.InvalidateOpponents();
-                } else {
+                }/*else {
                     throw new System.Exception("ProtocolGame.ParseCreatureMarks: Unknown creature id: " + creatureId);
-                }
+                }*/
             }
         }
 
@@ -149,8 +156,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
             var creature = CreatureStorage.GetCreature(creatureId);
             if (!!creature)
                 creature.NumberOfPvPHelpers = helpers;
-            else
-                throw new System.Exception("ProtocolGame.ParsePlayerHelpers: Unknown creature id: " + creatureId); 
+            /*else
+                throw new System.Exception("ProtocolGame.ParsePlayerHelpers: Unknown creature id: " + creatureId);*/
         }
 
         private void ParseCreatureType(Internal.ByteArray message) {
@@ -164,9 +171,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
             if (!!creature) {
                 creature.Type = (CreatureType)type;
                 creature.SetSummonerId(master);
-            } else {
+            }/*else {
                 throw new System.Exception("ProtocolGame.ParseCreatureType: Unknown creature id: " + creatureId);
-            }
+            }*/
         }
     }
 }

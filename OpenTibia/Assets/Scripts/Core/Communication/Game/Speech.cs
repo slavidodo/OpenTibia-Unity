@@ -264,7 +264,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
             if(mode != MessageModeType.NpcFromStartBlock && mode != MessageModeType.NpcFrom) {
                 try {
                     WorldMapStorage.AddOnscreenMessage(absolutePosition, (int)statementId, speaker, speakerLevel, mode, text);
-                    ChatStorage.AddChannelMessage(channelId, (int)statementId, speaker, speakerLevel, mode, text);
+                    if (mode != MessageModeType.BarkLoud)
+                        ChatStorage.AddChannelMessage(channelId, (int)statementId, speaker, speakerLevel, mode, text);
                 } catch (System.Exception e) {
                     throw new System.Exception("ProtocolGame.ParseTalk: Failed to add message: " + e.Message + "\n" + e.StackTrace);
                 }

@@ -10,6 +10,8 @@
         public virtual void SetIcon(UnityEngine.Sprite icon) { }
         public abstract void SetText(string text);
         public abstract void SetValue(long value);
+        public abstract void SetValue(string value);
         public virtual void SetValue(long value, float percent) => SetValue(value);
+        public virtual void SetValue(string value, float percent) => SetValue(value);
     }
 }

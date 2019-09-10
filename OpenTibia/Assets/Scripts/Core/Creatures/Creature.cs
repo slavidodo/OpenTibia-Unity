@@ -13,6 +13,10 @@ namespace OpenTibiaUnity.Core.Creatures
             BaseLevel = baseLevel;
             Percentage = percentage;
         }
+
+        public override string ToString() {
+            return $"{{Level = {Level}, BaseLevel = {BaseLevel}, Percentage = {Percentage}}}";
+        }
     }
 
     public class Creature {
@@ -314,6 +318,13 @@ namespace OpenTibiaUnity.Core.Creatures
                 _skills[skill].Level = level;
                 onSkillChange.Invoke(this, skillType, _skills[skill]);
             }
+        }
+
+        public Skill GetSkill(SkillType skill) {
+            if ((int)skill >= _skills.Length)
+                return default;
+
+            return _skills[(int)skill];
         }
 
         public long GetSkillValue(SkillType skill) {

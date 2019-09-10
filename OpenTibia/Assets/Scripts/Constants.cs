@@ -255,7 +255,8 @@
 
     public enum SkillType : byte
     {
-        Level = 0,
+        Experience = 0,
+        Level,
         MagLevel,
         HealthPercent,
         Health,
@@ -280,10 +281,12 @@
         ManaLeechChance,
         ManaLeechAmount,
 
+        First = Experience,
+        Last = ManaLeechAmount,
+
         // internal usage only
-        ExperienceGain = 253,
-        None = 254,
-        Experience = 255,
+        ExperienceGain = 254,
+        None = 255,
     }
     public enum States : int
     {

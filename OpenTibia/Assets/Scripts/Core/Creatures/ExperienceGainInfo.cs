@@ -3,7 +3,7 @@
     public class ExperienceGainInfo
     {
         private float _baseXpGain;
-        private float m_VoucherAddend;
+        private float _voucherAddend;
         private float _grindingAddend;
         private float _storeBoostAddend;
         private float _huntingBoostFactor;
@@ -24,9 +24,9 @@
 
         public void UpdateGainInfo(float baseXpGain, float voucherAddend, float grindingAddend, float storeBoostAddend, float huntingBoostFactor) {
 
-            if (_baseXpGain != baseXpGain || m_VoucherAddend != voucherAddend || _grindingAddend != grindingAddend || _storeBoostAddend != storeBoostAddend || _huntingBoostFactor != huntingBoostFactor) {
+            if (_baseXpGain != baseXpGain || _voucherAddend != voucherAddend || _grindingAddend != grindingAddend || _storeBoostAddend != storeBoostAddend || _huntingBoostFactor != huntingBoostFactor) {
                 _baseXpGain = baseXpGain;
-                m_VoucherAddend = voucherAddend;
+                _voucherAddend = voucherAddend;
                 _grindingAddend = grindingAddend;
                 _storeBoostAddend = storeBoostAddend;
                 _huntingBoostFactor = huntingBoostFactor;
@@ -35,7 +35,7 @@
 
         public void Reset() {
             _baseXpGain = 1;
-            m_VoucherAddend = 0;
+            _voucherAddend = 0;
             _grindingAddend = 0;
             _storeBoostAddend = 0;
             _huntingBoostFactor = 1;
@@ -44,7 +44,7 @@
         }
 
         public float ComputeXpGainModifier() {
-            return (_baseXpGain + m_VoucherAddend + _grindingAddend + _storeBoostAddend) * _huntingBoostFactor;
+            return (_baseXpGain + _voucherAddend + _grindingAddend + _storeBoostAddend) * _huntingBoostFactor;
         }
 
         public bool CanCurrentlyBuyXpBoost() {

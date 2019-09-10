@@ -109,6 +109,12 @@ namespace OpenTibiaUnity.Modules.Inventory
             ObjectMultiUseHandler.RegisterContainer(this);
 
             OpenTibiaUnity.InputHandler.AddMouseUpListener(Core.Utils.EventImplPriority.Default, OnMouseUp);
+            OpenTibiaUnity.GameManager.onTacticsChangeEvent.AddListener((attackMode, chaseMode, secureMode, pvpMode) => {
+                SetAttackMode(attackMode, false, true);
+                SetChaseMode(chaseMode, false, true);
+                SetSecureMode(secureMode, false, true);
+                SetPvPMode(pvpMode, false, true);
+            });
         }
 
         protected override void Start() {
@@ -134,13 +140,6 @@ namespace OpenTibiaUnity.Modules.Inventory
             _fingerItemView.onPointerExit.AddListener(OnItemPointerExit);
             _hipItemView.onPointerEnter.AddListener(OnItemPointerEnter);
             _hipItemView.onPointerExit.AddListener(OnItemPointerExit);
-
-            OpenTibiaUnity.GameManager.onTacticsChangeEvent.AddListener((attackMode, chaseMode, secureMode, pvpMode) => {
-                SetAttackMode(attackMode, false, true);
-                SetChaseMode(chaseMode, false, true);
-                SetSecureMode(secureMode, false, true);
-                SetPvPMode(pvpMode, false, true);
-            });
 
             _chaseOffToggle.onValueChanged.AddListener((value) => { if (value) SetChaseMode(CombatChaseModes.Off, true, false); });
             _chaseOnToggle.onValueChanged.AddListener((value) => { if (value) SetChaseMode(CombatChaseModes.On, true, false); });
@@ -171,6 +170,9 @@ namespace OpenTibiaUnity.Modules.Inventory
             _optionsLegacyButton.onClick.AddListener(miniWindowButtons.OnOptionsButtonClicked);
             _helpLegacyButton.onClick.AddListener(miniWindowButtons.OnHelpButtonClicked);
             _logoutLegacyButton.onClick.AddListener(miniWindowButtons.OnLogoutButtonClicked);
+
+            _storeInboxButton.onClick.AddListener(OnStoreInboxButtonClick);
+            _storeInboxLegacyButton.onClick.AddListener(OnStoreInboxButtonClick);
         }
 
         private void OnGUI() {
@@ -187,6 +189,8 @@ namespace OpenTibiaUnity.Modules.Inventory
             for (int i = 0; i < (int)ClothSlots.Hip; i++) {
                 var @object = BodyContainerView.Objects[i];
                 if (@object) {
+                    if (!@object.ClampeToFieldSize)
+                        @object.ClampeToFieldSize = true;
                     @object.Animate(OpenTibiaUnity.TicksMillis);
                     @object.Draw(new Vector2(Constants.FieldSize * i, 0), zoom, 0, 0, 0);
                 }
@@ -675,6 +679,14 @@ namespace OpenTibiaUnity.Modules.Inventory
             } catch (System.Exception) {
             } finally {
                 _handlingExpertPvPToggle = false;
+            }
+        }
+
+        private void OnStoreInboxButtonClick() {
+            var storeInbox = BodyContainerView.GetObject(ClothSlots.StoreInbox);
+            if (!!storeInbox) {
+                var absolutePosition = new Vector3Int(65535, (int)ClothSlots.StoreInbox, 0);
+                GameActionFactory.CreateUseAction(absolutePosition, storeInbox.Type, absolutePosition.z, Vector3Int.zero, null, 0, UseActionTarget.Auto).Perform();
             }
         }
     }

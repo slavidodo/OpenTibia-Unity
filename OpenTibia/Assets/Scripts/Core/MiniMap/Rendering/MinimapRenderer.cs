@@ -66,7 +66,7 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
             if (MiniMapStorage == null || !OpenTibiaUnity.GameManager.IsGameRunning || !WorldMapStorage.Valid)
                 return RenderError.MiniMapNotValid;
 
-            GL.Clear(false, true, Color.black);
+            Utils.GraphicsUtility.ClearColor(Color.black);
             if (PositionX < Constants.MapMinX || PositionX > Constants.MapMaxX
                 || PositionY < Constants.MapMinY || PositionY > Constants.MapMaxY
                 || PositionZ < Constants.MapMinZ || PositionZ > Constants.MapMaxZ) {

@@ -38,27 +38,28 @@ namespace OpenTibiaUnity.Core.Appearances
         protected int _lastPatternY = -1;
         protected int _lastPatternZ = -1;
 
-
         protected AppearanceType _type;
         protected Animation.IAppearanceAnimator[] _animators;
         protected List<CachedSpriteRequest[]> _cachedSprites;
+
+        public bool ClampeToFieldSize = false;
 
         protected Protobuf.Appearances.FrameGroup _activeFrameGroup {
             get {
                 if (_activeFrameGroupIndex < 0)
                     return null;
 
-                if (_activeFrameGroupIndex != _activeFrameGroupIndexpublic) {
-                    _activeFrameGroupIndexpublic = _activeFrameGroupIndex;
-                    _activeFrameGrouppublic = _type.FrameGroups?[_activeFrameGroupIndex];
+                if (_activeFrameGroupIndex != _activeFrameGroupIndexInternal) {
+                    _activeFrameGroupIndexInternal = _activeFrameGroupIndex;
+                    _activeFrameGroupInternal = _type.FrameGroups?[_activeFrameGroupIndex];
                 }
 
-                return _activeFrameGrouppublic;
+                return _activeFrameGroupInternal;
             }
         }
 
-        private int _activeFrameGroupIndexpublic = -1;
-        private Protobuf.Appearances.FrameGroup _activeFrameGrouppublic = null;
+        private int _activeFrameGroupIndexInternal = -1;
+        private Protobuf.Appearances.FrameGroup _activeFrameGroupInternal = null;
         
         public uint Id {
             get => _id;
@@ -121,7 +122,7 @@ namespace OpenTibiaUnity.Core.Appearances
                     _cachedSprites.Add(new CachedSpriteRequest[frameGroup.SpriteInfo.SpriteIDs.Count]);
             }
 
-            var cachedRequest = _cachedSprites[_activeFrameGroupIndex][spriteIndex];
+            CachedSpriteRequest cachedRequest = _cachedSprites[_activeFrameGroupIndex][spriteIndex];
             if (cachedRequest == null) {
                 CachedSprite cachedSprite;
 
@@ -168,8 +169,13 @@ namespace OpenTibiaUnity.Core.Appearances
         protected void InternalDrawTo(float screenX, float screenY, Vector2 zoom, bool highlighted, float highlightOpacity,
             CachedSprite cachedSprite, Material material = null) {
             s_TempPoint.Set(screenX - _type.OffsetX, screenY - _type.OffsetY);
-            s_TempRect.position = (s_TempPoint - cachedSprite.spriteSize + s_FieldVector) * zoom;
-            s_TempRect.size = cachedSprite.spriteSize * zoom;
+            if (ClampeToFieldSize) {
+                s_TempRect.position = s_TempPoint * zoom;
+                s_TempRect.size = s_FieldVector * zoom;
+            } else {
+                s_TempRect.position = (s_TempPoint - cachedSprite.spriteSize + s_FieldVector) * zoom;
+                s_TempRect.size = cachedSprite.spriteSize * zoom;
+            }
 
             if (material == null)
                 material = OpenTibiaUnity.GameManager.AppearanceTypeMaterial;

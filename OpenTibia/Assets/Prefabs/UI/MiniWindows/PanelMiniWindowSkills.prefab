@@ -51,7 +51,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0614c11299ee13747b0dd6cd835c00c1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _resizable: 0
+  _resizable: 1
   _minimizedHeight: 23
   _minContentHeight: 50
   _maxContentHeight: -1

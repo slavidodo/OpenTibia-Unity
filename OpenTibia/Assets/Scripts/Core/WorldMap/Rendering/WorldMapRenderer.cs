@@ -754,7 +754,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         }
 
         private void InternalDrawCreatureFlags(Creatures.Creature creature, float rectX, float rectY, bool visible) {
-            if (!(creature.IsHuman || creature.IsSummon || creature.IsNPC) || !creature.HasFlag)
+            if (!creature.HasFlag)
                 return;
             
             var screenPosition = new Vector2(rectX + 16 - Constants.StateFlagSize + 4, rectY + 1);

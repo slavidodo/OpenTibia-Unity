@@ -32,9 +32,10 @@ namespace OpenTibiaUnity.Core.Appearances
         AssetBundle _spritesAssetBundle;
 
         List<SpriteTypeImpl> _spriteSheet = new List<SpriteTypeImpl>();
+        List<CachedSprite> _cachedSprites = new List<CachedSprite>();
+        List<int> _failedTextureRequests = new List<int>();
         Dictionary<string, Texture2D> _cachedTextures = new Dictionary<string, Texture2D>();
         Dictionary<string, AssetBundleRequest> _activeTextureRequests = new Dictionary<string, AssetBundleRequest>();
-        List<CachedSprite> _cachedSprites = new List<CachedSprite>();
 
         private static Vector2[] SpriteTypeSizeRefs = new Vector2[] {
             new Vector2(1.0f, 1.0f),
@@ -136,6 +137,10 @@ namespace OpenTibiaUnity.Core.Appearances
             if (_cachedTextures.TryGetValue(filename, out tex2D))
                 return SpriteLoadingStatus.Completed;
 
+            int hashCode = filename.GetHashCode();
+            if (_failedTextureRequests.FindIndex((x) => x == hashCode) >= 0)
+                return SpriteLoadingStatus.Failed;
+
             AssetBundleRequest asyncRequest;
             if (!_activeTextureRequests.TryGetValue(filename, out asyncRequest)) {
                 asyncRequest = _spritesAssetBundle.LoadAssetAsync<Texture2D>(filename);
@@ -146,6 +151,8 @@ namespace OpenTibiaUnity.Core.Appearances
                 return SpriteLoadingStatus.Loading;
             } else if (asyncRequest.asset == null) {
                 _activeTextureRequests.Remove(filename);
+                _failedTextureRequests.Add(hashCode);
+                Debug.Log("Failed: " + filename);
                 return SpriteLoadingStatus.Failed;
             }
 

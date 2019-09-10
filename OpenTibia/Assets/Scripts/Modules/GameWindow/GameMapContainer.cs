@@ -104,7 +104,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
                     worldMapRenderer.HighlightTile = null;
                 
                 RenderTexture.active = gameManager.WorldMapRenderTexture;
-                Core.Utils.GraphicsUtility.ClearWithTransparency();
+                Core.Utils.GraphicsUtility.ClearColor(Color.black);
                 var error = worldMapRenderer.RenderWorldMap(worldMapRectTransform.rect);
                 RenderTexture.active = null;
                 

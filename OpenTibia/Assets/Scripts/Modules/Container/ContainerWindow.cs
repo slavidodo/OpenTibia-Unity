@@ -55,6 +55,8 @@ namespace OpenTibiaUnity.Modules.Container
                     if (index < _containerView.NumberOfTotalObjects) {
                         var @object = _containerView.GetObject(index + _containerView.IndexOfFirstObject);
                         if (@object) {
+                            if (!@object.ClampeToFieldSize)
+                                @object.ClampeToFieldSize = true;
                             @object.Animate(OpenTibiaUnity.TicksMillis);
                             @object.Draw(new Vector2(Constants.FieldSize * i, Constants.FieldSize * j), zoom, 0, 0, 0);
                         }
@@ -64,6 +66,8 @@ namespace OpenTibiaUnity.Modules.Container
 
             int iconColumn = _numberOfSlots % 4;
             int iconRow = _numberOfSlots / 4;
+            if (!_containerView.Icon.ClampeToFieldSize)
+                _containerView.Icon.ClampeToFieldSize = true;
             _containerView.Icon.Draw(new Vector2(Constants.FieldSize * iconColumn, Constants.FieldSize * iconRow), zoom, 0, 0, 0);
 
             RenderTexture.active = null;

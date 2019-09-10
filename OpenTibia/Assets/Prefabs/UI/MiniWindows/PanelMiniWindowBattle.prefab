@@ -52,7 +52,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e5bc9b42be5de1740b5e6e3c158313ad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _resizable: 0
+  _resizable: 1
   _minimizedHeight: 23
   _minContentHeight: 50
   _maxContentHeight: -1
@@ -891,11 +891,6 @@ PrefabInstance:
       propertyPath: m_Pivot.y
       value: 0.5
       objectReference: {fileID: 0}
-    - target: {fileID: 8274263800241433161, guid: a5ddc2e2a5a73e448b4ab83fc88d3cb5,
-        type: 3}
-      propertyPath: m_Resizable
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 1082704166163997138, guid: a5ddc2e2a5a73e448b4ab83fc88d3cb5,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -957,6 +952,11 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 21300006, guid: 7e8f07dd7106b6e40abbf1a133f70076,
         type: 3}
+    - target: {fileID: 8274263800241433161, guid: a5ddc2e2a5a73e448b4ab83fc88d3cb5,
+        type: 3}
+      propertyPath: m_Resizable
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 8274263800241433161, guid: a5ddc2e2a5a73e448b4ab83fc88d3cb5, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: a5ddc2e2a5a73e448b4ab83fc88d3cb5, type: 3}
@@ -1634,16 +1634,6 @@ PrefabInstance:
       propertyPath: m_AnchorMin.y
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 9080953906024433238, guid: 40dee3dca139fc94595d30807d888dc3,
-        type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 9080953906024433238, guid: 40dee3dca139fc94595d30807d888dc3,
-        type: 3}
-      propertyPath: m_SizeDelta.y
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 1970024145670434700, guid: 40dee3dca139fc94595d30807d888dc3,
         type: 3}
       propertyPath: m_AnchorMin.y
@@ -1670,6 +1660,16 @@ PrefabInstance:
       value: -12
       objectReference: {fileID: 0}
     - target: {fileID: 7725056495120241054, guid: 40dee3dca139fc94595d30807d888dc3,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9080953906024433238, guid: 40dee3dca139fc94595d30807d888dc3,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 9080953906024433238, guid: 40dee3dca139fc94595d30807d888dc3,
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 0

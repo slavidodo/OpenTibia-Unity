@@ -508,6 +508,12 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 case GameserverMessageType.ClearTarget:
                     ParseClearTarget(_inputBuffer);
                     break;
+                case GameserverMessageType.SpellDelay:
+                    ParseSpellDelay(_inputBuffer);
+                    break;
+                case GameserverMessageType.SpellGroupDelay:
+                    ParseSpellGroupDelay(_inputBuffer);
+                    break;
 
                 case GameserverMessageType.SetTactics:
                     ParseSetTactics(_inputBuffer);

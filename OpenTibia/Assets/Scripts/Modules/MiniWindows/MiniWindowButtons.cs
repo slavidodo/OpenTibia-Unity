@@ -62,8 +62,12 @@ namespace OpenTibiaUnity.Modules.MiniWindows
             _restToggle.isOn = true;
 
             int yExtention = 0;
-            if (isTibia11)
+            if (isTibia11) {
                 yExtention += 22;
+                layoutElement.preferredHeight = _restToggle.isOn ? 64 : 20;
+            } else {
+                layoutElement.preferredHeight = 20;
+            }
 
             (_skillsToggle.transform.parent as RectTransform).anchoredPosition = new Vector2(5, -yExtention);
             (_logoutButton.transform.parent as RectTransform).anchoredPosition = new Vector2(-5, -yExtention);

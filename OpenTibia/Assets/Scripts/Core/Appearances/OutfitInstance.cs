@@ -57,7 +57,7 @@ namespace OpenTibiaUnity.Core.Appearances
 
         public override int GetSpriteIndex(int layer, int patternX, int patternY, int patternZ) {
             return (int)((((
-                (layer >= 0 ? layer : _phase) % _activeFrameGroup.SpriteInfo.Phases
+                (layer >= 0 ? layer : (_phase > 0 ? _phase : 0)) % _activeFrameGroup.SpriteInfo.Phases
                 * _activeFrameGroup.SpriteInfo.PatternDepth + (patternZ >= 0 ? (int)(patternZ % _activeFrameGroup.SpriteInfo.PatternDepth) : 0))
                 * _activeFrameGroup.SpriteInfo.PatternHeight + (patternY >= 0 ? (int)(patternY % _activeFrameGroup.SpriteInfo.PatternHeight) : 0))
                 * _activeFrameGroup.SpriteInfo.PatternWidth + (patternX >= 0 ? (int)(patternX % _activeFrameGroup.SpriteInfo.PatternWidth) : 0))

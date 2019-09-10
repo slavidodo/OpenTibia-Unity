@@ -25,9 +25,11 @@ namespace OpenTibiaUnity.Modules.Skills
         public override void SetIcon(Sprite sprite) => _iconImage.sprite = sprite;
         public override void SetText(string text) => _labelText.SetText(text);
         public override void SetValue(long value) => SetValue(value, 0);
-        public override void SetValue(long value, float percent) => SetValue(Core.Utils.Utility.Commafy(value), percent);
+        public override void SetValue(string value) => SetValue(value, 0);
+        public override void SetValue(long value, float percent) => SetValueInternal(Core.Utils.Utility.Commafy(value), percent);
+        public override void SetValue(string value, float percent) => SetValueInternal(value, percent);
 
-        private void SetValue(string value, float percent) {
+        private void SetValueInternal(string value, float percent) {
             _labelValue.SetText(value);
             _progressBar.value = percent;
         }

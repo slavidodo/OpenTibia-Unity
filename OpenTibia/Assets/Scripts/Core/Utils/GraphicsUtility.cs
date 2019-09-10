@@ -6,13 +6,19 @@ namespace OpenTibiaUnity.Core.Utils
     public static class GraphicsUtility {
         private static Mesh _mesh;
 
+        public static Color TransparentColor = new Color(0, 0, 0, 0);
+
         static GraphicsUtility() {
             _mesh = new Mesh();
             _mesh.MarkDynamic();
         }
 
         public static void ClearWithTransparency() {
-            GL.Clear(false, true, new Color(0, 0, 0, 0));
+            ClearColor(TransparentColor);
+        }
+
+        public static void ClearColor(Color color) {
+            GL.Clear(false, true, color);
         }
 
         public static void DrawRect(Rect rect, Vector3 scale, Color color) {
