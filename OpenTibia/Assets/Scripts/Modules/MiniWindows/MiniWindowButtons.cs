@@ -41,6 +41,7 @@ namespace OpenTibiaUnity.Modules.MiniWindows
             _questLogButton.onClick.AddListener(OnQuestsButtonClicked);
             _optionsButton.onClick.AddListener(OnOptionsButtonClicked);
             _logoutButton.onClick.AddListener(OnLogoutButtonClicked);
+            _storeButton.onClick.AddListener(OnStoreButtonClicked);
         }
 
         protected override void OnClientVersionChange(int _, int newVersion) {
@@ -147,7 +148,13 @@ namespace OpenTibiaUnity.Modules.MiniWindows
         public void OnLogoutButtonClicked() {
 
         }
-        
+
+        public void OnStoreButtonClicked() {
+            var protocolGame = OpenTibiaUnity.ProtocolGame;
+            if (!!protocolGame && protocolGame.IsGameRunning)
+                protocolGame.SendOpenStore();
+        }
+
         private void ToggleWindow<T>(T prefab, bool value) where T : Core.Components.Base.MiniWindow {
             var miniWindow = OpenTibiaUnity.GameManager.GetModule<T>();
             if (value) {

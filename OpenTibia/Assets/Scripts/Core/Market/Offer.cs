@@ -2,8 +2,8 @@
 {
     public class Offer {
         private OfferId _id;
-        private MarketOfferTypes _offerType;
-        private MarketOfferStates _offerState;
+        private MarketOfferType _offerType;
+        private MarketOfferState _offerState;
 
         private ushort _typeId;
         private ushort _amount;
@@ -14,8 +14,8 @@
         public bool isDubious = false;
 
         public OfferId Id { get => _id; }
-        public MarketOfferTypes OfferType { get => _offerType; }
-        public MarketOfferStates OfferState { get => _offerState; }
+        public MarketOfferType OfferType { get => _offerType; }
+        public MarketOfferState OfferState { get => _offerState; }
 
         public ushort TypeId { get => _typeId; }
         public ushort Amount { get => _amount; }
@@ -23,7 +23,7 @@
 
         public string Character { get => _character; }
 
-        public Offer(OfferId offerId, MarketOfferTypes offerType, ushort typeId, ushort amount, uint piecePrice, string character, MarketOfferStates state) {
+        public Offer(OfferId offerId, MarketOfferType offerType, ushort typeId, ushort amount, uint piecePrice, string character, MarketOfferState state) {
             _id = offerId;
             _offerType = offerType;
             _typeId = typeId;

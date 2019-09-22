@@ -129,14 +129,13 @@ namespace OpenTibiaUnity.Modules.GameWindow
                 var clipRect = worldMapRenderer.CalculateClipRect();
                 if (clipRect != _gameWorldMap.rawImage.uvRect)
                     _gameWorldMap.rawImage.uvRect = clipRect;
-
-                bool hasPingFeature = gameManager.GetFeature(GameFeature.GameClientPing) || gameManager.GetFeature(GameFeature.GameExtendedClientPing);
-                if (worldMapRenderer.Framerate != _lastFramerate || (hasPingFeature && _lastPing != protocolGame.Ping)) {
+                
+                if (worldMapRenderer.Framerate != _lastFramerate || (gameManager.GetFeature(GameFeature.GameClientPing) && _lastPing != protocolGame.Ping)) {
                     _lastFramerate = worldMapRenderer.Framerate;
                     var fpsColor = GetFramerateColor(_lastFramerate);
                     
                     string text = string.Format("FPS: <color=#{0:X6}>{1}</color>", fpsColor, _lastFramerate);
-                    if (hasPingFeature) {
+                    if (gameManager.GetFeature(GameFeature.GameClientPing)) {
                         _lastPing = protocolGame.Ping;
                         var pingColor = GetPingColor(_lastPing);
                         text += string.Format("\nPing: <color=#{0:X6}>{1}</color>", pingColor, _lastPing);

@@ -2,20 +2,32 @@
 {
     public enum GameclientMessageType
     {
-        /**
-         * Missing
-         * (1132):
-         * ** GameclientMessageClientCheck
+        /** (Missing):
+         * GameclientMessageClientCheck
+         * SubscribeToUpdates
+         * TournamentInformation
+         * TournamentLeaderboard
+         * SetHirelingName
+         * FriendSystemAction
+         * OpenTransactionDetails
+         * Greet
+         * TournamentTicketAction
+         * OpenDepotSearch
+         * CloseDepotSearch
+         * DepotSearchType
+         * OpenParentContainer
+         * DepotSearchRetrieve
+         * GetOfferDescription
+         * Teleport
          */
 
-        EnterAccount = 1,
         PendingGame = 10,
         EnterWorld = 15,
         QuitGame = 20,
         Unknown28 = 28, // 12.00 / suspect: ConnectionPingBack
         Ping = 29,
         PingBack = 30,
-        PerformanceMetrics = 31, // removed in tibia 11
+        PerformanceMetrics = 31,
         StashAction = 40,
 
         GoPath = 100,
@@ -57,10 +69,10 @@
         Look = 140,
         LookAtCreature = 141,
         JoinAggression = 142,
-        // empty (133)
         QuickLoot = 143,
         LootContainer = 144,
-        // empty (145~149)
+        QuickLootBlackWhitelist = 145,
+        // empty (146~149)
         Talk = 150,
         GetChannels = 151,
         JoinChannel = 152,
@@ -92,7 +104,7 @@
         InspectPlayer = 206,
         BlessingsDialog = 207,
         TrackQuestflags = 208,
-        // empty (209)
+        MarketStatistics = 209,
         GetOutfit = 210,
         SetOutfit = 211,
         Mount = 212,
@@ -111,12 +123,13 @@
         OpenMonsterCyclopedia = 225, // 0 payload
         OpenMonsterCyclopediaMonsters = 226,
         OpenMonsterCyclopediaRace = 227,
-        MonsterBonusEffectAction = 228, // 2 bytes
+        MonsterBonusEffectAction = 228,
         OpenCyclopediaCharacterInfo = 229,
         // empty (225~229)
         BugReport = 230,
         ThankYou = 231,
-        ErrorFileEntry = 232,
+        ErrorFileEntry = 232, // removed in 11
+        GetOfferDescription = 232, // 1180
         StoreEvent = 233,
         FeatureEvent = 234, // cyclopedia, analytics, ...
         PreyAction = 235,
@@ -302,7 +315,7 @@
         TibiaTime = 239,
         QuestLog = 240,
         QuestLine = 241,
-        UpdatingStoreBalance = 242,
+        UpdatingStoreBalance = 242, // removed in 1100
         ChannelEvent = 243,
         ObjectInfo = 244,
         PlayerInventory = 245,
@@ -311,8 +324,8 @@
         MarketDetail = 248,
         MarketBrowse = 249,
         ShowModalDialog = 250,
-        PremiumStore = 251,
-        PremiumOffers = 252,
+        PremiumStore = 251, // StoreCategories
+        PremiumStoreOffers = 252, // StoreOffers
         TransactionHistory = 253,
         StoreSuccess = 254,
     }

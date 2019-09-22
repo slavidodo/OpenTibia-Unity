@@ -13,21 +13,7 @@
         public override bool Perform(bool repeat = false) {
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             if (!!protocolGame && protocolGame.IsGameRunning) {
-                switch (_direction) {
-                    case Direction.North:
-                        protocolGame.SendTurnNorth();
-                        break;
-                    case Direction.East:
-                        protocolGame.SendTurnEast();
-                        break;
-                    case Direction.South:
-                        protocolGame.SendTurnSouth();
-                        break;
-                    case Direction.West:
-                        protocolGame.SendTurnWest();
-                        break;
-                }
-
+                protocolGame.SendTurn(_direction);
                 return true;
             }
 

@@ -39,12 +39,12 @@ namespace OpenTibiaUnity.Core.Communication.Game
         private void ParseMarketDetail(Internal.ByteArray message) {
             ushort objectId = message.ReadUnsignedShort();
 
-            var last = MarketDetails.Weight;
+            var last = MarketDetail.Weight;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameImbuing))
-                last = MarketDetails.ImbuementSlots;
+                last = MarketDetail.ImbuementSlots;
 
-            Dictionary<MarketDetails, string> details = new Dictionary<MarketDetails, string>();
-            for (var i = MarketDetails.First; i <= last; i++) {
+            Dictionary<MarketDetail, string> details = new Dictionary<MarketDetail, string>();
+            for (var i = MarketDetail.First; i <= last; i++) {
                 int strLen = message.ReadUnsignedShort();
                 if (strLen == 0)
                     continue;
@@ -82,16 +82,16 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
             int count = message.ReadUnsignedByte();
             for (int i = 0; i < count; i++) {
-                ReadMarketOffer(message, MarketOfferTypes.Buy, var);
+                ReadMarketOffer(message, MarketOfferType.Buy, var);
             }
 
             count = message.ReadUnsignedByte();
             for (int i = 0; i < count; i++) {
-                ReadMarketOffer(message, MarketOfferTypes.Sell, var);
+                ReadMarketOffer(message, MarketOfferType.Sell, var);
             }
         }
 
-        private Market.Offer ReadMarketOffer(Internal.ByteArray message, MarketOfferTypes offerType, ushort var) {
+        private Market.Offer ReadMarketOffer(Internal.ByteArray message, MarketOfferType offerType, ushort var) {
             uint timestamp = message.ReadUnsignedInt();
             ushort counter = message.ReadUnsignedShort();
 
@@ -109,14 +109,14 @@ namespace OpenTibiaUnity.Core.Communication.Game
             ushort amount = message.ReadUnsignedShort();
             uint piecePrice = message.ReadUnsignedInt();
 
-            MarketOfferStates state = MarketOfferStates.Active;
+            MarketOfferState state = MarketOfferState.Active;
             string character = null;
 
             switch (var) {
                 case Constants.MarketRequestOwnOffers:
                     break;
                 case Constants.MarketRequestOwnHistory:
-                    state = (MarketOfferStates)message.ReadUnsignedByte();
+                    state = (MarketOfferState)message.ReadUnsignedByte();
                     break;
                 default:
                     character = message.ReadString();

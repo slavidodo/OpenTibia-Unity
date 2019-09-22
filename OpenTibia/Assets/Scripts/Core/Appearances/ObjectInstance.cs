@@ -90,69 +90,69 @@ namespace OpenTibiaUnity.Core.Appearances
                 _specialPatternY = _specialPatternY % (int)_type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternHeight;
             } else if (_type.IsSplash || _type.IsFluidContainer) {
                 _hasSpecialPattern = true;
-                FluidsColor color = FluidsColor.Transparent;
+                FluidColor color = FluidColor.Transparent;
                 if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameNewFluids)) {
-                    switch ((FluidsType)_data) {
-                        case FluidsType.None:
-                            color = FluidsColor.Transparent;
+                    switch ((FluidType)_data) {
+                        case FluidType.None:
+                            color = FluidColor.Transparent;
                             break;
-                        case FluidsType.Water:
-                            color = FluidsColor.Blue;
+                        case FluidType.Water:
+                            color = FluidColor.Blue;
                             break;
-                        case FluidsType.Mana:
-                            color = FluidsColor.Purple;
+                        case FluidType.Mana:
+                            color = FluidColor.Purple;
                             break;
-                        case FluidsType.Beer:
-                            color = FluidsColor.Brown;
+                        case FluidType.Beer:
+                            color = FluidColor.Brown;
                             break;
-                        case FluidsType.Oil:
-                            color = FluidsColor.Brown;
+                        case FluidType.Oil:
+                            color = FluidColor.Brown;
                             break;
-                        case FluidsType.Blood:
-                            color = FluidsColor.Red;
+                        case FluidType.Blood:
+                            color = FluidColor.Red;
                             break;
-                        case FluidsType.Slime:
-                            color = FluidsColor.Green;
+                        case FluidType.Slime:
+                            color = FluidColor.Green;
                             break;
-                        case FluidsType.Mud:
-                            color = FluidsColor.Brown;
+                        case FluidType.Mud:
+                            color = FluidColor.Brown;
                             break;
-                        case FluidsType.Lemonade:
-                            color = FluidsColor.Yellow;
+                        case FluidType.Lemonade:
+                            color = FluidColor.Yellow;
                             break;
-                        case FluidsType.Milk:
-                            color = FluidsColor.White;
+                        case FluidType.Milk:
+                            color = FluidColor.White;
                             break;
-                        case FluidsType.Wine:
-                            color = FluidsColor.Purple;
+                        case FluidType.Wine:
+                            color = FluidColor.Purple;
                             break;
-                        case FluidsType.Health:
-                            color = FluidsColor.Red;
+                        case FluidType.Health:
+                            color = FluidColor.Red;
                             break;
-                        case FluidsType.Urine:
-                            color = FluidsColor.Yellow;
+                        case FluidType.Urine:
+                            color = FluidColor.Yellow;
                             break;
-                        case FluidsType.Rum:
-                            color = FluidsColor.Brown;
+                        case FluidType.Rum:
+                            color = FluidColor.Brown;
                             break;
-                        case FluidsType.FruidJuice:
-                            color = FluidsColor.Yellow;
+                        case FluidType.FruidJuice:
+                            color = FluidColor.Yellow;
                             break;
-                        case FluidsType.CoconutMilk:
-                            color = FluidsColor.White;
+                        case FluidType.CoconutMilk:
+                            color = FluidColor.White;
                             break;
-                        case FluidsType.Tea:
-                            color = FluidsColor.Brown;
+                        case FluidType.Tea:
+                            color = FluidColor.Brown;
                             break;
-                        case FluidsType.Mead:
-                            color = FluidsColor.Brown;
+                        case FluidType.Mead:
+                            color = FluidColor.Brown;
                             break;
                         default:
-                            color = FluidsColor.Blue;
+                            color = FluidColor.Blue;
                             break;
                     }
                 } else {
-                    color = (FluidsColor)_data;
+                    color = (FluidColor)_data;
                 }
                 
                 _specialPatternX = ((int)color & 3) % (int)_type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternWidth;

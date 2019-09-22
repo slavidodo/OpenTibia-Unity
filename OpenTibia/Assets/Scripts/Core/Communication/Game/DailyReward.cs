@@ -57,11 +57,11 @@
         }
 
         private DailyReward.DailyReward ReadDailyReward(Internal.ByteArray message) {
-            var rewardState = message.ReadEnum<DailyRewardStates>();
+            var rewardType = message.ReadEnum<DailyRewardType>();
+            var reward = new DailyReward.DailyReward(rewardType);
 
-            var reward = new DailyReward.DailyReward(rewardState);
-            switch (rewardState) {
-                case DailyRewardStates.PickedItems: {
+            switch (rewardType) {
+                case DailyRewardType.PickedItems: {
                     reward.AllowedMaximumItems = message.ReadUnsignedByte();
                     int objectCount = message.ReadUnsignedByte();
                     
@@ -76,12 +76,12 @@
                     break;
                 }
 
-                case DailyRewardStates.FixedItems: {
+                case DailyRewardType.FixedItems: {
                     int itemsCount = message.ReadUnsignedByte();
                     for (int i = 0; i < itemsCount; i++) {
-                        var rewardType = message.ReadEnum<DailyRewardTypes>();
-                        switch (rewardType) {
-                            case DailyRewardTypes.Object: {
+                        var subType = message.ReadEnum<DailyRewardSubType>();
+                        switch (subType) {
+                            case DailyRewardSubType.Object: {
                                 ushort objectId = message.ReadUnsignedShort();
                                 string objectName = message.ReadString();
                                 int objectAmount = message.ReadUnsignedByte();
@@ -90,20 +90,20 @@
                                 break;
                             }
 
-                            case DailyRewardTypes.PreyBonusRerolls: {
+                            case DailyRewardSubType.PreyBonusRerolls: {
                                 int amount = message.ReadUnsignedByte();
                                 reward.AddItem(new DailyReward.Types.PreyBonusRerolls(amount));
                                 break;
                             }
 
-                            case DailyRewardTypes.FiftyPercentXpBoost: {
+                            case DailyRewardSubType.FiftyPercentXpBoost: {
                                 ushort minutes = message.ReadUnsignedShort();
                                 reward.AddItem(new DailyReward.Types.XpBoost(minutes));
                                 break;
                             }
 
                             default:
-                                throw new System.Exception("ProtocolGame.ReadDailyReward: Invalid reward type " + (int)rewardType + ".");
+                                throw new System.Exception("ProtocolGame.ReadDailyReward: Invalid reward sub-type " + (int)subType + ".");
                         }
                     }
 

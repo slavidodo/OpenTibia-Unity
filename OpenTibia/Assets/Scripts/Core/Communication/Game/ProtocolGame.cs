@@ -586,7 +586,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     break;
 
                 case GameserverMessageType.TrackedQuestFlags:
-                    if (!gameManager.GetFeature(GameFeature.QuestTracker))
+                    if (!gameManager.GetFeature(GameFeature.GameQuestTracker))
                         goto default;
                     ParseTrackedQuestFlags(_inputBuffer);
                     break;
@@ -604,27 +604,27 @@ namespace OpenTibiaUnity.Core.Communication.Game
                         ParseBuddyLogout(_inputBuffer);
                     break;
                 case GameserverMessageType.MonsterCyclopedia:
-                    if (!gameManager.GetFeature(GameFeature.GameCyclopedia))
+                    if (!gameManager.GetFeature(GameFeature.GameCyclopediaMonsters))
                         goto default;
                     ParseMonsterCyclopedia(_inputBuffer);
                     break;
                 case GameserverMessageType.MonsterCyclopediaMonsters:
-                    if (!gameManager.GetFeature(GameFeature.GameCyclopedia))
+                    if (!gameManager.GetFeature(GameFeature.GameCyclopediaMonsters))
                         goto default;
                     ParseMonsterCyclopediaMonsters(_inputBuffer);
                     break;
                 case GameserverMessageType.MonsterCyclopediaRace:
-                    if (!gameManager.GetFeature(GameFeature.GameCyclopedia))
+                    if (!gameManager.GetFeature(GameFeature.GameCyclopediaMonsters))
                         goto default;
                     ParseMonsterCyclopediaRace(_inputBuffer);
                     break;
                 case GameserverMessageType.MonsterCyclopediaBonusEffects:
-                    if (!gameManager.GetFeature(GameFeature.GameCyclopedia))
+                    if (!gameManager.GetFeature(GameFeature.GameCyclopediaMonsters))
                         goto default;
                     ParseMonsterCyclopediaBonusEffects(_inputBuffer);
                     break;
                 case GameserverMessageType.MonsterCyclopediaNewDetails:
-                    if (!gameManager.GetFeature(GameFeature.GameCyclopedia))
+                    if (!gameManager.GetFeature(GameFeature.GameCyclopediaMonsters))
                         goto default;
                     ParseMonsterCyclopediaNewDetails(_inputBuffer);
                     break;
@@ -638,7 +638,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     _inputBuffer.ReadUnsignedByte(); // hintId
                     break;
                 case GameserverMessageType.AutomapFlag_CyclopediaMapData:
-                    if (gameManager.GetFeature(GameFeature.GameCyclopediaMap))
+                    if (gameManager.GetFeature(GameFeature.GameCyclopediaMapAdditionalDetails))
                         ParseCyclopediaMapData(_inputBuffer);
                     else
                         ParseAutomapFlag(_inputBuffer);
@@ -716,6 +716,12 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     ParsePlayerInventory(_inputBuffer);
                     break;
 
+                case GameserverMessageType.PremiumStore:
+                    ParseStoreCategories(_inputBuffer);
+                    break;
+                case GameserverMessageType.PremiumStoreOffers:
+                    ParseStoreOffers(_inputBuffer);
+                    break;
                 default:
                     throw new System.Exception("unknown message type");
             }

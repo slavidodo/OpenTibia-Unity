@@ -111,15 +111,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
         private void ParsePlayerStats(Internal.ByteArray message) {
             int ticks = OpenTibiaUnity.TicksMillis;
 
-            int health, maxHealth;
-            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameDoubleHealth)) {
-                health = message.ReadInt();
-                maxHealth = message.ReadInt();
-            } else {
-                health = message.ReadUnsignedShort();
-                maxHealth = message.ReadUnsignedShort();
-            }
-            
+            int health = message.ReadUnsignedShort();
+            int maxHealth = message.ReadUnsignedShort();
+
             Player.SetSkill(SkillType.Health, health, maxHealth, 0);
 
             int freeCapacity;
@@ -164,15 +158,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 Player.ExperienceBonus = experienceBonus;
             }
 
-            int mana, maxMana;
-            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameDoubleHealth)) {
-                mana = message.ReadInt();
-                maxMana = message.ReadInt();
-            } else {
-                mana = message.ReadUnsignedShort();
-                maxMana = message.ReadUnsignedShort();
-            }
-
+            int mana = message.ReadUnsignedShort();
+            int maxMana = message.ReadUnsignedShort();
             Player.SetSkill(SkillType.Mana, mana, maxMana, 0);
             
             if (OpenTibiaUnity.GameManager.ClientVersion < 1200) {
@@ -328,21 +315,21 @@ namespace OpenTibiaUnity.Core.Communication.Game
             ulong balance = message.ReadUnsignedLong();
 
             switch (type) {
-                case (int)ResourceTypes.BankGold:
+                case (int)ResourceType.BankGold:
                     //_player.BankGold = balance;
                     break;
 
-                case (int)ResourceTypes.InventoryGold:
+                case (int)ResourceType.InventoryGold:
                     //_player.InventoryGold = balance;
                     break;
 
-                case (int)ResourceTypes.PreyBonusRerolls:
+                case (int)ResourceType.PreyBonusRerolls:
                     if (!OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePrey))
                         throw new System.Exception("ProtocolGame.ParseResourceBalance: Invalid resource type: " + type + ".");
                     //PreyManager.Insance.BonusRerollAmount = balance;
                     break;
 
-                case (int)ResourceTypes.CollectionTokens:
+                case (int)ResourceType.CollectionTokens:
                     if (!OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameRewardWall))
                         throw new System.Exception("ProtocolGame.ParseResourceBalance: Invalid resource type: " + type + ".");
                     break;
@@ -380,27 +367,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 else
                     count = message.ReadUnsignedByte();
                 
-                for (int i = 0; i < count; i++) {
-                    ushort outfitId = message.ReadUnsignedShort();
-                    var outfitName = message.ReadString();
-                    int addOns = message.ReadUnsignedByte();
-                    bool locked = true;
-                    uint offerId = 0;
-
-                    if (OpenTibiaUnity.GameManager.ClientVersion >= 1185) {
-                        locked = message.ReadBoolean();
-                        if (locked)
-                            offerId = message.ReadUnsignedInt();
-                    }
-
-                    outfitList.Add(new ProtocolOutfit() {
-                        _id = outfitId,
-                        Name = outfitName,
-                        AddOns = addOns,
-                        Locked = locked,
-                        StoreOfferId = offerId,
-                    });
-                }
+                for (int i = 0; i < count; i++)
+                    outfitList.Add(ReadNewProtocolOutfit(message));
             } else {
                 ushort outfitStart, outfitEnd;
                 if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameOutfitIdU16)) {
@@ -424,25 +392,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 else
                     count = message.ReadUnsignedByte();
 
-                for (int i = 0; i < count; i++) {
-                    ushort mountId = message.ReadUnsignedShort();
-                    var mountName = message.ReadString();
-                    bool locked = true;
-                    uint offerId = 0;
-
-                    if (OpenTibiaUnity.GameManager.ClientVersion >= 1185) {
-                        locked = message.ReadBoolean();
-                        if (locked)
-                            offerId = message.ReadUnsignedInt();
-                    }
-
-                    mountList.Add(new ProtocolMount() {
-                        _id = mountId,
-                        Name = mountName,
-                        Locked = locked,
-                        StoreOfferId = offerId,
-                    });
-                }
+                for (int i = 0; i < count; i++)
+                    mountList.Add(ReadProtocolMount(message));
             }
             
             if (OpenTibiaUnity.GameManager.ClientVersion >= 1185) {
@@ -461,6 +412,48 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 byte subType = message.ReadUnsignedByte();
                 ushort count = message.ReadUnsignedShort();
             }
+        }
+
+        private ProtocolOutfit ReadNewProtocolOutfit(Internal.ByteArray message) {
+            ushort outfitId = message.ReadUnsignedShort();
+            var outfitName = message.ReadString();
+            int addOns = message.ReadUnsignedByte();
+            bool locked = true;
+            uint offerId = 0;
+
+            if (OpenTibiaUnity.GameManager.ClientVersion >= 1185) {
+                locked = message.ReadBoolean();
+                if (locked)
+                    offerId = message.ReadUnsignedInt();
+            }
+
+            return new ProtocolOutfit() {
+                _id = outfitId,
+                Name = outfitName,
+                AddOns = addOns,
+                Locked = locked,
+                StoreOfferId = offerId,
+            };
+        }
+
+        private ProtocolMount ReadProtocolMount(Internal.ByteArray message) {
+            ushort mountId = message.ReadUnsignedShort();
+            var mountName = message.ReadString();
+            bool locked = true;
+            uint offerId = 0;
+
+            if (OpenTibiaUnity.GameManager.ClientVersion >= 1185) {
+                locked = message.ReadBoolean();
+                if (locked)
+                    offerId = message.ReadUnsignedInt();
+            }
+
+            return new ProtocolMount() {
+                _id = mountId,
+                Name = mountName,
+                Locked = locked,
+                StoreOfferId = offerId,
+            };
         }
     }
 }

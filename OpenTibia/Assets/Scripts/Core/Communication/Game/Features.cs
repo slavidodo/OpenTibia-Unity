@@ -28,9 +28,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
         
         private void ParseGameNews(Internal.ByteArray message) {
-            // TODO (suggested structure; timestamp, boolean)
-            message.ReadUnsignedInt();
-            message.ReadUnsignedByte();
+            uint timestamp = message.ReadUnsignedInt();
+            bool read = message.ReadBoolean();
         }
     }
 }

@@ -449,10 +449,6 @@
             var absolutePosition = message.ReadPosition();
             int icon = message.ReadUnsignedByte();
             var description = message.ReadString();
-
-            bool remove = false;
-            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameMinimapRemove))
-                remove = message.ReadBoolean();
         }
     }
 }

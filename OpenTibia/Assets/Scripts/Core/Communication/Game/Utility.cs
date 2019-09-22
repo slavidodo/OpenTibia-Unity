@@ -200,8 +200,12 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 }
             }
 
-            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameQuickLoot) && @object.Type.IsContainer)
-                message.ReadUnsignedByte(); // autolootIndex
+            if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameQuickLoot) && @object.Type.IsContainer) {
+                bool assignedToQuickLoot = message.ReadBoolean();
+                if (assignedToQuickLoot) {
+                    uint lootContainers = message.ReadUnsignedInt(); // 1 << ObjectCategory | ....
+                }
+            }
 
             return @object;
         }

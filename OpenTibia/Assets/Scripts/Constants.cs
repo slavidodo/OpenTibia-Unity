@@ -9,10 +9,12 @@
         public const string OpenTibiaDefaultIPAddress = "127.0.0.1";
         public const int OpenTibiaDefaultPort = 7171;
 
+        public const string StoreHomeCategoryName = "Home";
+
         // Don't modify those unless you know what you are doing.
         public const int PingDelay = 1000;
         public const int ConnectionTimeout = 30 * 1000;
-        
+
         public const int MapWidth = 15;
         public const int MapHeight = 11;
         public const int MapSizeW = 10;
@@ -83,7 +85,7 @@
 
         public const int WorldMapMinimumWidth = (int)(WorldMapRealWidth * 0.6667f);
         public const int WorldMapMinimumHeight = (int)(WorldMapRealHeight * 0.6667f);
-        
+
         public const int MaxNpcDistance = 3;
 
         public const int LightmapShrinkFactor = 8;
@@ -150,7 +152,7 @@
         PathErrorUnreachable,
         PathErrorpublic,
     }
-    public enum PathDirection : int
+    public enum PathDirection
     {
         East = 1,
         NorthEast = 2,
@@ -288,9 +290,8 @@
         ExperienceGain = 254,
         None = 255,
     }
-    public enum States : int
+    public enum PlayerState : byte
     {
-        None = -1,
         Poisoned = 0,
         Burning = 1,
         Electrified = 2,
@@ -309,8 +310,9 @@
         Bleeding = 15,
 
         Hungry = 31,
+        None = 255,
     }
-    public enum FluidsColor : int
+    public enum FluidColor : int
     {
         Transparent = 0,
         Blue,
@@ -321,7 +323,7 @@
         White,
         Purple
     }
-    public enum FluidsType : int
+    public enum FluidType : int
     {
         None = 0,
         Water,
@@ -537,7 +539,7 @@
         First = Head,
         Last = Blessings,
     }
-    public enum ResourceTypes : int
+    public enum ResourceType : byte
     {
         BankGold = 0,
         InventoryGold = 1,
@@ -545,7 +547,7 @@
         PreyBonusRerolls = 10,
         CollectionTokens = 20,
     }
-    public enum ReportTypes : int
+    public enum ReportTypes : byte
     {
         Name = 0,
         Statement = 1,
@@ -657,7 +659,7 @@
         PreyDialog = 12,
     }
 
-    public enum BlessingTypes
+    public enum BlessingTypes : uint
     {
         None = 0,
         Adventurer = 1 << 0,
@@ -675,7 +677,7 @@
         All_1141 = All_1120 | HeartOfTheMountain | BloodOfTheMountain,
     }
 
-    public enum MarkType
+    public enum MarkType : byte
     {
         ClientMapWindow = 1,
         ClientBattleList = 2,
@@ -685,7 +687,7 @@
         None = 255,
     }
 
-    public enum ObjectCategory
+    public enum ObjectCategory : byte
     {
         Armors = 1,
         Amulets = 2,
@@ -703,7 +705,7 @@
         Tools = 14,
         Valuables = 15,
         Ammunition = 16,
-        Axes  = 17,
+        Axes = 17,
         Clubs = 18,
         DistanceWeapons = 19,
         Swords = 20,
@@ -716,12 +718,12 @@
         AllWeapons = 29,
         Gold = 30,
         Default = 31, // links to Unassigned Loot (QuickLoot)
-        
+
         MetaWeapons = 255,
         All = 255,
     }
 
-    public enum MarketDetails
+    public enum MarketDetail : byte
     {
         Attack = 1,
         Capacity = 2,
@@ -743,13 +745,13 @@
         Last = ImbuementSlots,
     }
 
-    public enum MarketOfferTypes
+    public enum MarketOfferType : byte
     {
         Buy = 0,
         Sell = 1,
     }
 
-    public enum MarketOfferStates
+    public enum MarketOfferState : byte
     {
         Active = 0,
         Cancelled = 1,
@@ -757,7 +759,7 @@
         Accepted = 3,
     }
 
-    public enum MessageDialog
+    public enum MessageDialog : byte
     {
         ImbuementSuccess = 0,
         ImbuementError = 1,
@@ -771,7 +773,7 @@
         PreyError = 21,
     }
 
-    public enum StoreServiceType
+    public enum StoreServiceType : byte
     {
         Unknown = 0,
         CharacterNameChange = 1,
@@ -781,6 +783,72 @@
         Blessings = 5,
         XPBoost = 6,
         Prey = 7,
+    }
+    
+    public enum StoreOfferType : byte
+    {
+        PreySlot = 0,
+        PreyWildCard = 1,
+        DailyReward = 2,
+        CharmExpansion = 3,
+        BlessingWisdomOfSolitude = 4,
+        BlessingSparkOfThePhoniex = 5,
+        BlessingFireOfTheSuns = 6,
+        BlessingSpirtualShielding = 7,
+        BlessingEmbraceOfTibia = 8,
+        BlessingHeartOfTheMountain = 9,
+        BlessingBloodOfTheMountain = 10,
+        PremiumTime = 11,
+        BlessingTwistOfFate = 12,
+    }
+
+    public enum StoreCategoryType : byte
+    {
+        PremiumTime = 0,
+        XPBoost = 1,
+        // 2 unknown
+        // 3 unknown
+        // 4 unknown
+        // 5 unknown
+        // 6 unknown
+    }
+
+    public enum StoreHighlightState : byte
+    {
+        None = 0,
+        New = 1,
+        Sale = 2,
+        Timed = 3,
+    }
+
+    public enum StoreEvent : byte
+    {
+        SelectOffer = 0,
+    }
+
+    public enum StoreOpenParameterAction : byte
+    {
+        Invalid = 0,
+        CategoryType = 1,
+        CategoryAndFilter = 2,
+        OfferType = 3,
+        OfferId = 4,
+        CategoryName = 5,
+    }
+
+    public enum StoreOfferDisableState : byte
+    {
+        None = 0,
+        Disabled = 1,
+        Hidden = 2,
+    }
+
+    public enum StoreOfferAppearanceType : byte
+    {
+        Icon = 0,
+        Mount = 1, // no addons, black
+        Outfit = 2, // colors included
+        Object = 3,
     }
 
     public enum PreySlotStates : byte
@@ -808,17 +876,59 @@
         None = 2,
     }
 
-    public enum DailyRewardStates : byte
+    public enum PreyAction : byte
+    {
+        ListReroll = 0,
+        BonusReroll = 1,
+        SelectPrey = 2,
+    }
+
+    public enum DailyRewardType : byte
     {
         PickedItems = 1,
         FixedItems = 2,
     }
 
-    public enum DailyRewardTypes : byte
+    public enum DailyRewardSubType : byte
     {
         Object = 1,
         PreyBonusRerolls = 2,
         FiftyPercentXpBoost = 3,
+    }
+
+    public enum FeatureEventType : byte
+    {
+        CyclopediaItems = 1,
+        CyclopediaCharacterInfo = 2,
+        CyclopediaCharacterGeneralStats = 3,
+        CyclopediaCharacterCombatStats = 4,
+        CyclopediaCharacterRecentDeaths = 5,
+        CyclopediaCharacterRecentPvpKills = 6,
+        CyclopediaCharacterAchievements = 7,
+        CyclopediaCharacterItemSummary = 8,
+        CyclopediaCharacterOutfitsAndMounts = 9,
+        CyclopediaCharacterStoreSummary = 10,
+    }
+
+    public enum LootContainerAction : byte
+    {
+        AssignContainer = 0,
+        ClearContainer = 1,
+        // 2, unknown yet
+        SetUseFallback = 3,
+    }
+
+    public enum QuickLootFilter : byte
+    {
+        SkippedLoot = 0,
+        AcceptedLoot = 1,
+    }
+
+    public enum CyclopediaBonusEffectAction : byte
+    {
+        Unlock = 0,
+        Select = 1,
+        Clear = 2,
     }
 
     public enum CyclopediaRaceStage : byte
@@ -889,7 +999,7 @@
         OutfitsAndMounts = 7,
         StoreSummary = 8,
     }
-    
+
     public enum CyclopediaPvpKillStatus : byte
     {
         Justified = 0,
@@ -902,86 +1012,90 @@
     public enum InspectObjectTypes
     {
         NormalObject = 0,
+        NpcTrade = 1,
+        // 2 unknown yet
         Cyclopedia = 3,
+    }
+
+    public enum ClientInspectPlayerState
+    {
+        GrantPermission = 1,
+        AskToInspect = 2,
+        AllowToInspect = 3,
+        InspectPlayer = 4,
+        RevokePermission = 5,
+        AllowAllToInspect = 6,
+        RevokeAllToInspect = 7,
     }
 
     public enum GameFeature
     {
+        GameDebugAssertion,
+        GameOutfitIdU16,
+        GameMessageStatements,
+        GameLoginPacketEncryption,
+        GamePlayerAddons,
+        GamePlayerStamina,
+        GameNewFluids,
+        GameMessageLevel,
+        GamePlayerStateU16,
+        GameNewOutfitProtocol,
+        GameWritableDate,
+        GameNPCInterface,
         GameProtocolChecksum,
         GameAccountNames,
-        GameChallengeOnLogin,
-        GamePenalityOnDeath,
-        GameNameOnNpcTrade,
         GameDoubleFreeCapacity,
+        GameChallengeOnLogin,
+        GameMessageSizeCheck,
+        GameCreatureEmblems,
+        GameServerLog,
+        GameAttackSeq,
+        GamePenalityOnDeath,
         GameDoubleExperience,
+        GamePlayerMounts,
+        GameSpellList,
+        GameNameOnNpcTrade,
         GameTotalCapacity,
         GameSkillsBase,
         GamePlayerRegenerationTime,
         GameChannelPlayerList,
-        GamePlayerMounts,
         GameEnvironmentEffect,
-        GameCreatureEmblems,
-        GameServerLog,
         GameItemAnimationPhase,
-        GameMagicEffectU16,
         GamePlayerMarket,
+        GamePurseSlot,
+        GameClientPing,
         GameSpritesU32,
         GameOfflineTrainingTime,
-        GamePurseSlot,
-        GameFormatCreatureName,
-        GameSpellList,
-        GameClientPing,
-        GameExtendedClientPing,
-        GameDoubleHealth,
-        GameDoubleSkills,
-        GameChangeMapAwareRange,
-        GameMapMovePosition,
-        GameAttackSeq,
-        GameBlueNpcNameColor,
-        GameDiagonalAnimatedText,
+        GameAdditionalVipInfo,
+        GamePreviewState,
+        GameClientVersion,
         GameLoginPending,
         GameNewSpeedLaw,
-        GameForceFirstAutoWalkStep,
-        GameMinimapRemove,
         GameContainerPagination,
+        GameBrowseField,
         GameCreatureMarks,
         GameObjectMarks,
-        GameOutfitIdU16,
-        GamePlayerStamina,
-        GamePlayerAddons,
-        GameMessageStatements,
-        GameMessageLevel,
-        GameNewFluids,
-        GamePlayerStateU16,
-        GameNewOutfitProtocol,
         GamePVPMode,
-        GameWritableDate,
-        GameAdditionalVipInfo,
+        GameDoubleSkills,
         GameBaseSkillU16,
         GameCreatureIcons,
         GameHideNpcNames,
-        GameSpritesAlphaChannel,
         GamePremiumExpiration,
-        GameBrowseField,
         GameEnhancedAnimations,
-        GameOGLInformation,
-        GameMessageSizeCheck,
-        GamePreviewState,
-        GameLoginPacketEncryption,
-        GameClientVersion,
-        GameContentRevision,
-        GameExperienceBonus,
-        GameAuthenticator,
         GameUnjustifiedPoints,
-        GameSessionKey,
-        GameEquipHotkey,
+        GameExperienceBonus,
         GameDeathType,
         GameSeparateAnimationGroups,
-        GameKeepUnawareTiles,
+        GameOGLInformation,
+        GameContentRevision,
+        GameAuthenticator,
+        GameSessionKey,
+        GameEquipHotkey,
         GameIngameStore,
-        GameIngameStoreHighlights,
+        GameWrappableFurniture,
         GameIngameStoreServiceType,
         GameStoreInboxSlot,
+        GameIngameStoreHighlights,
         GameAdditionalSkills,
         GameExperienceGain,
         GameWorldProxyIdentification,
@@ -991,18 +1105,20 @@
         GameInspectionWindow,
         GameProtocolSequenceNumber,
         GameBlessingDialog,
-        QuestTracker,
+        GameQuestTracker,
+        GameCompendium,
         GamePlayerStateU32,
         GameRewardWall,
         GameAnalytics,
-        GameCyclopedia,
         GameQuickLoot,
         GameExtendedCapacity,
-        GameCyclopediaMap,
+        GameCyclopediaMonsters,
         GameStash,
+        GameCyclopediaMapAdditionalDetails,
         GamePercentSkillU16,
         GameTournament,
         GameAccountEmailAddress,
+        
         LastGameFeature,
     };
 }

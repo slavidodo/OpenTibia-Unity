@@ -23,6 +23,8 @@ namespace OpenTibiaUnity.Core.Communication.Internal
         }
 
         public ByteArray CreateMessage() {
+            // todo; verify caller's client compatability
+
             // separate the body from the whole message
             // to make it easier to perform actions on the body
 

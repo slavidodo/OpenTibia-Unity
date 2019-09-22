@@ -170,6 +170,7 @@ namespace OpenTibiaUnity.Modules.Inventory
             _optionsLegacyButton.onClick.AddListener(miniWindowButtons.OnOptionsButtonClicked);
             _helpLegacyButton.onClick.AddListener(miniWindowButtons.OnHelpButtonClicked);
             _logoutLegacyButton.onClick.AddListener(miniWindowButtons.OnLogoutButtonClicked);
+            _storeButton.onClick.AddListener(miniWindowButtons.OnStoreButtonClicked);
 
             _storeInboxButton.onClick.AddListener(OnStoreInboxButtonClick);
             _storeInboxLegacyButton.onClick.AddListener(OnStoreInboxButtonClick);

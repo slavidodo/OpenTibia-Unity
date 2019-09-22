@@ -124,7 +124,7 @@ namespace OpenTibiaUnity.Core.Creatures
         }
 
         public bool IsFighting {
-            get => (_stateFlags & 1 << (int)States.Fighting) > 0;
+            get => (_stateFlags & 1 << (int)PlayerState.Fighting) > 0;
         }
 
         public Player(uint id, string name = null) : base(id, CreatureType.Player, name) {}
@@ -472,7 +472,7 @@ namespace OpenTibiaUnity.Core.Creatures
             var flags = value ?? _stateFlags;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerRegenerationTime)
                 && GetSkillValue(SkillType.Food) <= GetSkillbase(SkillType.Food))
-                flags |= 1U << (int)States.Hungry;
+                flags |= 1U << (int)PlayerState.Hungry;
 
             if (_stateFlags != flags) {
                 var old = _stateFlags;

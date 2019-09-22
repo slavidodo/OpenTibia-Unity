@@ -90,13 +90,7 @@ namespace OpenTibiaUnity.Core
 
         [Header("Main Elements")]
         public Camera MainCamera = null;
-
-        [Header("Onscreen Static Labels")]
-        public TMPro.TextMeshProUGUI LabelMessageBoxTop = null;
-        public TMPro.TextMeshProUGUI LabelMessageBoxHigh = null;
-        public TMPro.TextMeshProUGUI LabelMessageBoxLow = null;
-        public TMPro.TextMeshProUGUI LabelMessageBoxBottom = null;
-
+        
         [Header("Utilities")]
         public Utils.CursorController CursorController = null;
 
@@ -128,6 +122,7 @@ namespace OpenTibiaUnity.Core
         public Chat.MessageStorage MessageStorage { get; private set; }
         public Container.ContainerStorage ContainerStorage { get; private set; }
         public Magic.SpellStorage SpellStorage { get; private set; }
+        public Store.StoreManager StoreManager { get; private set; }
         public Communication.Game.ProtocolGame ProtocolGame { get; set; }
         public int PendingCharacterIndex { get; set; } = -1;
         public UnityEvent onSecondaryTimeCheck { get; private set; }
@@ -247,17 +242,13 @@ namespace OpenTibiaUnity.Core
             CreatureStorage = new Creatures.CreatureStorage();
             MiniMapStorage = new MiniMap.MiniMapStorage();
             MiniMapRenderer = new MiniMap.Rendering.MiniMapRenderer();
-            WorldMapStorage = new WorldMap.WorldMapStorage(
-                LabelMessageBoxBottom,
-                LabelMessageBoxLow,
-                LabelMessageBoxHigh,
-                LabelMessageBoxTop,
-                LabelOnscreenMessageBoxPrefab);
+            WorldMapStorage = new WorldMap.WorldMapStorage(LabelOnscreenMessageBoxPrefab);
             WorldMapRenderer = new WorldMap.Rendering.WorldMapRenderer();
             ChatStorage = new Chat.ChatStorage(OptionStorage);
             MessageStorage = new Chat.MessageStorage();
             ContainerStorage = new Container.ContainerStorage();
             SpellStorage = new Magic.SpellStorage();
+            StoreManager = new Store.StoreManager();
 
             // Load options
             OptionStorage.LoadOptions();
@@ -652,6 +643,9 @@ namespace OpenTibiaUnity.Core
 
             Features.SetAll(false); // reset all
 
+            // basic game features that are disabled later
+            EnableFeature(GameFeature.GameDebugAssertion);
+
             if (version >= 770) {
                 EnableFeature(GameFeature.GameOutfitIdU16);
                 EnableFeature(GameFeature.GameMessageStatements);
@@ -669,6 +663,10 @@ namespace OpenTibiaUnity.Core
 
             if (version >= 790) {
                 EnableFeature(GameFeature.GameWritableDate);
+            }
+
+            if (version >= 800) {
+                EnableFeature(GameFeature.GameNPCInterface);
             }
 
             if (version >= 840) {
@@ -809,6 +807,7 @@ namespace OpenTibiaUnity.Core
             }
 
             if (version >= 1092) {
+                EnableFeature(GameFeature.GameWrappableFurniture);
                 EnableFeature(GameFeature.GameIngameStoreServiceType);
                 EnableFeature(GameFeature.GameStoreInboxSlot);
             }
@@ -843,30 +842,34 @@ namespace OpenTibiaUnity.Core
 
             if (version >= 1120) {
                 EnableFeature(GameFeature.GameBlessingDialog);
-                EnableFeature(GameFeature.QuestTracker);
+                EnableFeature(GameFeature.GameQuestTracker);
+            }
+
+            if (version >= 1132) {
+                EnableFeature(GameFeature.GameCompendium);
             }
             
             if (version >= 1140) {
                 EnableFeature(GameFeature.GamePlayerStateU32);
                 EnableFeature(GameFeature.GameRewardWall);
                 EnableFeature(GameFeature.GameAnalytics);
-                EnableFeature(GameFeature.GameCyclopedia);
             }
 
             if (version >= 1150) {
                 EnableFeature(GameFeature.GameQuickLoot);
                 EnableFeature(GameFeature.GameExtendedCapacity);
                 DisableFeature(GameFeature.GameTotalCapacity);
+                EnableFeature(GameFeature.GameCyclopediaMonsters);
             }
             
             if (version >= 1180) {
                 EnableFeature(GameFeature.GameStash);
+                EnableFeature(GameFeature.GameCyclopediaMapAdditionalDetails);
             }
             
             if (version >= 1185) {
                 DisableFeature(GameFeature.GameEnvironmentEffect);
                 DisableFeature(GameFeature.GameObjectMarks);
-                EnableFeature(GameFeature.GameCyclopediaMap);
             }
 
             // all these features are not verified (1200 is just the version we could obtain)

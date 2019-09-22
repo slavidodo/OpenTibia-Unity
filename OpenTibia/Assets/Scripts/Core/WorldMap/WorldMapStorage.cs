@@ -37,15 +37,9 @@ namespace OpenTibiaUnity.Core.WorldMap
         public bool LayoutOnscreenMessages { get; set; } = false;
         public List<OnscreenMessageBox> MessageBoxes { get; } = new List<OnscreenMessageBox>();
 
-        public WorldMapStorage(TMPro.TextMeshProUGUI textBoxBottom,
-            TMPro.TextMeshProUGUI textBoxLow,
-            TMPro.TextMeshProUGUI textBoxHigh,
-            TMPro.TextMeshProUGUI textBoxTop,
-            TMPro.TextMeshProUGUI textBoxPrefab) {
-
-            for (int i = 0; i < _fields.Length; i++) {
+        public WorldMapStorage(TMPro.TextMeshProUGUI textBoxPrefab) {
+            for (int i = 0; i < _fields.Length; i++)
                 _fields[i] = new Field();
-            }
 
             _textBoxPrefab = textBoxPrefab;
 
