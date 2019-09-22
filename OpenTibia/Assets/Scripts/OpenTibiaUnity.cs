@@ -37,7 +37,8 @@
         public static Core.Chat.MessageStorage MessageStorage { get => GameManager?.MessageStorage; }
         public static Core.Container.ContainerStorage ContainerStorage { get => GameManager?.ContainerStorage; }
         public static Core.Magic.SpellStorage SpellStorage { get => GameManager?.SpellStorage; }
-        public static Core.Store.StoreManager StoreManager { get => GameManager?.StoreManager; }
+        public static Core.Store.StoreStorage StoreStorage { get => GameManager?.StoreStorage; }
+        public static Core.Cyclopedia.CyclopediaStorage CyclopediaStorage { get => GameManager?.CyclopediaStorage; }
 
         public static int[] GetClientVersions() {
             return new int[] {

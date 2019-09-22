@@ -24,7 +24,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             if (OpenTibiaUnity.GameManager.ClientVersion < 1180)
                 ParseCreditBalance(message);
 
-            OpenTibiaUnity.StoreManager.ClearCategories();
+            OpenTibiaUnity.StoreStorage.ClearCategories();
 
             int totalCategories = message.ReadUnsignedShort();
             for (int i = 0; i < totalCategories; i++) {
@@ -32,11 +32,11 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 string parentCategoryName = message.ReadString();
 
                 if (parentCategoryName.Length != 0) {
-                    var parentCategory = OpenTibiaUnity.StoreManager.FindCategory(parentCategoryName);
+                    var parentCategory = OpenTibiaUnity.StoreStorage.FindCategory(parentCategoryName);
                     if (parentCategory != null)
                         parentCategory.AddSubCategory(storeCategory);
                 } else {
-                    OpenTibiaUnity.StoreManager.AddCategory(storeCategory);
+                    OpenTibiaUnity.StoreStorage.AddCategory(storeCategory);
                 }
             }
         }
@@ -55,7 +55,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 }
             }
 
-            var storeCategory = OpenTibiaUnity.StoreManager.FindCategory(categoryName);
+            var storeCategory = OpenTibiaUnity.StoreStorage.FindCategory(categoryName);
 
             int offerCount = message.ReadUnsignedShort();
             for (int i = 0; i < offerCount; i++)

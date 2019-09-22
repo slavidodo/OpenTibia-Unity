@@ -2,7 +2,7 @@
 
 namespace OpenTibiaUnity.Core.Store
 {
-    public class StoreManager
+    public class StoreStorage
     {
         List<StoreCategory> _categories = new List<StoreCategory>();
         StoreCategory _homeCategory = null;

@@ -122,7 +122,8 @@ namespace OpenTibiaUnity.Core
         public Chat.MessageStorage MessageStorage { get; private set; }
         public Container.ContainerStorage ContainerStorage { get; private set; }
         public Magic.SpellStorage SpellStorage { get; private set; }
-        public Store.StoreManager StoreManager { get; private set; }
+        public Store.StoreStorage StoreStorage { get; private set; }
+        public Cyclopedia.CyclopediaStorage CyclopediaStorage { get; private set; }
         public Communication.Game.ProtocolGame ProtocolGame { get; set; }
         public int PendingCharacterIndex { get; set; } = -1;
         public UnityEvent onSecondaryTimeCheck { get; private set; }
@@ -248,7 +249,8 @@ namespace OpenTibiaUnity.Core
             MessageStorage = new Chat.MessageStorage();
             ContainerStorage = new Container.ContainerStorage();
             SpellStorage = new Magic.SpellStorage();
-            StoreManager = new Store.StoreManager();
+            StoreStorage = new Store.StoreStorage();
+            CyclopediaStorage = new Cyclopedia.CyclopediaStorage();
 
             // Load options
             OptionStorage.LoadOptions();

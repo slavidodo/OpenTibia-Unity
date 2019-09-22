@@ -39,7 +39,13 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseSupplyStash(Internal.ByteArray message) {
-            
+            int availableItems = message.ReadUnsignedShort();
+            for (int i = 0; i < availableItems; i++) {
+                ushort objectID = message.ReadUnsignedShort();
+                uint objectCount = message.ReadUnsignedInt();
+            }
+
+            int freeSlots = message.ReadUnsignedShort();
         }
 
         private void ParseDepotTileState(Internal.ByteArray message) {
