@@ -26,7 +26,7 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
             set {
                 if (_animationInstance == null) {
                     return;
-                } else if (_animationInstance.Synchornized) {
+                } else if (_animationInstance.Synchronized) {
                     CalculateSynchronousPhase();
                 } else {
                     if (value == Constants.PhaseAsynchronous)
@@ -65,7 +65,7 @@ namespace OpenTibiaUnity.Core.Appearances.Animation
                             ? _animationInstance.SpritePhases[nextPhase].Duration() - (elapsedTicks - _currentPhaseDuration)
                             : CalculateMovementPhaseDuration(delay);
 
-                        if (duration < 0 && _animationInstance != null && _animationInstance.Synchornized) {
+                        if (duration < 0 && _animationInstance != null && _animationInstance.Synchronized) {
                             CalculateSynchronousPhase();
                         } else {
                             _currentPhase = nextPhase;

@@ -5,7 +5,7 @@
         private UnityEngine.Vector3Int _lastSnapback = UnityEngine.Vector3Int.zero;
         private int _snapbackCount = 0;
 
-        private void ParseFullMap(Internal.ByteArray message) {
+        private void ParseFullMap(Internal.CommunicationStream message) {
             UnityEngine.Vector3Int position = message.ReadPosition();
 
             Player.StopAutowalk(true);
@@ -20,7 +20,7 @@
             WorldMapStorage.CacheRefresh = true;
         }
 
-        private void ParseMapTopRow(Internal.ByteArray message) {
+        private void ParseMapTopRow(Internal.CommunicationStream message) {
             UnityEngine.Vector3Int position = WorldMapStorage.Position;
             position.y--;
 
@@ -32,7 +32,7 @@
             WorldMapStorage.CacheRefresh = true;
         }
 
-        private void ParseMapRightRow(Internal.ByteArray message) {
+        private void ParseMapRightRow(Internal.CommunicationStream message) {
             UnityEngine.Vector3Int position = WorldMapStorage.Position;
             position.x++;
 
@@ -44,7 +44,7 @@
             WorldMapStorage.CacheRefresh = true;
         }
 
-        private void ParseMapBottomRow(Internal.ByteArray message) {
+        private void ParseMapBottomRow(Internal.CommunicationStream message) {
             UnityEngine.Vector3Int position = WorldMapStorage.Position;
             position.y++;
 
@@ -56,7 +56,7 @@
             WorldMapStorage.CacheRefresh = true;
         }
 
-        private void ParseMapLeftRow(Internal.ByteArray message) {
+        private void ParseMapLeftRow(Internal.CommunicationStream message) {
             UnityEngine.Vector3Int position = WorldMapStorage.Position;
             position.x--;
 
@@ -68,7 +68,7 @@
             WorldMapStorage.CacheRefresh = true;
         }
 
-        private void ParseFieldData(Internal.ByteArray message) {
+        private void ParseFieldData(Internal.CommunicationStream message) {
             UnityEngine.Vector3Int absolutePosition = message.ReadPosition();
             if (!WorldMapStorage.IsVisible(absolutePosition, true))
                 throw new System.Exception("ProtocolGame.ParseFieldData: Co-ordinate " + absolutePosition + " is out of range.");
@@ -87,7 +87,7 @@
             WorldMapStorage.CacheRefresh = true;
         }
 
-        private void ParseCreateOnMap(Internal.ByteArray message) {
+        private void ParseCreateOnMap(Internal.CommunicationStream message) {
             var absolutePosition = message.ReadPosition();
             if (!WorldMapStorage.IsVisible(absolutePosition, true))
                 throw new System.Exception("ProtocolGame.ParseCreateOnMap: Co-ordinate " + absolutePosition + " is out of range.");
@@ -129,7 +129,7 @@
             WorldMapStorage.CacheRefresh = true;
         }
 
-        private void ParseChangeOnMap(Internal.ByteArray message) {
+        private void ParseChangeOnMap(Internal.CommunicationStream message) {
             int x = message.ReadUnsignedShort();
             Appearances.ObjectInstance objectInstance;
             Creatures.Creature creature = null;
@@ -196,7 +196,7 @@
             WorldMapStorage.CacheRefresh = true;
         }
 
-        private void ParseDeleteOnMap(Internal.ByteArray message) {
+        private void ParseDeleteOnMap(Internal.CommunicationStream message) {
             int x = message.ReadUnsignedShort();
 
             Appearances.ObjectInstance objectInstance;
@@ -252,7 +252,7 @@
             WorldMapStorage.CacheRefresh = true;
         }
 
-        private void ParseCreatureMove(Internal.ByteArray message) {
+        private void ParseCreatureMove(Internal.CommunicationStream message) {
             int x = message.ReadUnsignedShort();
 
             UnityEngine.Vector3Int oldAbsolutePosition;
@@ -342,7 +342,7 @@
             WorldMapStorage.CacheRefresh = true;
         }
 
-        private void ParseCancelWalk(Internal.ByteArray message) {
+        private void ParseCancelWalk(Internal.CommunicationStream message) {
             int direction = message.ReadUnsignedByte();
 
             var absolutePosition = Player.Position;
@@ -362,12 +362,12 @@
             Player.AbortAutowalk((Direction)direction);
         }
 
-        private void ParseWait(Internal.ByteArray message) {
+        private void ParseWait(Internal.CommunicationStream message) {
             ushort ticks = message.ReadUnsignedShort();
             Player.EarliestMoveTime += ticks;
         }
 
-        private void ParseMapTopFloor(Internal.ByteArray message) {
+        private void ParseMapTopFloor(Internal.CommunicationStream message) {
             UnityEngine.Vector3Int position = WorldMapStorage.Position;
             position.x++; position.y++; position.z--;
 
@@ -387,17 +387,16 @@
             Player.StopAutowalk(true);
             WorldMapStorage.InvalidateOnscreenMessages();
 
-            UnityEngine.Vector3Int tmpPosition = WorldMapStorage.ToMap(position);
-            
+            var mapPosition = WorldMapStorage.ToMap(position);
             for (int x = 0; x < Constants.MapSizeX; x++) {
-                for (int y = 0; x < Constants.MapSizeY; y++) {
-                    tmpPosition.x = x;
-                    tmpPosition.y = y;
+                for (int y = 0; y < Constants.MapSizeY; y++) {
+                    mapPosition.x = x;
+                    mapPosition.y = y;
 
-                    UnityEngine.Vector3Int absolutePosition = WorldMapStorage.ToAbsolute(tmpPosition);
-                    WorldMapStorage.UpdateMiniMap(tmpPosition);
-                    uint color = WorldMapStorage.GetMiniMapColour(tmpPosition);
-                    int cost = WorldMapStorage.GetMiniMapCost(tmpPosition);
+                    var absolutePosition = WorldMapStorage.ToAbsolute(mapPosition);
+                    WorldMapStorage.UpdateMiniMap(mapPosition);
+                    uint color = WorldMapStorage.GetMiniMapColour(mapPosition);
+                    int cost = WorldMapStorage.GetMiniMapCost(mapPosition);
                     MiniMapStorage.UpdateField(absolutePosition, color, cost, false);
                 }
             }
@@ -405,7 +404,7 @@
             WorldMapStorage.CacheRefresh = true;
         }
 
-        private void ParseMapBottomFloor(Internal.ByteArray message) {
+        private void ParseMapBottomFloor(Internal.CommunicationStream message) {
             UnityEngine.Vector3Int position = WorldMapStorage.Position;
             position.x--; position.y--; position.z++;
 
@@ -427,17 +426,16 @@
             Player.StopAutowalk(true);
             WorldMapStorage.InvalidateOnscreenMessages();
 
-            UnityEngine.Vector3Int tmpPosition = WorldMapStorage.ToMap(position);
-
+            var mapPosition = WorldMapStorage.ToMap(position);
             for (int x = 0; x < Constants.MapSizeX; x++) {
-                for (int y = 0; x < Constants.MapSizeY; y++) {
-                    tmpPosition.x = x;
-                    tmpPosition.y = y;
+                for (int y = 0; y < Constants.MapSizeY; y++) {
+                    mapPosition.x = x;
+                    mapPosition.y = y;
 
-                    UnityEngine.Vector3Int absolutePosition = WorldMapStorage.ToAbsolute(tmpPosition);
-                    WorldMapStorage.UpdateMiniMap(tmpPosition);
-                    uint color = WorldMapStorage.GetMiniMapColour(tmpPosition);
-                    int cost = WorldMapStorage.GetMiniMapCost(tmpPosition);
+                    var absolutePosition = WorldMapStorage.ToAbsolute(mapPosition);
+                    WorldMapStorage.UpdateMiniMap(mapPosition);
+                    uint color = WorldMapStorage.GetMiniMapColour(mapPosition);
+                    int cost = WorldMapStorage.GetMiniMapCost(mapPosition);
                     MiniMapStorage.UpdateField(absolutePosition, color, cost, false);
                 }
             }
@@ -445,7 +443,7 @@
             WorldMapStorage.CacheRefresh = true;
         }
 
-        private void ParseAutomapFlag(Internal.ByteArray message) {
+        private void ParseAutomapFlag(Internal.CommunicationStream message) {
             var absolutePosition = message.ReadPosition();
             int icon = message.ReadUnsignedByte();
             var description = message.ReadString();

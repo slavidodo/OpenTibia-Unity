@@ -7,7 +7,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
     public partial class ProtocolGame : Internal.Protocol
     {
-        private AppearanceInstance ReadCreatureOutfit(Internal.ByteArray message, AppearanceInstance instance = null) {
+        private AppearanceInstance ReadCreatureOutfit(Internal.CommunicationStream message, AppearanceInstance instance = null) {
             int outfitId;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameOutfitIdU16))
                 outfitId = message.ReadUnsignedShort();
@@ -44,7 +44,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return AppearanceStorage.CreateObjectInstance(objectId, 0);
         }
 
-        private AppearanceInstance ReadMountOutfit(Internal.ByteArray message, AppearanceInstance instance = null) {
+        private AppearanceInstance ReadMountOutfit(Internal.CommunicationStream message, AppearanceInstance instance = null) {
             uint outfitId = message.ReadUnsignedShort();
 
             OutfitInstance outfitInstance = instance as OutfitInstance;
@@ -57,7 +57,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return null;
         }
         
-        private Creatures.Creature ReadCreatureInstance(Internal.ByteArray message, int type = -1,
+        private Creatures.Creature ReadCreatureInstance(Internal.CommunicationStream message, int type = -1,
                     UnityEngine.Vector3Int? absolutePosition = null) {
 
             if (type == -1)
@@ -129,6 +129,10 @@ namespace OpenTibiaUnity.Core.Communication.Game
                             creature.SetSummonerId(creature.IsSummon ? message.ReadUnsignedInt() : 0);
                     }
 
+                    if (gameManager.ClientVersion >= 1220 && creature.Type == CreatureType.Player) {
+                        byte unknown = message.ReadUnsignedByte(); // suggestion: boolean isFriend (friend system)
+                    }
+
                     if (gameManager.GetFeature(GameFeature.GameCreatureIcons))
                         creature.SetSpeechCategory(message.ReadEnum<SpeechCategory>());
 
@@ -174,7 +178,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return creature;
         }
 
-        private ObjectInstance ReadObjectInstance(Internal.ByteArray message, int id = -1) {
+        private ObjectInstance ReadObjectInstance(Internal.CommunicationStream message, int id = -1) {
             if (id == -1)
                 id = message.ReadUnsignedShort();
 
@@ -210,7 +214,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return @object;
         }
 
-        private int ReadField(Internal.ByteArray message, int x, int y, int z) {
+        private int ReadField(Internal.CommunicationStream message, int x, int y, int z) {
             var mapPosition = new UnityEngine.Vector3Int(x, y, z);
             var absolutePosition = WorldMapStorage.ToAbsolute(mapPosition);
 
@@ -222,7 +226,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 typeOrId = message.ReadUnsignedShort();
                 if (typeOrId >= 65280)
                     break;
-
+                
                 if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameEnvironmentEffect) && !gotEffect) {
                     var effectObject = AppearanceStorage.CreateEnvironmentalEffect((uint)typeOrId);
                     WorldMapStorage.SetEnvironmentalEffect(mapPosition, effectObject);
@@ -251,7 +255,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return typeOrId - 65280;
         }
 
-        private int ReadArea(Internal.ByteArray message, int startx, int starty, int endx, int endy) {
+        private int ReadArea(Internal.CommunicationStream message, int startx, int starty, int endx, int endy) {
             UnityEngine.Vector3Int position = WorldMapStorage.Position;
 
             int z, endz, zstep;
@@ -290,7 +294,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return skip;
         }
 
-        private int ReadFloor(Internal.ByteArray message, int z, int skip) {
+        private int ReadFloor(Internal.CommunicationStream message, int z, int skip) {
             for (int x = 0; x <= Constants.MapSizeX - 1; x++) {
                 for (int y = 0; y <= Constants.MapSizeY - 1; y++) {
                     if (skip > 0)

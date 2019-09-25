@@ -5,7 +5,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
 {
     public partial class ProtocolGame : Internal.Protocol
     {
-        private void ParseMarketStatistics(Internal.ByteArray message) {
+        private void ParseMarketStatistics(Internal.CommunicationStream message) {
             int count = message.ReadUnsignedShort();
             for (int i = 0; i < count; i++) {
                 ushort objectId = message.ReadUnsignedShort();
@@ -13,7 +13,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private void ParseMarketEnter(Internal.ByteArray message) {
+        private void ParseMarketEnter(Internal.CommunicationStream message) {
             ulong balance;
             if (OpenTibiaUnity.GameManager.ClientVersion >= 981)
                 balance = message.ReadUnsignedLong();
@@ -32,11 +32,11 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private void ParseMarketLeave(Internal.ByteArray message) {
+        private void ParseMarketLeave(Internal.CommunicationStream message) {
              
         }
 
-        private void ParseMarketDetail(Internal.ByteArray message) {
+        private void ParseMarketDetail(Internal.CommunicationStream message) {
             ushort objectId = message.ReadUnsignedShort();
 
             var last = MarketDetail.Weight;
@@ -77,7 +77,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private void ParseMarketBrowse(Internal.ByteArray message) {
+        private void ParseMarketBrowse(Internal.CommunicationStream message) {
             ushort var = message.ReadUnsignedShort(); // this must match the current object id
 
             int count = message.ReadUnsignedByte();
@@ -91,7 +91,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private Market.Offer ReadMarketOffer(Internal.ByteArray message, MarketOfferType offerType, ushort var) {
+        private Market.Offer ReadMarketOffer(Internal.CommunicationStream message, MarketOfferType offerType, ushort var) {
             uint timestamp = message.ReadUnsignedInt();
             ushort counter = message.ReadUnsignedShort();
 

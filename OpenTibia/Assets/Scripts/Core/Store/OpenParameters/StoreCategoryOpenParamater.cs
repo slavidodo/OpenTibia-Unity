@@ -10,7 +10,7 @@
             _category = category;
         }
 
-        public void WriteToMessage(Communication.Internal.ByteArray message) {
+        public void WriteTo(Communication.Internal.CommunicationStream message) {
             message.WriteString(_category);
         }
     }

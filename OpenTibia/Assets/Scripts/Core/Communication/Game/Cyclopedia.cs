@@ -2,7 +2,7 @@
 {
     public partial class ProtocolGame : Internal.Protocol
     {
-        private void ParseMonsterCyclopedia(Internal.ByteArray message) {
+        private void ParseMonsterCyclopedia(Internal.CommunicationStream message) {
             int count = message.ReadUnsignedShort();
             for (int i = 0; i < count; i++) {
                 string classification = message.ReadString();
@@ -12,7 +12,7 @@
             }
         }
 
-        private void ParseMonsterCyclopediaMonsters(Internal.ByteArray message) {
+        private void ParseMonsterCyclopediaMonsters(Internal.CommunicationStream message) {
             string classification = message.ReadString();
 
             int monsters = message.ReadUnsignedShort();
@@ -27,7 +27,7 @@
             }
         }
 
-        private void ParseMonsterCyclopediaRace(Internal.ByteArray message) {
+        private void ParseMonsterCyclopediaRace(Internal.CommunicationStream message) {
             ushort raceID = message.ReadUnsignedShort();
             var classification = message.ReadString();
 
@@ -90,7 +90,7 @@
             }
         }
 
-        private void ParseMonsterCyclopediaBonusEffects(Internal.ByteArray message) {
+        private void ParseMonsterCyclopediaBonusEffects(Internal.CommunicationStream message) {
             int charmPoints = message.ReadInt();
 
             int count = message.ReadUnsignedByte();
@@ -120,11 +120,11 @@
             }
         }
 
-        private void ParseMonsterCyclopediaNewDetails(Internal.ByteArray message) {
+        private void ParseMonsterCyclopediaNewDetails(Internal.CommunicationStream message) {
             ushort raceID = message.ReadUnsignedShort();
         }
 
-        private void ParseCyclopediaCharacterInfo(Internal.ByteArray message) {
+        private void ParseCyclopediaCharacterInfo(Internal.CommunicationStream message) {
             // TODO, in 12.15 there are extra 4 bytes in both client/server
             // i suggest that these bytes might have to do with character id
             // as tibia introduced the so called "Friends widget"
@@ -163,7 +163,7 @@
             }
         }
 
-        private void ParseCyclopediaMapData(Internal.ByteArray message) {
+        private void ParseCyclopediaMapData(Internal.CommunicationStream message) {
             int dataType = message.ReadUnsignedByte();
 
             // unfinished packet, more information needed....
@@ -175,24 +175,24 @@
                     break;
                 }
 
-                case 1: { // AreaUnlock (sure)
+                case 1: { // idk?
                     int count = message.ReadUnsignedShort();
                     for (int i = 0; i < count; i++) {
                         // UnlockedArea (struct)
-                        message.ReadUnsignedByte(); // unknown
-                        message.ReadUnsignedByte(); // unknown
-                        message.ReadUnsignedByte(); // (enum) maximum value: 3
-                        message.ReadUnsignedByte(); // unknown
+                        int unknown1 = message.ReadUnsignedByte(); // unknown
+                        int unknown2 = message.ReadUnsignedByte(); // unknown
+                        int unknown3 = message.ReadUnsignedByte(); // (enum) maximum value: 3
+                        int unknown4 = message.ReadUnsignedByte(); // unknown
                     }
 
                     count = message.ReadUnsignedShort();
                     for (int i = 0; i < count; i++) {
-                        message.ReadUnsignedShort(); // unknown
+                        ushort unknown = message.ReadUnsignedShort(); // unknown
                     }
 
                     count = message.ReadUnsignedShort();
                     for (int i = 0; i < count; i++) {
-                        message.ReadUnsignedShort(); // unknown
+                        ushort unknown = message.ReadUnsignedShort(); // unknown
                     }
 
                     break;
@@ -200,7 +200,7 @@
 
                 case 2: { // Raid (sure)
                     var position = message.ReadPosition();
-                    message.ReadUnsignedByte(); /* (enum) unknown (0 = Active Raid) */
+                    bool inactive = message.ReadBoolean();
                     break;
                 }
 
@@ -219,18 +219,16 @@
                 }
 
 
-                case 5: { // MonsterKnowledge (not sure)
-                    message.ReadUnsignedByte(); // unknown
-                    message.ReadUnsignedByte(); // unknown
-                    message.ReadUnsignedByte(); // unknown
+                case 5: { // idk? (but it unlocks areas)
+                    ushort areaId = message.ReadUnsignedShort(); // this is likely to be areaId
+                    byte totalPois = message.ReadUnsignedByte(); // unknown
 
-                    // the following bytes are unknown //
-                    int count = message.ReadUnsignedByte();
-                    for (int i = 0; i < count; i++) {
-                        message.ReadUnsignedInt(); // 4 bytes (idk if this is unsigned int)
-                        message.ReadUnsignedByte();
-
-                        int something = message.ReadUnsignedByte();
+                    // points of interest unlocked!
+                    int poiCount = message.ReadUnsignedByte();
+                    for (int i = 0; i < poiCount; i++) {
+                        // point of interest
+                        var position = message.ReadPosition();
+                        int unknown6 = message.ReadUnsignedByte();
                     }
 
                     break;
@@ -251,7 +249,20 @@
                 }
 
                 case 9: {
-
+                    // 
+                    uint maximumGold = message.ReadUnsignedInt(); // maximum gold? (used for progress)
+                    uint unknown2 = message.ReadUnsignedInt(); // unknown
+                    
+                    // these are area donations, 
+                    byte listCount = message.ReadUnsignedByte();
+                    for (int i = 0; i < listCount; i++) {
+                        // ushort areaId, uint gold contributed
+                        // 
+                        uint unknown5 = message.ReadUnsignedShort();
+                        uint unknown3 = message.ReadUnsignedInt();
+                        uint unknown4 = message.ReadUnsignedInt();
+                        uint unknown6 = message.ReadUnsignedByte();
+                    }
                     break;
                 }
 
@@ -267,14 +278,23 @@
             }
         }
 
-        private void ReadCyclopediaCharacterInfoBaseInformation(Internal.ByteArray message) {
+        private void ParseObjectInfo(Internal.CommunicationStream message) {
+            int objectCount = message.ReadUnsignedByte();
+            for (int i = 0; i < objectCount; i++) {
+                ushort objectId = message.ReadUnsignedShort();
+                byte data = message.ReadUnsignedByte();
+                string name = message.ReadString();
+            }
+        }
+
+        private void ReadCyclopediaCharacterInfoBaseInformation(Internal.CommunicationStream message) {
             string characterName = message.ReadString();
             string vocation = message.ReadString();
             ushort level = message.ReadUnsignedShort();
             var outfit = ReadCreatureOutfit(message);
         }
 
-        private void ReadCyclopediaCharacterInfoGeneralStats(Internal.ByteArray message) {
+        private void ReadCyclopediaCharacterInfoGeneralStats(Internal.CommunicationStream message) {
             ulong experience = message.ReadUnsignedLong();
             ushort level = message.ReadUnsignedShort();
             int levelPercent = message.ReadUnsignedByte();
@@ -312,7 +332,7 @@
             }
         }
 
-        private void ReadCyclopediaCharacterInfoCombatStats(Internal.ByteArray message) {
+        private void ReadCyclopediaCharacterInfoCombatStats(Internal.CommunicationStream message) {
             SkillType[] specialSkills = new SkillType[] {
                     SkillType.CriticalHitChance,
                     SkillType.CriticalHitDamage,
@@ -344,7 +364,7 @@
             }
         }
 
-        private void ReadCyclopediaCharacterInfoRecentPvpKills(Internal.ByteArray message) {
+        private void ReadCyclopediaCharacterInfoRecentPvpKills(Internal.CommunicationStream message) {
             ushort count = message.ReadUnsignedShort();
             for (int i = 0; i < count; i++) {
                 uint time = message.ReadUnsignedInt();
@@ -353,7 +373,7 @@
             }
         }
 
-        private void ReadCyclopediaCharacterInfoRecentDeaths(Internal.ByteArray message) {
+        private void ReadCyclopediaCharacterInfoRecentDeaths(Internal.CommunicationStream message) {
             ushort count = message.ReadUnsignedShort();
             for (int i = 0; i < count; i++) {
                 uint time = message.ReadUnsignedInt();
@@ -361,7 +381,7 @@
             }
         }
 
-        private void ReadCyclopediaCharacterInfoAchievements(Internal.ByteArray message) {
+        private void ReadCyclopediaCharacterInfoAchievements(Internal.CommunicationStream message) {
             ushort totalPoints = message.ReadUnsignedShort();
             ushort totalSecretAchievements = message.ReadUnsignedShort();
 

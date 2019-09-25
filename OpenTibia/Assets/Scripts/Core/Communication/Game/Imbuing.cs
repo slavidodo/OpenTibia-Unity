@@ -2,7 +2,7 @@
 {
     public partial class ProtocolGame : Internal.Protocol
     {
-        public void ParseCloseImbuingDialog(Internal.ByteArray message) {
+        public void ParseCloseImbuingDialog(Internal.CommunicationStream message) {
             // TODO
         }
     }

@@ -43,7 +43,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
             requestData.Add("password", Password);
             if (Token.Length != 0)
                 requestData.Add("token", Token);
-
+            
             Connect(requestURI, Web.RequestType.Login, requestData);
         }
 

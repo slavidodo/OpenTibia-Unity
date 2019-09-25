@@ -44,8 +44,8 @@ namespace OpenTibiaUnity.Core.Communication.Login
         protected override void OnCommunicationDataReady() {
             LoginserverMessageType prevMessageType = 0;
             LoginserverMessageType lastMessageType = 0;
-            while (_inputBuffer.BytesAvailable > 0) {
-                var messageType = _inputBuffer.ReadLoginType();
+            while (_inputStream.BytesAvailable > 0) {
+                var messageType = _inputStream.ReadLoginType();
                 try {
                     ParseMessage(messageType);
                     prevMessageType = lastMessageType;
@@ -56,7 +56,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
                         messageType,
                         lastMessageType,
                         prevMessageType,
-                        _inputBuffer.BytesAvailable,
+                        _inputStream.BytesAvailable,
                         e.StackTrace);
 
                     OnConnectionError(err);
@@ -68,21 +68,21 @@ namespace OpenTibiaUnity.Core.Communication.Login
             switch (messageType) {
                 case LoginserverMessageType.ErrorLegacy:
                 case LoginserverMessageType.Error:
-                    onLoginError.Invoke(_inputBuffer.ReadString());
+                    onLoginError.Invoke(_inputStream.ReadString());
                     _expectingTermination = true;
                     break;
 
                 case LoginserverMessageType.TokenSuccess:
-                    _tokenSuccess = _inputBuffer.ReadBoolean();
+                    _tokenSuccess = _inputStream.ReadBoolean();
                     break;
 
                 case LoginserverMessageType.TokenError:
-                    byte tries = _inputBuffer.ReadUnsignedByte();
+                    byte tries = _inputStream.ReadUnsignedByte();
                     onLoginTokenError.Invoke(tries);
                     break;
 
                 case LoginserverMessageType.MessageOfTheDay:
-                    string[] motdinfo = _inputBuffer.ReadString().Split('\n');
+                    string[] motdinfo = _inputStream.ReadString().Split('\n');
                     if (motdinfo.Length == 2 && int.TryParse(motdinfo[0], out int number))
                         onMessageOfTheDay.Invoke(number, motdinfo[1]);
                     break;
@@ -93,12 +93,12 @@ namespace OpenTibiaUnity.Core.Communication.Login
                     break;
 
                 case LoginserverMessageType.SessionKey:
-                    onSessionKey.Invoke(_inputBuffer.ReadString());
+                    onSessionKey.Invoke(_inputStream.ReadString());
                     break;
 
                 case LoginserverMessageType.CharacterList:
                     var characterList = new CharacterList();
-                    characterList.Parse(_inputBuffer);
+                    characterList.Parse(_inputStream);
                     onCharacterList.Invoke(characterList);
                     _expectingTermination = true;
                     break;
@@ -130,7 +130,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
         }
         
         protected void SendLogin() {
-            var message = _packetWriter.CreateMessage();
+            var message = _packetWriter.PrepareStream();
             message.WriteEnum(LoginclientMessageType.EnterAccount);
             message.WriteUnsignedShort((ushort)Utils.Utility.GetCurrentOs());
 
@@ -154,7 +154,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
             if (gameManager.GetFeature(GameFeature.GamePreviewState))
                 message.WriteUnsignedByte(0x00);
             
-            int payloadStart = message.Position;
+            int payloadStart = (int)message.Position;
             var random = new System.Random();
             if (gameManager.GetFeature(GameFeature.GameLoginPacketEncryption)) {
                 message.WriteUnsignedByte(0); // first byte must be zero
@@ -189,7 +189,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
             }
 
             if (gameManager.GetFeature(GameFeature.GameAuthenticator)) {
-                payloadStart = message.Position;
+                payloadStart = (int)message.Position;
 
                 message.WriteUnsignedByte(0);
                 message.WriteString(Token); // no auth-token

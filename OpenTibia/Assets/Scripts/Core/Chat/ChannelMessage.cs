@@ -72,7 +72,10 @@ namespace OpenTibiaUnity.Core.Chat
             var rawText = StringHelper.RichTextSpecialChars(_rawText);
             if (_mode == MessageModeType.NpcFrom || _mode == MessageModeType.NpcFromStartBlock)
                 rawText = StringHelper.HighlightNpcTalk(rawText, highlightARGB & 16777215);
-
+            else if (_mode == MessageModeType.Loot && OpenTibiaUnity.GameManager.ClientVersion >= 1200)
+                rawText = StringHelper.HighlightLootValue(rawText, (ushort objectId) => {
+                    return OpenTibiaUnity.CyclopediaStorage.GetObjectColor(objectId);
+                });
             _richText = string.Format("<color=#{0:X6}>{1}{2}</color>", textARGB, prefix, rawText);
 
             rawText = _rawText;

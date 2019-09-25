@@ -2,17 +2,17 @@
 {
     public partial class ProtocolGame : Internal.Protocol
     {
-        private void ParsePreyFreeListRerollAvailability(Internal.ByteArray message) {
+        private void ParsePreyFreeListRerollAvailability(Internal.CommunicationStream message) {
             byte slot = message.ReadUnsignedByte();
             ushort minutes = message.ReadUnsignedShort();
         }
 
-        private void ParsePreyTimeLeft(Internal.ByteArray message) {
+        private void ParsePreyTimeLeft(Internal.CommunicationStream message) {
             byte slot = message.ReadUnsignedByte();
             ushort minutes = message.ReadUnsignedShort();
         }
 
-        private void ParsePreyData(Internal.ByteArray message) {
+        private void ParsePreyData(Internal.CommunicationStream message) {
             int slot = message.ReadUnsignedByte();
             var state = message.ReadEnum<PreySlotStates>();
             switch (state) {
@@ -65,7 +65,7 @@
             }
         }
 
-        private void ParsePreyPrices(Internal.ByteArray message) {
+        private void ParsePreyPrices(Internal.CommunicationStream message) {
             message.ReadUnsignedInt(); // rerollPrice in gold
             if (OpenTibiaUnity.GameManager.ClientVersion >= 1190) {
                 message.ReadUnsignedByte(); // unknown

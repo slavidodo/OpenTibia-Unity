@@ -233,9 +233,10 @@
         Quest,
         QuestTrader,
         Travel,
+        Hireling = 7,
 
         First = None,
-        Last = Travel,
+        Last = Hireling,
     }
     public enum GuildFlag : byte
     {
@@ -393,19 +394,21 @@
         Thankyou = 39,
         Market = 40,
         Mana = 41,
-        BeyondLast = 42,
+        BoostedCreature = 42,
+        BeyondLast = 43,
 
         // deprecated
-        MonsterYell = 43,
-        MonsterSay = 44,
-        Red = 45,
-        Blue = 46,
-        RVRChannel = 47,
-        RVRAnswer = 48,
-        RVRContinue = 49,
-        GameHighlight = 50,
-        NpcFromStartBlock = 51,
-        LastMessage = 52,
+        MonsterYell,
+        MonsterSay,
+        Red,
+        Blue,
+        RVRChannel,
+        RVRAnswer,
+        RVRContinue,
+        GameHighlight,
+        NpcFromStartBlock,
+
+        LastMessage,
         Invalid = 255
     }
     public enum MessageScreenTargets : int
@@ -784,7 +787,15 @@
         XPBoost = 6,
         Prey = 7,
     }
-    
+
+    public enum StoreOfferSortType: byte
+    {
+        Automatic = 0,
+        MostPopular = 1,
+        Alphabetically = 2,
+        Newest = 3,
+    }
+
     public enum StoreOfferType : byte
     {
         PreySlot = 0,
@@ -924,6 +935,12 @@
         AcceptedLoot = 1,
     }
 
+    public enum CyclopediaLootValueSource
+    {
+        NpcSaleData = 1,
+        MarketAverageValue = 2,
+    }
+
     public enum CyclopediaBonusEffectAction : byte
     {
         Unlock = 0,
@@ -1026,6 +1043,15 @@
         RevokePermission = 5,
         AllowAllToInspect = 6,
         RevokeAllToInspect = 7,
+    }
+
+    public enum ServerInspectPlayerState
+    {
+        None = 0,
+        AllowedToInspectMe = 1 << 0,
+        RequestedToInspectOther = 1 << 1,
+        GrantedPermissionToInspectOther = 1 << 2,
+        RequestedToInspectMe = 1 << 3,
     }
 
     public enum GameFeature

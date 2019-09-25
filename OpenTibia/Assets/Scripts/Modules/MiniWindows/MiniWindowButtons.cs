@@ -150,9 +150,15 @@ namespace OpenTibiaUnity.Modules.MiniWindows
         }
 
         public void OnStoreButtonClicked() {
+            var gameManager = OpenTibiaUnity.GameManager;
             var protocolGame = OpenTibiaUnity.ProtocolGame;
-            if (!!protocolGame && protocolGame.IsGameRunning)
+            if (!!protocolGame && protocolGame.IsGameRunning) {
                 protocolGame.SendOpenStore();
+                if (gameManager.ClientVersion >= 1180) {
+                    var openParamaters = new Core.Store.StoreOpenParameters(StoreOpenParameterAction.Invalid, null);
+                    protocolGame.SendRequestStoreOffers(openParamaters.OpenAction, openParamaters);
+                }
+            }
         }
 
         private void ToggleWindow<T>(T prefab, bool value) where T : Core.Components.Base.MiniWindow {

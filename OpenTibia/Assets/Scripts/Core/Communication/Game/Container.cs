@@ -4,19 +4,23 @@ namespace OpenTibiaUnity.Core.Communication.Game
 {
     public partial class ProtocolGame : Internal.Protocol
     {
-        private void ParseOpenContainer(Internal.ByteArray message) {
+        private void ParseOpenContainer(Internal.CommunicationStream message) {
             byte containerId = message.ReadUnsignedByte();
             var objectIcon = ReadObjectInstance(message);
             string name = message.ReadString();
             byte nOfSlotsPerPage = message.ReadUnsignedByte(); // capacity of shown view
             bool isSubContainer = message.ReadBoolean();
 
+            bool canUseDepotSearch = false;
             bool isDragAndDropEnabled = true;
             bool isPaginationEnabled = false;
             int nOfTotalObjects = 0;
             int indexOfFirstObject = 0;
             int nOfContentObjects = 0; // objects in the current shown view //
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameContainerPagination)) {
+                if (OpenTibiaUnity.GameManager.ClientVersion >= 1220)
+                    canUseDepotSearch = message.ReadBoolean();
+
                 isDragAndDropEnabled = message.ReadBoolean();
                 isPaginationEnabled = message.ReadBoolean();
                 nOfTotalObjects = message.ReadUnsignedShort();
@@ -44,12 +48,12 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 containerView.AddObject(indexOfFirstObject + i, ReadObjectInstance(message));
         }
 
-        private void ParseCloseContainer(Internal.ByteArray message) {
+        private void ParseCloseContainer(Internal.CommunicationStream message) {
             byte containerId = message.ReadUnsignedByte();
             ContainerStorage.CloseContainerView(containerId);
         }
 
-        private void ParseCreateInContainer(Internal.ByteArray message) {
+        private void ParseCreateInContainer(Internal.CommunicationStream message) {
             byte containerId = message.ReadUnsignedByte();
             ushort slot = 0;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameContainerPagination))
@@ -61,7 +65,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 containerView.AddObject(slot, @object);
         }
 
-        private void ParseChangeInContainer(Internal.ByteArray message) {
+        private void ParseChangeInContainer(Internal.CommunicationStream message) {
             byte containerId = message.ReadUnsignedByte();
             ushort slot = 0;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameContainerPagination))
@@ -75,7 +79,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 containerView.ChangeObject(slot, @object);
         }
 
-        private void ParseDeleteInContainer(Internal.ByteArray message) {
+        private void ParseDeleteInContainer(Internal.CommunicationStream message) {
             byte containerId = message.ReadUnsignedByte();
             ushort slot;
             Appearances.ObjectInstance appendObject = null;

@@ -7,13 +7,17 @@ namespace OpenTibiaUnity.Core.Store
         List<StoreOfferQuantityConfiguration> _quantityConfigurations = new List<StoreOfferQuantityConfiguration>();
         List<StoreVisualisation> _visualisations = new List<StoreVisualisation>();
         List<StoreProduct> _products = new List<StoreProduct>();
-        string _name;
-        string _description;
-        string _filter;
+        private string _name;
+        private string _description;
+        private string _filter;
 
         public string Name { get => _name; }
         public string Description { get => _description; }
         public string Filter { get => _filter; set => _filter = value; }
+
+        public uint TimeAddedToStore { get; set; }
+        public ushort TimesBought { get; set; }
+        public bool RequiresConfiguration { get; set; }
 
         public StoreOffer(string name) {
             _name = name;

@@ -118,6 +118,13 @@ namespace OpenTibiaUnity.Core.Input
             return false;
         }
 
+        public bool IsAnyMousePressed() {
+            return IsMouseButtonPressed(MouseButton.Left)
+                || IsMouseButtonPressed(MouseButton.Right)
+                || IsMouseButtonPressed(MouseButton.Middle)
+                || IsMouseButtonPressed(MouseButton.Both);
+        }
+
         public bool IsMouseButtonDragged(MouseButton mouseButton) {
             switch (mouseButton) {
                 case MouseButton.Left: return _mouseDragged[0] != 0;

@@ -91,7 +91,7 @@ namespace OpenTibiaUnity.Core.Appearances
             else
                 tex2D = null;
 
-            if (match == null || match.SpriteType < 1 || match.SpriteType > 4 || tex2D == null) {
+            if (tex2D == null) {
                 filename = null;
                 spriteRect = Rect.zero;
                 realSpriteSize = Vector2.zero;
@@ -152,7 +152,6 @@ namespace OpenTibiaUnity.Core.Appearances
             } else if (asyncRequest.asset == null) {
                 _activeTextureRequests.Remove(filename);
                 _failedTextureRequests.Add(hashCode);
-                Debug.Log("Failed: " + filename);
                 return SpriteLoadingStatus.Failed;
             }
 

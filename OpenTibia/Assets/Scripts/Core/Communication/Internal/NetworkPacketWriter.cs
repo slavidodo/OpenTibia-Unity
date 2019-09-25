@@ -7,8 +7,8 @@ namespace OpenTibiaUnity.Core.Communication.Internal
         public class PacketFinishedEvent : UnityEvent { }
 
         private Cryptography.XTEA _xTEA = null;
-        private ByteArray _messageBuffer = new ByteArray();
-        private ByteArray _outputBuffer = new ByteArray();
+        private CommunicationStream _messageBuffer = new CommunicationStream();
+        private CommunicationStream _outputBuffer = new CommunicationStream();
         private uint _sequenceNumber = 0;
 
         public PacketFinishedEvent onPacketFinished = new PacketFinishedEvent();
@@ -18,26 +18,23 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             set => _xTEA = value;
         }
 
-        public ByteArray OutputPacketBuffer {
+        public CommunicationStream OutputPacketBuffer {
             get => _outputBuffer;
         }
 
-        public ByteArray CreateMessage() {
+        public CommunicationStream PrepareStream() {
             // todo; verify caller's client compatability
 
             // separate the body from the whole message
             // to make it easier to perform actions on the body
 
-            _messageBuffer.Length = 0;
-            _messageBuffer.Position = 0;
-            _outputBuffer.Length = 0;
-            _outputBuffer.Position = 0;
+            _messageBuffer = new CommunicationStream();
+            _outputBuffer = new CommunicationStream();
             return _messageBuffer;
         }
 
         public void FinishMessage() {
-            _outputBuffer.Length = 0;
-            _outputBuffer.Position = 0;
+            _outputBuffer = new CommunicationStream();
 
             int pos = Connection.PacketLengthPos + Connection.PacketLengthSize;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameProtocolSequenceNumber))
@@ -46,21 +43,22 @@ namespace OpenTibiaUnity.Core.Communication.Internal
                 pos += Connection.ChecksumSize;
             
             _outputBuffer.Position = pos;
-            int messageSize = _messageBuffer.Position;
+            int messageSize = (int)_messageBuffer.Length;
 
+            _messageBuffer.Position = 0;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameLoginPacketEncryption) && _xTEA != null) {
                 _outputBuffer.WriteUnsignedShort((ushort)messageSize);
-                _outputBuffer.WriteBytes(_messageBuffer, 0, messageSize);
-                _xTEA.Encrypt(_outputBuffer, pos, _outputBuffer.Length - pos);
+                _outputBuffer.Write(_messageBuffer, 0, messageSize);
+                _xTEA.Encrypt(_outputBuffer, pos, (int)_outputBuffer.Length - pos);
             } else {
-                _outputBuffer.WriteBytes(_messageBuffer, 0, messageSize);
+                _outputBuffer.Write(_messageBuffer, 0, messageSize);
             }
 
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameProtocolSequenceNumber)) {
                 _outputBuffer.Position = Connection.SequenceNumberPos;
                 _outputBuffer.WriteUnsignedInt(_sequenceNumber++);
             } else if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameProtocolChecksum)) {
-                uint checksum = Cryptography.Adler32Checksum.CalculateAdler32Checksum(_outputBuffer, pos, _outputBuffer.Length - pos);
+                uint checksum = Cryptography.Adler32Checksum.CalculateAdler32Checksum(_outputBuffer, pos, (int)_outputBuffer.Length - pos);
                 _outputBuffer.Position = Connection.ChecksumPos;
                 _outputBuffer.WriteUnsignedInt(checksum);
             }

@@ -52,6 +52,10 @@ namespace OpenTibiaUnity.Core.WorldMap
             _richText = StringHelper.RichTextSpecialChars(_text);
             if (_mode == MessageModeType.NpcFrom)
                 _richText = StringHelper.HighlightNpcTalk(_richText, highlightARGB);
+            else if (_mode == MessageModeType.Loot && OpenTibiaUnity.GameManager.ClientVersion >= 1200)
+                _richText = StringHelper.HighlightLootValue(_richText, (ushort objectId) => {
+                    return OpenTibiaUnity.CyclopediaStorage.GetObjectColor(objectId);
+                });
 
             if (text != null)
                 _richText = text + _richText;

@@ -4,6 +4,8 @@ namespace OpenTibiaUnity.Core
 {
     public static class StringHelper
     {
+        public delegate uint ObjectIdHighlightDelegate(ushort objectId);
+
         private static Regex NpcHighlightRegex = new Regex(@"\{([^}]+)\}(?:\s+\{[^}]+\})*");
         private static Regex RichTextRegex = new Regex(@"\<[^<>]+\>");
         private static Regex LootHighlightRegex = new Regex(@"\{([^}]+)\|([^}]+)\}(?:\s+\{[^}]+\})*");
@@ -14,6 +16,18 @@ namespace OpenTibiaUnity.Core
 
             return NpcHighlightRegex.Replace(text, (Match match) => {
                 return string.Format("<link=\"{1}\"><color=#{0:X6}>{1}</color></link>", highlightColor, match.Groups[1]);
+            });
+        }
+
+        public static string HighlightLootValue(string text, ObjectIdHighlightDelegate highlightARGBFunc) {
+            return NpcHighlightRegex.Replace(text, (Match match) => {
+                var lootText = match.Groups[1].ToString();
+                var split = lootText.Split('|');
+                if (split.Length == 2 && ushort.TryParse(split[0], out ushort objectId)) {
+                    var highlightARGB = highlightARGBFunc(objectId);
+                    return string.Format("<color=#{0:X6}>{1}</color>", highlightARGB, split[1]);
+                }
+                return split.Length > 0 ? split[0] : lootText;
             });
         }
 

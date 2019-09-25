@@ -48,18 +48,18 @@
         public uint OffsetX { get => HasDisplacement ? _offset.X : 0; }
         public uint OffsetY { get => HasDisplacement ? _offset.Y : 0; }
         public UnityEngine.Vector2Int Offset { get => new UnityEngine.Vector2Int((int)OffsetX, (int)OffsetY); }
-        public bool HasElevation { get => HasAppearanceFlags && AppearanceFlags.Elevation != null; }
-        public uint Elevation { get => HasElevation ? AppearanceFlags.Elevation.Elevation : 0; }
+        public bool HasElevation { get => HasAppearanceFlags && AppearanceFlags.Height != null; }
+        public uint Elevation { get => HasElevation ? AppearanceFlags.Height.Elevation : 0; }
         public bool IsLyingCorpse { get => HasAppearanceFlags ? AppearanceFlags.LyingCorpse : false; }
         public bool IsAnimateAlways { get => HasAppearanceFlags ? AppearanceFlags.AnimateAlways : false; }
-        public bool IsMiniMap { get => HasAppearanceFlags && AppearanceFlags.Minimap != null; }
-        public uint MiniMapColor { get => IsMiniMap ? AppearanceFlags.Minimap.Color : 0; }
+        public bool IsAutomap { get => HasAppearanceFlags && AppearanceFlags.Automap != null; }
+        public uint AutomapColor { get => IsAutomap ? AppearanceFlags.Automap.Color : 0; }
         public bool HasLensHelp { get => HasAppearanceFlags && AppearanceFlags.LensHelp != null; }
         public uint LensHelp { get => HasLensHelp ? AppearanceFlags.LensHelp.ID : 0; }
         public bool IsFullGround { get => HasAppearanceFlags ? AppearanceFlags.FullGround : false; }
-        public bool IsIgnoreLook { get => HasAppearanceFlags ? AppearanceFlags.Look : false; }
-        public bool IsCloth { get => HasAppearanceFlags && AppearanceFlags.Cloth != null; }
-        public uint Cloth { get => IsCloth ? AppearanceFlags.Cloth.Slot : 0; }
+        public bool IsIgnoreLook { get => HasAppearanceFlags ? AppearanceFlags.IgnoreLook : false; }
+        public bool IsCloth { get => HasAppearanceFlags && AppearanceFlags.Clothes != null; }
+        public uint Cloth { get => IsCloth ? AppearanceFlags.Clothes.Slot : 0; }
         public Protobuf.Appearances.AppearanceFlagMarket Market { get => HasAppearanceFlags ? AppearanceFlags.Market: null; }
         public bool IsMarket { get => Market != null; }
         public bool HasDefaultAction { get => HasAppearanceFlags && AppearanceFlags.DefaultAction != null; }
@@ -67,10 +67,15 @@
         public bool IsWrappable { get => HasAppearanceFlags ? AppearanceFlags.Wrapable : false; }
         public bool IsUnwrappable { get => HasAppearanceFlags ? AppearanceFlags.UnWrapable : false; }
         public bool IsTopEffect { get => HasAppearanceFlags ? AppearanceFlags.TopEffect : false; }
-        // TODO NpcSaleData
-        // TODO ExpiringObject
-        public bool IsCorpse { get => HasAppearanceFlags ? false : false; } // TODO
-        public bool IsPlayerCorpse { get => HasAppearanceFlags ? false : false; } // TODO
+        public Google.Protobuf.Collections.RepeatedField<Protobuf.Appearances.AppearanceFlagNPC> NPCSaleData {
+            get => HasAppearanceFlags ? AppearanceFlags.NpcSaleData : null;
+        }
+        public bool IsExpiredChanged { get => HasAppearanceFlags && AppearanceFlags.ChangedToExpire != null; }
+        public uint FormerObjectTypeId { get => IsExpiredChanged ? AppearanceFlags.ChangedToExpire.FormerObjectTypeID : 0; }
+        public bool IsCorpse { get => HasAppearanceFlags && AppearanceFlags.Corpse; }
+        public bool IsPlayerCorpse { get => HasAppearanceFlags && AppearanceFlags.PlayerCorpse; }
+        public bool IsCyclopediaType { get => HasAppearanceFlags && AppearanceFlags.CyclopediaItem != null; }
+        public uint CyclopediaObjectTypeId { get => IsCyclopediaType ? AppearanceFlags.CyclopediaItem.CyclopediaType : 0; }
 
         public bool IsAnimation { get; }
         public bool IsCachable { get; }

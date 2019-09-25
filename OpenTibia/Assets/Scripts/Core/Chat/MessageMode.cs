@@ -94,6 +94,7 @@ namespace OpenTibiaUnity.Core.Chat
             MessageModeDefaults.Add(MessageModeType.Thankyou, new MessageModeProperties(MessageModeType.Thankyou, true, true, MessageColors.White, 0, false, true, MessageScreenTargets.BoxLow));
             MessageModeDefaults.Add(MessageModeType.Market, new MessageModeProperties(MessageModeType.Market, false, false, MessageColors.White, 0, false, true));
             MessageModeDefaults.Add(MessageModeType.Mana, new MessageModeProperties(MessageModeType.Mana, true, true, MessageColors.White, 0, false, true, MessageScreenTargets.EffectCoordinate));
+            MessageModeDefaults.Add(MessageModeType.BoostedCreature, new MessageModeProperties(MessageModeType.BoostedCreature, true, true, MessageColors.White, 0, false, true, MessageScreenTargets.BoxHigh));
             
             MessageModeDefaults.Add(MessageModeType.MonsterYell, new MessageModeProperties(MessageModeType.MonsterYell, true, true, MessageColors.Orange, 0, false, true, MessageScreenTargets.BoxCoordinate));
             MessageModeDefaults.Add(MessageModeType.MonsterSay, new MessageModeProperties(MessageModeType.MonsterSay, true, false, MessageColors.Orange, 0, false, true, MessageScreenTargets.BoxCoordinate));

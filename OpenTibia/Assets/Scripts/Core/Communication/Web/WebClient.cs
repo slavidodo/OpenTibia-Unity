@@ -28,18 +28,19 @@ namespace OpenTibiaUnity.Core.Communication.Web
         }
 
         protected async void Connect(string requestUri, RequestType type, Dictionary<string, string> requestData) {
-            string requestType = GetStringType(type);
-            var requestStr = CreateRequestString(requestType, requestData);
-
-            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
-            request.Content = new StringContent(requestStr, Encoding.UTF8, "text/json");
-
-            if (s_HttpClient == null)
-                s_HttpClient = new HttpClient();
-
-            HttpResponseMessage response;
             try {
-                response = await s_HttpClient.SendAsync(request);
+                string requestType = GetStringType(type);
+                var requestStr = CreateRequestString(requestType, requestData);
+
+                var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+                request.Content = new StringContent(requestStr, Encoding.UTF8, "text/json");
+
+                request.Headers.Add("User-Agent", "Mozilla/5.0");
+
+                if (s_HttpClient == null)
+                    s_HttpClient = new HttpClient();
+
+                HttpResponseMessage response = await s_HttpClient.SendAsync(request);
                 OnResonseReceived(response);
             } catch (HttpRequestException e) {
                 UnityEngine.Debug.Log("HttpRequestException: " + e);

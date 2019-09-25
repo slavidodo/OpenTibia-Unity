@@ -18,7 +18,24 @@ namespace OpenTibiaUnity.Core.Appearances
 
         private List<AppearanceType> _marketObjectTypes;
         private List<AppearanceTypeInfo> _objectTypeInfoCache;
-        
+
+
+        private uint _minimumObjectId = 0;
+        private uint _maximumObjectId = 0;
+        private uint _minimumEffectId = 0;
+        private uint _maximumEffectId = 0;
+        private uint _minimumMissileId = 0;
+        private uint _maximumMissileId = 0;
+        private uint _minimumOutfitId = 0;
+        private uint _maximumOutfitId = 0;
+
+        private Protobuf.Appearances.SpecialMeaningAppearanceIds SpecialMeaningAppearanceIds {
+            get => _protoAppearances != null ? _protoAppearances.SpecialMeaningAppearanceIDs : null;
+        }
+        public uint GoldCoinId { get => SpecialMeaningAppearanceIds != null ? SpecialMeaningAppearanceIds.GoldCoinId : 0; }
+        public uint PlatinumCoinId { get => SpecialMeaningAppearanceIds != null ? SpecialMeaningAppearanceIds.PlatinumCoinId : 0; }
+        public uint CrystalCoinId { get => SpecialMeaningAppearanceIds != null ? SpecialMeaningAppearanceIds.CrystalCoinId : 0; }
+
         public void SetProtoAppearances(Protobuf.Appearances.Appearances appearances) {
             _protoAppearances = appearances;
             
@@ -31,10 +48,6 @@ namespace OpenTibiaUnity.Core.Appearances
                     _marketObjectTypes.Add(type);
             }
 
-            _objectTypes.Sort((a, b) => {
-                return a.Id.CompareTo(b.Id);
-            });
-            
             _effectTypes = new List<AppearanceType>(_protoAppearances.Effects.Count);
             foreach (var appearance in _protoAppearances.Effects)
                 _effectTypes.Add(new AppearanceType(appearance.ID, appearance, AppearanceCategory.Effect));
@@ -46,6 +59,20 @@ namespace OpenTibiaUnity.Core.Appearances
             _outfitTypes = new List<AppearanceType>(_protoAppearances.Outfits.Count);
             foreach (var appearance in _protoAppearances.Outfits)
                 _outfitTypes.Add(new AppearanceType(appearance.ID, appearance, AppearanceCategory.Outfit));
+
+            _objectTypes.Sort((a, b) => a.Id.CompareTo(b.Id));
+            _effectTypes.Sort((a, b) => a.Id.CompareTo(b.Id));
+            _missileTypes.Sort((a, b) => a.Id.CompareTo(b.Id));
+            _outfitTypes.Sort((a, b) => a.Id.CompareTo(b.Id));
+
+            _minimumObjectId = _objectTypes[0].Id;
+            _maximumObjectId = _objectTypes[_objectTypes.Count - 1].Id;
+            _minimumEffectId = _effectTypes[0].Id;
+            _maximumEffectId = _effectTypes[_effectTypes.Count - 1].Id;
+            _minimumMissileId = _missileTypes[0].Id;
+            _maximumMissileId = _missileTypes[_missileTypes.Count - 1].Id;
+            _minimumOutfitId = _outfitTypes[0].Id;
+            _maximumOutfitId = _outfitTypes[_outfitTypes.Count - 1].Id;
             
             _invisibleOutfitType = _effectTypes[13 - 1];
         }
@@ -73,7 +100,7 @@ namespace OpenTibiaUnity.Core.Appearances
 
             if (id == AppearanceInstance.Creature)
                 return _creatureAppearanceType;
-            else if (id >= 100 && (id - 100) < _objectTypes.Count)
+            else if (id >= _minimumObjectId && id <= _maximumObjectId)
                 return FindAppearanceType(_objectTypes, id);
 
             return null;
@@ -92,7 +119,7 @@ namespace OpenTibiaUnity.Core.Appearances
             if (_effectTypes == null)
                 throw new System.Exception("AppearanceStorage.CreateEffectInstance: proto appearances not loaded.");
 
-            if (id >= 1 || id <= _effectTypes.Count)
+            if (id >= _minimumEffectId && id <= _maximumEffectId)
                 return new EffectInstance(id, FindAppearanceType(_effectTypes, id));
             return null;
         }
@@ -101,7 +128,7 @@ namespace OpenTibiaUnity.Core.Appearances
             if (_missileTypes == null)
                 throw new System.Exception("AppearanceStorage.CreateMissileInstance: proto appearances not loaded.");
 
-            if (id >= 1 || id <= _missileTypes.Count)
+            if (id >= _minimumMissileId && id <= _maximumMissileId)
                 return new MissileInstance(id, FindAppearanceType(_missileTypes, id), fromPosition, toPosition);
             return null;
         }
@@ -112,7 +139,7 @@ namespace OpenTibiaUnity.Core.Appearances
 
             if (id == OutfitInstance.InvisibleOutfitId) {
                 return new OutfitInstance(id, _invisibleOutfitType, head, body, legs, feet, addons);
-            } else if (id >= 1 && id <= _outfitTypes.Count) {
+            } else if (id >= _minimumOutfitId && id <= _maximumOutfitId) {
                 return new OutfitInstance(id, FindAppearanceType(_outfitTypes, id), head, body, legs, feet, addons);
             }
                 

@@ -84,7 +84,7 @@
         }
 
         public static int GetMinimumClientVersion() => 740;
-        public static int GetMaximumClientVersion() => 1215;
+        public static int GetMaximumClientVersion() => 1220;
 
         public static int GetProtocolVersion(int clientVersion, int buildVersion) {
             switch (clientVersion) {
@@ -116,7 +116,7 @@
         }
 
         public static int GetMinimumProtocolVersion() => 740;
-        public static int GetMaximumProtocolVersion() => 1215;
+        public static int GetMaximumProtocolVersion() => 1220;
 
         public static int[] GetBuildVersions(int clientVersion) {
             if (clientVersion < 1100)
@@ -194,13 +194,13 @@
                 case 1211: return new int[] { 8154 };
                 case 1212: return new int[] { 8202, 8266, 8334, 8413 };
                 case 1215: return new int[] { 8493, 8554, 8610, 8659, 8706, 8721, 8762, 8768, 8786, 8788, 8794, 8795, 8800, 8802, 8823 };
-                case 1220: return new int[] { };
+                case 1220: return new int[] { 8834, 8958 };
                 default: return null;
             }
         }
 
         public static int GetMinimumBuildVersion() => 3768;
-        public static int GetMaximumBuildVersion() => 8823;
+        public static int GetMaximumBuildVersion() => 8958;
 
         public static ushort GetContentRevision(int clientVersion, int buildVersion) {
             switch (clientVersion) {
@@ -232,6 +232,12 @@
                         case 8786: return 22700;
                         case 8788: case 8794: return 22644;
                         case 8795: return 22807;
+                        default: return 0;
+                    }
+                case 1220:
+                    switch (buildVersion) {
+                        case 8834: return 22862;
+                        case 8958: return 23209;
                         default: return 0;
                     }
             }

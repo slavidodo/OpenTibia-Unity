@@ -2,6 +2,6 @@
 {
     public interface IStoreOpenParamater
     {
-        void WriteToMessage(Communication.Internal.ByteArray message);
+        void WriteTo(Communication.Internal.CommunicationStream message);
     }
 }

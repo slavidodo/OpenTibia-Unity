@@ -27,110 +27,113 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             byte[] descriptorData = global::System.Convert.FromBase64String(
                 string.Concat(
                   "ChFhcHBlYXJhbmNlcy5wcm90bxIjT3BlblRpYmlhVW5pdHkuUHJvdG9idWYu",
-                  "QXBwZWFyYW5jZXMaDHNoYXJlZC5wcm90byL8AgoLQXBwZWFyYW5jZXMSQAoH",
+                  "QXBwZWFyYW5jZXMaDHNoYXJlZC5wcm90byL/AgoLQXBwZWFyYW5jZXMSQAoH",
                   "b2JqZWN0cxgBIAMoCzIvLk9wZW5UaWJpYVVuaXR5LlByb3RvYnVmLkFwcGVh",
                   "cmFuY2VzLkFwcGVhcmFuY2USQAoHb3V0Zml0cxgCIAMoCzIvLk9wZW5UaWJp",
                   "YVVuaXR5LlByb3RvYnVmLkFwcGVhcmFuY2VzLkFwcGVhcmFuY2USQAoHZWZm",
                   "ZWN0cxgDIAMoCzIvLk9wZW5UaWJpYVVuaXR5LlByb3RvYnVmLkFwcGVhcmFu",
                   "Y2VzLkFwcGVhcmFuY2USQAoHbWlzc2xlcxgEIAMoCzIvLk9wZW5UaWJpYVVu",
-                  "aXR5LlByb3RvYnVmLkFwcGVhcmFuY2VzLkFwcGVhcmFuY2USZQobc3BlY2lh",
-                  "bE1lYW5pbmdBcHBlYXJhbmNlSWRzGAUgASgLMkAuT3BlblRpYmlhVW5pdHku",
-                  "UHJvdG9idWYuQXBwZWFyYW5jZXMuU3BlY2lhbE1lYW5pbmdBcHBlYXJhbmNl",
-                  "SWRzIrEBCgpBcHBlYXJhbmNlEgoKAmlEGAEgASgNEkQKC2ZyYW1lR3JvdXBz",
-                  "GAIgAygLMi8uT3BlblRpYmlhVW5pdHkuUHJvdG9idWYuQXBwZWFyYW5jZXMu",
-                  "RnJhbWVHcm91cBJDCgVmbGFncxgDIAEoCzI0Lk9wZW5UaWJpYVVuaXR5LlBy",
-                  "b3RvYnVmLkFwcGVhcmFuY2VzLkFwcGVhcmFuY2VGbGFncxIMCgRuYW1lGAQg",
-                  "ASgJIoUOCg9BcHBlYXJhbmNlRmxhZ3MSSQoGZ3JvdW5kGAEgASgLMjkuT3Bl",
-                  "blRpYmlhVW5pdHkuUHJvdG9idWYuQXBwZWFyYW5jZXMuQXBwZWFyYW5jZUZs",
-                  "YWdHcm91bmQSFAoMZ3JvdW5kQm9yZGVyGAIgASgIEg4KBmJvdHRvbRgDIAEo",
-                  "CBILCgN0b3AYBCABKAgSEQoJY29udGFpbmVyGAUgASgIEhEKCXN0YWNrYWJs",
-                  "ZRgGIAEoCBIQCghmb3JjZVVzZRgHIAEoCBIQCghtdWx0aVVzZRgIIAEoCBJN",
-                  "Cgh3cml0YWJsZRgJIAEoCzI7Lk9wZW5UaWJpYVVuaXR5LlByb3RvYnVmLkFw",
-                  "cGVhcmFuY2VzLkFwcGVhcmFuY2VGbGFnV3JpdGFibGUSVQoMd3JpdGFibGVP",
-                  "bmNlGAogASgLMj8uT3BlblRpYmlhVW5pdHkuUHJvdG9idWYuQXBwZWFyYW5j",
-                  "ZXMuQXBwZWFyYW5jZUZsYWdXcml0YWJsZU9uY2USFgoOZmx1aWRDb250YWlu",
-                  "ZXIYCyABKAgSDgoGc3BsYXNoGAwgASgIEhIKCnVucGFzc2FibGUYDSABKAgS",
-                  "EgoKdW5tb3ZlYWJsZRgOIAEoCBIPCgd1bnNpZ2h0GA8gASgIEhEKCWJsb2Nr",
-                  "UGF0aBgQIAEoCBISCgpwaWNrdXBhYmxlGBEgASgIEhAKCGhhbmdhYmxlGBIg",
-                  "ASgIEkUKBGhvb2sYEyABKAsyNy5PcGVuVGliaWFVbml0eS5Qcm90b2J1Zi5B",
-                  "cHBlYXJhbmNlcy5BcHBlYXJhbmNlRmxhZ0hvb2sSEgoKcm90YXRlYWJsZRgU",
-                  "IAEoCBJHCgVsaWdodBgVIAEoCzI4Lk9wZW5UaWJpYVVuaXR5LlByb3RvYnVm",
-                  "LkFwcGVhcmFuY2VzLkFwcGVhcmFuY2VGbGFnTGlnaHQSEAoIZG9udEhpZGUY",
-                  "FiABKAgSEwoLdHJhbnNsdWNlbnQYFyABKAgSSQoGb2Zmc2V0GBggASgLMjku",
+                  "aXR5LlByb3RvYnVmLkFwcGVhcmFuY2VzLkFwcGVhcmFuY2USaAoec3BlY2lh",
+                  "bF9tZWFuaW5nX2FwcGVhcmFuY2VfaURzGAUgASgLMkAuT3BlblRpYmlhVW5p",
+                  "dHkuUHJvdG9idWYuQXBwZWFyYW5jZXMuU3BlY2lhbE1lYW5pbmdBcHBlYXJh",
+                  "bmNlSWRzIrIBCgpBcHBlYXJhbmNlEgoKAmlEGAEgASgNEkUKDGZyYW1lX2dy",
+                  "b3VwcxgCIAMoCzIvLk9wZW5UaWJpYVVuaXR5LlByb3RvYnVmLkFwcGVhcmFu",
+                  "Y2VzLkZyYW1lR3JvdXASQwoFZmxhZ3MYAyABKAsyNC5PcGVuVGliaWFVbml0",
+                  "eS5Qcm90b2J1Zi5BcHBlYXJhbmNlcy5BcHBlYXJhbmNlRmxhZ3MSDAoEbmFt",
+                  "ZRgEIAEoCSKhDgoPQXBwZWFyYW5jZUZsYWdzEkkKBmdyb3VuZBgBIAEoCzI5",
+                  "Lk9wZW5UaWJpYVVuaXR5LlByb3RvYnVmLkFwcGVhcmFuY2VzLkFwcGVhcmFu",
+                  "Y2VGbGFnR3JvdW5kEhUKDWdyb3VuZF9ib3JkZXIYAiABKAgSDgoGYm90dG9t",
+                  "GAMgASgIEgsKA3RvcBgEIAEoCBIRCgljb250YWluZXIYBSABKAgSEQoJc3Rh",
+                  "Y2thYmxlGAYgASgIEhEKCWZvcmNlX3VzZRgHIAEoCBIRCgltdWx0aV91c2UY",
+                  "CCABKAgSTQoId3JpdGFibGUYCSABKAsyOy5PcGVuVGliaWFVbml0eS5Qcm90",
+                  "b2J1Zi5BcHBlYXJhbmNlcy5BcHBlYXJhbmNlRmxhZ1dyaXRhYmxlElYKDXdy",
+                  "aXRhYmxlX29uY2UYCiABKAsyPy5PcGVuVGliaWFVbml0eS5Qcm90b2J1Zi5B",
+                  "cHBlYXJhbmNlcy5BcHBlYXJhbmNlRmxhZ1dyaXRhYmxlT25jZRIXCg9mbHVp",
+                  "ZF9jb250YWluZXIYCyABKAgSDgoGc3BsYXNoGAwgASgIEhIKCnVucGFzc2Fi",
+                  "bGUYDSABKAgSEgoKdW5tb3ZlYWJsZRgOIAEoCBIPCgd1bnNpZ2h0GA8gASgI",
+                  "EhIKCmJsb2NrX3BhdGgYECABKAgSEgoKcGlja3VwYWJsZRgRIAEoCBIQCgho",
+                  "YW5nYWJsZRgSIAEoCBJFCgRob29rGBMgASgLMjcuT3BlblRpYmlhVW5pdHku",
+                  "UHJvdG9idWYuQXBwZWFyYW5jZXMuQXBwZWFyYW5jZUZsYWdIb29rEhIKCnJv",
+                  "dGF0ZWFibGUYFCABKAgSRwoFbGlnaHQYFSABKAsyOC5PcGVuVGliaWFVbml0",
+                  "eS5Qcm90b2J1Zi5BcHBlYXJhbmNlcy5BcHBlYXJhbmNlRmxhZ0xpZ2h0EhEK",
+                  "CWRvbnRfaGlkZRgWIAEoCBITCgt0cmFuc2x1Y2VudBgXIAEoCBJJCgZvZmZz",
+                  "ZXQYGCABKAsyOS5PcGVuVGliaWFVbml0eS5Qcm90b2J1Zi5BcHBlYXJhbmNl",
+                  "cy5BcHBlYXJhbmNlRmxhZ09mZnNldBJJCgZoZWlnaHQYGSABKAsyOS5PcGVu",
+                  "VGliaWFVbml0eS5Qcm90b2J1Zi5BcHBlYXJhbmNlcy5BcHBlYXJhbmNlRmxh",
+                  "Z0hlaWdodBIUCgxseWluZ19jb3Jwc2UYGiABKAgSFgoOYW5pbWF0ZV9hbHdh",
+                  "eXMYGyABKAgSSwoHYXV0b21hcBgcIAEoCzI6Lk9wZW5UaWJpYVVuaXR5LlBy",
+                  "b3RvYnVmLkFwcGVhcmFuY2VzLkFwcGVhcmFuY2VGbGFnQXV0b21hcBJOCgls",
+                  "ZW5zX2hlbHAYHSABKAsyOy5PcGVuVGliaWFVbml0eS5Qcm90b2J1Zi5BcHBl",
+                  "YXJhbmNlcy5BcHBlYXJhbmNlRmxhZ0xlbnNIZWxwEhMKC2Z1bGxfZ3JvdW5k",
+                  "GB4gASgIEhMKC2lnbm9yZV9sb29rGB8gASgIEksKB2Nsb3RoZXMYICABKAsy",
+                  "Oi5PcGVuVGliaWFVbml0eS5Qcm90b2J1Zi5BcHBlYXJhbmNlcy5BcHBlYXJh",
+                  "bmNlRmxhZ0Nsb3RoZXMSSQoGbWFya2V0GCEgASgLMjkuT3BlblRpYmlhVW5p",
+                  "dHkuUHJvdG9idWYuQXBwZWFyYW5jZXMuQXBwZWFyYW5jZUZsYWdNYXJrZXQS",
+                  "WAoOZGVmYXVsdF9hY3Rpb24YIiABKAsyQC5PcGVuVGliaWFVbml0eS5Qcm90",
+                  "b2J1Zi5BcHBlYXJhbmNlcy5BcHBlYXJhbmNlRmxhZ0RlZmF1bHRBY3Rpb24S",
+                  "CwoDdXNlGCMgASgIEhAKCHdyYXBhYmxlGCQgASgIEhMKC3VuX3dyYXBhYmxl",
+                  "GCUgASgIEhIKCnRvcF9lZmZlY3QYJiABKAgSTQoNbnBjX3NhbGVfZGF0YRgn",
+                  "IAMoCzI2Lk9wZW5UaWJpYVVuaXR5LlByb3RvYnVmLkFwcGVhcmFuY2VzLkFw",
+                  "cGVhcmFuY2VGbGFnTlBDEl0KEWNoYW5nZWRfdG9fZXhwaXJlGCggASgLMkIu",
                   "T3BlblRpYmlhVW5pdHkuUHJvdG9idWYuQXBwZWFyYW5jZXMuQXBwZWFyYW5j",
-                  "ZUZsYWdPZmZzZXQSTAoJZWxldmF0aW9uGBkgASgLMjkuT3BlblRpYmlhVW5p",
-                  "dHkuUHJvdG9idWYuQXBwZWFyYW5jZXMuQXBwZWFyYW5jZUZsYWdIZWlnaHQS",
-                  "EwoLbHlpbmdDb3Jwc2UYGiABKAgSFQoNYW5pbWF0ZUFsd2F5cxgbIAEoCBJL",
-                  "CgdtaW5pbWFwGBwgASgLMjouT3BlblRpYmlhVW5pdHkuUHJvdG9idWYuQXBw",
-                  "ZWFyYW5jZXMuQXBwZWFyYW5jZUZsYWdBdXRvbWFwEk0KCGxlbnNIZWxwGB0g",
-                  "ASgLMjsuT3BlblRpYmlhVW5pdHkuUHJvdG9idWYuQXBwZWFyYW5jZXMuQXBw",
-                  "ZWFyYW5jZUZsYWdMZW5zSGVscBISCgpmdWxsR3JvdW5kGB4gASgIEgwKBExv",
-                  "b2sYHyABKAgSSQoFY2xvdGgYICABKAsyOi5PcGVuVGliaWFVbml0eS5Qcm90",
-                  "b2J1Zi5BcHBlYXJhbmNlcy5BcHBlYXJhbmNlRmxhZ0Nsb3RoZXMSSQoGbWFy",
-                  "a2V0GCEgASgLMjkuT3BlblRpYmlhVW5pdHkuUHJvdG9idWYuQXBwZWFyYW5j",
-                  "ZXMuQXBwZWFyYW5jZUZsYWdNYXJrZXQSVwoNZGVmYXVsdEFjdGlvbhgiIAEo",
-                  "CzJALk9wZW5UaWJpYVVuaXR5LlByb3RvYnVmLkFwcGVhcmFuY2VzLkFwcGVh",
-                  "cmFuY2VGbGFnRGVmYXVsdEFjdGlvbhILCgN1c2UYIyABKAgSEAoId3JhcGFi",
-                  "bGUYJCABKAgSEgoKdW5XcmFwYWJsZRglIAEoCBIRCgl0b3BFZmZlY3QYJiAB",
-                  "KAgSSwoLbnBjU2FsZURhdGEYJyADKAsyNi5PcGVuVGliaWFVbml0eS5Qcm90",
-                  "b2J1Zi5BcHBlYXJhbmNlcy5BcHBlYXJhbmNlRmxhZ05QQxJbCg9jaGFuZ2Vk",
-                  "VG9FeHBpcmUYKCABKAsyQi5PcGVuVGliaWFVbml0eS5Qcm90b2J1Zi5BcHBl",
-                  "YXJhbmNlcy5BcHBlYXJhbmNlRmxhZ0NoYW5nZWRUb0V4cGlyZRIOCgZjb3Jw",
-                  "c2UYKSABKAgSFAoMcGxheWVyQ29ycHNlGCogASgIElUKDmN5Y2xvcGVkaWFJ",
-                  "dGVtGCsgASgLMj0uT3BlblRpYmlhVW5pdHkuUHJvdG9idWYuQXBwZWFyYW5j",
-                  "ZXMuQXBwZWFyYW5jZUZsYWdDeWNsb3BlZGlhEhQKC2Zsb29yQ2hhbmdlGPwB",
-                  "IAEoCBIYCg9ub01vdmVBbmltYXRpb24Y/QEgASgIEhAKB2NoYXJnZXMY/gEg",
-                  "ASgIIiUKFEFwcGVhcmFuY2VGbGFnR3JvdW5kEg0KBXNwZWVkGAEgASgNIi8K",
-                  "FkFwcGVhcmFuY2VGbGFnV3JpdGFibGUSFQoNbWF4VGV4dExlbmd0aBgBIAEo",
-                  "DSI3ChpBcHBlYXJhbmNlRmxhZ1dyaXRhYmxlT25jZRIZChFtYXhUZXh0TGVu",
-                  "Z3RoT25jZRgBIAEoDSJMChJBcHBlYXJhbmNlRmxhZ0hvb2sSNgoEdHlwZRgB",
-                  "IAEoDjIoLk9wZW5UaWJpYVVuaXR5LlByb3RvYnVmLlNoYXJlZC5Ib29rVHlw",
-                  "ZSI3ChNBcHBlYXJhbmNlRmxhZ0xpZ2h0EhEKCWludGVuc2l0eRgBIAEoDRIN",
-                  "CgVjb2xvchgCIAEoDSIsChRBcHBlYXJhbmNlRmxhZ09mZnNldBIJCgF4GAEg",
-                  "ASgNEgkKAXkYAiABKA0iKQoUQXBwZWFyYW5jZUZsYWdIZWlnaHQSEQoJZWxl",
-                  "dmF0aW9uGAEgASgNIiYKFUFwcGVhcmFuY2VGbGFnQXV0b21hcBINCgVjb2xv",
-                  "chgBIAEoDSIkChZBcHBlYXJhbmNlRmxhZ0xlbnNIZWxwEgoKAmlEGAEgASgN",
-                  "IiUKFUFwcGVhcmFuY2VGbGFnQ2xvdGhlcxIMCgRzbG90GAEgASgNIrsBChRB",
-                  "cHBlYXJhbmNlRmxhZ01hcmtldBI+CghjYXRlZ29yeRgBIAEoDjIsLk9wZW5U",
-                  "aWJpYVVuaXR5LlByb3RvYnVmLlNoYXJlZC5JdGVtQ2F0ZWdvcnkSFwoPdHJh",
-                  "ZGVBc09iamVjdElEGAIgASgNEhYKDnNob3dBc09iamVjdElEGAMgASgNEhwK",
-                  "FHJlc3RyaWN0VG9Qcm9mZXNzaW9uGAQgASgNEhQKDG1pbmltdW1MZXZlbBgF",
-                  "IAEoDSJbChtBcHBlYXJhbmNlRmxhZ0RlZmF1bHRBY3Rpb24SPAoGYWN0aW9u",
-                  "GAEgASgOMiwuT3BlblRpYmlhVW5pdHkuUHJvdG9idWYuU2hhcmVkLlBsYXll",
-                  "ckFjdGlvbiJYChFBcHBlYXJhbmNlRmxhZ05QQxIMCgRuYW1lGAEgASgJEhAK",
-                  "CGxvY2F0aW9uGAIgASgJEhEKCXNhbGVQcmljZRgDIAEoDRIQCghidXlQcmlj",
-                  "ZRgEIAEoDSI7Ch1BcHBlYXJhbmNlRmxhZ0NoYW5nZWRUb0V4cGlyZRIaChJm",
-                  "b3JtZXJPYmplY3RUeXBlSWQYASABKA0iMwoYQXBwZWFyYW5jZUZsYWdDeWNs",
-                  "b3BlZGlhEhcKD2N5Y2xvcGVkaWFfdHlwZRgBIAEoDSKlAQobU3BlY2lhbE1l",
-                  "YW5pbmdBcHBlYXJhbmNlSWRzEhIKCmdvbGRDb2luSWQYASABKA0SFgoOcGxh",
-                  "dGludW1Db2luSWQYAiABKA0SFQoNY3J5c3RhbENvaW5JZBgDIAEoDRITCgt0",
-                  "aWJpYUNvaWRJZBgEIAEoDRIXCg9zdGFtcGVkTGV0dGVySWQYBSABKA0SFQoN",
-                  "c3VwcGx5U3Rhc2hJZBgGIAEoDSKbAQoKRnJhbWVHcm91cBI8CgR0eXBlGAEg",
-                  "ASgOMi4uT3BlblRpYmlhVW5pdHkuUHJvdG9idWYuU2hhcmVkLkZyYW1lR3Jv",
-                  "dXBUeXBlEgoKAmlEGAIgASgNEkMKCnNwcml0ZUluZm8YAyABKAsyLy5PcGVu",
-                  "VGliaWFVbml0eS5Qcm90b2J1Zi5BcHBlYXJhbmNlcy5TcHJpdGVJbmZvIsIC",
-                  "CgpTcHJpdGVJbmZvEhQKDHBhdHRlcm5XaWR0aBgBIAEoDRIVCg1wYXR0ZXJu",
-                  "SGVpZ2h0GAIgASgNEhQKDHBhdHRlcm5EZXB0aBgDIAEoDRIOCgZsYXllcnMY",
-                  "BCABKA0SDgoGcGhhc2VzGAUgASgNEhEKCXNwcml0ZUlEcxgGIAMoDRIWCg5i",
-                  "b3VuZGluZ1NxdWFyZRgHIAEoDRJHCglhbmltYXRpb24YCCABKAsyNC5PcGVu",
-                  "VGliaWFVbml0eS5Qcm90b2J1Zi5BcHBlYXJhbmNlcy5TcHJpdGVBbmltYXRp",
-                  "b24SEAoIaXNPcGFxdWUYCSABKAgSSwoZYm91bmRpbmdCb3hlc1BlckRpcmVj",
-                  "dGlvbhgKIAMoCzIoLk9wZW5UaWJpYVVuaXR5LlByb3RvYnVmLkFwcGVhcmFu",
-                  "Y2VzLkJveCI6CgNCb3gSCQoBeBgBIAEoDRIJCgF5GAIgASgNEg0KBXdpZHRo",
-                  "GAMgASgNEg4KBmhlaWdodBgEIAEoDSL8AQoPU3ByaXRlQW5pbWF0aW9uEhkK",
-                  "EWRlZmF1bHRTdGFydFBoYXNlGAEgASgNEhQKDHN5bmNob3JuaXplZBgCIAEo",
-                  "CBIYChByYW5kb21TdGFydFBoYXNlGAMgASgIEkMKCGxvb3BUeXBlGAQgASgO",
-                  "MjEuT3BlblRpYmlhVW5pdHkuUHJvdG9idWYuU2hhcmVkLkFuaW1hdGlvbkxv",
-                  "b3BUeXBlEhEKCWxvb3BDb3VudBgFIAEoDRJGCgxzcHJpdGVQaGFzZXMYBiAD",
-                  "KAsyMC5PcGVuVGliaWFVbml0eS5Qcm90b2J1Zi5BcHBlYXJhbmNlcy5TcHJp",
-                  "dGVQaGFzZSI3CgtTcHJpdGVQaGFzZRITCgtkdXJhdGlvbk1pbhgBIAEoDRIT",
-                  "CgtkdXJhdGlvbk1heBgCIAEoDWIGcHJvdG8z"));
+                  "ZUZsYWdDaGFuZ2VkVG9FeHBpcmUSDgoGY29ycHNlGCkgASgIEhQKDHBsYXll",
+                  "ckNvcnBzZRgqIAEoCBJWCg9jeWNsb3BlZGlhX2l0ZW0YKyABKAsyPS5PcGVu",
+                  "VGliaWFVbml0eS5Qcm90b2J1Zi5BcHBlYXJhbmNlcy5BcHBlYXJhbmNlRmxh",
+                  "Z0N5Y2xvcGVkaWESFQoMZmxvb3JfY2hhbmdlGPwBIAEoCBIaChFub19tb3Zl",
+                  "X2FuaW1hdGlvbhj9ASABKAgSEAoHY2hhcmdlcxj+ASABKAgiJQoUQXBwZWFy",
+                  "YW5jZUZsYWdHcm91bmQSDQoFc3BlZWQYASABKA0iMQoWQXBwZWFyYW5jZUZs",
+                  "YWdXcml0YWJsZRIXCg9tYXhfdGV4dF9sZW5ndGgYASABKA0iOgoaQXBwZWFy",
+                  "YW5jZUZsYWdXcml0YWJsZU9uY2USHAoUbWF4X3RleHRfbGVuZ3RoX29uY2UY",
+                  "ASABKA0iTAoSQXBwZWFyYW5jZUZsYWdIb29rEjYKBHR5cGUYASABKA4yKC5P",
+                  "cGVuVGliaWFVbml0eS5Qcm90b2J1Zi5TaGFyZWQuSG9va1R5cGUiNwoTQXBw",
+                  "ZWFyYW5jZUZsYWdMaWdodBIRCglpbnRlbnNpdHkYASABKA0SDQoFY29sb3IY",
+                  "AiABKA0iLAoUQXBwZWFyYW5jZUZsYWdPZmZzZXQSCQoBeBgBIAEoDRIJCgF5",
+                  "GAIgASgNIikKFEFwcGVhcmFuY2VGbGFnSGVpZ2h0EhEKCWVsZXZhdGlvbhgB",
+                  "IAEoDSImChVBcHBlYXJhbmNlRmxhZ0F1dG9tYXASDQoFY29sb3IYASABKA0i",
+                  "JAoWQXBwZWFyYW5jZUZsYWdMZW5zSGVscBIKCgJpRBgBIAEoDSIlChVBcHBl",
+                  "YXJhbmNlRmxhZ0Nsb3RoZXMSDAoEc2xvdBgBIAEoDSL2AQoUQXBwZWFyYW5j",
+                  "ZUZsYWdNYXJrZXQSPgoIY2F0ZWdvcnkYASABKA4yLC5PcGVuVGliaWFVbml0",
+                  "eS5Qcm90b2J1Zi5TaGFyZWQuSXRlbUNhdGVnb3J5EhoKEnRyYWRlX2FzX29i",
+                  "amVjdF9pRBgCIAEoDRIZChFzaG93X2FzX29iamVjdF9pRBgDIAEoDRJQChZy",
+                  "ZXN0cmljdF90b19wcm9mZXNzaW9uGAQgAygOMjAuT3BlblRpYmlhVW5pdHku",
+                  "UHJvdG9idWYuU2hhcmVkLlBsYXllclByb2Zlc3Npb24SFQoNbWluaW11bV9s",
+                  "ZXZlbBgFIAEoDSJbChtBcHBlYXJhbmNlRmxhZ0RlZmF1bHRBY3Rpb24SPAoG",
+                  "YWN0aW9uGAEgASgOMiwuT3BlblRpYmlhVW5pdHkuUHJvdG9idWYuU2hhcmVk",
+                  "LlBsYXllckFjdGlvbiJaChFBcHBlYXJhbmNlRmxhZ05QQxIMCgRuYW1lGAEg",
+                  "ASgJEhAKCGxvY2F0aW9uGAIgASgJEhIKCnNhbGVfcHJpY2UYAyABKA0SEQoJ",
+                  "YnV5X3ByaWNlGAQgASgNIj4KHUFwcGVhcmFuY2VGbGFnQ2hhbmdlZFRvRXhw",
+                  "aXJlEh0KFWZvcm1lcl9vYmplY3RfdHlwZV9pRBgBIAEoDSIzChhBcHBlYXJh",
+                  "bmNlRmxhZ0N5Y2xvcGVkaWESFwoPY3ljbG9wZWRpYV90eXBlGAEgASgNIrEB",
+                  "ChtTcGVjaWFsTWVhbmluZ0FwcGVhcmFuY2VJZHMSFAoMZ29sZF9jb2luX2lk",
+                  "GAEgASgNEhgKEHBsYXRpbnVtX2NvaW5faWQYAiABKA0SFwoPY3J5c3RhbF9j",
+                  "b2luX2lkGAMgASgNEhUKDXRpYmlhX2NvaW5faWQYBCABKA0SGQoRc3RhbXBl",
+                  "ZF9sZXR0ZXJfaWQYBSABKA0SFwoPc3VwcGx5X3N0YXNoX2lkGAYgASgNIpwB",
+                  "CgpGcmFtZUdyb3VwEjwKBHR5cGUYASABKA4yLi5PcGVuVGliaWFVbml0eS5Q",
+                  "cm90b2J1Zi5TaGFyZWQuRnJhbWVHcm91cFR5cGUSCgoCaUQYAiABKA0SRAoL",
+                  "c3ByaXRlX2luZm8YAyABKAsyLy5PcGVuVGliaWFVbml0eS5Qcm90b2J1Zi5B",
+                  "cHBlYXJhbmNlcy5TcHJpdGVJbmZvIssCCgpTcHJpdGVJbmZvEhUKDXBhdHRl",
+                  "cm5fd2lkdGgYASABKA0SFgoOcGF0dGVybl9oZWlnaHQYAiABKA0SFQoNcGF0",
+                  "dGVybl9kZXB0aBgDIAEoDRIOCgZsYXllcnMYBCABKA0SDgoGcGhhc2VzGAUg",
+                  "ASgNEhIKCnNwcml0ZV9pRHMYBiADKA0SFwoPYm91bmRpbmdfc3F1YXJlGAcg",
+                  "ASgNEkcKCWFuaW1hdGlvbhgIIAEoCzI0Lk9wZW5UaWJpYVVuaXR5LlByb3Rv",
+                  "YnVmLkFwcGVhcmFuY2VzLlNwcml0ZUFuaW1hdGlvbhIRCglpc19vcGFxdWUY",
+                  "CSABKAgSTgocYm91bmRpbmdfYm94ZXNfcGVyX2RpcmVjdGlvbhgKIAMoCzIo",
+                  "Lk9wZW5UaWJpYVVuaXR5LlByb3RvYnVmLkFwcGVhcmFuY2VzLkJveCI6CgNC",
+                  "b3gSCQoBeBgBIAEoDRIJCgF5GAIgASgNEg0KBXdpZHRoGAMgASgNEg4KBmhl",
+                  "aWdodBgEIAEoDSKDAgoPU3ByaXRlQW5pbWF0aW9uEhsKE2RlZmF1bHRfc3Rh",
+                  "cnRfcGhhc2UYASABKA0SFAoMc3luY2hyb25pemVkGAIgASgIEhoKEnJhbmRv",
+                  "bV9zdGFydF9waGFzZRgDIAEoCBJECglsb29wX3R5cGUYBCABKA4yMS5PcGVu",
+                  "VGliaWFVbml0eS5Qcm90b2J1Zi5TaGFyZWQuQW5pbWF0aW9uTG9vcFR5cGUS",
+                  "EgoKbG9vcF9jb3VudBgFIAEoDRJHCg1zcHJpdGVfcGhhc2VzGAYgAygLMjAu",
+                  "T3BlblRpYmlhVW5pdHkuUHJvdG9idWYuQXBwZWFyYW5jZXMuU3ByaXRlUGhh",
+                  "c2UiNwoLU3ByaXRlUGhhc2USEwoLZHVyYXRpb25NaW4YASABKA0SEwoLZHVy",
+                  "YXRpb25NYXgYAiABKA1iBnByb3RvMw=="));
             descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
                 new pbr::FileDescriptor[] { global::OpenTibiaUnity.Protobuf.Shared.SharedReflection.Descriptor, },
                 new pbr::GeneratedClrTypeInfo(null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.Appearances), global::OpenTibiaUnity.Protobuf.Appearances.Appearances.Parser, new[]{ "Objects", "Outfits", "Effects", "Missles", "SpecialMeaningAppearanceIds" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.Appearances), global::OpenTibiaUnity.Protobuf.Appearances.Appearances.Parser, new[]{ "Objects", "Outfits", "Effects", "Missles", "SpecialMeaningAppearanceIDs" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.Appearance), global::OpenTibiaUnity.Protobuf.Appearances.Appearance.Parser, new[]{ "ID", "FrameGroups", "Flags", "Name" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlags), global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlags.Parser, new[]{ "Ground", "GroundBorder", "Bottom", "Top", "Container", "Stackable", "ForceUse", "MultiUse", "Writable", "WritableOnce", "FluidContainer", "Splash", "Unpassable", "Unmoveable", "Unsight", "BlockPath", "Pickupable", "Hangable", "Hook", "Rotateable", "Light", "DontHide", "Translucent", "Offset", "Elevation", "LyingCorpse", "AnimateAlways", "Minimap", "LensHelp", "FullGround", "Look", "Cloth", "Market", "DefaultAction", "Use", "Wrapable", "UnWrapable", "TopEffect", "NpcSaleData", "ChangedToExpire", "Corpse", "PlayerCorpse", "CyclopediaItem", "FloorChange", "NoMoveAnimation", "Charges" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlags), global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlags.Parser, new[]{ "Ground", "GroundBorder", "Bottom", "Top", "Container", "Stackable", "ForceUse", "MultiUse", "Writable", "WritableOnce", "FluidContainer", "Splash", "Unpassable", "Unmoveable", "Unsight", "BlockPath", "Pickupable", "Hangable", "Hook", "Rotateable", "Light", "DontHide", "Translucent", "Offset", "Height", "LyingCorpse", "AnimateAlways", "Automap", "LensHelp", "FullGround", "IgnoreLook", "Clothes", "Market", "DefaultAction", "Use", "Wrapable", "UnWrapable", "TopEffect", "NpcSaleData", "ChangedToExpire", "Corpse", "PlayerCorpse", "CyclopediaItem", "FloorChange", "NoMoveAnimation", "Charges" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagGround), global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagGround.Parser, new[]{ "Speed" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagWritable), global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagWritable.Parser, new[]{ "MaxTextLength" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagWritableOnce), global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagWritableOnce.Parser, new[]{ "MaxTextLengthOnce" }, null, null, null),
@@ -144,13 +147,13 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagMarket), global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagMarket.Parser, new[]{ "Category", "TradeAsObjectID", "ShowAsObjectID", "RestrictToProfession", "MinimumLevel" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagDefaultAction), global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagDefaultAction.Parser, new[]{ "Action" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagNPC), global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagNPC.Parser, new[]{ "Name", "Location", "SalePrice", "BuyPrice" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagChangedToExpire), global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagChangedToExpire.Parser, new[]{ "FormerObjectTypeId" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagChangedToExpire), global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagChangedToExpire.Parser, new[]{ "FormerObjectTypeID" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagCyclopedia), global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagCyclopedia.Parser, new[]{ "CyclopediaType" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.SpecialMeaningAppearanceIds), global::OpenTibiaUnity.Protobuf.Appearances.SpecialMeaningAppearanceIds.Parser, new[]{ "GoldCoinId", "PlatinumCoinId", "CrystalCoinId", "TibiaCoidId", "StampedLetterId", "SupplyStashId" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.SpecialMeaningAppearanceIds), global::OpenTibiaUnity.Protobuf.Appearances.SpecialMeaningAppearanceIds.Parser, new[]{ "GoldCoinId", "PlatinumCoinId", "CrystalCoinId", "TibiaCoinId", "StampedLetterId", "SupplyStashId" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.FrameGroup), global::OpenTibiaUnity.Protobuf.Appearances.FrameGroup.Parser, new[]{ "Type", "ID", "SpriteInfo" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.SpriteInfo), global::OpenTibiaUnity.Protobuf.Appearances.SpriteInfo.Parser, new[]{ "PatternWidth", "PatternHeight", "PatternDepth", "Layers", "Phases", "SpriteIDs", "BoundingSquare", "Animation", "IsOpaque", "BoundingBoxesPerDirection" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.Box), global::OpenTibiaUnity.Protobuf.Appearances.Box.Parser, new[]{ "X", "Y", "Width", "Height" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.SpriteAnimation), global::OpenTibiaUnity.Protobuf.Appearances.SpriteAnimation.Parser, new[]{ "DefaultStartPhase", "Synchornized", "RandomStartPhase", "LoopType", "LoopCount", "SpritePhases" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.SpriteAnimation), global::OpenTibiaUnity.Protobuf.Appearances.SpriteAnimation.Parser, new[]{ "DefaultStartPhase", "Synchronized", "RandomStartPhase", "LoopType", "LoopCount", "SpritePhases" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::OpenTibiaUnity.Protobuf.Appearances.SpritePhase), global::OpenTibiaUnity.Protobuf.Appearances.SpritePhase.Parser, new[]{ "DurationMin", "DurationMax" }, null, null, null)
                 }));
         }
@@ -188,7 +191,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             outfits_ = other.outfits_.Clone();
             effects_ = other.effects_.Clone();
             missles_ = other.missles_.Clone();
-            specialMeaningAppearanceIds_ = other.specialMeaningAppearanceIds_ != null ? other.specialMeaningAppearanceIds_.Clone() : null;
+            specialMeaningAppearanceIDs_ = other.specialMeaningAppearanceIDs_ != null ? other.specialMeaningAppearanceIDs_.Clone() : null;
             _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
         }
 
@@ -237,14 +240,14 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             get { return missles_; }
         }
 
-        /// <summary>Field number for the "specialMeaningAppearanceIds" field.</summary>
-        public const int SpecialMeaningAppearanceIdsFieldNumber = 5;
-        private global::OpenTibiaUnity.Protobuf.Appearances.SpecialMeaningAppearanceIds specialMeaningAppearanceIds_;
+        /// <summary>Field number for the "special_meaning_appearance_iDs" field.</summary>
+        public const int SpecialMeaningAppearanceIDsFieldNumber = 5;
+        private global::OpenTibiaUnity.Protobuf.Appearances.SpecialMeaningAppearanceIds specialMeaningAppearanceIDs_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public global::OpenTibiaUnity.Protobuf.Appearances.SpecialMeaningAppearanceIds SpecialMeaningAppearanceIds {
-            get { return specialMeaningAppearanceIds_; }
+        public global::OpenTibiaUnity.Protobuf.Appearances.SpecialMeaningAppearanceIds SpecialMeaningAppearanceIDs {
+            get { return specialMeaningAppearanceIDs_; }
             set {
-                specialMeaningAppearanceIds_ = value;
+                specialMeaningAppearanceIDs_ = value;
             }
         }
 
@@ -265,7 +268,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (!outfits_.Equals(other.outfits_)) return false;
             if (!effects_.Equals(other.effects_)) return false;
             if (!missles_.Equals(other.missles_)) return false;
-            if (!object.Equals(SpecialMeaningAppearanceIds, other.SpecialMeaningAppearanceIds)) return false;
+            if (!object.Equals(SpecialMeaningAppearanceIDs, other.SpecialMeaningAppearanceIDs)) return false;
             return Equals(_unknownFields, other._unknownFields);
         }
 
@@ -276,7 +279,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             hash ^= outfits_.GetHashCode();
             hash ^= effects_.GetHashCode();
             hash ^= missles_.GetHashCode();
-            if (specialMeaningAppearanceIds_ != null) hash ^= SpecialMeaningAppearanceIds.GetHashCode();
+            if (specialMeaningAppearanceIDs_ != null) hash ^= SpecialMeaningAppearanceIDs.GetHashCode();
             if (_unknownFields != null) {
                 hash ^= _unknownFields.GetHashCode();
             }
@@ -294,9 +297,9 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             outfits_.WriteTo(output, _repeated_outfits_codec);
             effects_.WriteTo(output, _repeated_effects_codec);
             missles_.WriteTo(output, _repeated_missles_codec);
-            if (specialMeaningAppearanceIds_ != null) {
+            if (specialMeaningAppearanceIDs_ != null) {
                 output.WriteRawTag(42);
-                output.WriteMessage(SpecialMeaningAppearanceIds);
+                output.WriteMessage(SpecialMeaningAppearanceIDs);
             }
             if (_unknownFields != null) {
                 _unknownFields.WriteTo(output);
@@ -310,8 +313,8 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             size += outfits_.CalculateSize(_repeated_outfits_codec);
             size += effects_.CalculateSize(_repeated_effects_codec);
             size += missles_.CalculateSize(_repeated_missles_codec);
-            if (specialMeaningAppearanceIds_ != null) {
-                size += 1 + pb::CodedOutputStream.ComputeMessageSize(SpecialMeaningAppearanceIds);
+            if (specialMeaningAppearanceIDs_ != null) {
+                size += 1 + pb::CodedOutputStream.ComputeMessageSize(SpecialMeaningAppearanceIDs);
             }
             if (_unknownFields != null) {
                 size += _unknownFields.CalculateSize();
@@ -328,11 +331,11 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             outfits_.Add(other.outfits_);
             effects_.Add(other.effects_);
             missles_.Add(other.missles_);
-            if (other.specialMeaningAppearanceIds_ != null) {
-                if (specialMeaningAppearanceIds_ == null) {
-                    SpecialMeaningAppearanceIds = new global::OpenTibiaUnity.Protobuf.Appearances.SpecialMeaningAppearanceIds();
+            if (other.specialMeaningAppearanceIDs_ != null) {
+                if (specialMeaningAppearanceIDs_ == null) {
+                    SpecialMeaningAppearanceIDs = new global::OpenTibiaUnity.Protobuf.Appearances.SpecialMeaningAppearanceIds();
                 }
-                SpecialMeaningAppearanceIds.MergeFrom(other.SpecialMeaningAppearanceIds);
+                SpecialMeaningAppearanceIDs.MergeFrom(other.SpecialMeaningAppearanceIDs);
             }
             _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
         }
@@ -362,10 +365,10 @@ namespace OpenTibiaUnity.Protobuf.Appearances
                         break;
                     }
                     case 42: {
-                        if (specialMeaningAppearanceIds_ == null) {
-                            SpecialMeaningAppearanceIds = new global::OpenTibiaUnity.Protobuf.Appearances.SpecialMeaningAppearanceIds();
+                        if (specialMeaningAppearanceIDs_ == null) {
+                            SpecialMeaningAppearanceIDs = new global::OpenTibiaUnity.Protobuf.Appearances.SpecialMeaningAppearanceIds();
                         }
-                        input.ReadMessage(SpecialMeaningAppearanceIds);
+                        input.ReadMessage(SpecialMeaningAppearanceIDs);
                         break;
                     }
                 }
@@ -423,7 +426,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "frameGroups" field.</summary>
+        /// <summary>Field number for the "frame_groups" field.</summary>
         public const int FrameGroupsFieldNumber = 2;
         private static readonly pb::FieldCodec<global::OpenTibiaUnity.Protobuf.Appearances.FrameGroup> _repeated_frameGroups_codec
             = pb::FieldCodec.ForMessage(18, global::OpenTibiaUnity.Protobuf.Appearances.FrameGroup.Parser);
@@ -636,14 +639,14 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             dontHide_ = other.dontHide_;
             translucent_ = other.translucent_;
             offset_ = other.offset_ != null ? other.offset_.Clone() : null;
-            elevation_ = other.elevation_ != null ? other.elevation_.Clone() : null;
+            height_ = other.height_ != null ? other.height_.Clone() : null;
             lyingCorpse_ = other.lyingCorpse_;
             animateAlways_ = other.animateAlways_;
-            minimap_ = other.minimap_ != null ? other.minimap_.Clone() : null;
+            automap_ = other.automap_ != null ? other.automap_.Clone() : null;
             lensHelp_ = other.lensHelp_ != null ? other.lensHelp_.Clone() : null;
             fullGround_ = other.fullGround_;
-            look_ = other.look_;
-            cloth_ = other.cloth_ != null ? other.cloth_.Clone() : null;
+            ignoreLook_ = other.ignoreLook_;
+            clothes_ = other.clothes_ != null ? other.clothes_.Clone() : null;
             market_ = other.market_ != null ? other.market_.Clone() : null;
             defaultAction_ = other.defaultAction_ != null ? other.defaultAction_.Clone() : null;
             use_ = other.use_;
@@ -677,7 +680,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "groundBorder" field.</summary>
+        /// <summary>Field number for the "ground_border" field.</summary>
         public const int GroundBorderFieldNumber = 2;
         private bool groundBorder_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -732,7 +735,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "forceUse" field.</summary>
+        /// <summary>Field number for the "force_use" field.</summary>
         public const int ForceUseFieldNumber = 7;
         private bool forceUse_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -743,7 +746,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "multiUse" field.</summary>
+        /// <summary>Field number for the "multi_use" field.</summary>
         public const int MultiUseFieldNumber = 8;
         private bool multiUse_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -765,7 +768,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "writableOnce" field.</summary>
+        /// <summary>Field number for the "writable_once" field.</summary>
         public const int WritableOnceFieldNumber = 10;
         private global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagWritableOnce writableOnce_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -776,7 +779,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "fluidContainer" field.</summary>
+        /// <summary>Field number for the "fluid_container" field.</summary>
         public const int FluidContainerFieldNumber = 11;
         private bool fluidContainer_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -831,7 +834,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "blockPath" field.</summary>
+        /// <summary>Field number for the "block_path" field.</summary>
         public const int BlockPathFieldNumber = 16;
         private bool blockPath_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -897,7 +900,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "dontHide" field.</summary>
+        /// <summary>Field number for the "dont_hide" field.</summary>
         public const int DontHideFieldNumber = 22;
         private bool dontHide_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -930,18 +933,18 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "elevation" field.</summary>
-        public const int ElevationFieldNumber = 25;
-        private global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagHeight elevation_;
+        /// <summary>Field number for the "height" field.</summary>
+        public const int HeightFieldNumber = 25;
+        private global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagHeight height_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagHeight Elevation {
-            get { return elevation_; }
+        public global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagHeight Height {
+            get { return height_; }
             set {
-                elevation_ = value;
+                height_ = value;
             }
         }
 
-        /// <summary>Field number for the "lyingCorpse" field.</summary>
+        /// <summary>Field number for the "lying_corpse" field.</summary>
         public const int LyingCorpseFieldNumber = 26;
         private bool lyingCorpse_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -952,7 +955,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "animateAlways" field.</summary>
+        /// <summary>Field number for the "animate_always" field.</summary>
         public const int AnimateAlwaysFieldNumber = 27;
         private bool animateAlways_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -963,18 +966,18 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "minimap" field.</summary>
-        public const int MinimapFieldNumber = 28;
-        private global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagAutomap minimap_;
+        /// <summary>Field number for the "automap" field.</summary>
+        public const int AutomapFieldNumber = 28;
+        private global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagAutomap automap_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagAutomap Minimap {
-            get { return minimap_; }
+        public global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagAutomap Automap {
+            get { return automap_; }
             set {
-                minimap_ = value;
+                automap_ = value;
             }
         }
 
-        /// <summary>Field number for the "lensHelp" field.</summary>
+        /// <summary>Field number for the "lens_help" field.</summary>
         public const int LensHelpFieldNumber = 29;
         private global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagLensHelp lensHelp_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -985,7 +988,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "fullGround" field.</summary>
+        /// <summary>Field number for the "full_ground" field.</summary>
         public const int FullGroundFieldNumber = 30;
         private bool fullGround_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -996,25 +999,25 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "Look" field.</summary>
-        public const int LookFieldNumber = 31;
-        private bool look_;
+        /// <summary>Field number for the "ignore_look" field.</summary>
+        public const int IgnoreLookFieldNumber = 31;
+        private bool ignoreLook_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public bool Look {
-            get { return look_; }
+        public bool IgnoreLook {
+            get { return ignoreLook_; }
             set {
-                look_ = value;
+                ignoreLook_ = value;
             }
         }
 
-        /// <summary>Field number for the "cloth" field.</summary>
-        public const int ClothFieldNumber = 32;
-        private global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagClothes cloth_;
+        /// <summary>Field number for the "clothes" field.</summary>
+        public const int ClothesFieldNumber = 32;
+        private global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagClothes clothes_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagClothes Cloth {
-            get { return cloth_; }
+        public global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagClothes Clothes {
+            get { return clothes_; }
             set {
-                cloth_ = value;
+                clothes_ = value;
             }
         }
 
@@ -1029,7 +1032,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "defaultAction" field.</summary>
+        /// <summary>Field number for the "default_action" field.</summary>
         public const int DefaultActionFieldNumber = 34;
         private global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagDefaultAction defaultAction_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1062,7 +1065,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "unWrapable" field.</summary>
+        /// <summary>Field number for the "un_wrapable" field.</summary>
         public const int UnWrapableFieldNumber = 37;
         private bool unWrapable_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1073,7 +1076,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "topEffect" field.</summary>
+        /// <summary>Field number for the "top_effect" field.</summary>
         public const int TopEffectFieldNumber = 38;
         private bool topEffect_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1084,7 +1087,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "npcSaleData" field.</summary>
+        /// <summary>Field number for the "npc_sale_data" field.</summary>
         public const int NpcSaleDataFieldNumber = 39;
         private static readonly pb::FieldCodec<global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagNPC> _repeated_npcSaleData_codec
             = pb::FieldCodec.ForMessage(314, global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagNPC.Parser);
@@ -1094,7 +1097,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             get { return npcSaleData_; }
         }
 
-        /// <summary>Field number for the "changedToExpire" field.</summary>
+        /// <summary>Field number for the "changed_to_expire" field.</summary>
         public const int ChangedToExpireFieldNumber = 40;
         private global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagChangedToExpire changedToExpire_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1127,7 +1130,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "cyclopediaItem" field.</summary>
+        /// <summary>Field number for the "cyclopedia_item" field.</summary>
         public const int CyclopediaItemFieldNumber = 43;
         private global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagCyclopedia cyclopediaItem_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1138,7 +1141,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "floorChange" field.</summary>
+        /// <summary>Field number for the "floor_change" field.</summary>
         public const int FloorChangeFieldNumber = 252;
         private bool floorChange_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1149,7 +1152,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "noMoveAnimation" field.</summary>
+        /// <summary>Field number for the "no_move_animation" field.</summary>
         public const int NoMoveAnimationFieldNumber = 253;
         private bool noMoveAnimation_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1208,14 +1211,14 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (DontHide != other.DontHide) return false;
             if (Translucent != other.Translucent) return false;
             if (!object.Equals(Offset, other.Offset)) return false;
-            if (!object.Equals(Elevation, other.Elevation)) return false;
+            if (!object.Equals(Height, other.Height)) return false;
             if (LyingCorpse != other.LyingCorpse) return false;
             if (AnimateAlways != other.AnimateAlways) return false;
-            if (!object.Equals(Minimap, other.Minimap)) return false;
+            if (!object.Equals(Automap, other.Automap)) return false;
             if (!object.Equals(LensHelp, other.LensHelp)) return false;
             if (FullGround != other.FullGround) return false;
-            if (Look != other.Look) return false;
-            if (!object.Equals(Cloth, other.Cloth)) return false;
+            if (IgnoreLook != other.IgnoreLook) return false;
+            if (!object.Equals(Clothes, other.Clothes)) return false;
             if (!object.Equals(Market, other.Market)) return false;
             if (!object.Equals(DefaultAction, other.DefaultAction)) return false;
             if (Use != other.Use) return false;
@@ -1260,14 +1263,14 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (DontHide != false) hash ^= DontHide.GetHashCode();
             if (Translucent != false) hash ^= Translucent.GetHashCode();
             if (offset_ != null) hash ^= Offset.GetHashCode();
-            if (elevation_ != null) hash ^= Elevation.GetHashCode();
+            if (height_ != null) hash ^= Height.GetHashCode();
             if (LyingCorpse != false) hash ^= LyingCorpse.GetHashCode();
             if (AnimateAlways != false) hash ^= AnimateAlways.GetHashCode();
-            if (minimap_ != null) hash ^= Minimap.GetHashCode();
+            if (automap_ != null) hash ^= Automap.GetHashCode();
             if (lensHelp_ != null) hash ^= LensHelp.GetHashCode();
             if (FullGround != false) hash ^= FullGround.GetHashCode();
-            if (Look != false) hash ^= Look.GetHashCode();
-            if (cloth_ != null) hash ^= Cloth.GetHashCode();
+            if (IgnoreLook != false) hash ^= IgnoreLook.GetHashCode();
+            if (clothes_ != null) hash ^= Clothes.GetHashCode();
             if (market_ != null) hash ^= Market.GetHashCode();
             if (defaultAction_ != null) hash ^= DefaultAction.GetHashCode();
             if (Use != false) hash ^= Use.GetHashCode();
@@ -1391,9 +1394,9 @@ namespace OpenTibiaUnity.Protobuf.Appearances
                 output.WriteRawTag(194, 1);
                 output.WriteMessage(Offset);
             }
-            if (elevation_ != null) {
+            if (height_ != null) {
                 output.WriteRawTag(202, 1);
-                output.WriteMessage(Elevation);
+                output.WriteMessage(Height);
             }
             if (LyingCorpse != false) {
                 output.WriteRawTag(208, 1);
@@ -1403,9 +1406,9 @@ namespace OpenTibiaUnity.Protobuf.Appearances
                 output.WriteRawTag(216, 1);
                 output.WriteBool(AnimateAlways);
             }
-            if (minimap_ != null) {
+            if (automap_ != null) {
                 output.WriteRawTag(226, 1);
-                output.WriteMessage(Minimap);
+                output.WriteMessage(Automap);
             }
             if (lensHelp_ != null) {
                 output.WriteRawTag(234, 1);
@@ -1415,13 +1418,13 @@ namespace OpenTibiaUnity.Protobuf.Appearances
                 output.WriteRawTag(240, 1);
                 output.WriteBool(FullGround);
             }
-            if (Look != false) {
+            if (IgnoreLook != false) {
                 output.WriteRawTag(248, 1);
-                output.WriteBool(Look);
+                output.WriteBool(IgnoreLook);
             }
-            if (cloth_ != null) {
+            if (clothes_ != null) {
                 output.WriteRawTag(130, 2);
-                output.WriteMessage(Cloth);
+                output.WriteMessage(Clothes);
             }
             if (market_ != null) {
                 output.WriteRawTag(138, 2);
@@ -1556,8 +1559,8 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (offset_ != null) {
                 size += 2 + pb::CodedOutputStream.ComputeMessageSize(Offset);
             }
-            if (elevation_ != null) {
-                size += 2 + pb::CodedOutputStream.ComputeMessageSize(Elevation);
+            if (height_ != null) {
+                size += 2 + pb::CodedOutputStream.ComputeMessageSize(Height);
             }
             if (LyingCorpse != false) {
                 size += 2 + 1;
@@ -1565,8 +1568,8 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (AnimateAlways != false) {
                 size += 2 + 1;
             }
-            if (minimap_ != null) {
-                size += 2 + pb::CodedOutputStream.ComputeMessageSize(Minimap);
+            if (automap_ != null) {
+                size += 2 + pb::CodedOutputStream.ComputeMessageSize(Automap);
             }
             if (lensHelp_ != null) {
                 size += 2 + pb::CodedOutputStream.ComputeMessageSize(LensHelp);
@@ -1574,11 +1577,11 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (FullGround != false) {
                 size += 2 + 1;
             }
-            if (Look != false) {
+            if (IgnoreLook != false) {
                 size += 2 + 1;
             }
-            if (cloth_ != null) {
-                size += 2 + pb::CodedOutputStream.ComputeMessageSize(Cloth);
+            if (clothes_ != null) {
+                size += 2 + pb::CodedOutputStream.ComputeMessageSize(Clothes);
             }
             if (market_ != null) {
                 size += 2 + pb::CodedOutputStream.ComputeMessageSize(Market);
@@ -1721,11 +1724,11 @@ namespace OpenTibiaUnity.Protobuf.Appearances
                 }
                 Offset.MergeFrom(other.Offset);
             }
-            if (other.elevation_ != null) {
-                if (elevation_ == null) {
-                    Elevation = new global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagHeight();
+            if (other.height_ != null) {
+                if (height_ == null) {
+                    Height = new global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagHeight();
                 }
-                Elevation.MergeFrom(other.Elevation);
+                Height.MergeFrom(other.Height);
             }
             if (other.LyingCorpse != false) {
                 LyingCorpse = other.LyingCorpse;
@@ -1733,11 +1736,11 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (other.AnimateAlways != false) {
                 AnimateAlways = other.AnimateAlways;
             }
-            if (other.minimap_ != null) {
-                if (minimap_ == null) {
-                    Minimap = new global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagAutomap();
+            if (other.automap_ != null) {
+                if (automap_ == null) {
+                    Automap = new global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagAutomap();
                 }
-                Minimap.MergeFrom(other.Minimap);
+                Automap.MergeFrom(other.Automap);
             }
             if (other.lensHelp_ != null) {
                 if (lensHelp_ == null) {
@@ -1748,14 +1751,14 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (other.FullGround != false) {
                 FullGround = other.FullGround;
             }
-            if (other.Look != false) {
-                Look = other.Look;
+            if (other.IgnoreLook != false) {
+                IgnoreLook = other.IgnoreLook;
             }
-            if (other.cloth_ != null) {
-                if (cloth_ == null) {
-                    Cloth = new global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagClothes();
+            if (other.clothes_ != null) {
+                if (clothes_ == null) {
+                    Clothes = new global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagClothes();
                 }
-                Cloth.MergeFrom(other.Cloth);
+                Clothes.MergeFrom(other.Clothes);
             }
             if (other.market_ != null) {
                 if (market_ == null) {
@@ -1935,10 +1938,10 @@ namespace OpenTibiaUnity.Protobuf.Appearances
                         break;
                     }
                     case 202: {
-                        if (elevation_ == null) {
-                            Elevation = new global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagHeight();
+                        if (height_ == null) {
+                            Height = new global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagHeight();
                         }
-                        input.ReadMessage(Elevation);
+                        input.ReadMessage(Height);
                         break;
                     }
                     case 208: {
@@ -1950,10 +1953,10 @@ namespace OpenTibiaUnity.Protobuf.Appearances
                         break;
                     }
                     case 226: {
-                        if (minimap_ == null) {
-                            Minimap = new global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagAutomap();
+                        if (automap_ == null) {
+                            Automap = new global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagAutomap();
                         }
-                        input.ReadMessage(Minimap);
+                        input.ReadMessage(Automap);
                         break;
                     }
                     case 234: {
@@ -1968,14 +1971,14 @@ namespace OpenTibiaUnity.Protobuf.Appearances
                         break;
                     }
                     case 248: {
-                        Look = input.ReadBool();
+                        IgnoreLook = input.ReadBool();
                         break;
                     }
                     case 258: {
-                        if (cloth_ == null) {
-                            Cloth = new global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagClothes();
+                        if (clothes_ == null) {
+                            Clothes = new global::OpenTibiaUnity.Protobuf.Appearances.AppearanceFlagClothes();
                         }
-                        input.ReadMessage(Cloth);
+                        input.ReadMessage(Clothes);
                         break;
                     }
                     case 266: {
@@ -2217,7 +2220,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             return new AppearanceFlagWritable(this);
         }
 
-        /// <summary>Field number for the "maxTextLength" field.</summary>
+        /// <summary>Field number for the "max_text_length" field.</summary>
         public const int MaxTextLengthFieldNumber = 1;
         private uint maxTextLength_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2347,7 +2350,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             return new AppearanceFlagWritableOnce(this);
         }
 
-        /// <summary>Field number for the "maxTextLengthOnce" field.</summary>
+        /// <summary>Field number for the "max_text_length_once" field.</summary>
         public const int MaxTextLengthOnceFieldNumber = 1;
         private uint maxTextLengthOnce_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3437,7 +3440,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             category_ = other.category_;
             tradeAsObjectID_ = other.tradeAsObjectID_;
             showAsObjectID_ = other.showAsObjectID_;
-            restrictToProfession_ = other.restrictToProfession_;
+            restrictToProfession_ = other.restrictToProfession_.Clone();
             minimumLevel_ = other.minimumLevel_;
             _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
         }
@@ -3458,7 +3461,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "tradeAsObjectID" field.</summary>
+        /// <summary>Field number for the "trade_as_object_iD" field.</summary>
         public const int TradeAsObjectIDFieldNumber = 2;
         private uint tradeAsObjectID_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3469,7 +3472,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "showAsObjectID" field.</summary>
+        /// <summary>Field number for the "show_as_object_iD" field.</summary>
         public const int ShowAsObjectIDFieldNumber = 3;
         private uint showAsObjectID_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3480,18 +3483,17 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "restrictToProfession" field.</summary>
+        /// <summary>Field number for the "restrict_to_profession" field.</summary>
         public const int RestrictToProfessionFieldNumber = 4;
-        private uint restrictToProfession_;
+        private static readonly pb::FieldCodec<global::OpenTibiaUnity.Protobuf.Shared.PlayerProfession> _repeated_restrictToProfession_codec
+            = pb::FieldCodec.ForEnum(34, x => (int)x, x => (global::OpenTibiaUnity.Protobuf.Shared.PlayerProfession)x);
+        private readonly pbc::RepeatedField<global::OpenTibiaUnity.Protobuf.Shared.PlayerProfession> restrictToProfession_ = new pbc::RepeatedField<global::OpenTibiaUnity.Protobuf.Shared.PlayerProfession>();
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public uint RestrictToProfession {
+        public pbc::RepeatedField<global::OpenTibiaUnity.Protobuf.Shared.PlayerProfession> RestrictToProfession {
             get { return restrictToProfession_; }
-            set {
-                restrictToProfession_ = value;
-            }
         }
 
-        /// <summary>Field number for the "minimumLevel" field.</summary>
+        /// <summary>Field number for the "minimum_level" field.</summary>
         public const int MinimumLevelFieldNumber = 5;
         private uint minimumLevel_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3518,7 +3520,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (Category != other.Category) return false;
             if (TradeAsObjectID != other.TradeAsObjectID) return false;
             if (ShowAsObjectID != other.ShowAsObjectID) return false;
-            if (RestrictToProfession != other.RestrictToProfession) return false;
+            if (!restrictToProfession_.Equals(other.restrictToProfession_)) return false;
             if (MinimumLevel != other.MinimumLevel) return false;
             return Equals(_unknownFields, other._unknownFields);
         }
@@ -3529,7 +3531,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (Category != 0) hash ^= Category.GetHashCode();
             if (TradeAsObjectID != 0) hash ^= TradeAsObjectID.GetHashCode();
             if (ShowAsObjectID != 0) hash ^= ShowAsObjectID.GetHashCode();
-            if (RestrictToProfession != 0) hash ^= RestrictToProfession.GetHashCode();
+            hash ^= restrictToProfession_.GetHashCode();
             if (MinimumLevel != 0) hash ^= MinimumLevel.GetHashCode();
             if (_unknownFields != null) {
                 hash ^= _unknownFields.GetHashCode();
@@ -3556,10 +3558,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
                 output.WriteRawTag(24);
                 output.WriteUInt32(ShowAsObjectID);
             }
-            if (RestrictToProfession != 0) {
-                output.WriteRawTag(32);
-                output.WriteUInt32(RestrictToProfession);
-            }
+            restrictToProfession_.WriteTo(output, _repeated_restrictToProfession_codec);
             if (MinimumLevel != 0) {
                 output.WriteRawTag(40);
                 output.WriteUInt32(MinimumLevel);
@@ -3581,9 +3580,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (ShowAsObjectID != 0) {
                 size += 1 + pb::CodedOutputStream.ComputeUInt32Size(ShowAsObjectID);
             }
-            if (RestrictToProfession != 0) {
-                size += 1 + pb::CodedOutputStream.ComputeUInt32Size(RestrictToProfession);
-            }
+            size += restrictToProfession_.CalculateSize(_repeated_restrictToProfession_codec);
             if (MinimumLevel != 0) {
                 size += 1 + pb::CodedOutputStream.ComputeUInt32Size(MinimumLevel);
             }
@@ -3607,9 +3604,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (other.ShowAsObjectID != 0) {
                 ShowAsObjectID = other.ShowAsObjectID;
             }
-            if (other.RestrictToProfession != 0) {
-                RestrictToProfession = other.RestrictToProfession;
-            }
+            restrictToProfession_.Add(other.restrictToProfession_);
             if (other.MinimumLevel != 0) {
                 MinimumLevel = other.MinimumLevel;
             }
@@ -3636,8 +3631,9 @@ namespace OpenTibiaUnity.Protobuf.Appearances
                         ShowAsObjectID = input.ReadUInt32();
                         break;
                     }
+                    case 34:
                     case 32: {
-                        RestrictToProfession = input.ReadUInt32();
+                        restrictToProfession_.AddEntriesFrom(input, _repeated_restrictToProfession_codec);
                         break;
                     }
                     case 40: {
@@ -3840,7 +3836,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "salePrice" field.</summary>
+        /// <summary>Field number for the "sale_price" field.</summary>
         public const int SalePriceFieldNumber = 3;
         private uint salePrice_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3851,7 +3847,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "buyPrice" field.</summary>
+        /// <summary>Field number for the "buy_price" field.</summary>
         public const int BuyPriceFieldNumber = 4;
         private uint buyPrice_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4020,7 +4016,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         public AppearanceFlagChangedToExpire(AppearanceFlagChangedToExpire other) : this() {
-            formerObjectTypeId_ = other.formerObjectTypeId_;
+            formerObjectTypeID_ = other.formerObjectTypeID_;
             _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
         }
 
@@ -4029,14 +4025,14 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             return new AppearanceFlagChangedToExpire(this);
         }
 
-        /// <summary>Field number for the "formerObjectTypeId" field.</summary>
-        public const int FormerObjectTypeIdFieldNumber = 1;
-        private uint formerObjectTypeId_;
+        /// <summary>Field number for the "former_object_type_iD" field.</summary>
+        public const int FormerObjectTypeIDFieldNumber = 1;
+        private uint formerObjectTypeID_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public uint FormerObjectTypeId {
-            get { return formerObjectTypeId_; }
+        public uint FormerObjectTypeID {
+            get { return formerObjectTypeID_; }
             set {
-                formerObjectTypeId_ = value;
+                formerObjectTypeID_ = value;
             }
         }
 
@@ -4053,14 +4049,14 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (ReferenceEquals(other, this)) {
                 return true;
             }
-            if (FormerObjectTypeId != other.FormerObjectTypeId) return false;
+            if (FormerObjectTypeID != other.FormerObjectTypeID) return false;
             return Equals(_unknownFields, other._unknownFields);
         }
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         public override int GetHashCode() {
             int hash = 1;
-            if (FormerObjectTypeId != 0) hash ^= FormerObjectTypeId.GetHashCode();
+            if (FormerObjectTypeID != 0) hash ^= FormerObjectTypeID.GetHashCode();
             if (_unknownFields != null) {
                 hash ^= _unknownFields.GetHashCode();
             }
@@ -4074,9 +4070,9 @@ namespace OpenTibiaUnity.Protobuf.Appearances
 
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         public void WriteTo(pb::CodedOutputStream output) {
-            if (FormerObjectTypeId != 0) {
+            if (FormerObjectTypeID != 0) {
                 output.WriteRawTag(8);
-                output.WriteUInt32(FormerObjectTypeId);
+                output.WriteUInt32(FormerObjectTypeID);
             }
             if (_unknownFields != null) {
                 _unknownFields.WriteTo(output);
@@ -4086,8 +4082,8 @@ namespace OpenTibiaUnity.Protobuf.Appearances
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         public int CalculateSize() {
             int size = 0;
-            if (FormerObjectTypeId != 0) {
-                size += 1 + pb::CodedOutputStream.ComputeUInt32Size(FormerObjectTypeId);
+            if (FormerObjectTypeID != 0) {
+                size += 1 + pb::CodedOutputStream.ComputeUInt32Size(FormerObjectTypeID);
             }
             if (_unknownFields != null) {
                 size += _unknownFields.CalculateSize();
@@ -4100,8 +4096,8 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (other == null) {
                 return;
             }
-            if (other.FormerObjectTypeId != 0) {
-                FormerObjectTypeId = other.FormerObjectTypeId;
+            if (other.FormerObjectTypeID != 0) {
+                FormerObjectTypeID = other.FormerObjectTypeID;
             }
             _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
         }
@@ -4115,7 +4111,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
                         _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
                         break;
                     case 8: {
-                        FormerObjectTypeId = input.ReadUInt32();
+                        FormerObjectTypeID = input.ReadUInt32();
                         break;
                     }
                 }
@@ -4283,7 +4279,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             goldCoinId_ = other.goldCoinId_;
             platinumCoinId_ = other.platinumCoinId_;
             crystalCoinId_ = other.crystalCoinId_;
-            tibiaCoidId_ = other.tibiaCoidId_;
+            tibiaCoinId_ = other.tibiaCoinId_;
             stampedLetterId_ = other.stampedLetterId_;
             supplyStashId_ = other.supplyStashId_;
             _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
@@ -4294,7 +4290,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             return new SpecialMeaningAppearanceIds(this);
         }
 
-        /// <summary>Field number for the "goldCoinId" field.</summary>
+        /// <summary>Field number for the "gold_coin_id" field.</summary>
         public const int GoldCoinIdFieldNumber = 1;
         private uint goldCoinId_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4305,7 +4301,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "platinumCoinId" field.</summary>
+        /// <summary>Field number for the "platinum_coin_id" field.</summary>
         public const int PlatinumCoinIdFieldNumber = 2;
         private uint platinumCoinId_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4316,7 +4312,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "crystalCoinId" field.</summary>
+        /// <summary>Field number for the "crystal_coin_id" field.</summary>
         public const int CrystalCoinIdFieldNumber = 3;
         private uint crystalCoinId_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4327,18 +4323,18 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "tibiaCoidId" field.</summary>
-        public const int TibiaCoidIdFieldNumber = 4;
-        private uint tibiaCoidId_;
+        /// <summary>Field number for the "tibia_coin_id" field.</summary>
+        public const int TibiaCoinIdFieldNumber = 4;
+        private uint tibiaCoinId_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public uint TibiaCoidId {
-            get { return tibiaCoidId_; }
+        public uint TibiaCoinId {
+            get { return tibiaCoinId_; }
             set {
-                tibiaCoidId_ = value;
+                tibiaCoinId_ = value;
             }
         }
 
-        /// <summary>Field number for the "stampedLetterId" field.</summary>
+        /// <summary>Field number for the "stamped_letter_id" field.</summary>
         public const int StampedLetterIdFieldNumber = 5;
         private uint stampedLetterId_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4349,7 +4345,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "supplyStashId" field.</summary>
+        /// <summary>Field number for the "supply_stash_id" field.</summary>
         public const int SupplyStashIdFieldNumber = 6;
         private uint supplyStashId_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4376,7 +4372,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (GoldCoinId != other.GoldCoinId) return false;
             if (PlatinumCoinId != other.PlatinumCoinId) return false;
             if (CrystalCoinId != other.CrystalCoinId) return false;
-            if (TibiaCoidId != other.TibiaCoidId) return false;
+            if (TibiaCoinId != other.TibiaCoinId) return false;
             if (StampedLetterId != other.StampedLetterId) return false;
             if (SupplyStashId != other.SupplyStashId) return false;
             return Equals(_unknownFields, other._unknownFields);
@@ -4388,7 +4384,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (GoldCoinId != 0) hash ^= GoldCoinId.GetHashCode();
             if (PlatinumCoinId != 0) hash ^= PlatinumCoinId.GetHashCode();
             if (CrystalCoinId != 0) hash ^= CrystalCoinId.GetHashCode();
-            if (TibiaCoidId != 0) hash ^= TibiaCoidId.GetHashCode();
+            if (TibiaCoinId != 0) hash ^= TibiaCoinId.GetHashCode();
             if (StampedLetterId != 0) hash ^= StampedLetterId.GetHashCode();
             if (SupplyStashId != 0) hash ^= SupplyStashId.GetHashCode();
             if (_unknownFields != null) {
@@ -4416,9 +4412,9 @@ namespace OpenTibiaUnity.Protobuf.Appearances
                 output.WriteRawTag(24);
                 output.WriteUInt32(CrystalCoinId);
             }
-            if (TibiaCoidId != 0) {
+            if (TibiaCoinId != 0) {
                 output.WriteRawTag(32);
-                output.WriteUInt32(TibiaCoidId);
+                output.WriteUInt32(TibiaCoinId);
             }
             if (StampedLetterId != 0) {
                 output.WriteRawTag(40);
@@ -4445,8 +4441,8 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (CrystalCoinId != 0) {
                 size += 1 + pb::CodedOutputStream.ComputeUInt32Size(CrystalCoinId);
             }
-            if (TibiaCoidId != 0) {
-                size += 1 + pb::CodedOutputStream.ComputeUInt32Size(TibiaCoidId);
+            if (TibiaCoinId != 0) {
+                size += 1 + pb::CodedOutputStream.ComputeUInt32Size(TibiaCoinId);
             }
             if (StampedLetterId != 0) {
                 size += 1 + pb::CodedOutputStream.ComputeUInt32Size(StampedLetterId);
@@ -4474,8 +4470,8 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (other.CrystalCoinId != 0) {
                 CrystalCoinId = other.CrystalCoinId;
             }
-            if (other.TibiaCoidId != 0) {
-                TibiaCoidId = other.TibiaCoidId;
+            if (other.TibiaCoinId != 0) {
+                TibiaCoinId = other.TibiaCoinId;
             }
             if (other.StampedLetterId != 0) {
                 StampedLetterId = other.StampedLetterId;
@@ -4507,7 +4503,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
                         break;
                     }
                     case 32: {
-                        TibiaCoidId = input.ReadUInt32();
+                        TibiaCoinId = input.ReadUInt32();
                         break;
                     }
                     case 40: {
@@ -4583,7 +4579,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "spriteInfo" field.</summary>
+        /// <summary>Field number for the "sprite_info" field.</summary>
         public const int SpriteInfoFieldNumber = 3;
         private global::OpenTibiaUnity.Protobuf.Appearances.SpriteInfo spriteInfo_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4760,7 +4756,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             return new SpriteInfo(this);
         }
 
-        /// <summary>Field number for the "patternWidth" field.</summary>
+        /// <summary>Field number for the "pattern_width" field.</summary>
         public const int PatternWidthFieldNumber = 1;
         private uint patternWidth_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4771,7 +4767,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "patternHeight" field.</summary>
+        /// <summary>Field number for the "pattern_height" field.</summary>
         public const int PatternHeightFieldNumber = 2;
         private uint patternHeight_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4782,7 +4778,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "patternDepth" field.</summary>
+        /// <summary>Field number for the "pattern_depth" field.</summary>
         public const int PatternDepthFieldNumber = 3;
         private uint patternDepth_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4818,7 +4814,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "spriteIDs" field.</summary>
+        /// <summary>Field number for the "sprite_iDs" field.</summary>
         public const int SpriteIDsFieldNumber = 6;
         private static readonly pb::FieldCodec<uint> _repeated_spriteIDs_codec
             = pb::FieldCodec.ForUInt32(50);
@@ -4828,7 +4824,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             get { return spriteIDs_; }
         }
 
-        /// <summary>Field number for the "boundingSquare" field.</summary>
+        /// <summary>Field number for the "bounding_square" field.</summary>
         public const int BoundingSquareFieldNumber = 7;
         private uint boundingSquare_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4850,7 +4846,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "isOpaque" field.</summary>
+        /// <summary>Field number for the "is_opaque" field.</summary>
         public const int IsOpaqueFieldNumber = 9;
         private bool isOpaque_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4861,7 +4857,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "boundingBoxesPerDirection" field.</summary>
+        /// <summary>Field number for the "bounding_boxes_per_direction" field.</summary>
         public const int BoundingBoxesPerDirectionFieldNumber = 10;
         private static readonly pb::FieldCodec<global::OpenTibiaUnity.Protobuf.Appearances.Box> _repeated_boundingBoxesPerDirection_codec
             = pb::FieldCodec.ForMessage(82, global::OpenTibiaUnity.Protobuf.Appearances.Box.Parser);
@@ -5333,7 +5329,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
         public SpriteAnimation(SpriteAnimation other) : this() {
             defaultStartPhase_ = other.defaultStartPhase_;
-            synchornized_ = other.synchornized_;
+            synchronized_ = other.synchronized_;
             randomStartPhase_ = other.randomStartPhase_;
             loopType_ = other.loopType_;
             loopCount_ = other.loopCount_;
@@ -5346,7 +5342,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             return new SpriteAnimation(this);
         }
 
-        /// <summary>Field number for the "defaultStartPhase" field.</summary>
+        /// <summary>Field number for the "default_start_phase" field.</summary>
         public const int DefaultStartPhaseFieldNumber = 1;
         private uint defaultStartPhase_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -5357,18 +5353,18 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "synchornized" field.</summary>
-        public const int SynchornizedFieldNumber = 2;
-        private bool synchornized_;
+        /// <summary>Field number for the "synchronized" field.</summary>
+        public const int SynchronizedFieldNumber = 2;
+        private bool synchronized_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-        public bool Synchornized {
-            get { return synchornized_; }
+        public bool Synchronized {
+            get { return synchronized_; }
             set {
-                synchornized_ = value;
+                synchronized_ = value;
             }
         }
 
-        /// <summary>Field number for the "randomStartPhase" field.</summary>
+        /// <summary>Field number for the "random_start_phase" field.</summary>
         public const int RandomStartPhaseFieldNumber = 3;
         private bool randomStartPhase_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -5379,7 +5375,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "loopType" field.</summary>
+        /// <summary>Field number for the "loop_type" field.</summary>
         public const int LoopTypeFieldNumber = 4;
         private global::OpenTibiaUnity.Protobuf.Shared.AnimationLoopType loopType_ = 0;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -5390,7 +5386,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "loopCount" field.</summary>
+        /// <summary>Field number for the "loop_count" field.</summary>
         public const int LoopCountFieldNumber = 5;
         private uint loopCount_;
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -5401,7 +5397,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             }
         }
 
-        /// <summary>Field number for the "spritePhases" field.</summary>
+        /// <summary>Field number for the "sprite_phases" field.</summary>
         public const int SpritePhasesFieldNumber = 6;
         private static readonly pb::FieldCodec<global::OpenTibiaUnity.Protobuf.Appearances.SpritePhase> _repeated_spritePhases_codec
             = pb::FieldCodec.ForMessage(50, global::OpenTibiaUnity.Protobuf.Appearances.SpritePhase.Parser);
@@ -5425,7 +5421,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
                 return true;
             }
             if (DefaultStartPhase != other.DefaultStartPhase) return false;
-            if (Synchornized != other.Synchornized) return false;
+            if (Synchronized != other.Synchronized) return false;
             if (RandomStartPhase != other.RandomStartPhase) return false;
             if (LoopType != other.LoopType) return false;
             if (LoopCount != other.LoopCount) return false;
@@ -5437,7 +5433,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
         public override int GetHashCode() {
             int hash = 1;
             if (DefaultStartPhase != 0) hash ^= DefaultStartPhase.GetHashCode();
-            if (Synchornized != false) hash ^= Synchornized.GetHashCode();
+            if (Synchronized != false) hash ^= Synchronized.GetHashCode();
             if (RandomStartPhase != false) hash ^= RandomStartPhase.GetHashCode();
             if (LoopType != 0) hash ^= LoopType.GetHashCode();
             if (LoopCount != 0) hash ^= LoopCount.GetHashCode();
@@ -5459,9 +5455,9 @@ namespace OpenTibiaUnity.Protobuf.Appearances
                 output.WriteRawTag(8);
                 output.WriteUInt32(DefaultStartPhase);
             }
-            if (Synchornized != false) {
+            if (Synchronized != false) {
                 output.WriteRawTag(16);
-                output.WriteBool(Synchornized);
+                output.WriteBool(Synchronized);
             }
             if (RandomStartPhase != false) {
                 output.WriteRawTag(24);
@@ -5487,7 +5483,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (DefaultStartPhase != 0) {
                 size += 1 + pb::CodedOutputStream.ComputeUInt32Size(DefaultStartPhase);
             }
-            if (Synchornized != false) {
+            if (Synchronized != false) {
                 size += 1 + 1;
             }
             if (RandomStartPhase != false) {
@@ -5514,8 +5510,8 @@ namespace OpenTibiaUnity.Protobuf.Appearances
             if (other.DefaultStartPhase != 0) {
                 DefaultStartPhase = other.DefaultStartPhase;
             }
-            if (other.Synchornized != false) {
-                Synchornized = other.Synchornized;
+            if (other.Synchronized != false) {
+                Synchronized = other.Synchronized;
             }
             if (other.RandomStartPhase != false) {
                 RandomStartPhase = other.RandomStartPhase;
@@ -5543,7 +5539,7 @@ namespace OpenTibiaUnity.Protobuf.Appearances
                         break;
                     }
                     case 16: {
-                        Synchornized = input.ReadBool();
+                        Synchronized = input.ReadBool();
                         break;
                     }
                     case 24: {

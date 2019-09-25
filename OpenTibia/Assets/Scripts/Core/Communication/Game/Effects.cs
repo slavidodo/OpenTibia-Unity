@@ -4,7 +4,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
 {
     public partial class ProtocolGame : Internal.Protocol
     {
-        private void ParseAmbientLight(Internal.ByteArray message) {
+        private void ParseAmbientLight(Internal.CommunicationStream message) {
             int intensity = message.ReadUnsignedByte();
             int rawColor = message.ReadUnsignedByte();
 
@@ -12,7 +12,51 @@ namespace OpenTibiaUnity.Core.Communication.Game
             WorldMapStorage.SetAmbientLight(color, intensity);
         }
 
-        private void ParseGraphicalEffect(Internal.ByteArray message) {
+        private void ParseGraphicalEffects(Internal.CommunicationStream message) {
+            var initialPosition = message.ReadPosition();
+            int modifier = message.ReadUnsignedByte();
+            
+            Appearances.AppearanceInstance effect = null;
+            byte effectId = 0;
+
+            var fromPosition = initialPosition;
+            ushort unclampedOffset = 0;
+            while ((modifier & 7) != 0) {
+                if (modifier == 1) {
+                    unclampedOffset = message.ReadUnsignedShort();
+                    int offset = unclampedOffset % 256;
+                    fromPosition.x += offset % Constants.MapSizeX;
+                    fromPosition.y += offset / Constants.MapSizeX;
+                }
+
+                // the effect is far away from the initial position
+                while (fromPosition.x - initialPosition.x >= Constants.MapSizeX) {
+                    fromPosition.x -= Constants.MapSizeX;
+                    fromPosition.y++;
+                }
+
+                if ((unclampedOffset >= 1024 && modifier != 3) || modifier == 4) {
+                    effectId = message.ReadUnsignedByte();
+                    int deltaX = message.ReadSignedByte();
+                    int deltaY = message.ReadSignedByte();
+                    var toPosition = new Vector3Int(fromPosition.x + deltaX, fromPosition.y + deltaY, fromPosition.z);
+                    effect = AppearanceStorage.CreateMissileInstance(effectId, fromPosition, toPosition);
+                } else if (unclampedOffset >= 768 || modifier == 3) {
+                    effectId = message.ReadUnsignedByte();
+                    effect = AppearanceStorage.CreateEffectInstance(effectId);
+                } else {
+                    throw new System.NotImplementedException();
+                }
+
+                if (!effect)
+                    throw new System.Exception("ProtocolGame.ParseGraphicalEffects: Unknown effect: " + effectId);
+
+                WorldMapStorage.AppendEffect(fromPosition, effect);
+                modifier = message.ReadUnsignedByte();
+            }
+        }
+
+        private void ParseGraphicalEffect(Internal.CommunicationStream message) {
             var position = message.ReadPosition();
             byte effectId = message.ReadUnsignedByte();
 
@@ -23,11 +67,11 @@ namespace OpenTibiaUnity.Core.Communication.Game
             WorldMapStorage.AppendEffect(position, effect);
         }
 
-        private void ParseRemoveGraphicalEffect(Internal.ByteArray message) {
+        private void ParseRemoveGraphicalEffect(Internal.CommunicationStream message) {
 
         }
 
-        private void ParseTextEffect(Internal.ByteArray message) {
+        private void ParseTextEffect(Internal.CommunicationStream message) {
             var position = message.ReadPosition();
             int color = message.ReadUnsignedByte();
             string text = message.ReadString();
@@ -35,7 +79,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             WorldMapStorage.AddTextualEffect(position, color, text);
         }
 
-        private void ParseMissleEffect(Internal.ByteArray message) {
+        private void ParseMissleEffect(Internal.CommunicationStream message) {
             var fromPosition = message.ReadPosition();
             var toPosition = message.ReadPosition();
             byte missleId = message.ReadUnsignedByte();

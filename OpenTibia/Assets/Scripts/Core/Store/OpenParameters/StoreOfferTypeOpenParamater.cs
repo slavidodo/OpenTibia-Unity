@@ -12,8 +12,8 @@ namespace OpenTibiaUnity.Core.Store.OpenParameters
             _type = addition;
         }
 
-        public void WriteToMessage(ByteArray message) {
-            message.WriteEnum(_type);
+        public void WriteTo(CommunicationStream stream) {
+            stream.WriteEnum(_type);
         }
     }
 }

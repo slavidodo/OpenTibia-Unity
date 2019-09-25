@@ -7,7 +7,7 @@ namespace OpenTibiaUnity.Core.Communication.Internal
         protected Connection _connection;
         
         protected NetworkPacketWriter _packetWriter;
-        protected ByteArray _inputBuffer;
+        protected CommunicationStream _inputStream;
         protected NetworkPacketReader _packetReader;
         protected Cryptography.XTEA _xTEA;
 
@@ -20,8 +20,8 @@ namespace OpenTibiaUnity.Core.Communication.Internal
         }
 
         private void CreateNewInputBuffer() {
-            _inputBuffer = new ByteArray();
-            _packetReader = new NetworkPacketReader(_inputBuffer);
+            _inputStream = new CommunicationStream();
+            _packetReader = new NetworkPacketReader(_inputStream);
         }
 
         public virtual void Connect(string address, int port) {
@@ -77,15 +77,15 @@ namespace OpenTibiaUnity.Core.Communication.Internal
         protected virtual void OnConnectionTerminated() { }
         protected virtual void OnConnectionError(string error, bool disconnecting = false) { }
         protected virtual void OnConnectionSocketError(System.Net.Sockets.SocketError e, string error) { }
-        protected virtual void OnConnectionReceived(ByteArray message) {
+        protected virtual void OnConnectionReceived(CommunicationStream stream) {
             try {
                 if (!_connection || !_connection.Established || _connection.Terminated)
                     return;
-
-                _inputBuffer.Position = Connection.PacketLengthPos;
-                _inputBuffer.Length = 0;
-                _inputBuffer.WriteBytes(message.Buffer, 0, message.Length);
-                _inputBuffer.Position = 0;
+                
+                _inputStream.SetLength(0);
+                _inputStream.Position = Connection.PacketLengthPos;
+                stream.CopyTo(_inputStream);
+                _inputStream.Position = 0;
 
                 if (!_packetReader.PreparePacket())
                     OnConnectionError("Protocol.OnConnectionReceived: Failed to prepare packet.");
@@ -93,7 +93,7 @@ namespace OpenTibiaUnity.Core.Communication.Internal
                 OnConnectionError("Protocol.OnConnectionReceived: Failed to prepare packet.");
             }
         }
-        protected virtual void OnConnectionSent(ByteArray message) { }
+        protected virtual void OnConnectionSent(CommunicationStream stream) { }
 
         protected virtual void OnPacketReaderReady() {
             OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {

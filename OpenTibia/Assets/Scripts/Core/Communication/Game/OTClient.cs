@@ -2,7 +2,7 @@
 {
     public partial class ProtocolGame : Internal.Protocol
     {
-        private void ParseOtclientExtendedOpcode(Internal.ByteArray message) {
+        private void ParseOtclientExtendedOpcode(Internal.CommunicationStream message) {
             message.ReadUnsignedByte();
             message.ReadString();
         }

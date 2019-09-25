@@ -21,11 +21,11 @@
 
     public static class Login
     {
-        public static void WriteEnum(this Internal.ByteArray message, LoginclientMessageType messageType, int offset = 0) {
+        public static void WriteEnum(this Internal.CommunicationStream message, LoginclientMessageType messageType, int offset = 0) {
             message.WriteEnum(messageType, offset);
         }
 
-        public static LoginserverMessageType ReadLoginType(this Internal.ByteArray message) {
+        public static LoginserverMessageType ReadLoginType(this Internal.CommunicationStream message) {
             return message.ReadEnum<LoginserverMessageType>();
         }
     }

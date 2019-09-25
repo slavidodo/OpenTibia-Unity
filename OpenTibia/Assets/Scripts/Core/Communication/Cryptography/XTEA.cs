@@ -20,22 +20,22 @@ namespace OpenTibiaUnity.Core.Communication.Cryptography
             _key[3] = (uint)_random.Next();
         }
 
-        public void WriteKey(Internal.ByteArray message) {
+        public void WriteKey(Internal.CommunicationStream message) {
             message.WriteUnsignedInt(_key[0]);
             message.WriteUnsignedInt(_key[1]);
             message.WriteUnsignedInt(_key[2]);
             message.WriteUnsignedInt(_key[3]);
         }
 
-        public int Encrypt(Internal.ByteArray message, int offset = 0, int length = int.MaxValue) {
-            length = Math.Min(length, message.Length - offset);
+        public int Encrypt(Internal.CommunicationStream message, int offset = 0, int length = int.MaxValue) {
+            length = Math.Min(length, (int)message.Length - offset);
             message.Position = offset + length;
 
             int encryptedLength = (int)(Math.Floor((length + BlockSize - 1) / (double)BlockSize) * BlockSize);
             if (encryptedLength > length) {
                 byte[] tmp = new byte[encryptedLength - length];
                 _random.NextBytes(tmp);
-                message.WriteBytes(tmp);
+                message.Write(tmp, 0, tmp.Length);
                 length = encryptedLength;
             }
 
@@ -62,8 +62,8 @@ namespace OpenTibiaUnity.Core.Communication.Cryptography
             return length;
         }
 
-        public int Decrypt(Internal.ByteArray message, int offset = 0, int length = int.MaxValue) {
-            length = Math.Min(length, message.Length - offset);
+        public int Decrypt(Internal.CommunicationStream message, int offset = 0, int length = int.MaxValue) {
+            length = Math.Min(length, (int)message.Length - offset);
             length -= length % BlockSize;
             int i = offset;
             while (i < offset + length) {
@@ -91,7 +91,7 @@ namespace OpenTibiaUnity.Core.Communication.Cryptography
             if (lengthDelta > 0 || -lengthDelta > length)
                 return 0;
 
-            message.Length += lengthDelta;
+            message.SetLength(message.Length + lengthDelta);
             return length;
         }
     }

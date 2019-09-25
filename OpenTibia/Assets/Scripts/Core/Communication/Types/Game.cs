@@ -72,7 +72,8 @@
         QuickLoot = 143,
         LootContainer = 144,
         QuickLootBlackWhitelist = 145,
-        // empty (146~149)
+        OpenDepotSearch = 146,
+        // empty (147~149)
         Talk = 150,
         GetChannels = 151,
         JoinChannel = 152,
@@ -274,8 +275,8 @@
         TournamentLeaderboard = 197, // 12.15
         // empty (198~199)
         OutfitDialog = 200,
-        MessageExivaSuppressed = 201,
-        SupplyStash = 202,
+        MessageExivaSuppressed = 201, // 11.50
+        UpdateExivaOptions = 202, // 11.50
         TransactionDetails = 203, // 12.03~
         ImpactTracking = 204,
         MarketStatistics = 205,
@@ -297,7 +298,7 @@
         AutomapFlag_CyclopediaMapData = 221, // this packet was extended with cyclopedia map implementation
         DailyRewardCollectionState = 222,
         CreditBalance = 223, // store balance
-        StoreOffer = 224,
+        StoreError = 224,
         RequestPurchaseData = 225,
         OpenRewardWall = 226,
         CloseRewardWall = 227,

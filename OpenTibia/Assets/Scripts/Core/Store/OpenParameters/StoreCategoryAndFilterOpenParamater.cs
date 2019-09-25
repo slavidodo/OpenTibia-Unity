@@ -10,7 +10,7 @@
             _categoryAndFilter = categoryAndFilter;
         }
 
-        public void WriteToMessage(Communication.Internal.ByteArray message) {
+        public void WriteTo(Communication.Internal.CommunicationStream message) {
             message.WriteString(_categoryAndFilter.Category);
             message.WriteString(_categoryAndFilter.Filter);
         }

@@ -2,17 +2,17 @@
 {
     public partial class ProtocolGame : Internal.Protocol
     {
-        private void ParseRestingAreaState(Internal.ByteArray message) {
-            message.ReadBoolean(); // unknown
-            message.ReadBoolean(); // unknown
-            message.ReadString();
+        private void ParseRestingAreaState(Internal.CommunicationStream message) {
+            bool inRestingArea = message.ReadBoolean();
+            bool restingBonusActive = message.ReadBoolean();
+            string description = message.ReadString();
         }
 
-        private void ParseDailyRewardCollectionState(Internal.ByteArray message) {
-            message.ReadUnsignedInt(); // collection tokens
+        private void ParseDailyRewardCollectionState(Internal.CommunicationStream message) {
+            message.ReadUnsignedByte(); // collection tokens
         }
 
-        private void ParseOpenRewardWall(Internal.ByteArray message) {
+        private void ParseOpenRewardWall(Internal.CommunicationStream message) {
             message.ReadBoolean(); // openedFromShrine
             message.ReadUnsignedInt(); // timestamp for the player to be able to take the reward (0 = able)
             message.ReadUnsignedByte(); // currentRewardIndex
@@ -26,11 +26,11 @@
             message.ReadUnsignedShort(); // unknown
         }
 
-        private void ParseCloseRewardWall(Internal.ByteArray message) {
+        private void ParseCloseRewardWall(Internal.CommunicationStream message) {
 
         }
 
-        private void ParseDailyRewardBasic(Internal.ByteArray message) {
+        private void ParseDailyRewardBasic(Internal.CommunicationStream message) {
             int count = message.ReadUnsignedByte();
             for (int i = 0; i < count; i++) {
                 var freeReward = ReadDailyReward(message);
@@ -46,7 +46,7 @@
             message.ReadUnsignedByte(); // activeBonuses
         }
 
-        private void ParseDailyRewardHistory(Internal.ByteArray message) {
+        private void ParseDailyRewardHistory(Internal.CommunicationStream message) {
             int count = message.ReadUnsignedByte();
             for (int i = 0; i < count; i++) {
                 var timestamp = message.ReadUnsignedInt(); // timestamp
@@ -56,7 +56,7 @@
             }
         }
 
-        private DailyReward.DailyReward ReadDailyReward(Internal.ByteArray message) {
+        private DailyReward.DailyReward ReadDailyReward(Internal.CommunicationStream message) {
             var rewardType = message.ReadEnum<DailyRewardType>();
             var reward = new DailyReward.DailyReward(rewardType);
 

@@ -2,7 +2,7 @@
 {
     public partial class ProtocolGame : Internal.Protocol
     {
-        private void ParseInspectionList(Internal.ByteArray message) {
+        private void ParseInspectionList(Internal.CommunicationStream message) {
             bool isPlayer = message.ReadBoolean();
 
             int size = message.ReadUnsignedByte();
@@ -23,6 +23,22 @@
                     string description = message.ReadString();
                 }
             }
+
+            if (isPlayer) {
+                string playerName = message.ReadString();
+                var outfit = ReadCreatureOutfit(message);
+
+                int details = message.ReadUnsignedByte();
+                for (int j = 0; j < details; j++) {
+                    string name = message.ReadString();
+                    string description = message.ReadString();
+                }
+            }
+        }
+
+        private void ParseInspectionState(Internal.CommunicationStream message) {
+            uint creatureId = message.ReadUnsignedInt();
+            byte state = message.ReadUnsignedByte();
         }
     }
 }

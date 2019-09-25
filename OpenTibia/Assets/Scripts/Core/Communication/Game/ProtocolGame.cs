@@ -4,7 +4,7 @@ using UnityEngine.Events;
 
 namespace OpenTibiaUnity.Core.Communication.Game
 {
-    using Inflater = Compression.Inflater3;
+    using Inflater = Compression.Inflater;
 
     public enum ConnectionState
     {
@@ -74,6 +74,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
             BuildMessageModesMap(OpenTibiaUnity.GameManager.ClientVersion);
             SetConnectionState(ConnectionState.ConnectingStage1);
+
             base.Connect(address, port);
         }
 
@@ -88,6 +89,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
         protected override void OnConnectionEstablished() {
             var gameManager = OpenTibiaUnity.GameManager;
+
+            Inflater.Cleanup();
 
             // if proxy is required, send identification to the server
             // and it will do the rest for us
@@ -150,8 +153,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 _firstReceived = true;
 
                 if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameMessageSizeCheck)) {
-                    int size = _inputBuffer.ReadUnsignedShort();
-                    int unread = _inputBuffer.BytesAvailable;
+                    int size = _inputStream.ReadUnsignedShort();
+                    int unread = _inputStream.BytesAvailable;
 
                     if (unread != size) {
                         OnConnectionError(string.Format("ProtocolGame.OnCommunicationDataReady: Invalid message size (size: {0}, unread: {1})", size, unread));
@@ -160,7 +163,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 }
             }
 
-            if (_inputBuffer.BytesAvailable == 0)
+            if (_inputStream.BytesAvailable == 0)
                 return;
 
             if (_packetReader.Compressed && !InflateInputBuffer()) {
@@ -168,36 +171,39 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 return;
             }
 
-            GameserverMessageType prevMessageType = 0;
+            GameserverMessageType curMessageType = 0;
             GameserverMessageType lastMessageType = 0;
-            while (_inputBuffer.BytesAvailable > 0) {
-                var messageType = _inputBuffer.ReadEnum<GameserverMessageType>();
-                if (!OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameLoginPending)) {
-                    if (!IsGameRunning && messageType > GameserverMessageType.GameFirstMessageType) {
-                        MiniMapStorage.Position.Set(0, 0, 0);
-                        WorldMapStorage.Position.Set(0, 0, 0);
-                        WorldMapStorage.ResetMap();
-                        CreatureStorage.Reset();
-                        WorldMapStorage.Valid = false;
-
-                        SetConnectionState(ConnectionState.Game);
-                    }
-                }
-
+            GameserverMessageType prevMessageType = 0;
+            while (_inputStream.BytesAvailable > 0) {
                 try {
-                    CheckPing(messageType);
-                    ParseMessage(messageType);
+                    curMessageType = 0; // reset for debugging purposes
+                    curMessageType = _inputStream.ReadEnum<GameserverMessageType>();
+                    if (!OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameLoginPending)) {
+                        if (!IsGameRunning && curMessageType > GameserverMessageType.GameFirstMessageType) {
+                            MiniMapStorage.Position.Set(0, 0, 0);
+                            WorldMapStorage.Position.Set(0, 0, 0);
+                            WorldMapStorage.ResetMap();
+                            CreatureStorage.Reset();
+                            WorldMapStorage.Valid = false;
+                            SetConnectionState(ConnectionState.Game);
+                        }
+                    }
+
+                    CheckPing(curMessageType);
+                    ParseMessage(curMessageType);
 
                     prevMessageType = lastMessageType;
-                    lastMessageType = messageType;
+                    lastMessageType = curMessageType;
                 } catch (System.Exception e) {
 #if DEBUG
-                    var err = string.Format("ProtocolGame.ParsePacket: error: {0}, type: ({1}), last type ({2}), prev type ({2}), unread ({4}), StackTrace: \n{5}.",
+                    var err = string.Format("ProtocolGame.ParsePacket: error: {0}, type: (<color=white>{1}</color>), " +
+                        "last type (<color=green>{2}</color>), prev type (<color=purple>{2}</color>), unread (<color=red>{4}</color>), compressed(<color=yellow>{5}</color>) StackTrace: \n{6}.",
                         e.Message,
-                        messageType,
+                        curMessageType,
                         lastMessageType,
                         prevMessageType,
-                        _inputBuffer.BytesAvailable,
+                        _inputStream.BytesAvailable,
+                        _packetReader.Compressed ? "yes" : "no",
                         e.StackTrace);
 #else
                     var err = "Invalid state of the protocol. Please contact support.";
@@ -206,7 +212,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     
                     // tolerating map issues will result in undefined behaviour of the gameplay
                     bool forceDisconnect = false;
-                    switch (messageType) {
+                    switch (curMessageType) {
                         case GameserverMessageType.FullMap:
                         case GameserverMessageType.MapTopRow:
                         case GameserverMessageType.MapRightRow:
@@ -270,23 +276,17 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
 
         private bool InflateInputBuffer() {
-            int length = _inputBuffer.Length;
-            int offset = _inputBuffer.Position;
+            var compressedBuffer = new byte[_inputStream.BytesAvailable];
+            _inputStream.Read(compressedBuffer, 0, compressedBuffer.Length);
+            _inputStream.Position -= compressedBuffer.Length;
 
-            var compressedBuffer = new byte[length - offset];
-            _inputBuffer.ReadBytes(compressedBuffer, 0, compressedBuffer.Length);
-            
             try {
                 if (Inflater.Inflate(compressedBuffer, out byte[] uncompressedBuffer)) {
-                    _inputBuffer.Position -= compressedBuffer.Length;
-                    _inputBuffer.Length += uncompressedBuffer.Length - compressedBuffer.Length;
-                    _inputBuffer.WriteBytes(uncompressedBuffer, 0, uncompressedBuffer.Length);
-                    _inputBuffer.Position -= uncompressedBuffer.Length;
+                    _inputStream.Write(uncompressedBuffer, 0, uncompressedBuffer.Length);
+                    _inputStream.Position -= uncompressedBuffer.Length;
                     return true;
                 }
-            } catch (System.Exception e) {
-                UnityEngine.Debug.Log("Message: " + e);
-            }
+            } catch (System.Exception) {}
             
             return false;
         }
@@ -302,425 +302,500 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     if (gameManager.GetFeature(GameFeature.GameLoginPending))
                         SetConnectionState(ConnectionState.Pending);
                     else
-                        ParseLoginSuccess(_inputBuffer);
+                        ParseLoginSuccess(_inputStream);
                     break;
                 case GameserverMessageType.GMActions_ReadyForSecondaryConnection:
                     if (gameManager.ClientVersion < 1100)
-                        ParseGmActions(_inputBuffer);
+                        ParseGmActions(_inputStream);
                     else
-                        ParseReadyForSecondaryConnection(_inputBuffer);
+                        ParseReadyForSecondaryConnection(_inputStream);
                     break;
                 case GameserverMessageType.WorldEntered:
-                    ParseWorldEntered(_inputBuffer);
+                    ParseWorldEntered(_inputStream);
                     break;
                 case GameserverMessageType.LoginError:
-                    ParseLoginError(_inputBuffer);
+                    ParseLoginError(_inputStream);
                     break;
                 case GameserverMessageType.LoginAdvice:
-                    ParseLoginAdvice(_inputBuffer);
+                    ParseLoginAdvice(_inputStream);
                     break;
                 case GameserverMessageType.LoginWait:
-                    ParseLoginWait(_inputBuffer);
+                    ParseLoginWait(_inputStream);
                     break;
                 case GameserverMessageType.LoginSuccess:
-                    ParseLoginSuccess(_inputBuffer);
+                    ParseLoginSuccess(_inputStream);
                     break;
                 case GameserverMessageType.LoginToken:
-                    ParseLoginToken(_inputBuffer);
+                    ParseLoginToken(_inputStream);
                     break;
                 case GameserverMessageType.StoreButtonIndicators:
-                    ParseStoreButtonIndicators(_inputBuffer);
+                    ParseStoreButtonIndicators(_inputStream);
                     break;
                 case GameserverMessageType.Ping:
                 case GameserverMessageType.PingBack: {
                     if ((messageType == GameserverMessageType.Ping && gameManager.GetFeature(GameFeature.GameClientPing)) ||
                         (messageType == GameserverMessageType.PingBack && !gameManager.GetFeature(GameFeature.GameClientPing)))
-                        ParsePingBack(_inputBuffer);
+                        ParsePingBack(_inputStream);
                     else
-                        ParsePing(_inputBuffer);
+                        ParsePing(_inputStream);
                     break;
                 }
                 case GameserverMessageType.Challenge:
                     if (!gameManager.GetFeature(GameFeature.GameChallengeOnLogin))
                         goto default;
-                    ParseChallange(_inputBuffer);
+                    ParseChallange(_inputStream);
                     break;
-                    
                 case GameserverMessageType.Death:
-                    ParseDeath(_inputBuffer);
+                    ParseDeath(_inputStream);
                     break;
+                case GameserverMessageType.Stash:
+                    if (gameManager.ClientVersion < 1200)
+                        goto default;
+                    ParseSupplyStash(_inputStream);
+                    break;
+
                 case GameserverMessageType.OTClientExtendedOpcode:
-                    ParseOtclientExtendedOpcode(_inputBuffer);
+                    ParseOtclientExtendedOpcode(_inputStream);
                     break;
                     
                 case GameserverMessageType.ClientCheck:
                     if (gameManager.ClientVersion < 1121)
                         goto default;
-                    ParseClientCheck(_inputBuffer);
+                    ParseClientCheck(_inputStream);
                     break;
                 case GameserverMessageType.FullMap:
-                    ParseFullMap(_inputBuffer);
+                    ParseFullMap(_inputStream);
                     break;
                 case GameserverMessageType.MapTopRow:
-                    ParseMapTopRow(_inputBuffer);
+                    ParseMapTopRow(_inputStream);
                     break;
                 case GameserverMessageType.MapRightRow:
-                    ParseMapRightRow(_inputBuffer);
+                    ParseMapRightRow(_inputStream);
                     break;
                 case GameserverMessageType.MapBottomRow:
-                    ParseMapBottomRow(_inputBuffer);
+                    ParseMapBottomRow(_inputStream);
                     break;
                 case GameserverMessageType.MapLeftRow:
-                    ParseMapLeftRow(_inputBuffer);
+                    ParseMapLeftRow(_inputStream);
                     break;
                 case GameserverMessageType.FieldData:
-                    ParseFieldData(_inputBuffer);
+                    ParseFieldData(_inputStream);
                     break;
                 case GameserverMessageType.CreateOnMap:
-                    ParseCreateOnMap(_inputBuffer);
+                    ParseCreateOnMap(_inputStream);
                     break;
                 case GameserverMessageType.ChangeOnMap:
-                    ParseChangeOnMap(_inputBuffer);
+                    ParseChangeOnMap(_inputStream);
                     break;
                 case GameserverMessageType.DeleteOnMap:
-                    ParseDeleteOnMap(_inputBuffer);
+                    ParseDeleteOnMap(_inputStream);
                     break;
                 case GameserverMessageType.MoveCreature:
-                    ParseCreatureMove(_inputBuffer);
+                    ParseCreatureMove(_inputStream);
                     break;
 
                 case GameserverMessageType.OpenContainer:
-                    ParseOpenContainer(_inputBuffer);
+                    ParseOpenContainer(_inputStream);
                     break;
                 case GameserverMessageType.CloseContainer:
-                    ParseCloseContainer(_inputBuffer);
+                    ParseCloseContainer(_inputStream);
                     break;
                 case GameserverMessageType.CreateInContainer:
-                    ParseCreateInContainer(_inputBuffer);
+                    ParseCreateInContainer(_inputStream);
                     break;
                 case GameserverMessageType.ChangeInContainer:
-                    ParseChangeInContainer(_inputBuffer);
+                    ParseChangeInContainer(_inputStream);
                     break;
                 case GameserverMessageType.DeleteInContainer:
-                    ParseDeleteInContainer(_inputBuffer);
+                    ParseDeleteInContainer(_inputStream);
                     break;
 
+                case GameserverMessageType.InspectionList:
+                    if (!gameManager.GetFeature(GameFeature.GameInspectionWindow))
+                        goto default;
+                    ParseInspectionList(_inputStream);
+                    break;
+                case GameserverMessageType.InspectionState:
+                    if (!gameManager.GetFeature(GameFeature.GameInspectionWindow))
+                        goto default;
+                    ParseInspectionState(_inputStream);
+                    break;
                 case GameserverMessageType.SetInventory:
-                    ParseSetInventory(_inputBuffer);
+                    ParseSetInventory(_inputStream);
                     break;
                 case GameserverMessageType.DeleteInventory:
-                    ParseDeleteInventory(_inputBuffer);
+                    ParseDeleteInventory(_inputStream);
                     break;
                 case GameserverMessageType.NpcOffer:
-                    ParseNPCOffer(_inputBuffer);
+                    ParseNPCOffer(_inputStream);
                     break;
                 case GameserverMessageType.PlayerGoods:
-                    ParsePlayerGoods(_inputBuffer);
+                    ParsePlayerGoods(_inputStream);
                     break;
                 case GameserverMessageType.CloseNpcTrade:
-                    ParseCloseNPCTrade(_inputBuffer);
+                    ParseCloseNPCTrade(_inputStream);
                     break;
                 case GameserverMessageType.OwnOffer:
-                    ParseOwnOffer(_inputBuffer);
+                    ParseOwnOffer(_inputStream);
                     break;
                 case GameserverMessageType.CounterOffer:
-                    ParseCounterOffer(_inputBuffer);
+                    ParseCounterOffer(_inputStream);
                     break;
                 case GameserverMessageType.CloseTrade:
-                    ParseCloseTrade(_inputBuffer);
+                    ParseCloseTrade(_inputStream);
                     break;
                 case GameserverMessageType.AmbientLight:
-                    ParseAmbientLight(_inputBuffer);
+                    ParseAmbientLight(_inputStream);
                     break;
                 case GameserverMessageType.GraphicalEffect:
-                    ParseGraphicalEffect(_inputBuffer);
+                    if (OpenTibiaUnity.GameManager.ClientVersion >= 1200)
+                        ParseGraphicalEffects(_inputStream);
+                    else
+                        ParseGraphicalEffect(_inputStream);
                     break;
                 case GameserverMessageType.TextEffect_RemoveGraphicalEffect:
                     if (gameManager.ClientVersion < 900)
-                        ParseTextEffect(_inputBuffer);
+                        ParseTextEffect(_inputStream);
                     else if (gameManager.ClientVersion >= 1200)
-                        ParseRemoveGraphicalEffect(_inputBuffer);
+                        ParseRemoveGraphicalEffect(_inputStream);
                     else
                         goto default;
                     break;
                 case GameserverMessageType.MissleEffect:
-                    ParseMissleEffect(_inputBuffer);
+                    ParseMissleEffect(_inputStream);
                     break;
                 case GameserverMessageType.CreatureMark:
-                    ParseCreatureMark(_inputBuffer);
+                    ParseCreatureMark(_inputStream);
                     break;
 
                 case GameserverMessageType.CreatureHealth:
-                    ParseCreatureHealth(_inputBuffer);
+                    ParseCreatureHealth(_inputStream);
                     break;
                 case GameserverMessageType.CreatureLight:
-                    ParseCreatureLight(_inputBuffer);
+                    ParseCreatureLight(_inputStream);
                     break;
                 case GameserverMessageType.CreatureOutfit:
-                    ParseCreatureOutfit(_inputBuffer);
+                    ParseCreatureOutfit(_inputStream);
                     break;
                 case GameserverMessageType.CreatureSpeed:
-                    ParseCreatureSpeed(_inputBuffer);
+                    ParseCreatureSpeed(_inputStream);
                     break;
                 case GameserverMessageType.CreatureSkull:
-                    ParseCreatureSkull(_inputBuffer);
+                    ParseCreatureSkull(_inputStream);
                     break;
                 case GameserverMessageType.CreatureShield:
-                    ParseCreatureShield(_inputBuffer);
+                    ParseCreatureShield(_inputStream);
                     break;
                 case GameserverMessageType.CreatureUnpass:
-                    ParseCreatureUnpass(_inputBuffer);
+                    ParseCreatureUnpass(_inputStream);
                     break;
                 case GameserverMessageType.CreatureMarks:
-                    ParseCreatureMarks(_inputBuffer);
+                    ParseCreatureMarks(_inputStream);
                     break;
                 case GameserverMessageType.PlayerHelpers:
                     if (gameManager.ClientVersion < 1185)
-                        ParsePlayerHelpers(_inputBuffer);
+                        ParsePlayerHelpers(_inputStream);
                     else
                         throw new System.Exception("opcode (PlayerHelpers) changed and must be verified.");
                     break;
                 case GameserverMessageType.CreatureType:
-                    ParseCreatureType(_inputBuffer);
+                    ParseCreatureType(_inputStream);
                     break;
                 case GameserverMessageType.GameNews:
-                    ParseGameNews(_inputBuffer);
+                    ParseGameNews(_inputStream);
                     break;
 
                 case GameserverMessageType.Blessings:
-                    ParseBlessings(_inputBuffer);
+                    ParseBlessings(_inputStream);
                     break;
                 case GameserverMessageType.PremiumTrigger:
-                    ParsePremiumTrigger(_inputBuffer);
+                    ParsePremiumTrigger(_inputStream);
                     break;
                 case GameserverMessageType.PlayerBasicData:
-                    ParseBasicData(_inputBuffer);
+                    ParseBasicData(_inputStream);
                     break;
                 case GameserverMessageType.PlayerStats:
-                    ParsePlayerStats(_inputBuffer);
+                    ParsePlayerStats(_inputStream);
                     break;
                 case GameserverMessageType.PlayerSkills:
-                    ParsePlayerSkills(_inputBuffer);
+                    ParsePlayerSkills(_inputStream);
                     break;
                 case GameserverMessageType.PlayerStates:
-                    ParsePlayerStates(_inputBuffer);
+                    ParsePlayerStates(_inputStream);
                     break;
                 case GameserverMessageType.ClearTarget:
-                    ParseClearTarget(_inputBuffer);
+                    ParseClearTarget(_inputStream);
                     break;
                 case GameserverMessageType.SpellDelay:
-                    ParseSpellDelay(_inputBuffer);
+                    ParseSpellDelay(_inputStream);
                     break;
                 case GameserverMessageType.SpellGroupDelay:
-                    ParseSpellGroupDelay(_inputBuffer);
+                    ParseSpellGroupDelay(_inputStream);
+                    break;
+                case GameserverMessageType.MultiUseDelay:
+                    ParsaeMultiUseDelay(_inputStream);
                     break;
 
                 case GameserverMessageType.SetTactics:
-                    ParseSetTactics(_inputBuffer);
+                    ParseSetTactics(_inputStream);
+                    break;
+                case GameserverMessageType.SetStoreDeepLink:
+                    ParseSetStoreDeepLink(_inputStream);
                     break;
 
                 case GameserverMessageType.RestingAreaState:
-                    ParseRestingAreaState(_inputBuffer);
+                    ParseRestingAreaState(_inputStream);
                     break;
                 case GameserverMessageType.Talk:
-                    ParseTalk(_inputBuffer);
+                    ParseTalk(_inputStream);
                     break;
                 case GameserverMessageType.Channels:
-                    ParseChannels(_inputBuffer);
+                    ParseChannels(_inputStream);
                     break;
                 case GameserverMessageType.OpenChannel:
-                    ParseOpenChannel(_inputBuffer);
+                    ParseOpenChannel(_inputStream);
                     break;
                 case GameserverMessageType.PrivateChannel:
-                    ParsePrivateChannel(_inputBuffer);
+                    ParsePrivateChannel(_inputStream);
                     break;
 
                 case GameserverMessageType.OpenOwnChannel:
-                    ParseOpenOwnChannel(_inputBuffer);
+                    ParseOpenOwnChannel(_inputStream);
                     break;
                 case GameserverMessageType.CloseChannel:
-                    ParseCloseChannel(_inputBuffer);
+                    ParseCloseChannel(_inputStream);
                     break;
                 case GameserverMessageType.TextMessage:
-                    ParseTextMessage(_inputBuffer);
+                    ParseTextMessage(_inputStream);
                     break;
                 case GameserverMessageType.CancelWalk:
-                    ParseCancelWalk(_inputBuffer);
+                    ParseCancelWalk(_inputStream);
                     break;
                 case GameserverMessageType.Wait:
-                    ParseWait(_inputBuffer);
+                    ParseWait(_inputStream);
                     break;
                 case GameserverMessageType.UnjustifiedPoints:
-                    ParseUnjustifiedPoints(_inputBuffer);
+                    ParseUnjustifiedPoints(_inputStream);
                     break;
                 case GameserverMessageType.PvpSituations:
-                    ParsePvpSituations(_inputBuffer);
+                    ParsePvpSituations(_inputStream);
                     break;
 
                 case GameserverMessageType.TopFloor:
-                    ParseMapTopFloor(_inputBuffer);
+                    ParseMapTopFloor(_inputStream);
                     break;
                 case GameserverMessageType.BottomFloor:
-                    ParseMapBottomFloor(_inputBuffer);
+                    ParseMapBottomFloor(_inputStream);
                     break;
                 case GameserverMessageType.UpdateLootContainers:
                     if (!gameManager.GetFeature(GameFeature.GameQuickLoot))
                         goto default;
-                    ParseUpdateLootContainers(_inputBuffer);
+                    ParseUpdateLootContainers(_inputStream);
                     break;
 
                 case GameserverMessageType.OutfitDialog:
-                    ParseOutfitDialog(_inputBuffer);
+                    ParseOutfitDialog(_inputStream);
+                    break;
+                case GameserverMessageType.MessageExivaSuppressed:
+                    ParseMessageExivaSuppressed(_inputStream);
+                    break;
+                case GameserverMessageType.UpdateExivaOptions:
+                    ParseUpdateExivaOptions(_inputStream);
                     break;
 
-                case GameserverMessageType.SupplyStash:
-                    if (gameManager.ClientVersion < 1200)
+                case GameserverMessageType.ImpactTracking:
+                    if (!gameManager.GetFeature(GameFeature.GameAnalytics))
                         goto default;
-                    ParseSupplyStash(_inputBuffer);
+                    ParseImpactTracking(_inputStream);
                     break;
-
                 case GameserverMessageType.MarketStatistics:
                     if (gameManager.ClientVersion < 1140)
                         goto default;
-                    ParseMarketStatistics(_inputBuffer);
+                    ParseMarketStatistics(_inputStream);
                     break;
-
+                case GameserverMessageType.ItemWasted:
+                    if (!gameManager.GetFeature(GameFeature.GameAnalytics))
+                        goto default;
+                    ParseItemWasted(_inputStream);
+                    break;
+                case GameserverMessageType.ItemLooted:
+                    if (!gameManager.GetFeature(GameFeature.GameAnalytics))
+                        goto default;
+                    ParseItemLooted(_inputStream);
+                    break;
                 case GameserverMessageType.TrackedQuestFlags:
                     if (!gameManager.GetFeature(GameFeature.GameQuestTracker))
                         goto default;
-                    ParseTrackedQuestFlags(_inputBuffer);
+                    ParseTrackedQuestFlags(_inputStream);
                     break;
-
+                case GameserverMessageType.KillTracking:
+                    if (!gameManager.GetFeature(GameFeature.GameAnalytics))
+                        goto default;
+                    ParseKillTracking(_inputStream);
+                    break;
                 case GameserverMessageType.BuddyAdd:
-                    ParseBuddyAdd(_inputBuffer);
+                    ParseBuddyAdd(_inputStream);
                     break;
                 case GameserverMessageType.BuddyState:
-                    ParseBuddyState(_inputBuffer);
+                    ParseBuddyState(_inputStream);
                     break;
                 case GameserverMessageType.BuddyLogout_BuddyGroupData:
                     if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameBuddyGroups))
-                        ParseBuddyGroupData(_inputBuffer);
+                        ParseBuddyGroupData(_inputStream);
                     else
-                        ParseBuddyLogout(_inputBuffer);
+                        ParseBuddyLogout(_inputStream);
                     break;
                 case GameserverMessageType.MonsterCyclopedia:
                     if (!gameManager.GetFeature(GameFeature.GameCyclopediaMonsters))
                         goto default;
-                    ParseMonsterCyclopedia(_inputBuffer);
+                    ParseMonsterCyclopedia(_inputStream);
                     break;
                 case GameserverMessageType.MonsterCyclopediaMonsters:
                     if (!gameManager.GetFeature(GameFeature.GameCyclopediaMonsters))
                         goto default;
-                    ParseMonsterCyclopediaMonsters(_inputBuffer);
+                    ParseMonsterCyclopediaMonsters(_inputStream);
                     break;
                 case GameserverMessageType.MonsterCyclopediaRace:
                     if (!gameManager.GetFeature(GameFeature.GameCyclopediaMonsters))
                         goto default;
-                    ParseMonsterCyclopediaRace(_inputBuffer);
+                    ParseMonsterCyclopediaRace(_inputStream);
                     break;
                 case GameserverMessageType.MonsterCyclopediaBonusEffects:
                     if (!gameManager.GetFeature(GameFeature.GameCyclopediaMonsters))
                         goto default;
-                    ParseMonsterCyclopediaBonusEffects(_inputBuffer);
+                    ParseMonsterCyclopediaBonusEffects(_inputStream);
                     break;
                 case GameserverMessageType.MonsterCyclopediaNewDetails:
                     if (!gameManager.GetFeature(GameFeature.GameCyclopediaMonsters))
                         goto default;
-                    ParseMonsterCyclopediaNewDetails(_inputBuffer);
+                    ParseMonsterCyclopediaNewDetails(_inputStream);
                     break;
                 case GameserverMessageType.CyclopediaCharacterInfo:
-                    if (gameManager.ClientVersion < 1200) // was introduced within tibia 12
+                    if (gameManager.ClientVersion < 1200)
                         goto default;
-                    ParseCyclopediaCharacterInfo(_inputBuffer);
+                    ParseCyclopediaCharacterInfo(_inputStream);
                     break;
                     
                 case GameserverMessageType.TutorialHint:
-                    _inputBuffer.ReadUnsignedByte(); // hintId
+                    _inputStream.ReadUnsignedByte(); // hintId
                     break;
                 case GameserverMessageType.AutomapFlag_CyclopediaMapData:
                     if (gameManager.GetFeature(GameFeature.GameCyclopediaMapAdditionalDetails))
-                        ParseCyclopediaMapData(_inputBuffer);
+                        ParseCyclopediaMapData(_inputStream);
                     else
-                        ParseAutomapFlag(_inputBuffer);
+                        ParseAutomapFlag(_inputStream);
                     break;
                 case GameserverMessageType.DailyRewardCollectionState:
                     if (!gameManager.GetFeature(GameFeature.GameRewardWall))
                         goto default;
-                    ParseDailyRewardCollectionState(_inputBuffer);
+                    ParseDailyRewardCollectionState(_inputStream);
                     break;
-
+                case GameserverMessageType.CreditBalance:
+                    if (!gameManager.GetFeature(GameFeature.GameIngameStore))
+                        goto default;
+                    ParseCreditBalance(_inputStream);
+                    break;
+                case GameserverMessageType.StoreError:
+                    if (!gameManager.GetFeature(GameFeature.GameIngameStore))
+                        goto default;
+                    ParseStoreError(_inputStream);
+                    break;
+                case GameserverMessageType.RequestPurchaseData:
+                    if (!gameManager.GetFeature(GameFeature.GameIngameStore))
+                        goto default;
+                    ParseRequestPurchaseData(_inputStream);
+                    break;
                 case GameserverMessageType.OpenRewardWall:
                     if (!gameManager.GetFeature(GameFeature.GameRewardWall))
                         goto default;
-                    ParseOpenRewardWall(_inputBuffer);
+                    ParseOpenRewardWall(_inputStream);
                     break;
                 case GameserverMessageType.CloseRewardWall:
                     if (!gameManager.GetFeature(GameFeature.GameRewardWall))
                         goto default;
-                    ParseCloseRewardWall(_inputBuffer);
+                    ParseCloseRewardWall(_inputStream);
                     break;
                 case GameserverMessageType.DailyRewardBasic:
                     if (!gameManager.GetFeature(GameFeature.GameRewardWall))
                         goto default;
-                    ParseDailyRewardBasic(_inputBuffer);
+                    ParseDailyRewardBasic(_inputStream);
                     break;
                 case GameserverMessageType.DailyRewardHistory:
                     if (!gameManager.GetFeature(GameFeature.GameRewardWall))
                         goto default;
-                    ParseDailyRewardHistory(_inputBuffer);
+                    ParseDailyRewardHistory(_inputStream);
                     break;
 
                 case GameserverMessageType.PreyFreeListRerollAvailability:
                     if (!gameManager.GetFeature(GameFeature.GamePrey))
                         goto default;
-                    ParsePreyFreeListRerollAvailability(_inputBuffer);
+                    ParsePreyFreeListRerollAvailability(_inputStream);
                     break;
                 case GameserverMessageType.PreyTimeLeft:
                     if (!gameManager.GetFeature(GameFeature.GamePrey))
                         goto default;
-                    ParsePreyTimeLeft(_inputBuffer);
+                    ParsePreyTimeLeft(_inputStream);
                     break;
                 case GameserverMessageType.PreyData:
                     if (!gameManager.GetFeature(GameFeature.GamePrey))
                         goto default;
-                    ParsePreyData(_inputBuffer);
+                    ParsePreyData(_inputStream);
                     break;
                 case GameserverMessageType.PreyPrices:
                     if (!gameManager.GetFeature(GameFeature.GamePrey))
                         goto default;
-                    ParsePreyPrices(_inputBuffer);
+                    ParsePreyPrices(_inputStream);
                     break;
 
                 case GameserverMessageType.CloseImbuingDialog:
                     if (!gameManager.GetFeature(GameFeature.GameImbuing))
                         goto default;
-                    ParseCloseImbuingDialog(_inputBuffer);
+                    ParseCloseImbuingDialog(_inputStream);
                     break;
 
                 case GameserverMessageType.ResourceBalance:
                     if (!gameManager.GetFeature(GameFeature.GameImbuing))
                         goto default;
-                    ParseResourceBalance(_inputBuffer);
+                    ParseResourceBalance(_inputStream);
                     break;
                 case GameserverMessageType.TibiaTime:
                     if (gameManager.ClientVersion < 1121)
                         goto default;
-                    _inputBuffer.ReadUnsignedByte(); // hrs
-                    _inputBuffer.ReadUnsignedByte(); // mins
+                    _inputStream.ReadUnsignedByte(); // hrs
+                    _inputStream.ReadUnsignedByte(); // mins
+                    break;
+                case GameserverMessageType.UpdatingStoreBalance:
+                    ParseUpdatingStoreBalance(_inputStream);
                     break;
                 case GameserverMessageType.ChannelEvent:
-                    ParseChannelEvent(_inputBuffer);
+                    ParseChannelEvent(_inputStream);
                     break;
-
+                case GameserverMessageType.ObjectInfo:
+                    ParseObjectInfo(_inputStream);
+                    break;
                 case GameserverMessageType.PlayerInventory:
-                    ParsePlayerInventory(_inputBuffer);
+                    ParsePlayerInventory(_inputStream);
                     break;
-
+                case GameserverMessageType.MarketEnter:
+                    ParseMarketEnter(_inputStream);
+                    break;
+                case GameserverMessageType.MarketLeave:
+                    ParseMarketLeave(_inputStream);
+                    break;
+                case GameserverMessageType.MarketDetail:
+                    ParseMarketDetail(_inputStream);
+                    break;
+                case GameserverMessageType.MarketBrowse:
+                    ParseMarketBrowse(_inputStream);
+                    break;
+                case GameserverMessageType.ShowModalDialog:
+                    ParseShowModalDialog(_inputStream);
+                    break;
                 case GameserverMessageType.PremiumStore:
-                    ParseStoreCategories(_inputBuffer);
+                    ParseStoreCategories(_inputStream);
                     break;
                 case GameserverMessageType.PremiumStoreOffers:
-                    ParseStoreOffers(_inputBuffer);
+                    ParseStoreOffers(_inputStream);
                     break;
                 default:
                     throw new System.Exception("unknown message type");
@@ -740,7 +815,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private void ParsePingBack(Internal.ByteArray message) {
+        private void ParsePingBack(Internal.CommunicationStream message) {
             _pingReceived++;
             
             if (_pingReceived == _pingSent)
@@ -751,7 +826,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             OpenTibiaUnity.GameManager.ShouldSendPingAt = OpenTibiaUnity.TicksMillis + Constants.PingDelay;
         }
 
-        private void ParsePing(Internal.ByteArray message) {
+        private void ParsePing(Internal.CommunicationStream message) {
             // onPing.Invoke();
             InternalSendPingBack();
         }

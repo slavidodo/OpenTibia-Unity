@@ -2,7 +2,7 @@
 {
     public partial class ProtocolGame : Internal.Protocol
     {
-        private void ParseUpdateLootContainers(Internal.ByteArray message) {
+        private void ParseUpdateLootContainers(Internal.CommunicationStream message) {
             byte unknown = message.ReadUnsignedByte();
             int count = message.ReadUnsignedByte();
             for (int i = 0; i < count; i++) {

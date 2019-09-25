@@ -10,7 +10,7 @@
             _offerId = offerId;
         }
 
-        public void WriteToMessage(Communication.Internal.ByteArray message) {
+        public void WriteTo(Communication.Internal.CommunicationStream message) {
             message.WriteUnsignedInt(_offerId);
         }
     }

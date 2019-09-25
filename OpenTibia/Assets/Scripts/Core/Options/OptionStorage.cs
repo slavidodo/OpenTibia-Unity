@@ -111,19 +111,20 @@ namespace OpenTibiaUnity.Core.Options
         public int GeneralInputSetId = MappingSet.DefaultSet;
         public int GeneralInputSetMode = MappingSet.ChatModeON;
 
-        // public Client Options
+        // internal client options
         public bool AuthenticatorTokenOn = false;
         public string LoginAddress = string.Empty;
         public int SelectedClientVersion = -1;
         public int SelectedBuildVersion = -1;
 
-        // public Game Options
+        // internal game options
         public CombatAttackModes CombatAttackMode = CombatAttackModes.Balanced;
         public CombatChaseModes CombatChaseMode = CombatChaseModes.Off;
         public bool CombatSecureMode = true;
         public CombatPvPModes CombatPvPMode = CombatPvPModes.Dove;
         public OpponentFilters OpponentFilter = OpponentFilters.None;
         public OpponentSortTypes OpponentSort = OpponentSortTypes.SortKnownSinceAsc;
+        public CyclopediaLootValueSource LootValueSource = CyclopediaLootValueSource.NpcSaleData;
 
         // public Storages (Mappings) (TODO: Rename Mapping to Preset)
         // These storages are not serialized with default options, as they are independant theirselves..

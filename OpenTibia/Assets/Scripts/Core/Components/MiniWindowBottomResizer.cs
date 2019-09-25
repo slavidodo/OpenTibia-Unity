@@ -70,7 +70,7 @@ namespace OpenTibiaUnity.Core.Components
         }
         
         void IPointerEnterHandler.OnPointerEnter(PointerEventData eventData) {
-            if (miniWindow.Resizable) {
+            if (miniWindow.Resizable && !OpenTibiaUnity.InputHandler.IsAnyMousePressed()) {
                 _shouldDeactivateCursor = false;
                 _cursorActivated = true;
                 PushResizeCursor();
@@ -91,7 +91,7 @@ namespace OpenTibiaUnity.Core.Components
         }
 
         void IPointerDownHandler.OnPointerDown(PointerEventData eventData) {
-            if (!miniWindow.Resizable)
+            if (eventData.button != PointerEventData.InputButton.Left || !miniWindow.Resizable)
                 return;
 
             _dragAllowed = true;

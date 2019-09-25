@@ -2,7 +2,7 @@
 {
     public class StoreEmptyOpenParamater : IStoreOpenParamater
     {
-        public void WriteToMessage(Communication.Internal.ByteArray _) {
+        public void WriteTo(Communication.Internal.CommunicationStream _) {
         }
     }
 }

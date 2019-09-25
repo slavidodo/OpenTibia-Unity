@@ -9,7 +9,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
         public bool BugReportsAllowed = false;
 
-        private void ParseGmActions(Internal.ByteArray message) {
+        private void ParseGmActions(Internal.CommunicationStream message) {
             int numViolationReasons = 20;
             var clientVersion = OpenTibiaUnity.GameManager.ClientVersion;
             if (clientVersion >= 850)
@@ -25,11 +25,11 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private void ParseReadyForSecondaryConnection(Internal.ByteArray message) {
+        private void ParseReadyForSecondaryConnection(Internal.CommunicationStream message) {
             var sessionKey = message.ReadString();
         }
 
-        private void ParseWorldEntered(Internal.ByteArray message) {
+        private void ParseWorldEntered(Internal.CommunicationStream message) {
             bool hasLoginPendingFeature = OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameLoginPending);
             if ((hasLoginPendingFeature && _connectionState == ConnectionState.Pending)
                 || (!hasLoginPendingFeature && _connectionState > ConnectionState.Disconnected && _connectionState != ConnectionState.Game)) {
@@ -42,20 +42,20 @@ namespace OpenTibiaUnity.Core.Communication.Game
             
             SetConnectionState(ConnectionState.Game);
         }
-        private void ParseLoginError(Internal.ByteArray message) {
+        private void ParseLoginError(Internal.CommunicationStream message) {
             string error = message.ReadString();
             onLoginError.Invoke(error);
         }
-        private void ParseLoginAdvice(Internal.ByteArray message) {
+        private void ParseLoginAdvice(Internal.CommunicationStream message) {
             string advice = message.ReadString();
             onLoginAdvice.Invoke(advice);
         }
-        private void ParseLoginWait(Internal.ByteArray message) {
+        private void ParseLoginWait(Internal.CommunicationStream message) {
             string waitMessage = message.ReadString();
             int waitTime = message.ReadUnsignedByte();
             onLoginWait.Invoke(waitMessage, waitTime);
         }
-        private void ParseLoginSuccess(Internal.ByteArray message) {
+        private void ParseLoginSuccess(Internal.CommunicationStream message) {
             Player.Id = message.ReadUnsignedInt();
 
 #if !UNITY_EDITOR && UNITY_STANDALONE_WIN
@@ -93,11 +93,11 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private void ParseLoginToken(Internal.ByteArray message) {
+        private void ParseLoginToken(Internal.CommunicationStream message) {
             /*byte unknown = */message.ReadUnsignedByte();
         }
 
-        private void ParseChallange(Internal.ByteArray message) {
+        private void ParseChallange(Internal.CommunicationStream message) {
             uint timestamp = message.ReadUnsignedInt();
             byte challange = message.ReadUnsignedByte();
 

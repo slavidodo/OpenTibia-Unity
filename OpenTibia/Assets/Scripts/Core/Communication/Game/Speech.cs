@@ -14,6 +14,10 @@ namespace OpenTibiaUnity.Core.Communication.Game
             else
                 _messageModesDict.Clear();
 
+            if (version >= 1200) {
+                _messageModesDict.Add(MessageModeType.BoostedCreature, 49);
+            }
+
             if (version >= 1094) {
                 _messageModesDict.Add(MessageModeType.Mana, 43);
             }
@@ -63,14 +67,14 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 _messageModesDict.Add(MessageModeType.Thankyou, 41);
                 _messageModesDict.Add(MessageModeType.Market, 42);
             } else if (version >= 1036) {
-                for (var i = MessageModeType.None; i <= MessageModeType.BeyondLast; ++i) {
+                for (var i = MessageModeType.None; i <= MessageModeType.Thankyou; ++i) {
                     if (i >= MessageModeType.NpcTo)
                         _messageModesDict.Add(i, (int)i + 1);
                     else
                         _messageModesDict.Add(i, (int)i);
                 }
             } else if (version >= 900) {
-                for (var i = MessageModeType.None; i <= MessageModeType.BeyondLast; ++i)
+                for (var i = MessageModeType.None; i <= MessageModeType.Thankyou; ++i)
                     _messageModesDict.Add(i, (int)i);
             } else if (version >= 861) {
                 _messageModesDict.Add(MessageModeType.None, 0);
@@ -177,7 +181,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return (int)MessageModeType.Invalid;
         }
 
-        private void ParseTalk(Internal.ByteArray message) {
+        private void ParseTalk(Internal.CommunicationStream message) {
             uint statementId = 0;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameMessageStatements))
                 statementId = message.ReadUnsignedInt();
@@ -276,7 +280,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private void ParseChannels(Internal.ByteArray message) {
+        private void ParseChannels(Internal.CommunicationStream message) {
             int count = message.ReadUnsignedByte();
             List<Chat.Channel> channels = new List<Chat.Channel>();
             for (int i = 0; i < count; i++) {
@@ -286,7 +290,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private void ParseOpenChannel(Internal.ByteArray message) {
+        private void ParseOpenChannel(Internal.CommunicationStream message) {
             int channelId = message.ReadUnsignedShort();
             string channelName = message.ReadString();
             Chat.Channel channel = ChatStorage.AddChannel(channelId, channelName, MessageModeType.Channel);
@@ -303,12 +307,12 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private void ParsePrivateChannel(Internal.ByteArray message) {
+        private void ParsePrivateChannel(Internal.CommunicationStream message) {
             string channelName = message.ReadString();
             ChatStorage.AddChannel(channelName, channelName, MessageModeType.PrivateTo);
         }
 
-        private void ParseOpenOwnChannel(Internal.ByteArray message) {
+        private void ParseOpenOwnChannel(Internal.CommunicationStream message) {
             int channelId = message.ReadUnsignedShort();
             string channelName = message.ReadString();
             var channel = ChatStorage.AddChannel(channelId, channelName, MessageModeType.Channel);
@@ -328,19 +332,23 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private void ParseCloseChannel(Internal.ByteArray message) {
+        private void ParseCloseChannel(Internal.CommunicationStream message) {
             int channelId = message.ReadUnsignedShort();
             ChatStorage.CloseChannel(channelId);
         }
 
-        private void ParseTextMessage(Internal.ByteArray message) {
-            var mode = TranslateMessageModeFromServer(message.ReadUnsignedByte());
+        private void ParseTextMessage(Internal.CommunicationStream message) {
+            var rawMode = message.ReadUnsignedByte();
+            var mode = TranslateMessageModeFromServer(rawMode);
 
             try {
+                int channelId = 0;
+                string text = null;
+
                 switch (mode) {
                     case MessageModeType.ChannelManagement:
-                        int channelId = message.ReadUnsignedShort();
-                        string text = message.ReadString();
+                        channelId = message.ReadUnsignedShort();
+                        text = message.ReadString();
                         // TODO name filter
                         //var regex = new System.Text.RegularExpressions.Regex(@"^(.+?) invites you to |^You have been excluded from the channel ([^']+)'s Channel\.$");
                         //var match = regex.Match(text);
@@ -369,6 +377,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     case MessageModeType.Loot:
                     case MessageModeType.TradeNpc:
                     case MessageModeType.HotkeyUse:
+                    case MessageModeType.BoostedCreature:
                         channelId = -1;
                         text = message.ReadString();
                         WorldMapStorage.AddOnscreenMessage(null, -1, null, 0, mode, text);
@@ -425,12 +434,13 @@ namespace OpenTibiaUnity.Core.Communication.Game
                         ChatStorage.AddChannelMessage(-1, -1, null, 0, mode, text);
                         break;
                 }
+
             } catch (System.Exception e) {
-                throw new System.Exception("ProtocolGame.ParseTextMessage: Failed to add message of type " + mode + ": " + e.Message + "\n" + e.StackTrace);
+                throw new System.Exception("ProtocolGame.ParseTextMessage: Failed to add message of type " + rawMode + ": " + e.Message + "\n" + e.StackTrace);
             }
         }
 
-        private void ParseChannelEvent(Internal.ByteArray message) {
+        private void ParseChannelEvent(Internal.CommunicationStream message) {
             int channelId = message.ReadUnsignedShort();
             var channel = ChatStorage.GetChannel(channelId);
             string playerName = message.ReadString();

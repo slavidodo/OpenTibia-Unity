@@ -5,32 +5,58 @@ namespace OpenTibiaUnity.Core.Communication.Game
 {
     public partial class ProtocolGame : Internal.Protocol
     {
-        private void ParseStoreButtonIndicators(Internal.ByteArray message) {
+        private void ParseStoreButtonIndicators(Internal.CommunicationStream message) {
             message.ReadBoolean(); // sale on items?
             message.ReadBoolean(); // new items on store?
 
             // TODO
         }
 
-        private void ParseCreditBalance(Internal.ByteArray message) {
+        private void ParseSetStoreDeepLink(Internal.CommunicationStream message) {
+            message.ReadUnsignedByte();
+            if (OpenTibiaUnity.GameManager.ClientVersion >= 1200) {
+                message.ReadUnsignedByte();
+                message.ReadUnsignedByte();
+            }
+        }
+
+        private void ParseCreditBalance(Internal.CommunicationStream message) {
             bool updating = message.ReadBoolean();
             if (updating) {
                 uint coins = message.ReadUnsignedInt();
                 uint transferableCoins = message.ReadUnsignedInt();
+                uint tournamentCoins = 0;
+
+                if (OpenTibiaUnity.GameManager.ClientVersion >= 1215) {
+                    tournamentCoins = message.ReadUnsignedInt();
+                }
             }
         }
-        
-        private void ParseStoreCategories(Internal.ByteArray message) {
+
+        private void ParseStoreError(Internal.CommunicationStream message) {
+            int type = message.ReadUnsignedByte();
+            string error = message.ReadString();
+        }
+
+        private void ParseRequestPurchaseData(Internal.CommunicationStream message) {
+            throw new System.NotImplementedException();
+        }
+
+        private void ParseUpdatingStoreBalance(Internal.CommunicationStream message) {
+            bool updating = message.ReadBoolean();
+        }
+
+
+        private void ParseStoreCategories(Internal.CommunicationStream message) {
             if (OpenTibiaUnity.GameManager.ClientVersion < 1180)
                 ParseCreditBalance(message);
 
             OpenTibiaUnity.StoreStorage.ClearCategories();
 
-            int totalCategories = message.ReadUnsignedShort();
-            for (int i = 0; i < totalCategories; i++) {
+            int categoryCount = message.ReadUnsignedShort();
+            for (int i = 0; i < categoryCount; i++) {
                 var storeCategory = ReadStoreCategory(message);
                 string parentCategoryName = message.ReadString();
-
                 if (parentCategoryName.Length != 0) {
                     var parentCategory = OpenTibiaUnity.StoreStorage.FindCategory(parentCategoryName);
                     if (parentCategory != null)
@@ -41,17 +67,27 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private void ParseStoreOffers(Internal.ByteArray message) {
+        private void ParseStoreOffers(Internal.CommunicationStream message) {
             var gameManager = OpenTibiaUnity.GameManager;
             string categoryName = message.ReadString();
 
             if (gameManager.ClientVersion >= 1180) {
                 uint selectedOfferId = message.ReadUnsignedInt();
-
+                var sortType = message.ReadEnum<StoreOfferSortType>();
+                int filterCount = message.ReadUnsignedByte();
+                for (int i = 0; i < filterCount; i++) {
+                    string filter = message.ReadString();
+                }
+                
                 if (gameManager.ClientVersion >= 1185) {
-                    message.ReadUnsignedInt();
-                } else {
-                    message.ReadUnsignedShort();
+                    // if a filter is not included, then if "Show all" is not selected
+                    // the offer will be hidden until then..
+                    // if the offer has no filter, then this value won't affect it
+
+                    int shownFiltersCount = message.ReadUnsignedShort();
+                    for (int i = 0; i < shownFiltersCount; i++) {
+                        int filterIndex = message.ReadUnsignedByte();
+                    }
                 }
             }
 
@@ -66,10 +102,12 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 for (int i = 0; i < featuredOfferCount; i++) {
                     var storeFeaturedOffer = ReadStoreFeaturedOffer(message);
                 }
+
+                byte unknown = message.ReadUnsignedByte();
             }
         }
 
-        private StoreCategory ReadStoreCategory(Internal.ByteArray message) {
+        private StoreCategory ReadStoreCategory(Internal.CommunicationStream message) {
             string name;
             string description = null;
             StoreHighlightState highlightState = StoreHighlightState.None;
@@ -90,15 +128,15 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return category;
         }
 
-        private StoreOffer ReadStoreOffer(Internal.ByteArray message) {
+        private StoreOffer ReadStoreOffer(Internal.CommunicationStream message) {
             if (OpenTibiaUnity.GameManager.ClientVersion >= 1180)
                 return ReadExtendedStoreOffer(message);
             else
                 return ReadLegacyStoreOffer(message);
         }
 
-        public StoreOffer ReadExtendedStoreOffer(Internal.ByteArray message) {
-            string name = message.ReadString();
+        public StoreOffer ReadExtendedStoreOffer(Internal.CommunicationStream message) {
+            string name = name = message.ReadString();
             var storeOffer = new StoreOffer(name, null);
 
             byte quantityCount = message.ReadUnsignedByte();
@@ -106,11 +144,16 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 storeOffer.AddQuantityConfiguration(ReadStoreOfferQuantityConfiguration(message));
 
             storeOffer.AddVisualisation(ReadStoreVisualisation(message));
-            storeOffer.Filter = message.ReadString(); // unknown, tested and so far no effect.
 
-            uint timeAddedToStore = message.ReadUnsignedInt();
-            ushort timesBought = message.ReadUnsignedShort();
-            bool requiresConfiguration = message.ReadBoolean();
+            if (OpenTibiaUnity.GameManager.ClientVersion >= 1212) {
+                message.ReadUnsignedByte(); // enum (0, 1, 2)
+            }
+
+            storeOffer.Filter = message.ReadString();
+
+            storeOffer.TimeAddedToStore = message.ReadUnsignedInt();
+            storeOffer.TimesBought = message.ReadUnsignedShort();
+            storeOffer.RequiresConfiguration = message.ReadBoolean();
 
             ushort productCount = message.ReadUnsignedShort();
             for (int i = 0; i < productCount; i++)
@@ -118,7 +161,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return storeOffer;
         }
 
-        public StoreOffer ReadLegacyStoreOffer(Internal.ByteArray message) {
+        public StoreOffer ReadLegacyStoreOffer(Internal.CommunicationStream message) {
             bool supportsHighlighting = OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameIngameStoreHighlights);
 
             uint offerId = message.ReadUnsignedInt();
@@ -161,7 +204,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return storeOffer;
         }
 
-        public StoreOfferQuantityConfiguration ReadStoreOfferQuantityConfiguration(Internal.ByteArray message) {
+        public StoreOfferQuantityConfiguration ReadStoreOfferQuantityConfiguration(Internal.CommunicationStream message) {
             uint offerId = message.ReadUnsignedInt();
             ushort amount = message.ReadUnsignedShort();
             uint price = message.ReadUnsignedInt();
@@ -190,7 +233,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return quantityConfiguration;
         }
 
-        public StoreVisualisation ReadStoreVisualisation(Internal.ByteArray message) {
+        public StoreVisualisation ReadStoreVisualisation(Internal.CommunicationStream message) {
             var appearanceType = message.ReadEnum<StoreOfferAppearanceType>();
             switch (appearanceType) {
                 case StoreOfferAppearanceType.Icon: {
@@ -218,7 +261,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return null;
         }
 
-        public StoreProduct ReadStoreProduct(Internal.ByteArray message) {
+        public StoreProduct ReadStoreProduct(Internal.CommunicationStream message) {
             string name = message.ReadString();
             string description = null;
             List<StoreVisualisation> visualisations = new List<StoreVisualisation>();
@@ -235,13 +278,13 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return new StoreProduct(name, description, visualisations);
         }
 
-        public StoreFeaturedOffer ReadStoreFeaturedOffer(Internal.ByteArray message) {
+        public StoreFeaturedOffer ReadStoreFeaturedOffer(Internal.CommunicationStream message) {
             string icon = message.ReadString();
             var openParameters = ReadStoreOpenParameters(message);
             return new StoreFeaturedOffer(icon, openParameters);
         }
 
-        public StoreOpenParameters ReadStoreOpenParameters(Internal.ByteArray message) {
+        public StoreOpenParameters ReadStoreOpenParameters(Internal.CommunicationStream message) {
             var openAction = message.ReadEnum<StoreOpenParameterAction>();
 
             Store.OpenParameters.IStoreOpenParamater openParam = null;
@@ -288,7 +331,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return new StoreOpenParameters(openAction, openParam);
         }
 
-        public StoreCategoryAndFilter ReadStoreCategoryAndFilter(Internal.ByteArray message) {
+        public StoreCategoryAndFilter ReadStoreCategoryAndFilter(Internal.CommunicationStream message) {
             string category = message.ReadString();
             string filter = message.ReadString();
             return new StoreCategoryAndFilter(category, filter);

@@ -31,24 +31,30 @@ namespace OpenTibiaUnity.Core.Communication.Cryptography
             s_Random = new Random();
         }
 
-        public static void EncryptMessage(Internal.ByteArray message, int payloadStart, int blockSize) {
-            blockSize = Math.Min(blockSize, message.Length - payloadStart);
-            message.Position = payloadStart + blockSize;
-            
+        public static void EncryptMessage(Internal.CommunicationStream stream, int payloadStart, int blockSize) {
+            blockSize = Math.Min(blockSize, (int)stream.Length - payloadStart);
+            stream.Position = payloadStart + blockSize;
+
             int length = (int)(Math.Floor((blockSize + RSABlockSize - 1D) / RSABlockSize) * RSABlockSize);
             if (length > blockSize) {
                 var tmp = new byte[length - blockSize];
                 s_Random.NextBytes(tmp);
-                message.WriteBytes(tmp);
+                stream.Write(tmp, 0, tmp.Length);
                 blockSize = length;
             }
 
-            message.Position = payloadStart;
-            var bytes = ProcessBlock(message.Buffer, payloadStart, RSABlockSize);
-            message.WriteBytes(bytes, 0, bytes.Length);
+            stream.Position = payloadStart;
+            var bytes = ProcessBlock(stream, payloadStart, RSABlockSize);
+            stream.Write(bytes, 0, bytes.Length);
         }
 
-        private static byte[] ProcessBlock(byte[] buffer, int offset, int length) {
+        private static byte[] ProcessBlock(Internal.CommunicationStream stream, int offset, int length) {
+            var oldPosition = stream.Position;
+            stream.Position = 0;
+            byte[] buffer = new byte[(int)stream.Length];
+            stream.Read(buffer, 0, buffer.Length);
+            stream.Position = oldPosition;
+
             RsaEngine engine;
             if (OpenTibiaUnity.GameManager.IsRealTibia)
                 engine = RealTibiaEncryptEngine;

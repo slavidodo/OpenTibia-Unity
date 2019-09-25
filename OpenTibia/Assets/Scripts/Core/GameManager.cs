@@ -69,8 +69,6 @@ namespace OpenTibiaUnity.Core
         [Header("Static Panels")]
         public RectTransform LobbyPanel = null;
         public RectTransform WorldMapRenderingPanel = null;
-        public RectTransform OnscreenMessagesContainer = null;
-        public RectTransform CreatureStatusContainer = null;
 
         [Header("Windows")]
         public Components.Base.Window LoadingAppearancesWindow = null;

@@ -29,7 +29,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
         public ushort PremiumDays { get; private set; }
         public uint PremiumTimeStamp { get; private set; }
 
-        public void Parse(Internal.ByteArray message) {
+        public void Parse(Internal.CommunicationStream message) {
             if (OpenTibiaUnity.GameManager.ClientVersion >= 1010) {
                 byte worlds = message.ReadUnsignedByte();
                 for (int i = 0; i < worlds; i++) {

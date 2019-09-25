@@ -269,6 +269,7 @@ namespace OpenTibiaUnity.Core.Chat
                 case MessageModeType.HotkeyUse:
                 case MessageModeType.TutorialHint:
                 case MessageModeType.Thankyou:
+                case MessageModeType.BoostedCreature:
                     if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameServerLog))
                         channel = GetChannel(ChatStorage.ServerChannelId);
                     else

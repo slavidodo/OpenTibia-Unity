@@ -4,7 +4,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
 {
     public partial class ProtocolGame : Internal.Protocol
     {
-        private void ParseCreatureMark(Internal.ByteArray message) {
+        private void ParseCreatureMark(Internal.CommunicationStream message) {
             uint creatureId = message.ReadUnsignedInt();
             byte mark = message.ReadUnsignedByte();
 
@@ -17,7 +17,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }*/
         }
 
-        private void ParseTrappers(Internal.ByteArray message) {
+        private void ParseTrappers(Internal.CommunicationStream message) {
             int n = message.ReadUnsignedByte();
             List<Creatures.Creature> trappers = new List<Creatures.Creature>();
             for (int i = 0; i < n; i++) {
@@ -30,7 +30,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             CreatureStorage.SetTrappers(trappers);
         }
 
-        private void ParseCreatureHealth(Internal.ByteArray message) {
+        private void ParseCreatureHealth(Internal.CommunicationStream message) {
             uint creatureId = message.ReadUnsignedInt();
             byte healthPercent = message.ReadUnsignedByte();
 
@@ -43,7 +43,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }*/
         }
 
-        private void ParseCreatureLight(Internal.ByteArray message) {
+        private void ParseCreatureLight(Internal.CommunicationStream message) {
             uint creatureId = message.ReadUnsignedInt();
 
             byte intensity = message.ReadUnsignedByte();
@@ -58,7 +58,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }*/
         }
 
-        private void ParseCreatureOutfit(Internal.ByteArray message) {
+        private void ParseCreatureOutfit(Internal.CommunicationStream message) {
             uint creatureId = message.ReadUnsignedInt();
             var outfit = ReadCreatureOutfit(message);
             
@@ -72,7 +72,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }*/
         }
 
-        private void ParseCreatureSpeed(Internal.ByteArray message) {
+        private void ParseCreatureSpeed(Internal.CommunicationStream message) {
             uint creatureId = message.ReadUnsignedInt();
             int baseSpeed = -1;
             if (OpenTibiaUnity.GameManager.ClientVersion >= 1059)
@@ -89,7 +89,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }*/
         }
 
-        private void ParseCreatureSkull(Internal.ByteArray message) {
+        private void ParseCreatureSkull(Internal.CommunicationStream message) {
             uint creatureId = message.ReadUnsignedInt();
             byte pkFlag = message.ReadUnsignedByte();
 
@@ -102,7 +102,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }*/
         }
 
-        private void ParseCreatureShield(Internal.ByteArray message) {
+        private void ParseCreatureShield(Internal.CommunicationStream message) {
             uint creatureId = message.ReadUnsignedInt();
             var partyFlag = message.ReadEnum<PartyFlag>();
 
@@ -115,7 +115,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }*/
         }
 
-        private void ParseCreatureUnpass(Internal.ByteArray message) {
+        private void ParseCreatureUnpass(Internal.CommunicationStream message) {
             uint creatureId = message.ReadUnsignedInt();
             bool unpass = message.ReadBoolean();
 
@@ -127,7 +127,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }*/
         }
 
-        private void ParseCreatureMarks(Internal.ByteArray message) {
+        private void ParseCreatureMarks(Internal.CommunicationStream message) {
             int length;
             if (OpenTibiaUnity.GameManager.ClientVersion >= 1035)
                 length = 1;
@@ -149,7 +149,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private void ParsePlayerHelpers(Internal.ByteArray message) {
+        private void ParsePlayerHelpers(Internal.CommunicationStream message) {
             uint creatureId = message.ReadUnsignedInt();
             ushort helpers = message.ReadUnsignedShort();
 
@@ -160,7 +160,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 throw new System.Exception("ProtocolGame.ParsePlayerHelpers: Unknown creature id: " + creatureId);*/
         }
 
-        private void ParseCreatureType(Internal.ByteArray message) {
+        private void ParseCreatureType(Internal.CommunicationStream message) {
             uint creatureId = message.ReadUnsignedInt();
             byte type = message.ReadUnsignedByte();
             uint master = 0;

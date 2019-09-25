@@ -21,7 +21,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
     
     public partial class ProtocolGame : Internal.Protocol
     {
-        private void ParseDeath(Internal.ByteArray message) {
+        private void ParseDeath(Internal.CommunicationStream message) {
             var deathType = DeathType.DeathTypeRegular;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameDeathType))
                 deathType = (DeathType)message.ReadUnsignedByte();
@@ -38,7 +38,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             //LocalPlayer.OnDeath(deathType, penalty);
         }
 
-        private void ParseSupplyStash(Internal.ByteArray message) {
+        private void ParseSupplyStash(Internal.CommunicationStream message) {
             int availableItems = message.ReadUnsignedShort();
             for (int i = 0; i < availableItems; i++) {
                 ushort objectID = message.ReadUnsignedShort();
@@ -48,27 +48,27 @@ namespace OpenTibiaUnity.Core.Communication.Game
             int freeSlots = message.ReadUnsignedShort();
         }
 
-        private void ParseDepotTileState(Internal.ByteArray message) {
+        private void ParseDepotTileState(Internal.CommunicationStream message) {
             Player.IsInDepot = message.ReadBoolean();
         }
 
-        private void ParseSetInventory(Internal.ByteArray message) {
+        private void ParseSetInventory(Internal.CommunicationStream message) {
             var slot = message.ReadEnum<ClothSlots>();
             var @object = ReadObjectInstance(message);
             
             OpenTibiaUnity.ContainerStorage.BodyContainerView.SetObject(slot, @object);
         }
 
-        private void ParseDeleteInventory(Internal.ByteArray message) {
+        private void ParseDeleteInventory(Internal.CommunicationStream message) {
             var slot = message.ReadEnum<ClothSlots>();
             OpenTibiaUnity.ContainerStorage.BodyContainerView.SetObject(slot, null);
         }
 
-        private void ParseBlessingsDialog(Internal.ByteArray message) {
+        private void ParseBlessingsDialog(Internal.CommunicationStream message) {
 
         }
 
-        private void ParseBlessings(Internal.ByteArray message) {
+        private void ParseBlessings(Internal.CommunicationStream message) {
             var protocolVersion = OpenTibiaUnity.GameManager.ProtocolVersion;
             ushort blessings = message.ReadUnsignedShort();
 
@@ -81,7 +81,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 message.ReadUnsignedByte(); // buttonStatus
         }
 
-        private void ParsePremiumTrigger(Internal.ByteArray message) {
+        private void ParsePremiumTrigger(Internal.CommunicationStream message) {
             int triggers = message.ReadUnsignedByte();
             for (int i = 0; i < triggers; i++) {
                 message.ReadUnsignedByte(); // trigger
@@ -89,7 +89,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private void ParseBasicData(Internal.ByteArray message) {
+        private void ParseBasicData(Internal.CommunicationStream message) {
             bool premium = message.ReadBoolean();
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePremiumExpiration)) {
                 uint premiumExpiration = message.ReadUnsignedInt();
@@ -114,7 +114,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private void ParsePlayerStats(Internal.ByteArray message) {
+        private void ParsePlayerStats(Internal.CommunicationStream message) {
             int ticks = OpenTibiaUnity.TicksMillis;
 
             int health = message.ReadUnsignedShort();
@@ -206,7 +206,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private Creatures.Skill ReadSkill(Internal.ByteArray message, bool special = false) {
+        private Creatures.Skill ReadSkill(Internal.CommunicationStream message, bool special = false) {
             int level;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameDoubleSkills))
                 level = message.ReadUnsignedShort();
@@ -237,7 +237,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return new Creatures.Skill(level, baseLevel, percentage);
         }
 
-        private void ParsePlayerSkills(Internal.ByteArray message) {
+        private void ParsePlayerSkills(Internal.CommunicationStream message) {
             // magic level is being parsed
             if (OpenTibiaUnity.GameManager.ClientVersion >= 1200) {
                 var skillStruct = ReadSkill(message);
@@ -282,7 +282,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private void ParsePlayerStates(Internal.ByteArray message) {
+        private void ParsePlayerStates(Internal.CommunicationStream message) {
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerStateU32))
                 Player.StateFlags = message.ReadUnsignedInt();
             else if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerStateU16))
@@ -291,7 +291,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 Player.StateFlags = message.ReadUnsignedByte();
         }
 
-        private void ParseClearTarget(Internal.ByteArray message) {
+        private void ParseClearTarget(Internal.CommunicationStream message) {
             uint creatureId = 0;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameAttackSeq))
                 creatureId = message.ReadUnsignedInt();
@@ -303,7 +303,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 CreatureStorage.SetFollowTarget(null, false);
         }
 
-        private void ParseSetTactics(Internal.ByteArray message) {
+        private void ParseSetTactics(Internal.CommunicationStream message) {
             int attackMode = message.ReadUnsignedByte();
             int chaseMode = message.ReadUnsignedByte();
             int secureMode = message.ReadUnsignedByte();
@@ -316,7 +316,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 (CombatPvPModes)pvpMode);
         }
 
-        private void ParseResourceBalance(Internal.ByteArray message) {
+        private void ParseResourceBalance(Internal.CommunicationStream message) {
             byte type = message.ReadUnsignedByte();
             ulong balance = message.ReadUnsignedLong();
 
@@ -345,7 +345,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
         
-        private void ParseUnjustifiedPoints(Internal.ByteArray message) {
+        private void ParseUnjustifiedPoints(Internal.CommunicationStream message) {
             message.ReadUnsignedByte(); // dailyProgress
             message.ReadUnsignedByte(); // dailyRemaining
             message.ReadUnsignedByte(); // weeklyProgress
@@ -355,11 +355,11 @@ namespace OpenTibiaUnity.Core.Communication.Game
             message.ReadUnsignedByte(); // skullDuration
         }
 
-        private void ParsePvpSituations(Internal.ByteArray message) {
+        private void ParsePvpSituations(Internal.CommunicationStream message) {
             message.ReadUnsignedByte(); // situations
         }
 
-        private void ParseOutfitDialog(Internal.ByteArray message) {
+        private void ParseOutfitDialog(Internal.CommunicationStream message) {
             var outfit = ReadCreatureOutfit(message);
             Appearances.AppearanceInstance mountOutfit = null;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerMounts))
@@ -410,7 +410,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             OpenTibiaUnity.GameManager.onRequestOutfitDialog.Invoke(outfit, mountOutfit, outfitList, mountList);
         }
 
-        private void ParsePlayerInventory(Internal.ByteArray message) {
+        private void ParsePlayerInventory(Internal.CommunicationStream message) {
             //List<KeyValuePair<ushort, ushort>> items = new List<KeyValuePair<ushort, ushort>>();
             ushort size = message.ReadUnsignedShort();
             for (int i = 0; i < size; i++) {
@@ -420,7 +420,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private ProtocolOutfit ReadNewProtocolOutfit(Internal.ByteArray message) {
+        private ProtocolOutfit ReadNewProtocolOutfit(Internal.CommunicationStream message) {
             ushort outfitId = message.ReadUnsignedShort();
             var outfitName = message.ReadString();
             int addOns = message.ReadUnsignedByte();
@@ -442,7 +442,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             };
         }
 
-        private ProtocolMount ReadProtocolMount(Internal.ByteArray message) {
+        private ProtocolMount ReadProtocolMount(Internal.CommunicationStream message) {
             ushort mountId = message.ReadUnsignedShort();
             var mountName = message.ReadString();
             bool locked = true;

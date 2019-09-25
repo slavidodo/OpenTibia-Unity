@@ -41,7 +41,7 @@ namespace OpenTibiaUnity.Core.Input.GameAction
                 _stackPosOrData = stackPosOrData;
 
             _targetObject = targetObject;
-            _targetAbsolutePosition = absolutePosition;
+            _targetAbsolutePosition = targetAbsolute;
             if (_targetAbsolutePosition.x == 65535 && _targetAbsolutePosition.y == 0)
                 _targetStackPosOrData = targetStackPosOrData;
             else if (_targetAbsolutePosition.x == 65535 && _targetAbsolutePosition.y != 0)

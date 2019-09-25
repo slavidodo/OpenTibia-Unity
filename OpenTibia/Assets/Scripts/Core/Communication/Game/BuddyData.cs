@@ -4,7 +4,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
 {
     public partial class ProtocolGame : Internal.Protocol
     {
-        private void ParseBuddyAdd(Internal.ByteArray message) {
+        private void ParseBuddyAdd(Internal.CommunicationStream message) {
             uint creatureId = message.ReadUnsignedInt();
             string name = message.ReadString();
             string desc = string.Empty;
@@ -28,18 +28,18 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
         }
 
-        private void ParseBuddyState(Internal.ByteArray message) {
+        private void ParseBuddyState(Internal.CommunicationStream message) {
             uint creatureId = message.ReadUnsignedInt();
             byte state = 1;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameLoginPending))
                 state = message.ReadUnsignedByte();
         }
 
-        private void ParseBuddyLogout(Internal.ByteArray message) {
+        private void ParseBuddyLogout(Internal.CommunicationStream message) {
             uint creatureId = message.ReadUnsignedInt();
         }
 
-        private void ParseBuddyGroupData(Internal.ByteArray message) {
+        private void ParseBuddyGroupData(Internal.CommunicationStream message) {
             int groups = message.ReadUnsignedByte();
             for (int i = 0; i < groups; i++) {
                 message.ReadUnsignedByte(); // id

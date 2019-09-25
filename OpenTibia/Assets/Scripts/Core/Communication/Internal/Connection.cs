@@ -8,7 +8,7 @@ namespace OpenTibiaUnity.Core.Communication.Internal
 {
     public class AsyncStateHolder
     {
-        public ByteArray AsyncBuffer;
+        public byte[] AsyncBuffer;
         public int State = 0;
 
         public int Required {
@@ -20,11 +20,11 @@ namespace OpenTibiaUnity.Core.Communication.Internal
         }
 
         public byte[] Buffer {
-            get => AsyncBuffer.Buffer;
+            get => AsyncBuffer;
         }
 
-        public AsyncStateHolder(ByteArray asyncBuffer, int state = 0) {
-            AsyncBuffer = asyncBuffer;
+        public AsyncStateHolder(byte[] buffer, int state = 0) {
+            AsyncBuffer = buffer;
             State = state;
         }
     }
@@ -45,7 +45,7 @@ namespace OpenTibiaUnity.Core.Communication.Internal
         public class ConnectionStateEvent : UnityEvent { }
         public class ConnectionErrorEvent : UnityEvent<string, bool> { }
         public class ConnectionSocketErrorEvent : UnityEvent<SocketError, string> { }
-        public class ConnectionCommunicationEvent : UnityEvent<ByteArray> { }
+        public class ConnectionCommunicationEvent : UnityEvent<CommunicationStream> { }
 
         protected Socket _socket = null;
         protected string _address = null;
@@ -97,23 +97,28 @@ namespace OpenTibiaUnity.Core.Communication.Internal
         public void Disconnect() {
             if (_terminated || !_established)
                 return;
-            
             _socket.Disconnect(false);
             HandleCommunicationTermination();
         }
 
-        public void Send(ByteArray message) {
+        public void Send(CommunicationStream message) {
             if (_terminated || !_established)
                 throw new InvalidOperationException("Connection.Send: Trying to send before connecting.");
 
-            var clone = message.Clone();
+            CommunicationStream clone;
+
+            long position = message.Position;
+            message.Position = 0;
+            clone = new CommunicationStream(message);
+            message.Position = position;
+
             lock (_packetQueue) {
                 if (_sending) {
                     _packetQueue.Enqueue(clone);
                     return;
                 }
 
-                publicSend(clone);
+                InternalSend(clone);
             }
         }
 
@@ -125,24 +130,29 @@ namespace OpenTibiaUnity.Core.Communication.Internal
                 return;
             
             _receiving = true;
-            publicReceiveHeader();
+            InternalReceiveHeader();
         }
 
-        protected void publicSend(ByteArray message) {
+        protected void InternalSend(CommunicationStream stream) {
+            byte[] buffer = new byte[stream.Length - stream.Position];
+            stream.Read(buffer, 0, buffer.Length);
+            InternalSend(buffer);
+        }
+
+        protected void InternalSend(byte[] buffer) {
             // this function is guaranteed to be called only
             // when the connection is established
             _sending = true;
 
-            var stateObject = new AsyncStateHolder(message);
+            var stateObject = new AsyncStateHolder(buffer);
             _socket.BeginSend(stateObject.Buffer, stateObject.State, stateObject.Required, SocketFlags.None, OnConnectionSend, stateObject);
         }
 
-        protected void publicReceiveHeader() {
+        protected void InternalReceiveHeader() {
             // this function is guaranteed to be called only
             // when the connection is established
             var buffer = new byte[PacketLengthSize];
-            var byteArray = new ByteArray(buffer);
-            var stateObject = new AsyncStateHolder(byteArray);
+            var stateObject = new AsyncStateHolder(buffer);
             _socket.BeginReceive(stateObject.Buffer, stateObject.State, stateObject.Required, SocketFlags.None, OnConnectionRecvHeader, stateObject);
         }
 
@@ -150,8 +160,7 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             // this function is guaranteed to be called only
             // when the connection is established
             var buffer = new byte[size];
-            var byteArray = new ByteArray(buffer);
-            var stateObject = new AsyncStateHolder(byteArray);
+            var stateObject = new AsyncStateHolder(buffer);
             _socket.BeginReceive(stateObject.Buffer, stateObject.State, stateObject.Required, SocketFlags.None, OnConnectionRecvBody, stateObject);
         }
 
@@ -187,7 +196,7 @@ namespace OpenTibiaUnity.Core.Communication.Internal
                 }
                 return;
             }
-            
+
             if (total == 0) {
                 HandleCommunicationTermination();
                 return;
@@ -197,10 +206,10 @@ namespace OpenTibiaUnity.Core.Communication.Internal
 
             stateObject.State += total;
             if (stateObject.Finished) {
-                onConnectionSent.Invoke(stateObject.AsyncBuffer);
+                onConnectionSent.Invoke(new CommunicationStream(stateObject.AsyncBuffer));
                 lock (_packetQueue) {
                     if (_packetQueue.Count >= 0) {
-                        publicSend(_packetQueue.Dequeue() as ByteArray);
+                        InternalSend(_packetQueue.Dequeue() as CommunicationStream);
                         return;
                     }
                 }
@@ -227,7 +236,7 @@ namespace OpenTibiaUnity.Core.Communication.Internal
                 }
                 return;
             }
-            
+
             if (total == 0) {
                 HandleCommunicationTermination();
                 return;
@@ -267,7 +276,7 @@ namespace OpenTibiaUnity.Core.Communication.Internal
 
             stateObject.State += total;
             if (stateObject.Finished) {
-                onConnectionReceived.Invoke(stateObject.AsyncBuffer);
+                onConnectionReceived.Invoke(new CommunicationStream(stateObject.AsyncBuffer));
 
                 _receiving = false;
                 return;
