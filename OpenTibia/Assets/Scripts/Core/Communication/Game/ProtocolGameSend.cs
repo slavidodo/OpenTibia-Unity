@@ -657,6 +657,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
         public void SendGetOutfit() {
             var message = _packetWriter.PrepareStream();
             message.WriteEnum(GameclientMessageType.GetOutfit);
+            if (OpenTibiaUnity.GameManager.ClientVersion >= 1220)
+                message.WriteUnsignedByte(0);
             _packetWriter.FinishMessage();
         }
         [ClientVersion(0)]

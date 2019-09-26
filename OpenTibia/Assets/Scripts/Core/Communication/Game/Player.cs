@@ -7,7 +7,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
         public ushort _id;
         public string Name;
         public int AddOns;
-        public bool Locked;
+        public OutfitLockType LockType;
         public uint StoreOfferId;
     }
 
@@ -401,9 +401,10 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 for (int i = 0; i < count; i++)
                     mountList.Add(ReadProtocolMount(message));
             }
-            
+
+            OutfitDialogType type = 0;
             if (OpenTibiaUnity.GameManager.ClientVersion >= 1185) {
-                bool tryOutfit = message.ReadBoolean();
+                type = message.ReadEnum<OutfitDialogType>();
                 bool mounted = message.ReadBoolean();
             }
 
@@ -424,12 +425,18 @@ namespace OpenTibiaUnity.Core.Communication.Game
             ushort outfitId = message.ReadUnsignedShort();
             var outfitName = message.ReadString();
             int addOns = message.ReadUnsignedByte();
-            bool locked = true;
+
+            OutfitLockType lockType = OutfitLockType.Unlocked;
             uint offerId = 0;
 
-            if (OpenTibiaUnity.GameManager.ClientVersion >= 1185) {
-                locked = message.ReadBoolean();
-                if (locked)
+            var clientVersion = OpenTibiaUnity.GameManager.ClientVersion;
+            if (clientVersion >= 1185) {
+                if (clientVersion >= 1220)
+                    lockType = message.ReadEnum<OutfitLockType>();
+                else if (message.ReadBoolean())
+                    lockType = OutfitLockType.Store;
+
+                if (lockType == OutfitLockType.Store)
                     offerId = message.ReadUnsignedInt();
             }
 
@@ -437,7 +444,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 _id = outfitId,
                 Name = outfitName,
                 AddOns = addOns,
-                Locked = locked,
+                LockType = lockType,
                 StoreOfferId = offerId,
             };
         }

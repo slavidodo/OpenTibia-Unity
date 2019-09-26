@@ -1054,6 +1054,20 @@
         RequestedToInspectMe = 1 << 3,
     }
 
+    public enum OutfitDialogType : byte
+    {
+        Normal = 0,
+        TryOutfit = 1,
+        TryMount = 2,
+    }
+
+    public enum OutfitLockType : byte
+    {
+        Unlocked = 0,
+        Store = 1,
+        GoldenOutfit = 2,
+    }
+
     public enum GameFeature
     {
         GameDebugAssertion,
