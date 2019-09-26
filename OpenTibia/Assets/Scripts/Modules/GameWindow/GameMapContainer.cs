@@ -454,16 +454,16 @@ namespace OpenTibiaUnity.Modules.GameWindow
                         if (topUseObject.Type.IsMultiUse)
                             ObjectMultiUseHandler.Activate(absolutePosition, topUseObject, topUseObjectStackPos);
                         else
-                            GameActionFactory.CreateUseAction(absolutePosition, topUseObject.Type, topUseObjectStackPos, Vector3Int.zero, null, 0, UseActionTarget.Auto).Perform();
+                            new UseActionImpl(absolutePosition, topUseObject.Type, topUseObjectStackPos, Vector3Int.zero, null, 0, UseActionTarget.Auto).Perform();
                         break;
                     case AppearanceActions.Open:
-                        GameActionFactory.CreateUseAction(absolutePosition, topUseObject, topUseObjectStackPos, Vector3Int.zero, null, 0, UseActionTarget.Auto).Perform();
+                        new UseActionImpl(absolutePosition, topUseObject, topUseObjectStackPos, Vector3Int.zero, null, 0, UseActionTarget.Auto).Perform();
                         break;
                     case AppearanceActions.Talk:
-                        GameActionFactory.CreateGreetAction(creature).Perform();
+                        new GreetAction(creature).Perform();
                         break;
                     case AppearanceActions.Loot:
-                        // TODO: Loot action
+                        new LootActionImpl(absolutePosition, topLookObject, topLookObjectStackPos).Perform();
                         break;
                     case AppearanceActions.Unset:
                         break;

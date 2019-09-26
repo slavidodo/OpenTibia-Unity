@@ -53,7 +53,7 @@ namespace OpenTibiaUnity.Core.Game
                     if (onUse != null)
                         onUse.Invoke(targetAbsolute.Value, targetObject, targetStackPos);
                     else
-                        Input.GameAction.GameActionFactory.CreateUseAction(s_AbsolutePosition, s_Object, s_PositionOrData, targetAbsolute.Value, targetObject, targetStackPos, UseActionTarget.Auto).Perform();
+                        new Input.GameAction.UseActionImpl(s_AbsolutePosition, s_Object, s_PositionOrData, targetAbsolute.Value, targetObject, targetStackPos, UseActionTarget.Auto).Perform();
 
                     return;
                 }

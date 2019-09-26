@@ -25,7 +25,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             this.fieldY = fieldY;
         }
 
-        public void Assign(RenderAtom other) {
+        public virtual void Assign(RenderAtom other) {
             if (!other || other == this)
                 return;
 
@@ -37,11 +37,11 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             Object = other.Object;
         }
 
-        public void Reset() {
+        public virtual void Reset() {
             Update();
         }
 
-        public RenderAtom Clone() {
+        public virtual RenderAtom Clone() {
             return new RenderAtom(Object, x, y, z, fieldX, fieldY);
         }
 

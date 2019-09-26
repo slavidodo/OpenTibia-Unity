@@ -2,21 +2,21 @@
 
 namespace OpenTibiaUnity.Core.Input.GameAction
 {
-    public class LookActionImpl : IActionImpl
+    public class LootActionImpl : IActionImpl
     {
         Vector3Int _absolutePosition;
         Appearances.AppearanceType _appearanceType;
         int _stackPos;
 
-        public LookActionImpl(Vector3Int absolutePosition, Appearances.ObjectInstance objectInstance, int stackPos) {
+        public LootActionImpl(Vector3Int absolutePosition, Appearances.ObjectInstance objectInstance, int stackPos) {
             Init(absolutePosition, objectInstance?.Type, stackPos);
         }
 
-        public LookActionImpl(Vector3Int absolutePosition, Appearances.AppearanceType appearnceType, int stackPos) {
+        public LootActionImpl(Vector3Int absolutePosition, Appearances.AppearanceType appearnceType, int stackPos) {
             Init(absolutePosition, appearnceType, stackPos);
         }
 
-        public LookActionImpl(Vector3Int absolutePosition, uint objectId, int stackPos) {
+        public LootActionImpl(Vector3Int absolutePosition, uint objectId, int stackPos) {
             var appearnceType = OpenTibiaUnity.AppearanceStorage.GetObjectType(objectId);
             Init(absolutePosition, appearnceType, stackPos);
         }
@@ -33,7 +33,7 @@ namespace OpenTibiaUnity.Core.Input.GameAction
         public void Perform(bool repeat = false) {
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             if (!!protocolGame && protocolGame.IsGameRunning)
-                protocolGame.SendLook(_absolutePosition, (ushort)_appearanceType.Id, _stackPos);
+                protocolGame.SendQuickLoot(_absolutePosition, (ushort)_appearanceType.Id, _stackPos);
         }
     }
 }

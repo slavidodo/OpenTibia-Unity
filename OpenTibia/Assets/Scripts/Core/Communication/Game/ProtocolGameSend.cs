@@ -350,11 +350,11 @@ namespace OpenTibiaUnity.Core.Communication.Game
             _packetWriter.FinishMessage();
         }
         [ClientVersion(0)]
-        public void SendLook(UnityEngine.Vector3Int absolute, uint typeId, int stackPos) {
+        public void SendLook(UnityEngine.Vector3Int absolute, ushort typeId, int stackPos) {
             var message = _packetWriter.PrepareStream();
             message.WriteEnum(GameclientMessageType.Look);
             message.WritePosition(absolute);
-            message.WriteUnsignedShort((ushort)typeId);
+            message.WriteUnsignedShort(typeId);
             message.WriteUnsignedByte((byte)stackPos);
             _packetWriter.FinishMessage();
         }

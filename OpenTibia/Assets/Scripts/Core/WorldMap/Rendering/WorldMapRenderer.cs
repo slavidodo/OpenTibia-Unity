@@ -6,6 +6,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 {
     public class WorldMapRenderer {
         private int _drawnCreaturesCount = 0;
+        private int _drawnEffectsCount = 0;
         private int _drawnTextualEffectsCount = 0;
         private int _maxZPlane = 0;
         private int _playerZPlane = 0;
@@ -20,7 +21,8 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         private readonly int[] _creatureCount;
         private readonly RenderAtom[][] _creatureField;
         private readonly RenderAtom[] _drawnCreatures;
-        private readonly RenderAtom[] _drawnTextualEffects;
+        private readonly EffectRenderAtom[] _drawnEffets;
+        private readonly RenderAtom[] _drawnTextualEffets;
 
         private TileCursor _tileCursor = new TileCursor();
         private Appearances.ObjectInstance _previousHang = null;
@@ -68,9 +70,12 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             for (int i = 0; i < _drawnCreatures.Length; i++)
                 _drawnCreatures[i] = new RenderAtom();
 
-            _drawnTextualEffects = new RenderAtom[Constants.NumEffects];
-            for (int i = 0; i < _drawnTextualEffects.Length; i++)
-                _drawnTextualEffects[i] = new RenderAtom();
+            _drawnEffets = new EffectRenderAtom[Constants.NumEffects];
+            _drawnTextualEffets = new RenderAtom[Constants.NumEffects];
+            for (int i = 0; i < _drawnTextualEffets.Length; i++) {
+                _drawnEffets[i] = new EffectRenderAtom();
+                _drawnTextualEffets[i] = new RenderAtom();
+            }
 
             _creaturesMarksView.AddMarkToView(MarkType.ClientMapWindow, Constants.MarkThicknessBold);
             _creaturesMarksView.AddMarkToView(MarkType.Permenant, Constants.MarkThicknessBold);
@@ -154,11 +159,15 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             for (int z = 0; z <= _maxZPlane; z++) {
                 for (int i = 0; i < _creatureCount.Length; i++)
                     _creatureCount[i] = 0;
-            
+
+                _drawnEffectsCount = 0;
                 InternalUpdateFloor(z);
                 InternalDrawFields(z);
+
+                if (OpenTibiaUnity.GameManager.ClientVersion >= 1200)
+                    InternalDrawEffects();
             }
-            
+
             if (OptionStorage.ShowLightEffects) {
                 var lightmapTexture = _lightmapRenderer.CreateLightmap();
                 var lightmapRect = new Rect() {
@@ -509,14 +518,17 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             int totalTextualEffectsWidth = 0;
             int lastTextualEffectY = 0;
 
-            for (int i = field.EffectsCount - 1; i >= 0; i--) {
+            int i = field.EffectsCount - 1;
+            while (i >= 0 && (_drawnEffectsCount + _drawnTextualEffectsCount) <= Constants.NumEffects) {
                 var effect = field.Effects[i];
+                i--;
+
                 if (!effect)
                     continue;
 
                 if (effect is Appearances.TextualEffectInstance textualEffect) {
                     if (drawLyingObjects) {
-                        var renderAtom = _drawnTextualEffects[_drawnTextualEffectsCount];
+                        var renderAtom = _drawnTextualEffets[_drawnTextualEffectsCount];
                         int x = effectRectX + Constants.FieldSize / 2 + totalTextualEffectsWidth;
                         int y = effectRectY + Constants.FieldSize / 8 - 2 * textualEffect.Phase;
                         renderAtom.Update(textualEffect, x, y, 0);
@@ -529,22 +541,30 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                             lastTextualEffectY = renderAtom.y;
                         }
                     }
-                } else if (effect is Appearances.MissileInstance missileEffect) {
-                    var screenPosition = new Vector2(effectRectX + missileEffect.AnimationDelta.x, effectRectY + missileEffect.AnimationDelta.y);
-                    effect.Draw(screenPosition, ScreenZoom, absoluteX, absoluteY, absoluteZ);
-
-                    if (drawLyingObjects && OptionStorage.ShowLightEffects && effect.Type.IsLight) {
-                        var color = Colors.ColorFrom8Bit((byte)effect.Type.LightColor);
-                        _lightmapRenderer.SetLightSource(effectLightX, effectLightY, positionZ, effect.Type.Brightness, color);
-                    }
-                } else { // EffectInstance
+                } else {
                     var screenPosition = new Vector2(effectRectX, effectRectY);
-                    effect.Draw(screenPosition, ScreenZoom, absoluteX, absoluteY, absoluteZ);
+                    uint brightness = effect.Type.Brightness;
+                    if (effect is Appearances.MissileInstance missile) {
+                        screenPosition.x += missile.AnimationDelta.x;
+                        screenPosition.y += missile.AnimationDelta.y;
 
-                    if (drawLyingObjects && OptionStorage.ShowLightEffects && effect.Type.IsLight) {
                         uint activeBrightness = (uint)((Math.Min(effect.Phase, effect.Type.FrameGroups[0].SpriteInfo.Phases + 1 - effect.Phase) * effect.Type.Brightness + 2) / 3);
-                        var color = Colors.ColorFrom8Bit((byte)effect.Type.LightColor);
-                        _lightmapRenderer.SetLightSource(effectLightX, effectLightY, positionZ, Math.Min(activeBrightness, effect.Type.Brightness), color);
+                        brightness = Math.Min(brightness, activeBrightness);
+                    }
+
+                    if (OpenTibiaUnity.GameManager.ClientVersion >= 1200) {
+                        var renderAtom = _drawnEffets[_drawnEffectsCount];
+                        int x = (int)screenPosition.x;
+                        int y = (int)screenPosition.y;
+
+                        renderAtom.Update(effect, x, y, (int)brightness, absoluteX, absoluteY, absoluteZ, positionZ, effectLightX, effectLightY);
+                        _drawnEffectsCount++;
+                    } else {
+                        effect.Draw(screenPosition, ScreenZoom, absoluteX, absoluteY, absoluteZ);
+                        if (drawLyingObjects && OptionStorage.ShowLightEffects && effect.Type.IsLight) {
+                            var color = Colors.ColorFrom8Bit((byte)effect.Type.LightColor);
+                            _lightmapRenderer.SetLightSource(effectLightX, effectLightY, positionZ, brightness, color);
+                        }
                     }
                 }
             }
@@ -602,9 +622,23 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             }
         }
 
+        private void InternalDrawEffects() {
+            for (int i = 0; i < _drawnEffectsCount; i++) {
+                var renderAtom = _drawnEffets[i];
+                if (renderAtom.Object is Appearances.AppearanceInstance effect) {
+                    var screenPosition = new Vector2(renderAtom.x, renderAtom.y);
+                    effect.Draw(screenPosition, ScreenZoom, renderAtom.fieldX, renderAtom.fieldY, renderAtom.fieldZ);
+                    if (OptionStorage.ShowLightEffects && effect.Type.IsLight) {
+                        var color = Colors.ColorFrom8Bit((byte)effect.Type.LightColor);
+                        _lightmapRenderer.SetLightSource(renderAtom.lightX, renderAtom.lightY, renderAtom.positionZ, (uint)renderAtom.z, color);
+                    }
+                }
+            }
+        }
+
         private void InternalDrawTextualEffects() {
             for (int i = 0; i < _drawnTextualEffectsCount; i++) {
-                var renderAtom = _drawnTextualEffects[i];
+                var renderAtom = _drawnTextualEffets[i];
                 if (renderAtom.Object is Appearances.TextualEffectInstance textualEffect) {
                     var screenPosition = new Vector2(renderAtom.x, renderAtom.y);
                     screenPosition.x = (screenPosition.x - 2 * Constants.FieldSize) * LayerZoom.x + _realScreenTranslation.x;

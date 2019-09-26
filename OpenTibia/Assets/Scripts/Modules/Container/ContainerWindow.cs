@@ -200,10 +200,13 @@ namespace OpenTibiaUnity.Modules.Container
                         if (@object.Type.IsMultiUse)
                             ObjectMultiUseHandler.Activate(absolutePosition, @object, absolutePosition.z);
                         else
-                            GameActionFactory.CreateUseAction(absolutePosition, @object.Type, absolutePosition.z, Vector3Int.zero, null, 0, UseActionTarget.Auto).Perform();
+                            new UseActionImpl(absolutePosition, @object.Type, absolutePosition.z, Vector3Int.zero, null, 0, UseActionTarget.Auto).Perform();
                         break;
                     case AppearanceActions.Open:
-                        GameActionFactory.CreateUseAction(absolutePosition, @object.Type, absolutePosition.z, Vector3Int.zero, null, 0, UseActionTarget.Auto).Perform();
+                        new UseActionImpl(absolutePosition, @object.Type, absolutePosition.z, Vector3Int.zero, null, 0, UseActionTarget.Auto).Perform();
+                        break;
+                    case AppearanceActions.Loot:
+                        new LootActionImpl(absolutePosition, @object.Type, absolutePosition.z).Perform();
                         break;
                     case AppearanceActions.Unset:
                         break;

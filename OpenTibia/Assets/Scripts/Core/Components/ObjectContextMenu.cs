@@ -48,17 +48,17 @@ namespace OpenTibiaUnity.Core.Components
                 if (_absolute.x == 65535 && _absolute.y >= 64) {
                     CreateTextItem(TextResources.CTX_OBJECT_OPEN, () => {
                         if (!!_useObject)
-                            GameActionFactory.CreateUseAction(_absolute, _useObject, _useObjectStackPos, Vector3Int.zero, null, 0, UseActionTarget.Auto).Perform();
+                            new UseActionImpl(_absolute, _useObject, _useObjectStackPos, Vector3Int.zero, null, 0, UseActionTarget.Auto).Perform();
                     });
 
                     CreateTextItem(TextResources.CTX_OBJECT_OPEN_NEW_WINDOW, () => {
                         if (!!_useObject)
-                            GameActionFactory.CreateUseAction(_absolute, _useObject, _useObjectStackPos, Vector3Int.zero, null, 0, UseActionTarget.NewWindow).Perform();
+                            new UseActionImpl(_absolute, _useObject, _useObjectStackPos, Vector3Int.zero, null, 0, UseActionTarget.NewWindow).Perform();
                     });
                 } else {
                     CreateTextItem(TextResources.CTX_OBJECT_OPEN, () => {
                         if (!!_useObject)
-                            GameActionFactory.CreateUseAction(_absolute, _useObject, _useObjectStackPos, Vector3Int.zero, null, 0, UseActionTarget.NewWindow).Perform();
+                            new UseActionImpl(_absolute, _useObject, _useObjectStackPos, Vector3Int.zero, null, 0, UseActionTarget.NewWindow).Perform();
                     });
                 }
             }
@@ -74,8 +74,10 @@ namespace OpenTibiaUnity.Core.Components
                 }
 
                 CreateTextItem(text, shortcut, () => {
-                    //if (!!_useObject)
-                    //    GameActionFactory.CreateUseAction(_absolute, _useObject, _useObjectStackPos, UseActionTarget.Auto).Perform();
+                    if (!!_useObject) {
+                        if (!_useObject.Type.IsMultiUse)
+                            new UseActionImpl(_absolute, _useObject, _useObjectStackPos, Vector3Int.zero, null, 0, UseActionTarget.Auto).Perform();
+                    }
                 });
             }
 
@@ -122,7 +124,7 @@ namespace OpenTibiaUnity.Core.Components
             if (!!_lookObject && _absolute.x == 65535 && _absolute.y >= 64 && OpenTibiaUnity.ContainerStorage.GetContainerView(_absolute.y - 64).IsSubContainer) {
                 CreateTextItem(TextResources.CTX_OBJECT_MOVE_UP, () => {
                     if (!!_lookObject)
-                        GameActionFactory.CreateMoveAction(_absolute, _lookObject, _lookObjectStackPos,
+                        new MoveActionImpl(_absolute, _lookObject, _lookObjectStackPos,
                             new Vector3Int(_absolute.x, _absolute.y, 254), MoveActionImpl.MoveAll).Perform();
                 });
             }
@@ -177,7 +179,7 @@ namespace OpenTibiaUnity.Core.Components
             if (!!_creature && _creature.Id != player.Id) {
                 if (_creature.IsNPC) {
                     CreateTextItem(TextResources.CTX_CREATURE_TALK, () => {
-                        GameActionFactory.CreateGreetAction(_creature).Perform();
+                        new GreetAction(_creature).Perform();
                     });
                 } else {
                     var attackTarget = creatureStorage.AttackTarget;
@@ -185,7 +187,7 @@ namespace OpenTibiaUnity.Core.Components
                     var shortcut = (isClassic || isRegular) ? "Alt" : null;
 
                     CreateTextItem(text, shortcut, () => {
-                        GameActionFactory.CreateToggleAttackTargetAction(_creature, true).Perform();
+                        new ToggleAttackTargetActionImpl(_creature, true).Perform();
                     });
                 }
 

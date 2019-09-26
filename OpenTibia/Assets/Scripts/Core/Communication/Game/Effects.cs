@@ -15,13 +15,13 @@ namespace OpenTibiaUnity.Core.Communication.Game
         private void ParseGraphicalEffects(Internal.CommunicationStream message) {
             var initialPosition = message.ReadPosition();
             int modifier = message.ReadUnsignedByte();
-            
+
             Appearances.AppearanceInstance effect = null;
             byte effectId = 0;
 
             var fromPosition = initialPosition;
             ushort unclampedOffset = 0;
-            while ((modifier & 7) != 0) {
+            while (modifier != 0) {
                 if (modifier == 1) {
                     unclampedOffset = message.ReadUnsignedShort();
                     int offset = unclampedOffset % 256;
@@ -35,7 +35,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     fromPosition.y++;
                 }
 
-                if ((unclampedOffset >= 1024 && modifier != 3) || modifier == 4) {
+                if ((unclampedOffset >= 1024 && modifier == 1) || (modifier & 3) == 0) {
                     effectId = message.ReadUnsignedByte();
                     int deltaX = message.ReadSignedByte();
                     int deltaY = message.ReadSignedByte();

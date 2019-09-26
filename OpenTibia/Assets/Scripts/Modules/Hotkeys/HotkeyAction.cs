@@ -56,7 +56,7 @@ namespace OpenTibiaUnity.Modules.Hotkeys
         }
 
         public override void Apply() {
-            Core.Input.GameAction.GameActionFactory.CreateTalkAction(Text, AutoSend).Perform();
+            new Core.Input.GameAction.TalkActionImpl(Text, AutoSend).Perform();
         }
 
         public override JObject Serialize() {
@@ -102,10 +102,10 @@ namespace OpenTibiaUnity.Modules.Hotkeys
                 Core.Game.ObjectMultiUseHandler.Activate(absolutePosition, @object, 0);
                 return;
             }
-            
+
             // this is guaranteed to only be "self/target"
             // if the item is not multiuse (i.e a rune that can only be used on yourself, it will be only used)
-            Core.Input.GameAction.GameActionFactory.CreateUseAction(absolutePosition, AppearanceType, 0, UnityEngine.Vector3Int.zero, null, 0, ActionTarget).Perform();
+            new Core.Input.GameAction.UseActionImpl(absolutePosition, AppearanceType, 0, UnityEngine.Vector3Int.zero, null, 0, ActionTarget).Perform();
         }
 
         public override JObject Serialize() {

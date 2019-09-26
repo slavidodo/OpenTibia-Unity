@@ -49,6 +49,10 @@ namespace OpenTibiaUnity.Core.Communication.Game
         public void ParseKillTracking(Internal.CommunicationStream message) {
             string name = message.ReadString();
             var outfit = ReadCreatureOutfit(message);
+            int lootCount = message.ReadUnsignedByte();
+            for (int i = 0; i < lootCount; i++) {
+                var @object = ReadObjectInstance(message);
+            }
         }
     }
 }
