@@ -132,11 +132,10 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 }
             };
 
-            if (System.Threading.Thread.CurrentThread == OpenTibiaUnity.MainThread) {
+            if (System.Threading.Thread.CurrentThread == OpenTibiaUnity.MainThread)
                 action.Invoke();
-            } else {
+            else
                 OpenTibiaUnity.GameManager.InvokeOnMainThread(action);
-            }
         }
         
         protected override void OnConnectionError(string message, bool disconnecting = false) {
@@ -448,7 +447,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     ParseAmbientLight(_inputStream);
                     break;
                 case GameserverMessageType.GraphicalEffect:
-                    if (OpenTibiaUnity.GameManager.ClientVersion >= 1200)
+                    if (OpenTibiaUnity.GameManager.ClientVersion >= 1203)
                         ParseGraphicalEffects(_inputStream);
                     else
                         ParseGraphicalEffect(_inputStream);

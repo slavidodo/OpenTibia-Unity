@@ -168,7 +168,7 @@ namespace OpenTibiaUnity.Core
         }
 
         public bool IsGameRunning {
-            get => ProtocolGame != null && ProtocolGame.IsGameRunning;
+            get => !!ProtocolGame && ProtocolGame.IsGameRunning;
         }
         
         public bool IsRealTibia { get => ClientSpecification == ClientSpecification.Cipsoft; }
@@ -332,7 +332,7 @@ namespace OpenTibiaUnity.Core
             // away of unity's default classes, we need to shutdown things
             // to avoid errors in the console while debugging
 
-            if (ProtocolGame != null && ProtocolGame.IsGameRunning)
+            if (IsGameRunning)
                 ProtocolGame.Disconnect(); // force disconnection (by trying to logout)
 
             AppearanceStorage.UnloadSpriteProvider();
@@ -389,7 +389,7 @@ namespace OpenTibiaUnity.Core
                 _actionQueue.Enqueue(action);
         }
 
-        public void DequeueMainThreadActions() {
+        private void DequeueMainThreadActions() {
             while (true) {
                 UnityAction action;
                 lock (_actionQueue) {
@@ -403,16 +403,18 @@ namespace OpenTibiaUnity.Core
             }
         }
 
-        private bool Application_wantsToQuit() {
-            if (!ProtocolGame || !ProtocolGame.IsGameRunning || OpenTibiaUnity.Quiting)
+        private bool ApplicationWantsToQuit() {
+            if (!IsGameRunning || OpenTibiaUnity.Quiting)
                 return true;
-            
-            ShowQuitNotification();
-            return false;
+
+            return !ShowQuitNotification();
         }
 
-        public void ShowQuitNotification() {
+        public bool ShowQuitNotification() {
             // are you sure you want to exit?
+            if (ExitWindowPrefab == null)
+                return false;
+
             if (_exitWindow == null) {
                 _exitWindow = Instantiate(ExitWindowPrefab, GameCanvas.transform);
                 _exitWindow.rectTransform.anchoredPosition = new Vector2(0, 0);
@@ -420,6 +422,7 @@ namespace OpenTibiaUnity.Core
                 _exitWindow.gameObject.SetActive(true);
                 _exitWindow.rectTransform.anchoredPosition = new Vector2(0, 0);
             }
+            return true;
         }
 
         public string GetAssetsPath(int clientVersion, int buildVersion, ClientSpecification specification) {
@@ -579,7 +582,9 @@ namespace OpenTibiaUnity.Core
         }
 
         private void OnConnectionError(string message, bool disconnected) {
-            Debug.Log("ProcessGameError: " + message + ", " + disconnected);
+#if DEBUG || NDEBUG
+            Debug.Log($"ProcessGame.OnConnectionError ({message}) Disconnected: {disconnected}");
+#endif
             if (disconnected) {
                 if (Thread.CurrentThread == OpenTibiaUnity.MainThread)
                     ProcessGameEnd();

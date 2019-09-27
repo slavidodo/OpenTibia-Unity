@@ -21,16 +21,24 @@ namespace OpenTibiaUnity.Core.Components
 
         bool _templateVisible = false;
 
-        private TMPro.TMP_Dropdown _dropdown;
+        private TMPro.TMP_Dropdown _dropdown = null;
         public TMPro.TMP_Dropdown dropdown {
             get {
                 if (_dropdown == null)
                     _dropdown = GetComponent<TMPro.TMP_Dropdown>();
-
                 return _dropdown;
             }
         }
-        
+
+        private OTU_ScrollRect _scrollRect = null;
+        private OTU_ScrollRect scrollRect {
+            get {
+                if (_scrollRect = null)
+                    _scrollRect = GetComponentInChildren<OTU_ScrollRect>();
+                return _scrollRect;
+            }
+        }
+
         protected void LateUpdate() {
             if (dropdown.IsExpanded != _templateVisible) {
                 // highlight the dropdown
@@ -43,7 +51,7 @@ namespace OpenTibiaUnity.Core.Components
                 }
 
                 if (dropdown.IsExpanded) {
-                    var scrollRect = transform.GetComponentInChildren<ScrollRect>();
+                    var scrollRect = transform.GetComponentInChildren<OTU_ScrollRect>();
                     if (scrollRect) {
                         float value = 1f - dropdown.value / (float)(scrollRect.content.childCount - 2);
 
@@ -53,9 +61,6 @@ namespace OpenTibiaUnity.Core.Components
                             scrollRect.verticalScrollbar.value = value;
                     }
                 }
-
-                // scroll to selection
-                //EnsureChildVisible();
 
                 _templateVisible = dropdown.IsExpanded;
             }

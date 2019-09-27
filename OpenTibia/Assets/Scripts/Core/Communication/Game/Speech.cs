@@ -446,6 +446,13 @@ namespace OpenTibiaUnity.Core.Communication.Game
             string playerName = message.ReadString();
             var eventType = message.ReadEnum<ChannelEvent>();
 
+            if (channel == null) {
+#if DEBUG || NDEBUG
+                Debug.LogWarning("ProtocolGame.ParseChannelEvent: invalid channel id " + channelId);
+#endif
+                return;
+            }
+
             switch (eventType) {
                 case ChannelEvent.PlayerJoined:
                     channel.PlayerJoined(playerName);

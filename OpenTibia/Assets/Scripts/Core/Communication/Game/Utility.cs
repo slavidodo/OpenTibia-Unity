@@ -226,7 +226,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 typeOrId = message.ReadUnsignedShort();
                 if (typeOrId >= 65280)
                     break;
-                
+
                 if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameEnvironmentEffect) && !gotEffect) {
                     var effectObject = AppearanceStorage.CreateEnvironmentalEffect((uint)typeOrId);
                     WorldMapStorage.SetEnvironmentalEffect(mapPosition, effectObject);

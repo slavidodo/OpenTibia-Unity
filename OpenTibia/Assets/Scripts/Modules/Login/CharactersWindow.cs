@@ -55,7 +55,6 @@ namespace OpenTibiaUnity.Modules.Login
 
             // setup input
             OpenTibiaUnity.InputHandler.AddKeyDownListener(Core.Utils.EventImplPriority.High, OnKeyDown);
-            OpenTibiaUnity.InputHandler.AddKeyUpListener(Core.Utils.EventImplPriority.High, OnKeyUp);
 
             // setup events
             _oKButton.onClick.AddListener(OnOkButtonClick);
@@ -86,12 +85,7 @@ namespace OpenTibiaUnity.Modules.Login
             ForceClientVersionUpdate();
         }
 
-        protected void OnKeyDown(Event e, bool repeat) {
-            if (repeat)
-                OnKeyUp(e, false);
-        }
-
-        protected void OnKeyUp(Event e, bool _) {
+        protected void OnKeyDown(Event e, bool _) {
             if (e.alt || e.shift || e.control || !InputHandler.IsHighlighted(this))
                 return;
             
@@ -108,11 +102,12 @@ namespace OpenTibiaUnity.Modules.Login
                     break;
                 case KeyCode.Return:
                 case KeyCode.KeypadEnter:
-                    if (e.type == EventType.KeyDown)
-                        return;
-
                     e.Use();
                     OnOkButtonClick();
+                    break;
+                case KeyCode.Escape:
+                    e.Use();
+                    OnCancelButtonClick();
                     break;
             }
         }
@@ -165,19 +160,18 @@ namespace OpenTibiaUnity.Modules.Login
             if (_popupIsAdvice) {
                 _popupIsAdvice = false;
                 
-                if (OpenTibiaUnity.ProtocolGame != null && OpenTibiaUnity.ProtocolGame.IsGameRunning)
+                if (OpenTibiaUnity.GameManager.IsGameRunning)
                     SwitchToGameplayCanvas();
             }
         }
 
         protected void OnPopupCancelClick() {
             var protocolGame = OpenTibiaUnity.ProtocolGame;
-            if (!protocolGame)
-                return;
-
-            RemoveProtocolGameListeners(protocolGame);
-            protocolGame.Disconnect();
-            OpenTibiaUnity.ProtocolGame = null;
+            if (!!protocolGame) {
+                RemoveProtocolGameListeners(protocolGame);
+                protocolGame.Disconnect();
+                OpenTibiaUnity.ProtocolGame = null;
+            }
 
             Show();
         }
@@ -340,6 +334,7 @@ namespace OpenTibiaUnity.Modules.Login
                 var child = _charactersScrollRect.content.GetChild(_selectedCharacterIndex);
                 var characterPanel = child.GetComponent<CharacterPanel>();
                 characterPanel.Select();
+                Core.Utils.UIHelper.EnsureChildVisible(_charactersScrollRect, child as RectTransform);
             }
         }
 
@@ -353,6 +348,7 @@ namespace OpenTibiaUnity.Modules.Login
                 var child = _charactersScrollRect.content.GetChild(_selectedCharacterIndex);
                 var characterPanel = child.GetComponent<CharacterPanel>();
                 characterPanel.Select();
+                Core.Utils.UIHelper.EnsureChildVisible(_charactersScrollRect, child as RectTransform);
             } else if (_charactersScrollRect.content.childCount > 0 && _selectedCharacterIndex != 0) {
                 SelectFirstCharacter();
             }
@@ -410,7 +406,7 @@ namespace OpenTibiaUnity.Modules.Login
         }
         
         protected void PopupMessage(string title, string message, PopupMenuType popupType = PopupMenuType.OK, TMPro.TextAlignmentOptions alignment = TMPro.TextAlignmentOptions.MidlineGeoAligned) {
-            _popupWindow.Show();
+            _popupWindow.Open();
 
             _popupWindow.PopupType = popupType;
 

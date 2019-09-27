@@ -208,20 +208,17 @@
             if (x != 65535) {
                 absolutePosition = message.ReadPosition(x);
 
-                if (!WorldMapStorage.IsVisible(absolutePosition, true)) {
+                if (!WorldMapStorage.IsVisible(absolutePosition, true))
                     throw new System.Exception($"ProtocolGame.ParseDeleteOnMap: Co-oridnate ({absolutePosition.x}, {absolutePosition.y}, {absolutePosition.z}) is out of range.");
-                }
 
                 mapPosition = WorldMapStorage.ToMap(absolutePosition);
 
                 int stackPos = message.ReadUnsignedByte();
-                if (!(objectInstance = WorldMapStorage.GetObject(mapPosition, stackPos))) {
+                if (!(objectInstance = WorldMapStorage.GetObject(mapPosition, stackPos)))
                     throw new System.Exception($"ProtocolGame.ParseDeleteOnMap: Object not found.");
-                }
 
-                if (objectInstance.IsCreature && (creature = CreatureStorage.GetCreature(objectInstance.Data)) == null) {
+                if (objectInstance.IsCreature && (creature = CreatureStorage.GetCreature(objectInstance.Data)) == null)
                     throw new System.Exception($"ProtocolGame.ParseDeleteOnMap: Creature not found.");
-                }
 
                 WorldMapStorage.DeleteObject(mapPosition, stackPos);
             } else {
@@ -268,6 +265,7 @@
 
                 oldMapPosition = WorldMapStorage.ToMap(oldAbsolutePosition);
                 stackPos = message.ReadUnsignedByte();
+
                 @object = WorldMapStorage.GetObject(oldMapPosition, stackPos);
                 if (!@object || !@object.IsCreature || !(creature = CreatureStorage.GetCreature(@object.Data)))
                     throw new System.Exception("ProtocolGame.ParseCreatureMove: No creature at position " + oldAbsolutePosition);

@@ -144,7 +144,7 @@ namespace OpenTibiaUnity.Core.Creatures
 
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             var worldMapStorage = OpenTibiaUnity.WorldMapStorage;
-            if (protocolGame == null || !protocolGame.IsGameRunning || worldMapStorage == null)
+            if (!!protocolGame || !protocolGame.IsGameRunning || worldMapStorage == null)
                 return;
 
             _autowalkTarget.Set(-1, -1, -1);
@@ -186,7 +186,7 @@ namespace OpenTibiaUnity.Core.Creatures
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             var minimapStorage = OpenTibiaUnity.MiniMapStorage;
             var worldMapStorage = OpenTibiaUnity.WorldMapStorage;
-            if (protocolGame == null || !protocolGame.IsGameRunning || minimapStorage == null || worldMapStorage == null)
+            if (!!protocolGame || !protocolGame.IsGameRunning || minimapStorage == null || worldMapStorage == null)
                 return;
 
             _autowalkPathAborting = false;
@@ -235,7 +235,7 @@ namespace OpenTibiaUnity.Core.Creatures
             
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             var worldMapStorage = OpenTibiaUnity.WorldMapStorage;
-            if (protocolGame == null || !protocolGame.IsGameRunning || worldMapStorage == null)
+            if (!!protocolGame || !protocolGame.IsGameRunning || worldMapStorage == null)
                 return;
 
             switch ((PathDirection)(_autowalkPathSteps[0] & 65535)) {

@@ -1064,43 +1064,43 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             };
         }
         
-        public Vector3Int? PointToMap(Vector2 point) {
+        public Vector3Int? PointToMap(Vector2 point, bool restrictedToPlayerZPlane) {
+            if (WorldMapStorage == null || (restrictedToPlayerZPlane && !Player))
+                return null;
+
             int x = (int)(point.x / (Constants.FieldSize * LayerZoom.x)) + 1;
             int y = (int)(point.y / (Constants.FieldSize * LayerZoom.y)) + 1;
-
             if (x < 0 || x > Constants.MapWidth || y < 0 || y > Constants.MapHeight)
                 return null;
 
-            Vector3Int mapPosition = new Vector3Int(x, y, 0);
 
-            int minZ = _minZPlane[y * Constants.MapSizeX + x];
-            int z = _maxZPlane;
-
-            while (z > minZ) {
-                var field = WorldMapStorage.GetField(x, y, z);
-                for (int i = 0; i < field.ObjectsCount; i++) {
-                    var type = field.ObjectsRenderer[i].Type;
-                    if ((type.IsGround || type.IsBottom) && !type.IsIgnoreLook) {
-                        minZ = -1;
-                        break;
+            int z = -1;
+            if (restrictedToPlayerZPlane) {
+                z = WorldMapStorage.ToMap(Player.Position).z;
+            } else {
+                int minZ = _minZPlane[y * Constants.MapSizeX + x];
+                for (z = _maxZPlane; z > minZ; z--) {
+                    var field = WorldMapStorage.GetField(x, y, z);
+                    for (int i = 0; i < field.ObjectsCount; i++) {
+                        var type = field.ObjectsRenderer[i].Type;
+                        if ((type.IsGround || type.IsBottom) && !type.IsIgnoreLook) {
+                            minZ = -1;
+                            break;
+                        }
                     }
+
+                    if (minZ < 0)
+                        break;
                 }
-
-                if (minZ < 0)
-                    break;
-
-                z--;
             }
 
             if (z < 0 || z >= Constants.MapSizeZ)
                 return null;
-
-            mapPosition.z = z;
-            return mapPosition;
+            return new Vector3Int(x, y, z);
         }
 
-        public Vector3Int? PointToAbsolute(Vector2 point) {
-            var mapPosition = PointToMap(point);
+        public Vector3Int? PointToAbsolute(Vector2 point, bool restrictedToPlayerZPlane) {
+            var mapPosition = PointToMap(point, restrictedToPlayerZPlane);
             if (mapPosition.HasValue)
                 return WorldMapStorage.ToAbsolute(mapPosition.Value);
             return null;
@@ -1109,24 +1109,33 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         public Creatures.Creature PointToCreature(Vector2 point, bool restrictedToPlayerZPlane) {
             if (WorldMapStorage == null || (restrictedToPlayerZPlane && !Player))
                 return null;
-            
-            Vector3Int? tmpPosition = PointToMap(point);
-            if (!tmpPosition.HasValue)
-                return null;
-            
-            var mapPosition = tmpPosition.Value;
-            if (restrictedToPlayerZPlane)
-                mapPosition.z = WorldMapStorage.ToMap(Player.Position).z;
-            
-            var field = WorldMapStorage.GetField(mapPosition);
-            if (!field)
+
+            int rectX = (int)(point.x / LayerZoom.x) + Constants.FieldSize;
+            int rectY = (int)(point.y / LayerZoom.y) + Constants.FieldSize;
+
+            int mapX = rectX / Constants.FieldSize;
+            int mapY = rectY / Constants.FieldSize;
+
+            if (mapX < 0 || mapX > Constants.MapWidth || mapY < 0 || mapY > Constants.MapHeight)
                 return null;
 
-            int index = field.GetTopCreatureObject(out Appearances.ObjectInstance @object);
-            if (index == -1)
-                return null;
-            
-            return CreatureStorage.GetCreature(@object.Data);
+            int minZ = _minZPlane[mapY * Constants.MapSizeX + mapX];
+            if (restrictedToPlayerZPlane)
+                minZ = WorldMapStorage.ToMap(Player.Position).z;
+
+            for (int i = 0; i < _drawnCreaturesCount; i++) {
+                var renderAtom = _drawnCreatures[i];
+                int renderX = renderAtom.x - Constants.FieldSize / 2;
+                int renderY = renderAtom.y - Constants.FieldSize / 2;
+
+                if (!(Math.Abs(renderX - rectX) > Constants.FieldSize / 2 || Math.Abs(renderY - rectY) > Constants.FieldSize / 2)) {
+                    var creature = renderAtom.Object as Creatures.Creature;
+                    if (!!creature && WorldMapStorage.IsVisible(creature.Position, true) && WorldMapStorage.ToMap(creature.Position).z >= minZ)
+                        return creature;
+                }
+            }
+
+            return null;
         }
     }
 }
