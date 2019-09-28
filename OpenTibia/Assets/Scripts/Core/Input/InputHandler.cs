@@ -340,9 +340,7 @@ namespace OpenTibiaUnity.Core.Input
         }
 
         public static bool IsGameObjectHighlighted(GameObject gameObject) {
-            if (!gameObject)
-                return true;
-            else if (!gameObject.activeSelf)
+            if (!gameObject || !gameObject.activeSelf)
                 return false;
 
             var selectedGameObject = EventSystem.current.currentSelectedGameObject;

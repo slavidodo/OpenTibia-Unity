@@ -40,7 +40,7 @@ namespace OpenTibiaUnity.Modules.Container
                 return;
 
             var gameManager = OpenTibiaUnity.GameManager;
-            publicStartMouseAction(Input.mousePosition, MouseButton.None, false, true);
+            InternalStartMouseAction(Input.mousePosition, MouseButton.None, false, true);
 
             if (!_slotsRenderTexture)
                 return;
@@ -83,7 +83,7 @@ namespace OpenTibiaUnity.Modules.Container
         }
 
         protected void OnMouseUp(Event e, MouseButton mouseButton, bool repeat) {
-            if (publicStartMouseAction(e.mousePosition, mouseButton, true, false))
+            if (InternalStartMouseAction(e.mousePosition, mouseButton, true, false))
                 e.Use();
         }
 
@@ -100,7 +100,7 @@ namespace OpenTibiaUnity.Modules.Container
                 protocolGame.SendUpContainer(_containerView.Id);
         }
 
-        private bool publicStartMouseAction(Vector3 mousePosition, MouseButton mouseButton, bool applyAction = false, bool updateCursor = false) {
+        private bool InternalStartMouseAction(Vector3 mousePosition, MouseButton mouseButton, bool applyAction = false, bool updateCursor = false) {
             var gameManager = OpenTibiaUnity.GameManager;
             if (!_mouseCursorOverRenderer || !gameManager.GameCanvas.gameObject.activeSelf || gameManager.GamePanelBlocker.gameObject.activeSelf)
                 return false;

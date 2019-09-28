@@ -144,7 +144,7 @@ namespace OpenTibiaUnity.Core.Creatures
 
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             var worldMapStorage = OpenTibiaUnity.WorldMapStorage;
-            if (!!protocolGame || !protocolGame.IsGameRunning || worldMapStorage == null)
+            if (!protocolGame || !protocolGame.IsGameRunning || worldMapStorage == null)
                 return;
 
             _autowalkTarget.Set(-1, -1, -1);
@@ -172,21 +172,21 @@ namespace OpenTibiaUnity.Core.Creatures
 
             // if there is no steps left, permit a new walk
             if (_autowalkPathSteps.Count == 0) {
-                StartAutowalkpublic();
+                StartAutowalkInternal();
             } else {
                 protocolGame.SendStop();
                 _autowalkPathAborting = true;
             }
         }
 
-        private void StartAutowalkpublic() {
+        private void StartAutowalkInternal() {
             if (_movementRunning || _autowalkPathAborting || _autowalkPathDelta != UnityEngine.Vector3Int.zero || _autowalkTarget.x == -1 && _autowalkTarget.y == -1 && _autowalkTarget.z == -1)
                 return;
             
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             var minimapStorage = OpenTibiaUnity.MiniMapStorage;
             var worldMapStorage = OpenTibiaUnity.WorldMapStorage;
-            if (!!protocolGame || !protocolGame.IsGameRunning || minimapStorage == null || worldMapStorage == null)
+            if (!protocolGame || !protocolGame.IsGameRunning || minimapStorage == null || worldMapStorage == null)
                 return;
 
             _autowalkPathAborting = false;
@@ -235,7 +235,7 @@ namespace OpenTibiaUnity.Core.Creatures
             
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             var worldMapStorage = OpenTibiaUnity.WorldMapStorage;
-            if (!!protocolGame || !protocolGame.IsGameRunning || worldMapStorage == null)
+            if (!protocolGame || !protocolGame.IsGameRunning || worldMapStorage == null)
                 return;
 
             switch ((PathDirection)(_autowalkPathSteps[0] & 65535)) {
@@ -363,7 +363,7 @@ namespace OpenTibiaUnity.Core.Creatures
             if (!_movementRunning || _autowalkPathDelta != UnityEngine.Vector3Int.zero) {
                 _autowalkPathDelta.Set(0, 0, 0);
                 StopMovementAnimation();
-                StartAutowalkpublic();
+                StartAutowalkInternal();
             }
         }
 
@@ -390,7 +390,7 @@ namespace OpenTibiaUnity.Core.Creatures
                 if (_autowalkPathSteps.Count > 0)
                     NextAutowalkStep();
                 else
-                    StartAutowalkpublic();
+                    StartAutowalkInternal();
             }
         }
 

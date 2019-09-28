@@ -181,7 +181,7 @@ namespace OpenTibiaUnity.Modules.Inventory
                 return;
 
             var gameManager = OpenTibiaUnity.GameManager;
-            publicStartMouseAction(Input.mousePosition, MouseButton.None, false, true);
+            InternalStartMouseAction(Input.mousePosition, MouseButton.None, false, true);
 
             Vector2 zoom = new Vector2(Screen.width / (float)_slotsRenderTexture.width, Screen.height / (float)_slotsRenderTexture.height);
 
@@ -208,11 +208,11 @@ namespace OpenTibiaUnity.Modules.Inventory
         }
 
         public void OnMouseUp(Event e, MouseButton mouseButton, bool repeat) {
-            if (publicStartMouseAction(e.mousePosition, mouseButton, true, false))
+            if (InternalStartMouseAction(e.mousePosition, mouseButton, true, false))
                 e.Use();
         }
 
-        private bool publicStartMouseAction(Vector3 mousePosition, MouseButton mouseButton, bool applyAction = false, bool updateCursor = false) {
+        private bool InternalStartMouseAction(Vector3 mousePosition, MouseButton mouseButton, bool applyAction = false, bool updateCursor = false) {
             var gameManager = OpenTibiaUnity.GameManager;
             if (!_mouseCursorOverRenderer || !gameManager.GameCanvas.gameObject.activeSelf || gameManager.GamePanelBlocker.gameObject.activeSelf)
                 return false;
@@ -623,17 +623,17 @@ namespace OpenTibiaUnity.Modules.Inventory
             return BodyContainerView.GetObject((ClothSlots)_slotUnderMouse);
         }
 
-        public int GetTopObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
+        public int GetTopObjectUnderPoint(Vector3 _, out ObjectInstance @object) {
             @object = GetObjectUnderMouse();
             return _slotUnderMouse;
         }
 
-        public int GetUseObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
+        public int GetUseObjectUnderPoint(Vector3 _, out ObjectInstance @object) {
             @object = GetObjectUnderMouse();
             return _slotUnderMouse;
         }
 
-        public int GetMultiUseObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
+        public int GetMultiUseObjectUnderPoint(Vector3 _, out ObjectInstance @object) {
             @object = GetObjectUnderMouse();
             if (!@object.Type.IsMultiUse) {
                 @object = null;
@@ -643,18 +643,18 @@ namespace OpenTibiaUnity.Modules.Inventory
             return _slotUnderMouse;
         }
 
-        public int GetMoveObjectUnderPoint(Vector3 mousePosition, out ObjectInstance @object) {
-            return GetUseObjectUnderPoint(mousePosition, out @object);
+        public int GetMoveObjectUnderPoint(Vector3 _, out ObjectInstance @object) {
+            return GetUseObjectUnderPoint(_, out @object);
         }
 
-        public Vector3Int? MousePositionToAbsolutePosition(Vector3 mousePosition) {
+        public Vector3Int? MousePositionToAbsolutePosition(Vector3 _) {
             if (_slotUnderMouse == -1)
                 return null;
 
             return new Vector3Int(65535, _slotUnderMouse, 0);
         }
 
-        public Vector3Int? MousePositionToMapPosition(Vector3 mousePosition) {
+        public Vector3Int? MousePositionToMapPosition(Vector3 _) {
             return null;
         }
 

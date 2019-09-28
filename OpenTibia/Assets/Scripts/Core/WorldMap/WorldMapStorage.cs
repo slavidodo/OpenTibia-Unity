@@ -31,7 +31,6 @@ namespace OpenTibiaUnity.Core.WorldMap
         }
         public bool Valid { get; set; } = false;
         public bool CacheFullbank { get; set; } = false;
-        public bool CacheUnsight { get; set; } = false;
         public bool CacheRefresh { get; set; } = false;
         public int PlayerZPlane { get; private set; } = 0;
         public bool LayoutOnscreenMessages { get; set; } = false;

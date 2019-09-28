@@ -333,8 +333,6 @@ namespace OpenTibiaUnity.Core.WorldMap
                 else
                     hangableObject.Hang = 0;
             }
-            
-            OpenTibiaUnity.WorldMapStorage.CacheUnsight = OpenTibiaUnity.WorldMapStorage.CacheUnsight && !CacheUnsight;
         }
 
         public void ResetObjects() {

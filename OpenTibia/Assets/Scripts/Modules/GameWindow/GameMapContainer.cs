@@ -94,7 +94,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
 
             if (gameManager != null && worldMapStorage != null && gameManager.IsGameRunning && worldMapStorage.Valid) {
                 if (_mouseCursorOverRenderer && gameManager.GameCanvas.gameObject.activeSelf && !gameManager.GamePanelBlocker.gameObject.activeSelf) {
-                    publicStartMouseAction(Input.mousePosition, MouseButton.None, false, true, true);
+                    InternalStartMouseAction(Input.mousePosition, MouseButton.None, false, true, true);
                 } else {
                     worldMapRenderer.HighlightTile = null;
                     worldMapRenderer.HighlightObject = null;
@@ -232,11 +232,11 @@ namespace OpenTibiaUnity.Modules.GameWindow
         public void InvalidateScreenRect() => _screenRectDirty = true;
 
         public void OnMouseUp(Event e, MouseButton mouseButton, bool repeat) {
-            if (publicStartMouseAction(e.mousePosition, mouseButton, true, false, false))
+            if (InternalStartMouseAction(e.mousePosition, mouseButton, true, false, false))
                 e.Use();
         }
 
-        private bool publicStartMouseAction(Vector3 mousePosition, MouseButton mouseButton, bool applyAction = false, bool updateCursor = false, bool updateHighlight = false) {
+        private bool InternalStartMouseAction(Vector3 mousePosition, MouseButton mouseButton, bool applyAction = false, bool updateCursor = false, bool updateHighlight = false) {
             var gameManager = OpenTibiaUnity.GameManager;
             if (!_mouseCursorOverRenderer || !gameManager.GameCanvas.gameObject.activeSelf || gameManager.GamePanelBlocker.gameObject.activeSelf)
                 return false;
@@ -433,7 +433,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
                         break;
                     case AppearanceActions.AutoWalk:
                     case AppearanceActions.AutoWalkHighlight:
-                        absolutePosition = worldMapRenderer.PointToAbsolute(RawMousePositionToLocalMapPosition(mousePosition), false).Value;
+                        absolutePosition = worldMapRenderer.PointToAbsolute(RawMousePositionToLocalMapPosition(mousePosition), true).Value;
                         player.StartAutowalk(absolutePosition, false, true);
                         break;
                     case AppearanceActions.ContextMenu:

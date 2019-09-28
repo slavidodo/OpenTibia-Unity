@@ -192,34 +192,30 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         }
         
         private void UpdateMinMaxZPlane() {
-            if (!WorldMapStorage.CacheUnsight) {
-                _maxZPlane = Constants.MapSizeZ - 1;
-                while (_maxZPlane > _playerZPlane && WorldMapStorage.GetObjectPerLayer(_maxZPlane) <= 0)
-                    _maxZPlane--;
+            _maxZPlane = Constants.MapSizeZ - 1;
+            while (_maxZPlane > _playerZPlane && WorldMapStorage.GetObjectPerLayer(_maxZPlane) <= 0)
+                _maxZPlane--;
 
-                for (int x = Constants.PlayerOffsetX - 1; x <= Constants.PlayerOffsetX + 1; x++) {
-                    for (int y = Constants.PlayerOffsetY - 1; y <= Constants.PlayerOffsetY + 1; y++) {
-                        if (!(x != Constants.PlayerOffsetX && y != Constants.PlayerOffsetY || !WorldMapStorage.IsLookPossible(x, y, _playerZPlane))) {
-                            int z = _playerZPlane + 1;
-                            while (z - 1 < _maxZPlane && x + _playerZPlane - z >= 0 && y + _playerZPlane - z >= 0) {
-                                var @object = WorldMapStorage.GetObject(x + _playerZPlane - z, y + _playerZPlane - z, z, 0);
-                                if (!!@object && !!@object.Type && @object.Type.IsGround && !@object.Type.IsDontHide) {
-                                    _maxZPlane = z - 1;
-                                    continue;
-                                }
-
-                                @object = WorldMapStorage.GetObject(x, y, z, 0);
-                                if (!!@object && !!@object.Type && (@object.Type.IsGround || @object.Type.IsBottom) && !@object.Type.IsDontHide) {
-                                    _maxZPlane = z - 1;
-                                    continue;
-                                }
-                                z++;
+            for (int x = Constants.PlayerOffsetX - 1; x <= Constants.PlayerOffsetX + 1; x++) {
+                for (int y = Constants.PlayerOffsetY - 1; y <= Constants.PlayerOffsetY + 1; y++) {
+                    if (!(x != Constants.PlayerOffsetX && y != Constants.PlayerOffsetY || !WorldMapStorage.IsLookPossible(x, y, _playerZPlane))) {
+                        int z = _playerZPlane + 1;
+                        while (z - 1 < _maxZPlane && x + _playerZPlane - z >= 0 && y + _playerZPlane - z >= 0) {
+                            var @object = WorldMapStorage.GetObject(x + _playerZPlane - z, y + _playerZPlane - z, z, 0);
+                            if (!!@object && !!@object.Type && @object.Type.IsGround && !@object.Type.IsDontHide) {
+                                _maxZPlane = z - 1;
+                                continue;
                             }
+
+                            @object = WorldMapStorage.GetObject(x, y, z, 0);
+                            if (!!@object && !!@object.Type && (@object.Type.IsGround || @object.Type.IsBottom) && !@object.Type.IsDontHide) {
+                                _maxZPlane = z - 1;
+                                continue;
+                            }
+                            z++;
                         }
                     }
                 }
-
-                WorldMapStorage.CacheUnsight = true;
             }
 
             if (!WorldMapStorage.CacheFullbank) {

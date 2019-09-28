@@ -7,7 +7,7 @@ namespace OpenTibiaUnity.Core.Input.GameAction
         private Creatures.Creature _nPC;
 
         public GreetAction(Creatures.Creature npcCreature) : base("Hi", true) {
-            if (!npcCreature || npcCreature.IsNPC)
+            if (!npcCreature || !npcCreature.IsNPC)
                 throw new Exception("GreetAction.GreetAction: Unknown creature or creature is not NPC.");
             _nPC = npcCreature;
         }

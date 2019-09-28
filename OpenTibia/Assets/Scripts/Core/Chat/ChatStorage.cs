@@ -57,7 +57,7 @@ namespace OpenTibiaUnity.Core.Chat
 
         public void LeaveChannel(Utils.UnionStrInt channelId) {
             var protocolGame = OpenTibiaUnity.ProtocolGame;
-            if (!!protocolGame || !protocolGame.IsGameRunning)
+            if (!protocolGame || !protocolGame.IsGameRunning)
                 return;
 
             if (s_IsPrivateChannel(channelId)) {
