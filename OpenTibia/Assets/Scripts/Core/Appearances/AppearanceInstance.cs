@@ -173,8 +173,8 @@ namespace OpenTibiaUnity.Core.Appearances
                 s_TempRect.position = s_TempPoint * zoom;
                 s_TempRect.size = s_FieldVector * zoom;
             } else {
-                s_TempRect.position = (s_TempPoint - cachedSprite.spriteSize + s_FieldVector) * zoom;
-                s_TempRect.size = cachedSprite.spriteSize * zoom;
+                s_TempRect.position = (s_TempPoint - cachedSprite.size + s_FieldVector) * zoom;
+                s_TempRect.size = cachedSprite.size * zoom;
             }
 
             if (material == null)

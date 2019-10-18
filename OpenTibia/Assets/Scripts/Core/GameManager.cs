@@ -174,8 +174,28 @@ namespace OpenTibiaUnity.Core
         public bool IsRealTibia { get => ClientSpecification == ClientSpecification.Cipsoft; }
         public bool IsOpenTibia { get => ClientSpecification == ClientSpecification.OpenTibia; }
 
-        public bool IsLoadingClientAssets { get => _loadingClientAssets; }
-        public bool HasLoadedClientAssets { get => _loadedClientAssets; }
+        private object _loadingClientAssetsLock;
+        public bool IsLoadingClientAssets {
+            get {
+                lock (_loadingClientAssetsLock)
+                    return _loadingClientAssets;
+            }
+            private set {
+                lock (_loadingClientAssetsLock)
+                    _loadingClientAssets = value;
+            }
+        }
+        private object _loadedClientAssetsLock;
+        public bool HasLoadedClientAssets {
+            get {
+                lock (_loadedClientAssetsLock)
+                    return _loadedClientAssets;
+            }
+            private set {
+                lock (_loadingClientAssetsLock)
+                    _loadedClientAssets = value;
+            }
+        }
 
         public int ShouldSendPingAt { get; set; } = -1;
 
@@ -207,6 +227,8 @@ namespace OpenTibiaUnity.Core
 
             // setup threading mutex & lockers
             _actionQueue = new Queue<UnityAction>();
+            _loadingClientAssetsLock = new object();
+            _loadedClientAssetsLock = new object();
 
             // quit-notification related
             _exitWindow = null;
@@ -439,11 +461,11 @@ namespace OpenTibiaUnity.Core
         public bool CanLoadThings(int clientVersion, int buildVersion, ClientSpecification specification) {
             string assetsPath = GetAssetsPath(clientVersion, buildVersion, specification);
             
-            string appearancesPath = Path.Combine(assetsPath, "appearances.dat");
+            string appearancesPath = Path.Combine(assetsPath, "appearances.otud");
             if (!File.Exists(appearancesPath))
                 return false;
 
-            string spritesPath = Path.Combine(assetsPath, "sprites");
+            string spritesPath = Path.Combine(assetsPath, "assets.otus");
             if (!File.Exists(spritesPath))
                 return false;
 
@@ -455,7 +477,7 @@ namespace OpenTibiaUnity.Core
         }
 
         public async Task<bool> LoadThingsAsyncAwaitable(int clientVersion, int buildVersion, ClientSpecification specification) {
-            if (_loadingClientAssets)
+            if (IsLoadingClientAssets)
                 return false;
 
             if (clientVersion < 1100) {
@@ -464,7 +486,7 @@ namespace OpenTibiaUnity.Core
             } else if (_loadedClientVersion == clientVersion && _loadedBuildVersion == buildVersion)
                 return true;
 
-            _loadingClientAssets = true;
+            IsLoadingClientAssets = true;
             
             try {
                 string assetsPath = GetAssetsPath(clientVersion, buildVersion, specification);
@@ -473,7 +495,7 @@ namespace OpenTibiaUnity.Core
                 LoadProtoAppearanaces(assetsPath);
                 await LoadSpriteAssets(assetsPath);
 
-                _loadedClientAssets = true;
+                HasLoadedClientAssets = true;
                 _loadedClientVersion = clientVersion;
                 _loadedBuildVersion = buildVersion;
 
@@ -481,16 +503,19 @@ namespace OpenTibiaUnity.Core
                     onLoadedGameAssets.Invoke();
                 else
                     InvokeOnMainThread(() => onLoadedGameAssets.Invoke());
-            } catch (System.Exception) {
-                _loadedClientAssets = false;
+            } catch (System.Exception e) {
+#if DEBUG || NDEBUG
+                Debug.Log($"GameManager.LoadThingsAsyncAwaitable failed ({e.Message})");
+#endif
+                HasLoadedClientAssets = false;
             }
 
-            _loadingClientAssets = false;
-            return _loadedClientAssets;
+            IsLoadingClientAssets = false;
+            return HasLoadedClientAssets;
         }
 
         protected void LoadProtoAppearanaces(string assetsPath) {
-            string appearancesPath = Path.Combine(assetsPath, "appearances.dat");
+            string appearancesPath = Path.Combine(assetsPath, "appearances.otud");
             if (!File.Exists(appearancesPath))
                 throw new FileNotFoundException(string.Format("Couldn't find the appearances ({0}).", appearancesPath));
             
@@ -498,34 +523,24 @@ namespace OpenTibiaUnity.Core
                 byte[] bytes = File.ReadAllBytes(appearancesPath);
                 AppearanceStorage.SetProtoAppearances(Protobuf.Appearances.Appearances.Parser.ParseFrom(bytes));
             } catch (System.Exception e) {
-                throw new System.Exception(string.Format("Unable to appearances.dat ({0}).", e.Message));
+                throw new System.Exception(string.Format("Unable to appearances.otud ({0}).", e.Message));
             }
         }
 
         protected async Task LoadSpriteAssets(string assetsPath) {
-            string spritesPath = Path.Combine(assetsPath, "sprites");
+            string spritesPath = Path.Combine(assetsPath, "assets.otus");
             if (!File.Exists(spritesPath))
-                throw new FileNotFoundException(string.Format("Couldn't find sprites ({0}).", spritesPath));
+                throw new FileNotFoundException(string.Format("Couldn't find assets.otus ({0}).", spritesPath));
 
-            string catalogPath = Path.Combine(assetsPath, "catalog-content.json");
-            if (!File.Exists(catalogPath))
-                throw new FileNotFoundException(string.Format("Couldn't find catalog-content ({0}).", catalogPath));
-            
-            var request = AssetBundle.LoadFromFileAsync(spritesPath);
-            while (!request.isDone)
-                await Task.Yield();
-            
-            var assetBundle = request.assetBundle;
-            if (assetBundle == null)
-                throw new System.Exception(string.Format("Unable to load asset bundle ({0}).", spritesPath));
-            
-            try {
-                string catalogJson = File.ReadAllText(catalogPath);
-                AppearanceStorage.SetSpriteProvider(new Appearances.SpritesProvider(assetBundle, catalogJson));
-            } catch (System.Exception e) {
-                assetBundle.Unload(true);
-                throw new System.Exception(string.Format("Unable to catalog-content.json ({0}).", e.Message));
+            using (var stream = File.OpenRead(spritesPath)) {
+                var spriteProvider = await LoadSpriteProvider(stream);
+                AppearanceStorage.SetSpriteProvider(spriteProvider);
             }
+        }
+
+        private async Task<Appearances.SpritesProvider> LoadSpriteProvider(Stream stream) {
+            await Task.Yield();
+            return new Appearances.SpritesProvider(stream);
         }
 
         public void ProcessGamePending() {

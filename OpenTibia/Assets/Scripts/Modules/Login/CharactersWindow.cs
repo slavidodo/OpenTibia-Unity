@@ -419,6 +419,10 @@ namespace OpenTibiaUnity.Modules.Login
             Close();
 
             var gameManager = OpenTibiaUnity.GameManager;
+            if (!gameManager.IsLoadingClientAssets && !gameManager.HasLoadedClientAssets) {
+                await gameManager.LoadThingsAsyncAwaitable(gameManager.ClientVersion, gameManager.BuildVersion, gameManager.ClientSpecification);
+            }
+
             if (gameManager.IsLoadingClientAssets) {
                 gameManager.LobbyPanel.gameObject.SetActive(false);
                 gameManager.LoadingAppearancesWindow.gameObject.SetActive(true);
@@ -428,16 +432,21 @@ namespace OpenTibiaUnity.Modules.Login
 
                 gameManager.LobbyPanel.gameObject.SetActive(OpenTibiaUnity.GameManager.ClientVersion >= 1200);
                 gameManager.LoadingAppearancesWindow.gameObject.SetActive(false);
-
-                if (!gameManager.HasLoadedClientAssets) {
-                    var clientVersion = OpenTibiaUnity.GameManager.ClientVersion;
-                    var buildVersion = OpenTibiaUnity.GameManager.BuildVersion;
-
-                    PopupMessage("Sorry", string.Format("Couldn't load appearances for version {0}.{1}.", clientVersion / 100f, buildVersion));
-                    return;
-                }
             }
-            
+
+            if (!gameManager.HasLoadedClientAssets) {
+                var clientVersion = OpenTibiaUnity.GameManager.ClientVersion;
+                var buildVersion = OpenTibiaUnity.GameManager.BuildVersion;
+                string versionLiteral;
+                if (clientVersion >= 1100)
+                    versionLiteral = $"{clientVersion}.{buildVersion}";
+                else
+                    versionLiteral = clientVersion.ToString();
+
+                PopupMessage("Sorry", string.Format($"Couldn't load appearances for version {versionLiteral}."));
+                return;
+            }
+
             PopupMessage("Connecting", "Connecting to the game world. Please wait.", PopupMenuType.Cancel);
 
             OpenTibiaUnity.ChatStorage.Reset();

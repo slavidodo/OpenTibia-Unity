@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -15,97 +16,90 @@ namespace OpenTibiaUnity.Core.Appearances
     public class SpriteTypeImpl
     {
         public string File;
-        public int SpriteType;
+        public ushort SpriteType;
         public uint FirstSpriteId;
         public uint LastSpriteId;
+        public uint AtlasId;
+        public Texture2D Texture;
     }
 
     public class CachedSprite
     {
-        public uint id = 0;
-        public Texture2D texture = null;
-        public Rect rect = Rect.zero;
-        public Vector2 spriteSize = Vector2.zero;
+        public uint id { get; set; }
+        public Texture2D texture { get; set; }
+        public Rect rect { get; set; }
+        public Vector2 size { get; set; }
     }
 
     public sealed class SpritesProvider {
-        AssetBundle _spritesAssetBundle;
-
-        List<SpriteTypeImpl> _spriteSheet = new List<SpriteTypeImpl>();
-        List<CachedSprite> _cachedSprites = new List<CachedSprite>();
-        List<int> _failedTextureRequests = new List<int>();
-        Dictionary<string, Texture2D> _cachedTextures = new Dictionary<string, Texture2D>();
-        Dictionary<string, AssetBundleRequest> _activeTextureRequests = new Dictionary<string, AssetBundleRequest>();
-
         private static Vector2[] SpriteTypeSizeRefs = new Vector2[] {
             new Vector2(1.0f, 1.0f),
             new Vector2(1.0f, 2.0f),
             new Vector2(2.0f, 1.0f),
             new Vector2(2.0f, 2.0f)
         };
-        
-        public SpritesProvider(AssetBundle spritesBundle, string catalogJson) {
-            var catalogObjects = (JArray)JsonConvert.DeserializeObject(catalogJson);
-            if (catalogObjects == null)
-                throw new System.Exception("SpriteProvider.SpritesProvider: Invalid catalog-content JSON");
-            
-            _spritesAssetBundle = spritesBundle;
-            foreach (var @object in catalogObjects.Children<JObject>()) {
-                var typeProperty = @object.Property("type");
-                if (typeProperty == null || typeProperty.Value.ToString() != "sprite")
-                    continue;
-                
-                if (!@object.TryGetValue("file", out JToken fileToken)
-                    || !@object.TryGetValue("spritetype", out JToken spriteTypeToken)
-                    || !@object.TryGetValue("firstspriteid", out JToken firstSpriteIdToken)
-                    || !@object.TryGetValue("lastspriteid", out JToken lastSpriteIdToken))
-                    continue;
 
-                try {
-                    _spriteSheet.Add(new SpriteTypeImpl() {
-                        File = (string)fileToken,
-                        SpriteType = (int)spriteTypeToken,
-                        FirstSpriteId = (uint)firstSpriteIdToken,
-                        LastSpriteId = (uint)lastSpriteIdToken
-                    });
-                } catch (System.InvalidCastException) {}
+        List<SpriteTypeImpl> _spriteSheet;
+        List<CachedSprite> _cachedSprites = new List<CachedSprite>();
+
+        public SpritesProvider(System.IO.Stream stream) {
+            using (var reader = new System.IO.BinaryReader(stream)) {
+                uint total = reader.ReadUInt32();
+                _spriteSheet = new List<SpriteTypeImpl>((int)total);
+                for (uint i = 0; i < total; i++) {
+                    var atlasId = reader.ReadUInt32();
+                    var spriteType = reader.ReadUInt16();
+                    var firstSpriteId = reader.ReadUInt32();
+                    var lastSpriteId = reader.ReadUInt32();
+
+                    var texture = new Texture2D(1, 1);
+                    var size = reader.ReadUInt32();
+                    var data = new byte[size];
+                    reader.Read(data, 0, (int)size);
+                    texture.LoadImage(data);
+
+                    var spriteImpl = new SpriteTypeImpl {
+                        AtlasId = atlasId,
+                        FirstSpriteId = firstSpriteId,
+                        LastSpriteId = lastSpriteId,
+                        SpriteType = spriteType,
+                        Texture = texture,
+                    };
+
+                    _spriteSheet.Add(spriteImpl);
+                }
             }
         }
 
-        public void Unload() {
-            _spritesAssetBundle?.Unload(true);
-            _spritesAssetBundle = null;
-
+        public void Dispose() {
             _spriteSheet.Clear();
-            _cachedTextures.Clear();
-            _activeTextureRequests.Clear();
             _cachedSprites.Clear();
         }
 
-        private SpriteLoadingStatus GetSpriteInfo(uint spriteId, out string filename, out Rect spriteRect, out Vector2 realSpriteSize, out Texture2D tex2D) {
+        private SpriteLoadingStatus GetSpriteInfo(uint spriteId, out Rect rect, out Vector2 size, out Texture2D texture) {
             SpriteTypeImpl match = _spriteSheet.Find(m => spriteId >= m.FirstSpriteId && spriteId <= m.LastSpriteId);
 
-            SpriteLoadingStatus loadingStatus = SpriteLoadingStatus.Failed;
-            if (match != null)
-                loadingStatus = GetOrLoadTexture(match.File, out tex2D);
-            else
-                tex2D = null;
+            var loadingStatus = SpriteLoadingStatus.Failed;
+            if (match != null) {
+                loadingStatus = SpriteLoadingStatus.Completed;
+                texture = match.Texture;
+            } else {
+                texture = null;
+            }
 
-            if (tex2D == null) {
-                filename = null;
-                spriteRect = Rect.zero;
-                realSpriteSize = Vector2.zero;
+            if (texture == null) {
+                rect = Rect.zero;
+                size = Vector2.zero;
                 return loadingStatus;
             }
 
-            filename = match.File;
-            realSpriteSize = SpriteTypeSizeRefs[match.SpriteType - 1] * Constants.FieldSize;
+            size = SpriteTypeSizeRefs[match.SpriteType - 1] * Constants.FieldSize;
             uint realId = spriteId - match.FirstSpriteId;
-            int texPerRow = (int)(tex2D.width / realSpriteSize.x);
+            int texPerRow = (int)(texture.width / size.x);
 
-            float x = (realId % texPerRow) * realSpriteSize.x;
-            float y = tex2D.width - (realId / texPerRow * realSpriteSize.y) - realSpriteSize.y;
-            spriteRect = new Rect(x / tex2D.width, y / tex2D.height, realSpriteSize.x / tex2D.width, realSpriteSize.y / tex2D.height);
+            float x = (realId % texPerRow) * size.x;
+            float y = texture.width - (realId / texPerRow * size.y) - size.y;
+            rect = new Rect(x / texture.width, y / texture.height, size.x / texture.width, size.y / texture.height);
             return loadingStatus;
         }
 
@@ -114,50 +108,22 @@ namespace OpenTibiaUnity.Core.Appearances
             if (cachedSprite != null)
                 return SpriteLoadingStatus.Completed;
 
-            string filename;
-            Rect spriteRect;
-            Vector2 realSize;
-            Texture2D tex2D;
-
-            var loadingStatus = GetSpriteInfo(spriteId, out filename, out spriteRect, out realSize, out tex2D);
+            var loadingStatus = GetSpriteInfo(spriteId, out Rect rect, out Vector2 size, out Texture2D texture);
             if (loadingStatus != SpriteLoadingStatus.Completed)
                 return loadingStatus;
-            
-            cachedSprite = new CachedSprite();
+
+            cachedSprite = new CachedSprite {
+                id = spriteId,
+                rect = rect,
+                size = size,
+                texture = texture,
+            };
             cachedSprite.id = spriteId;
-            cachedSprite.rect = spriteRect;
-            cachedSprite.spriteSize = realSize;
-            cachedSprite.texture = tex2D;
+            cachedSprite.rect = rect;
+            cachedSprite.size = size;
+            cachedSprite.texture = texture;
 
-            BinaryInsert(cachedSprite);
-            return SpriteLoadingStatus.Completed;
-        }
-
-        private SpriteLoadingStatus GetOrLoadTexture(string filename, out Texture2D tex2D) {
-            if (_cachedTextures.TryGetValue(filename, out tex2D))
-                return SpriteLoadingStatus.Completed;
-
-            int hashCode = filename.GetHashCode();
-            if (_failedTextureRequests.FindIndex((x) => x == hashCode) >= 0)
-                return SpriteLoadingStatus.Failed;
-
-            AssetBundleRequest asyncRequest;
-            if (!_activeTextureRequests.TryGetValue(filename, out asyncRequest)) {
-                asyncRequest = _spritesAssetBundle.LoadAssetAsync<Texture2D>(filename);
-                _activeTextureRequests.Add(filename, asyncRequest);
-            }
-
-            if (!asyncRequest.isDone) {
-                return SpriteLoadingStatus.Loading;
-            } else if (asyncRequest.asset == null) {
-                _activeTextureRequests.Remove(filename);
-                _failedTextureRequests.Add(hashCode);
-                return SpriteLoadingStatus.Failed;
-            }
-
-            tex2D = asyncRequest.asset as Texture2D;
-            _activeTextureRequests.Remove(filename);
-            _cachedTextures.Add(filename, tex2D);
+            InsertCachedSprite(cachedSprite);
             return SpriteLoadingStatus.Completed;
         }
 
@@ -178,7 +144,7 @@ namespace OpenTibiaUnity.Core.Appearances
             return null;
         }
 
-        private void BinaryInsert(CachedSprite cachedSprite) {
+        private void InsertCachedSprite(CachedSprite cachedSprite) {
             int index = 0;
             int lastIndex = _cachedSprites.Count - 1;
             while (index <= lastIndex) {

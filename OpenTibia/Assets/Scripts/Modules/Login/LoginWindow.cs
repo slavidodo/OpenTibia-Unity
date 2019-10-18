@@ -461,16 +461,11 @@ namespace OpenTibiaUnity.Modules.Login
             int clientVersion = gameManager.ClientVersion;
             int buildVersion = gameManager.BuildVersion;
 
-            ClientSpecification specification;
-            string rawAddress = address.ToLower();
-            if (rawAddress == "cipsoft")
-                specification = ClientSpecification.Cipsoft;
-            else
-                specification = ClientSpecification.OpenTibia;
-
-            gameManager.SetClientSpecification(specification);
-
+            var specification = ClientSpecification.OpenTibia;
             if (clientVersion >= 1200) {
+                if (address.ToLower() == "cipsoft")
+                    specification = ClientSpecification.Cipsoft;
+
                 gameObject.SetActive(false);
                 gameManager.LoadingAppearancesWindow.Open();
                 bool loaded = await gameManager.LoadThingsAsyncAwaitable(clientVersion, buildVersion, specification);
@@ -489,7 +484,8 @@ namespace OpenTibiaUnity.Modules.Login
 
                 gameManager.LoadThingsAsync(clientVersion, buildVersion, specification);
             }
-            
+
+            gameManager.SetClientSpecification(specification);
             if (clientVersion >= 1100) {
                 _loginWebClient = new LoginWebClient(clientVersion, buildVersion) {
                     AccountIdentifier = _protocolAccountIdentifier,

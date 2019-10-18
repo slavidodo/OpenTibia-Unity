@@ -78,7 +78,7 @@ namespace OpenTibiaUnity.Core.Appearances
         }
 
         public void SetSpriteProvider(SpritesProvider spriteProvider) => _spritesProvider = spriteProvider;
-        public void UnloadSpriteProvider() => _spritesProvider?.Unload();
+        public void UnloadSpriteProvider() => _spritesProvider?.Dispose();
         public SpriteLoadingStatus GetSprite(uint spriteId, out CachedSprite cachedSprite) {
             return _spritesProvider.GetSprite(spriteId, out cachedSprite);
         }
