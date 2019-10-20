@@ -150,10 +150,11 @@
         PathErrorGoUpstairs,
         PathErrorTooFar,
         PathErrorUnreachable,
-        PathErrorpublic,
+        PathErrorInternal,
     }
-    public enum PathDirection
+    public enum PathDirection : byte
     {
+        Invalid = 0,
         East = 1,
         NorthEast = 2,
         North = 3,

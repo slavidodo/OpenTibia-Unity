@@ -220,7 +220,7 @@ namespace OpenTibiaUnity.Core.Creatures
                     worldMapStorage.AddOnscreenMessage(MessageModeType.Failure, TextResources.MSG_PATH_UNREACHABLE);
                     StopAutowalk(false);
                     break;
-                case PathState.PathErrorpublic:
+                case PathState.PathErrorInternal:
                     worldMapStorage.AddOnscreenMessage(MessageModeType.Failure, TextResources.MSG_SORRY_NOT_POSSIBLE);
                     StopAutowalk(false);
                     break;

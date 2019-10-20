@@ -15,8 +15,8 @@ namespace OpenTibiaUnity.Core.MiniMap
         public int SectorY { get; }
         public int SectorZ { get; }
         public int MinCost { get; private set; } = 255;
-        public UnityEngine.Texture2D Texture2D { get; private set; }
-        private UnityEngine.Texture2D _waypointsTexture2D;
+        public Texture2D Texture2D { get; private set; }
+        public Texture2D WaypointsTexture2D { get; private set; }
 
         public MiniMapSector(int x, int y, int z) {
             SectorX = x;
@@ -27,15 +27,15 @@ namespace OpenTibiaUnity.Core.MiniMap
                 filterMode = FilterMode.Point
             };
 
-            Texture2D.SetPixels(Enumerable.Repeat(Color.black, Constants.MiniMapSectorSize * Constants.MiniMapSectorSize).ToArray());
-            Texture2D.Apply();
-
-            _waypointsTexture2D = new Texture2D(Constants.MiniMapSectorSize, Constants.MiniMapSectorSize, TextureFormat.ARGB32, true) {
+            WaypointsTexture2D = new Texture2D(Constants.MiniMapSectorSize, Constants.MiniMapSectorSize, TextureFormat.ARGB32, true) {
                 filterMode = FilterMode.Point
             };
 
-            _waypointsTexture2D.SetPixels(Enumerable.Repeat(Colors.ColorFrom8Bit(Constants.PathCostUndefined), Constants.MiniMapSectorSize * Constants.MiniMapSectorSize).ToArray());
-            _waypointsTexture2D.Apply();
+            var blackColorArray = Enumerable.Repeat(Color.black, Constants.MiniMapSectorSize * Constants.MiniMapSectorSize).ToArray();
+            Texture2D.SetPixels(blackColorArray);
+            WaypointsTexture2D.SetPixels(blackColorArray);
+            Texture2D.Apply();
+            WaypointsTexture2D.Apply();
 
             for (int i = 0; i < _cost.Length; i++)
                 _cost[i] = Constants.PathCostUndefined;
@@ -76,8 +76,9 @@ namespace OpenTibiaUnity.Core.MiniMap
             y %= Constants.MiniMapSectorSize;
             cost = GetWaypointsSafe(cost);
 
-            Texture2D.SetPixel(x, Constants.MiniMapSectorSize - y - 1, Colors.ColorFromARGB(color));
-            _waypointsTexture2D.SetPixel(x, Constants.MiniMapSectorSize - y - 1, Colors.ColorFrom8Bit(cost));
+            int texelX = x, texelY = Constants.MiniMapSectorSize - y - 1;
+            Texture2D.SetPixel(texelX, texelY, Colors.ColorFromARGB(color));
+            WaypointsTexture2D.SetPixel(texelX, texelY, Colors.ColorFrom8Bit(cost));
 
             _cost[y * Constants.MiniMapSectorSize + x] = cost;
             MinCost = System.Math.Min(MinCost, cost);
@@ -103,7 +104,7 @@ namespace OpenTibiaUnity.Core.MiniMap
             if (UncommittedPixelChanges) {
                 UncommittedPixelChanges = false;
                 Texture2D.Apply();
-                _waypointsTexture2D.Apply();
+                WaypointsTexture2D.Apply();
             }
         }
 
@@ -124,7 +125,7 @@ namespace OpenTibiaUnity.Core.MiniMap
             if (!Texture2D.LoadImage(colorBytes))
                 return false;
 
-            if (!_waypointsTexture2D.LoadImage(waypointBytes)) {
+            if (!WaypointsTexture2D.LoadImage(waypointBytes)) {
                 Texture2D.SetPixels(Enumerable.Repeat(Color.black, Constants.MiniMapSectorSize * Constants.MiniMapSectorSize).ToArray());
                 Texture2D.Apply();
                 UncommittedPixelChanges = false;
@@ -133,7 +134,7 @@ namespace OpenTibiaUnity.Core.MiniMap
 
             for (int x = 0; x < Constants.MiniMapSectorSize; x++) {
                 for (int y = 0; y < Constants.MiniMapSectorSize; y++) {
-                    var cost = Colors.EightBitFromColor(_waypointsTexture2D.GetPixel(x, y));
+                    var cost = Colors.EightBitFromColor(WaypointsTexture2D.GetPixel(x, y));
                     MinCost = Mathf.Min(MinCost, cost);
                     _cost[(Constants.MiniMapSectorSize - y - 1) * Constants.MiniMapSectorSize + x] = cost;
                 }
@@ -149,7 +150,7 @@ namespace OpenTibiaUnity.Core.MiniMap
                 Directory.CreateDirectory(Path.Combine(Application.persistentDataPath, "MiniMap"));
 
             byte[] colorTexBytes = Texture2D.EncodeToPNG();
-            byte[] waypointsTexBytes = _waypointsTexture2D.EncodeToPNG();
+            byte[] waypointsTexBytes = WaypointsTexture2D.EncodeToPNG();
 
             var sectorName = GetSectorName(this);
             var colorPath = Path.Combine(Application.persistentDataPath, "MiniMap/Colors_" + sectorName + ".png");

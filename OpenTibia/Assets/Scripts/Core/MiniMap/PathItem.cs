@@ -2,23 +2,21 @@
 
 namespace OpenTibiaUnity.Core.MiniMap
 {
-    public class PathItem : Utils.HeapItem
+    public sealed class PathItem
     {
         public int X = 0;
         public int Y = 0;
 
-        public int Cost = int.MaxValue;
-        public int PathHeuristic = int.MaxValue;
-        public int PathCost = int.MaxValue;
-        public int Distance = int.MaxValue;
+        public int Cost = 0;
+        public int PathHeuristic = 0;
+        public int PathCost = 0;
+        public PathDirection Direction = PathDirection.Invalid;
 
         public PathItem Predecessor = null;
 
         public PathItem(int x, int y) {
             X = x;
             Y = y;
-
-            Distance = Mathf.Abs(x) + Mathf.Abs(y);
         }
     }
 }

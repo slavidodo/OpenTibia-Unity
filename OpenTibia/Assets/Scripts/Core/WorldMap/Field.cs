@@ -394,14 +394,15 @@ namespace OpenTibiaUnity.Core.WorldMap
             bool obstacle = ObjectsCount == 0 || !ObjectsRenderer[0].Type.IsGround; // no objects or no ground
             for (int i = 0; i < ObjectsCount; i++) {
                 Appearances.AppearanceType appearanceType = ObjectsRenderer[i].Type;
-                if (appearanceType.IsGround)
-                    MiniMapCost = (int)System.Math.Min(Constants.PathCostMax, appearanceType.GroundSpeed);
+                if (!obstacle) {
+                    if (appearanceType.IsBlockPath || appearanceType.IsUnpassable)
+                        obstacle = true;
+                    else if (appearanceType.IsGround)
+                        MiniMapCost = (int)System.Math.Min(Constants.PathCostMax, appearanceType.GroundSpeed);
+                }
 
                 if (appearanceType.IsAutomap)
                     MiniMapColor = Colors.ARGBFrom8Bit(appearanceType.AutomapColor);
-
-                if (appearanceType.IsBlockPath || appearanceType.IsUnpassable)
-                    obstacle = true;
             }
 
             if (obstacle)

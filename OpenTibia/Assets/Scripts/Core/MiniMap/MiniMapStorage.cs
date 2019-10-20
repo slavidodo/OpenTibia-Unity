@@ -11,12 +11,9 @@ namespace OpenTibiaUnity.Core.MiniMap
         private bool _changedSector = false;
         private Vector3Int _sector = new Vector3Int(-1, -1, -1);
         private Vector3Int _position = new Vector3Int(-1, -1, -1);
-        private Utils.Heap _pathHeap;
         private List<MiniMapSector> _sectorCache = new List<MiniMapSector>();
         private List<MiniMapSector> _loadQueue = new List<MiniMapSector>();
         private List<MiniMapSector> _saveQueue = new List<MiniMapSector>();
-        private SortedList<int, PathItem> _pathMatrix;
-        private List<PathItem> _pathDirty = new List<PathItem>();
         private int _currentIOCount = 0;
 
         public int PositionX { get { return _position.x; } }
@@ -54,17 +51,6 @@ namespace OpenTibiaUnity.Core.MiniMap
 
                 onPositionChange.Invoke(this, Position, oldPosition);
             }
-        }
-
-        public MiniMapStorage() {
-            _pathMatrix = new SortedList<int, PathItem>(Constants.PathMatrixCenter * Constants.PathMatrixCenter);
-            for (int y = 0; y < Constants.PathMatrixSize; y++) {
-                for (int x = 0; x < Constants.PathMatrixSize; x++)
-                    _pathMatrix.Add(y * Constants.PathMatrixSize + x, new PathItem(x - Constants.PathMatrixCenter, y- Constants.PathMatrixCenter));
-            }
-
-            _pathHeap = new Utils.Heap(50000);
-            _pathDirty = new List<PathItem>();
         }
 
         public MiniMapSector AcquireSector(Vector3Int position, bool cache) {
@@ -191,7 +177,7 @@ namespace OpenTibiaUnity.Core.MiniMap
             int dX = targetX - startX;
             int dY = targetY - startY;
             if (steps == null)
-                return PathState.PathErrorpublic;
+                return PathState.PathErrorInternal;
             else if (targetZ > startZ)
                 return PathState.PathErrorGoDownstairs;
             else if (targetZ < startZ)
@@ -202,7 +188,7 @@ namespace OpenTibiaUnity.Core.MiniMap
                 return PathState.PathErrorTooFar;
 
             // check if this tile is known to be obstacle
-            
+
             // simple case, adjacent square
             if (System.Math.Abs(dX) + System.Math.Abs(dY) == 1) {
                 int cost = GetFieldCost(targetX, targetY, targetZ);
@@ -239,180 +225,144 @@ namespace OpenTibiaUnity.Core.MiniMap
                 }
                 return PathState.PathEmpty;
             }
-            
+
             // A* Algorithm
+            return CalculateAStartPath(startX, startY, startZ, targetX, targetY, targetZ, 50000, steps);
+        }
 
-            // acquiring 4 directional sectors
-            MiniMapSector[] tmpSectors = new MiniMapSector[4];
-            tmpSectors[0] = AcquireSector(startX - Constants.PathMatrixCenter, startY - Constants.PathMatrixCenter, startZ, false);
-            tmpSectors[1] = AcquireSector(startX - Constants.PathMatrixCenter, startY + Constants.PathMatrixCenter, startZ, false);
-            tmpSectors[2] = AcquireSector(startX + Constants.PathMatrixCenter, startY + Constants.PathMatrixCenter, startZ, false);
-            tmpSectors[3] = AcquireSector(startX + Constants.PathMatrixCenter, startY - Constants.PathMatrixCenter, startZ, false);
-
-            // obtain local variables of constants
-            int matrixCenter = Constants.PathMatrixCenter;
-            int matrixSize = Constants.PathMatrixSize;
-
-            // heuristic multiplier
-            var minCost = int.MaxValue;
-            foreach (var sector in tmpSectors)
-                minCost = System.Math.Min(minCost, sector.MinCost);
+        private PathState CalculateAStartPath(int startX, int startY, int startZ, int targetX, int targetY, int targetZ, int searchLimit, List<int> steps) {
+            MiniMapSector[] sectors = new MiniMapSector[4];
+            sectors[0] = AcquireSector(startX - Constants.PathMatrixCenter, startY - Constants.PathMatrixCenter, startZ, false);
+            sectors[1] = AcquireSector(startX - Constants.PathMatrixCenter, startY + Constants.PathMatrixCenter, startZ, false);
+            sectors[2] = AcquireSector(startX + Constants.PathMatrixCenter, startY + Constants.PathMatrixCenter, startZ, false);
+            sectors[3] = AcquireSector(startX + Constants.PathMatrixCenter, startY - Constants.PathMatrixCenter, startZ, false);
 
             // initial sector position (start position in minimap storage)
-            var sectorMaxX = tmpSectors[0].SectorX + Constants.MiniMapSectorSize;
-            var sextorMaxY = tmpSectors[0].SectorY + Constants.MiniMapSectorSize;
+            var sectorMaxX = sectors[0].SectorX + Constants.MiniMapSectorSize;
+            var sextorMaxY = sectors[0].SectorY + Constants.MiniMapSectorSize;
 
-            // obtain the center of the grid, and resetting it
-            // the center of the grid is matchin our initial position, so we will use MatrixCenter with offset as a workaround
-            PathItem pathItem = _pathMatrix[matrixCenter * matrixSize + matrixCenter];
-            pathItem.Reset();
-            pathItem.Predecessor = null;
-            pathItem.Cost = int.MaxValue;
-            pathItem.PathCost = int.MaxValue;
-            pathItem.PathHeuristic = 0;
-            _pathDirty.Add(pathItem); // push the initial position to the closed list
+            var closedList = new Dictionary<int, PathItem>();
+            var openList = new Utils.PriorityQueue<KeyValuePair<PathItem, int>>(Comparer<KeyValuePair<PathItem, int>>.Create(ComparePathNodes));
 
-            // obtain the final position at our grid
-            PathItem lastPathNode = _pathMatrix[(matrixCenter + dY) * Constants.PathMatrixSize + (matrixCenter + dX)];
-            lastPathNode.Predecessor = null;
-            lastPathNode.Reset();
+            PathItem currentNode = new PathItem(startX, startY);
+            closedList.Add(Hash2DPosition(startX, startY), currentNode);
 
-            int tmpIndex;
-            if (targetX < sectorMaxX)
-                tmpIndex = targetY < sextorMaxY ? 0 : 1;
-            else
-                tmpIndex = targetY < sextorMaxY ? 3 : 2;
-            
-            lastPathNode.Cost = tmpSectors[tmpIndex].GetCost(targetX, targetY, targetZ);
-            lastPathNode.PathCost = 0;
-            // from the constructor, the distance is the manhattan distance from start_pos to target_pos
-            lastPathNode.PathHeuristic = lastPathNode.Cost + (lastPathNode.Distance - 1) * minCost;
+            PathItem foundNode = null;
 
-            // now add that to our closed list
-            _pathDirty.Add(lastPathNode);
+            PathState ret = PathState.PathErrorInternal;
+            while (currentNode != null) {
+                if (closedList.Count > searchLimit) {
+                    ret = PathState.PathErrorTooFar;
+                    break;
+                }
 
-            // clear our heap and push the current node to it.
-            _pathHeap.Clear(false);
-            _pathHeap.AddItem(lastPathNode, lastPathNode.PathHeuristic);
+                if (currentNode.X == targetX && currentNode.Y == targetY && (foundNode == null || currentNode.PathCost < foundNode.PathCost))
+                    foundNode = currentNode;
 
-            PathItem currentPathItem = null;
-            PathItem tmpPathItem = null;
-            
-            // looping through the very first SQM in the heap
-            while ((currentPathItem = _pathHeap.ExtractMinItem() as PathItem) != null) {
-                // check if the current move won't exceed our current shortest path, otherwise end it up
-                // if it exceeds, then we will loop again through our heap, if exists
-                // if not, then we are done searching if the current path is undefined that means we can't
-                // reach that field
-                
-                if (currentPathItem.HeapKey < pathItem.PathCost) {
-                    for (int i = -1; i <= 1; i++) {
-                        for (int j = -1; j <= 1; j++) {
-                            if (i != 0 || j != 0) {
-                                int gridX = currentPathItem.X + i;
-                                int gridY = currentPathItem.Y + j;
+                if (foundNode != null && (currentNode.PathHeuristic >= foundNode.PathCost))
+                    break;
 
-                                // check if that grid is in the range or validity
-                                if (!(gridX < -matrixCenter || gridX > matrixCenter || gridY < -matrixCenter || gridY > matrixCenter)) {
-                                    int currentPathCost;
-                                    if (i * j == 0) // straight movement (not diagonal)
-                                        currentPathCost = currentPathItem.PathCost + currentPathItem.Cost;
-                                    else // diagonal movements worth as 3 as a normal movement;
-                                        currentPathCost = currentPathItem.PathCost + 3 * currentPathItem.Cost;
+                for (int i = -1; i <= 1; i++) {
+                    for (int j = -1; j <= 1; j++) {
+                        if (i == 0 && j == 0)
+                            continue;
 
-                                    tmpPathItem = _pathMatrix[(matrixCenter + gridY) * matrixSize + (matrixCenter + gridX)];
-                                    if (tmpPathItem.PathCost > currentPathCost) {
-                                        tmpPathItem.Predecessor = currentPathItem;
-                                        tmpPathItem.PathCost = currentPathCost;
-                                        if (tmpPathItem.Cost == int.MaxValue) {
-                                            int currentPosX = startX + tmpPathItem.X;
-                                            int currentPosY = startY + tmpPathItem.Y;
-                                            if (currentPosX < sectorMaxX)
-                                                tmpIndex = currentPosY < sextorMaxY ? 0 : 1;
-                                            else
-                                                tmpIndex = currentPosY < sextorMaxY ? 3 : 2;
+                        int currentPosX = currentNode.X + i;
+                        int currentPosY = currentNode.Y + j;
+                        int sectorIndex;
+                        if (currentPosX < sectorMaxX)
+                            sectorIndex = currentPosY < sextorMaxY ? 0 : 1;
+                        else
+                            sectorIndex = currentPosY < sextorMaxY ? 3 : 2;
 
-                                            tmpPathItem.Cost = tmpSectors[tmpIndex].GetCost(currentPosX, currentPosY, startZ);
-                                            tmpPathItem.PathHeuristic = tmpPathItem.Cost + (tmpPathItem.Distance - 1) * minCost;
-                                            _pathDirty.Add(tmpPathItem);
-                                        }
+                        int cost = sectors[sectorIndex].GetCost(currentPosX, currentPosY, startZ);
+                        if (cost >= Constants.PathCostObstacle)
+                            continue;
 
-                                        if (!(tmpPathItem == pathItem || tmpPathItem.Cost >= Constants.PathCostObstacle)) {
-                                            if (tmpPathItem.HeapParent != null) {
-                                                _pathHeap.UpdateKey(tmpPathItem, currentPathCost + tmpPathItem.PathHeuristic);
-                                            } else {
-                                                tmpPathItem.Reset();
-                                                _pathHeap.AddItem(tmpPathItem, currentPathCost + tmpPathItem.PathHeuristic);
-                                            }
-                                        }
-                                    }
-                                }
-                            }
+                        int modifier = 1;
+                        if ((i * j) != 0)
+                            modifier = 3;
+
+                        int pathCost = currentNode.PathCost + modifier * cost;
+                        var direction = DirectionFromPosToPos(currentNode.X, currentNode.Y, currentPosX, currentPosY);
+
+                        PathItem neighborNode;
+                        if (closedList.TryGetValue(Hash2DPosition(currentPosX, currentPosY), out PathItem handledNode)) {
+                            neighborNode = handledNode;
+                            if (neighborNode.PathCost <= pathCost)
+                                continue;
+                        } else {
+                            neighborNode = new PathItem(currentPosX, currentPosY);
+                            closedList.Add(Hash2DPosition(currentPosX, currentPosY), neighborNode);
                         }
+
+                        neighborNode.Predecessor = currentNode;
+                        neighborNode.Cost = cost;
+                        neighborNode.PathCost = pathCost;
+                        neighborNode.PathHeuristic = neighborNode.PathCost + Distance(currentPosX, currentPosY, targetX, targetY);
+                        neighborNode.Direction = direction;
+
+                        openList.Push(new KeyValuePair<PathItem, int>(neighborNode, neighborNode.PathHeuristic));
                     }
                 }
+
+                if (openList.Count > 0)
+                    currentNode = openList.Pop().Key;
+                else
+                    currentNode = null;
             }
 
-            var ret = PathState.PathErrorpublic;
-            if (pathItem.PathCost < int.MaxValue) {
-                currentPathItem = pathItem;
-                tmpPathItem = null;
-                while (currentPathItem != null) {
-                    if (!forceExact && currentPathItem.X == lastPathNode.X && currentPathItem.Y == lastPathNode.Y && lastPathNode.Cost >= Constants.PathCostObstacle) {
-                        currentPathItem = null;
+            if (foundNode != null) {
+                currentNode = foundNode;
+                while (currentNode != null) {
+                    steps.Add((int)currentNode.Direction | currentNode.Cost << 16);
+                    if (steps.Count + 1 >= Constants.PathMaxSteps)
                         break;
-                    }
-                    
-                    if (currentPathItem.Cost == Constants.PathCostUndefined)
-                        break;
-
-                    if (tmpPathItem != null) {
-                        dX = currentPathItem.X - tmpPathItem.X;
-                        dY = currentPathItem.Y - tmpPathItem.Y;
-                        if (dX == 1 && dY == 0) {
-                            steps.Add((int)PathDirection.East);
-                        } else if (dX == 1 && dY == -1) {
-                            steps.Add((int)PathDirection.NorthEast);
-                        } else if (dX == 0 && dY == -1) {
-                            steps.Add((int)PathDirection.North);
-                        } else if (dX == -1 && dY == -1) {
-                            steps.Add((int)PathDirection.NorthWest);
-                        } else if (dX == -1 && dY == 0) {
-                            steps.Add((int)PathDirection.West);
-                        } else if (dX == -1 && dY == 1) {
-                            steps.Add((int)PathDirection.SouthWest);
-                        } else if (dX == 0 && dY == 1) {
-                            steps.Add((int)PathDirection.South);
-                        } else if (dX == 1 && dY == 1) {
-                            steps.Add((int)PathDirection.SouthEast);
-                        }
-                        steps[steps.Count - 1] = steps[steps.Count - 1] | currentPathItem.Cost << 16;
-                        if (steps.Count + 1 >= Constants.PathMaxSteps) {
-                            break;
-                        }
-                    }
-
-                    tmpPathItem = currentPathItem;
-                    currentPathItem = currentPathItem.Predecessor;
+                    currentNode = currentNode.Predecessor;
                 }
 
-                if (steps.Count == 0) {
-                    ret = PathState.PathEmpty;
-                } else {
-                    ret = PathState.PathExists;
-                }
-            } else {
-                ret = PathState.PathErrorUnreachable;
+                steps.RemoveAt(steps.Count - 1);
+                steps.Reverse();
+                ret = PathState.PathExists;
             }
 
-            foreach (var tmp in _pathDirty) {
-                tmp.Cost = int.MaxValue;
-                tmp.PathCost = int.MaxValue;
-            }
-            _pathDirty.Clear();
             return ret;
         }
 
+        private int Hash2DPosition(int x, int y) {
+            return x * 8192 + y;
+        }
+
+        private int Distance(int startX, int startY, int targetX, int targetY) {
+            float d = Mathf.Sqrt(Mathf.Pow(targetX - startX, 2) + Mathf.Pow(targetY - startY, 2)) * 100;
+            return (int)d;
+        }
+
+        private int ComparePathNodes(KeyValuePair<PathItem, int> a, KeyValuePair<PathItem, int> b) {
+            return a.Value.CompareTo(b.Value);
+        }
+
+        private PathDirection DirectionFromPosToPos(int startX, int startY, int targetX, int targetY) {
+            int dX = Mathf.Clamp(targetX - startX, -1, 1);
+            int dY = Mathf.Clamp(targetY - startY, -1, 1);
+            if (dX >= 1 && dY == 0)
+                return PathDirection.East;
+            else if (dX == 1 && dY == -1)
+                return PathDirection.NorthEast;
+            else if (dX == 0 && dY == -1)
+                return PathDirection.North;
+            else if (dX == -1 && dY == -1)
+                return PathDirection.NorthWest;
+            else if (dX == -1 && dY == 0)
+                return PathDirection.West;
+            else if (dX == -1 && dY == 1)
+                return PathDirection.SouthWest;
+            else if (dX == 0 && dY == 1)
+                return PathDirection.South;
+            else if (dX == 1 && dY == 1)
+                return PathDirection.SouthEast;
+            return PathDirection.Invalid;
+        }
         public void OnIOTimer() {
             _currentIOCount++;
 
