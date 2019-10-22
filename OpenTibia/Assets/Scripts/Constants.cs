@@ -763,7 +763,7 @@
         Accepted = 3,
     }
 
-    public enum MessageDialog : byte
+    public enum MessageDialogType : byte
     {
         ImbuementSuccess = 0,
         ImbuementError = 1,
@@ -775,6 +775,10 @@
 
         PreyMessage = 20,
         PreyError = 21,
+
+        SupplyStashMessage = 30,
+
+        DailyRewardError = 40,
     }
 
     public enum StoreServiceType : byte

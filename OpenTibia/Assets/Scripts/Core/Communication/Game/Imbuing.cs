@@ -5,5 +5,10 @@
         public void ParseCloseImbuingDialog(Internal.CommunicationStream message) {
             // TODO
         }
+
+        public void ParseShowMessageDialog(Internal.CommunicationStream message) {
+            var type = message.ReadEnum<MessageDialogType>();
+            string content = message.ReadString();
+        }
     }
 }

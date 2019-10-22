@@ -751,6 +751,11 @@ namespace OpenTibiaUnity.Core.Communication.Game
                         goto default;
                     ParseCloseImbuingDialog(_inputStream);
                     break;
+                case GameserverMessageType.ShowMessageDialog:
+                    if (!gameManager.GetFeature(GameFeature.GameImbuing))
+                        goto default;
+                    ParseShowMessageDialog(_inputStream);
+                    break;
 
                 case GameserverMessageType.ResourceBalance:
                     if (!gameManager.GetFeature(GameFeature.GameImbuing))
