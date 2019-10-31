@@ -194,13 +194,13 @@
                 case 1211: return new int[] { 8154 };
                 case 1212: return new int[] { 8202, 8266, 8334, 8413 };
                 case 1215: return new int[] { 8493, 8554, 8610, 8659, 8706, 8721, 8762, 8768, 8786, 8788, 8794, 8795, 8800, 8802, 8823 };
-                case 1220: return new int[] { 8834, 8958 };
+                case 1220: return new int[] { 8834, 8958, 9030, 9066, 9108, 9183, 9210 };
                 default: return null;
             }
         }
 
         public static int GetMinimumBuildVersion() => 3768;
-        public static int GetMaximumBuildVersion() => 8958;
+        public static int GetMaximumBuildVersion() => 9210;
 
         public static ushort GetContentRevision(int clientVersion, int buildVersion) {
             switch (clientVersion) {
@@ -238,6 +238,11 @@
                     switch (buildVersion) {
                         case 8834: return 22862;
                         case 8958: return 23209;
+                        case 9030: return 23326;
+                        // 9066 unknown
+                        case 9108: return 23539;
+                        case 9183: return 23636;
+                        case 9210: return 23717;
                         default: return 0;
                     }
             }
