@@ -1,8 +1,10 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace OpenTibiaUnity.Core.Communication.Web
 {
@@ -29,18 +31,8 @@ namespace OpenTibiaUnity.Core.Communication.Web
 
         protected async void Connect(string requestUri, RequestType type, Dictionary<string, string> requestData) {
             try {
-                string requestType = GetStringType(type);
-                var requestStr = CreateRequestString(requestType, requestData);
-
-                var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
-                request.Content = new StringContent(requestStr, Encoding.UTF8, "text/json");
-
-                request.Headers.Add("User-Agent", "Mozilla/5.0");
-
-                if (s_HttpClient == null)
-                    s_HttpClient = new HttpClient();
-
-                HttpResponseMessage response = await s_HttpClient.SendAsync(request);
+                var request = CreateRequest(requestUri, type, requestData);
+                var response = await SendAsync(request);
                 OnResonseReceived(response);
             } catch (HttpRequestException e) {
                 UnityEngine.Debug.Log("HttpRequestException: " + e);
@@ -51,8 +43,28 @@ namespace OpenTibiaUnity.Core.Communication.Web
             }
         }
 
+        protected HttpRequestMessage CreateRequest(string requestUri, RequestType type, Dictionary<string, string> requestData) {
+            string requestType = GetStringType(type);
+            var requestStr = CreateRequestString(requestType, requestData);
+
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri);
+            request.Content = new StringContent(requestStr, Encoding.UTF8, "application/json");
+            request.Headers.Add("User-Agent", "Mozilla/5.0");
+            request.Headers.Add("Connection", "Keep-Alive");
+            request.Headers.Add("Accept-Language", "en-US,*");
+            return request;
+        }
+
+        protected async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request) {
+            if (s_HttpClient == null)
+                s_HttpClient = new HttpClient();
+
+            return await s_HttpClient.SendAsync(request);
+        }
+
         protected async virtual void OnResonseReceived(HttpResponseMessage response) {
             string content = await response.Content.ReadAsStringAsync();
+
             OnResponseContentReceived(content);
         }
 
