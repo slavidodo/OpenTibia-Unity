@@ -43,6 +43,7 @@
         public const int FieldSize = 32;
         public const int FieldCacheSize = 32;
         public const int FieldHeight = 24;
+        public const int MaxCreatureCount = 1300;
 
         public const int PlayerOffsetY = 6;
         public const int PlayerOffsetX = 8;

@@ -10,7 +10,6 @@ namespace OpenTibiaUnity.Core.Creatures
         private OpponentStates _opponentState = OpponentStates.NoAction;
         private List<Creature> _opponents = new List<Creature>();
         private int _creatureIndex = 0;
-        private readonly int _maxCreaturesCount = 1300;
         private List<Creature> _creatures = new List<Creature>();
 
         public Creature Aim { get; set; } = null;
@@ -81,7 +80,7 @@ namespace OpenTibiaUnity.Core.Creatures
             if (id != 0)
                 RemoveCreature(id);
 
-            if (_creatureCount >= _maxCreaturesCount)
+            if (_creatureCount >= Constants.MaxCreatureCount)
                 throw new System.ArgumentException("CreatureStorage.replaceCreature: No space left to append " + creature.Id);
             
             int index = 0;
