@@ -193,7 +193,7 @@ namespace OpenTibiaUnity.Modules.Inventory
                     if (!@object.ClampeToFieldSize)
                         @object.ClampeToFieldSize = true;
                     @object.Animate(OpenTibiaUnity.TicksMillis);
-                    @object.Draw(new Vector2(Constants.FieldSize * i, 0), zoom, 0, 0, 0);
+                    @object.Draw(new Vector2Int(Constants.FieldSize * i, 0), zoom, 0, 0, 0);
                 }
             }
 

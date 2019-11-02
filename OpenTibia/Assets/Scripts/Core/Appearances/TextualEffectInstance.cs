@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using UnityEngine;
+
+using CommandBuffer = UnityEngine.Rendering.CommandBuffer;
 
 namespace OpenTibiaUnity.Core.Appearances
 {
@@ -54,13 +54,11 @@ namespace OpenTibiaUnity.Core.Appearances
             _text = text;
         }
 
-        public override void Draw(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+        public override void Draw(CommandBuffer commandBuffer, Vector2Int screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
             RebuildCache();
-            if (!OpenTibiaUnity.GameManager.OutlinedVerdanaFontMaterial.SetPass(0))
-                return;
-            
-            var matrix = Matrix4x4.TRS(screenPosition, Quaternion.Euler(180, 0, 0), zoom);
-            Graphics.DrawMeshNow(_mesh, matrix);
+            var material = OpenTibiaUnity.GameManager.OutlinedVerdanaFontMaterial;
+            var matrix = Matrix4x4.TRS(new Vector2(screenPosition.x, screenPosition.y), Quaternion.Euler(180, 0, 0), zoom);
+            commandBuffer.DrawMesh(_mesh, matrix, material);
         }
 
         public bool Merge(AppearanceInstance other) {

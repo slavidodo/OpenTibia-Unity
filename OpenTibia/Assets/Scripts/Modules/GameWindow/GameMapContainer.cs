@@ -52,6 +52,9 @@ namespace OpenTibiaUnity.Modules.GameWindow
 
                 _lastScreenWidth = Screen.width;
                 _lastScreenHeight = Screen.height;
+
+                if (OpenTibiaUnity.WorldMapStorage != null)
+                    OpenTibiaUnity.WorldMapStorage.InvalidateFieldsTRS();
             }
         }
 
@@ -102,11 +105,8 @@ namespace OpenTibiaUnity.Modules.GameWindow
 
                 if (ContextMenuBase.CurrentContextMenu != null || ObjectDragImpl.AnyDraggingObject)
                     worldMapRenderer.HighlightTile = null;
-                
-                RenderTexture.active = gameManager.WorldMapRenderTexture;
-                Core.Utils.GraphicsUtility.ClearColor(Color.black);
-                var error = worldMapRenderer.RenderWorldMap(worldMapRectTransform.rect);
-                RenderTexture.active = null;
+
+                var error = worldMapRenderer.RenderWorldMap(worldMapRectTransform.rect, gameManager.WorldMapRenderTexture);
                 
                 // no point in rendering text if rendering worldmap failed
                 if (error == RenderError.None) {
@@ -116,10 +116,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
                         _onscreenTextImage.texture = _onscreenTextRenderTexture;
                     }
 
-                    RenderTexture.active = _onscreenTextRenderTexture;
-                    Core.Utils.GraphicsUtility.ClearWithTransparency();
-                    worldMapRenderer.RenderOnscreenText(_cachedScreenRect);
-                    RenderTexture.active = null;
+                    worldMapRenderer.RenderOnscreenText(_cachedScreenRect, _onscreenTextRenderTexture);
 
                     if (!_onscreenTextImage.enabled)
                         _onscreenTextImage.enabled = true;

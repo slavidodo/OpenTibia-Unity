@@ -74,6 +74,7 @@ namespace OpenTibiaUnity.Core
         public Components.Base.Window LoadingAppearancesWindow = null;
 
         [Header("Materials")]
+        public Material ColoredMaterial = null;
         public Material AppearanceTypeMaterial = null;
         public Material OutfitTypeMaterial = null;
         public Material MarksViewMaterial = null;

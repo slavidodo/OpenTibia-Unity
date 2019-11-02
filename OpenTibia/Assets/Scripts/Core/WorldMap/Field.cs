@@ -263,6 +263,13 @@ namespace OpenTibiaUnity.Core.WorldMap
             return -1;
         }
 
+        public void InvalidateObjectsTRS() {
+            UpdateObjectsCache();
+
+            for (int i = 0; i < ObjectsCount; i++)
+                ObjectsRenderer[i].InvalidateTRS();
+        }
+
         public void UpdateObjectsCache() {
             if (!CacheObjectsDirty)
                 return;

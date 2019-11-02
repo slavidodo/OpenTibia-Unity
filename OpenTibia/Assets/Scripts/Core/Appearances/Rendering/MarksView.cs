@@ -54,41 +54,42 @@ namespace OpenTibiaUnity.Core.Appearances.Rendering
         }
 
         public void DrawMarks(Marks marks, float screenX, float screenY, Vector2 zoom) {
-            Rect screenRect = new Rect() {
-                x = screenX * zoom.x,
-                y = screenY * zoom.y,
-                width = Constants.FieldSize * zoom.x,
-                height = Constants.FieldSize * zoom.y,
-            };
-
-            var size = _marksStartSize;
-            var tex2d = OpenTibiaUnity.GameManager.MarksViewTexture;
-            var material = OpenTibiaUnity.GameManager.MarksViewMaterial;
-
-            foreach (var information in _marksViewInformations) {
-                if (!marks.IsMarkSet(information.MarkType))
-                    continue;
-
-                uint eightBit = marks.GetMarkColor(information.MarkType);
-                Color color;
-                if (eightBit > Marks.MarksNumTotal)
-                    continue;
-                else if (eightBit > Marks.MarkNumColors)
-                    color = s_FrameColors[(int)eightBit];
-                else
-                    color = Colors.ColorFrom8Bit((int)eightBit);
-
-                Rect texRect = new Rect() {
-                    x = size * Constants.FieldSize / (float)tex2d.width,
-                    y = (Constants.MarkThicknessBold - information.MarkThickness) * Constants.FieldSize / (float)tex2d.height,
-                    width = Constants.FieldSize / (float)tex2d.width,
-                    height = Constants.FieldSize / (float)tex2d.height,
-                };
-
-                material.SetColor("_Color", color);
-                Graphics.DrawTexture(screenRect, tex2d, texRect, 0, 0, 0, 0, color, material);
-                size += information.MarkThickness;
-            }
+            // marks renderer is disabled internally
+            //Rect screenRect = new Rect() {
+            //    x = screenX * zoom.x,
+            //    y = screenY * zoom.y,
+            //    width = Constants.FieldSize * zoom.x,
+            //    height = Constants.FieldSize * zoom.y,
+            //};
+            //
+            //var size = _marksStartSize;
+            //var tex2d = OpenTibiaUnity.GameManager.MarksViewTexture;
+            //var material = OpenTibiaUnity.GameManager.MarksViewMaterial;
+            //
+            //foreach (var information in _marksViewInformations) {
+            //    if (!marks.IsMarkSet(information.MarkType))
+            //        continue;
+            //
+            //    uint eightBit = marks.GetMarkColor(information.MarkType);
+            //    Color color;
+            //    if (eightBit > Marks.MarksNumTotal)
+            //        continue;
+            //    else if (eightBit > Marks.MarkNumColors)
+            //        color = s_FrameColors[(int)eightBit];
+            //    else
+            //        color = Colors.ColorFrom8Bit((int)eightBit);
+            //
+            //    Rect texRect = new Rect() {
+            //        x = size * Constants.FieldSize / (float)tex2d.width,
+            //        y = (Constants.MarkThicknessBold - information.MarkThickness) * Constants.FieldSize / (float)tex2d.height,
+            //        width = Constants.FieldSize / (float)tex2d.width,
+            //        height = Constants.FieldSize / (float)tex2d.height,
+            //    };
+            //
+            //    material.SetColor("_Color", color);
+            //    Graphics.DrawTexture(screenRect, tex2d, texRect, 0, 0, 0, 0, color, material);
+            //    size += information.MarkThickness;
+            //}
         }
     }
 

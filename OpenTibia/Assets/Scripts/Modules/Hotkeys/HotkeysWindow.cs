@@ -136,7 +136,7 @@ namespace OpenTibiaUnity.Modules.Hotkeys
             RenderTexture.active = s_RenderTexture;
             Core.Utils.GraphicsUtility.ClearWithTransparency();
             var zoom = new Vector2(Screen.width / (float)s_RenderTexture.width, Screen.height / (float)s_RenderTexture.height);
-            _objectInstance.Draw(new Vector2(0, 0), zoom, 0, 0, 0);
+            _objectInstance.Draw(new Vector2Int(0, 0), zoom, 0, 0, 0);
             RenderTexture.active = null;
 
             if (!_objectImage.enabled)

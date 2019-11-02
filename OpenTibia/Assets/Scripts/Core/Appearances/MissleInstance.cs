@@ -4,33 +4,29 @@ namespace OpenTibiaUnity.Core.Appearances
 {
     public sealed class MissileInstance : AppearanceInstance
     {
-        private static int s_UniqueCounter = 0;
-
-        private readonly int _uniqueId;
         private readonly int _patternX;
         private readonly int _patternY;
         private readonly int _animationEnd = 0;
         private Vector3Int _target;
         private Vector3Int _position;
 
-        private Vector2 _animationDelta;
+        private Vector2Int _animationDelta;
         private readonly Vector3 _animationSpeed;
 
         public readonly int AnimationDirection;
 
         public Vector3Int Target { get => _target; }
         public Vector3Int Position { get => _position; }
-        public Vector3 AnimationDelta {
+        public Vector3Int AnimationDelta {
             get {
-                var delta = _animationDelta;
-                delta.x += (_target.x - _position.x) * Constants.FieldSize;
-                delta.y += (_target.y - _position.y) * Constants.FieldSize;
-                return delta;
+                return new Vector3Int {
+                    x = _animationDelta.x + (_target.x - _position.x),
+                    y = _animationDelta.y + (_target.y - _position.y)
+                } * Constants.FieldSize;
             }
         }
 
         public MissileInstance(uint id, AppearanceType type, Vector3Int fromPosition, Vector3Int toPosition) : base(id, type) {
-            _uniqueId = s_UniqueCounter++;
             _animationDelta = new Vector2Int(toPosition.x - fromPosition.x, toPosition.y - fromPosition.y);
             if (_animationDelta.x == 0) {
                 if (_animationDelta.y <= 0) {
@@ -119,20 +115,19 @@ namespace OpenTibiaUnity.Core.Appearances
 
             int elapsedMillis = ticks - (_animationEnd - (int)_animationSpeed.z);
             if (elapsedMillis <= 0) {
-                _animationDelta.x = _animationSpeed.x;
-                _animationDelta.y = _animationSpeed.y;
+                _animationDelta.x = (int)_animationSpeed.x;
+                _animationDelta.y = (int)_animationSpeed.y;
             } else if (elapsedMillis >= _animationSpeed.z) {
                 _animationDelta.x = 0;
                 _animationDelta.y = 0;
             } else {
-                _animationDelta.x = _animationSpeed.x - (int)(_animationSpeed.x / _animationSpeed.z * elapsedMillis + 0.5f);
-                _animationDelta.y = _animationSpeed.y - (int)(_animationSpeed.y / _animationSpeed.z * elapsedMillis + 0.5f);
+                _animationDelta.x = (int)_animationSpeed.x - (int)(_animationSpeed.x / _animationSpeed.z * elapsedMillis + 0.5f);
+                _animationDelta.y = (int)_animationSpeed.y - (int)(_animationSpeed.y / _animationSpeed.z * elapsedMillis + 0.5f);
             }
 
             if ((_animationDelta.x == 0 && _animationDelta.y == 0) || ticks >= _animationEnd)
                 return false;
 
-            var oldPosition = _position;
             float mX = (_target.x + 1) * Constants.FieldSize - _type.OffsetX + _animationDelta.x;
             float mY = (_target.y + 1) * Constants.FieldSize - _type.OffsetY + _animationDelta.y;
             _position.x = (int)((mX - 1) / Constants.FieldSize);

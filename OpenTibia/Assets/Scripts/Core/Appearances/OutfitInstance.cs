@@ -1,4 +1,7 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
+
+using CommandBuffer = UnityEngine.Rendering.CommandBuffer;
 
 namespace OpenTibiaUnity.Core.Appearances
 {
@@ -16,6 +19,8 @@ namespace OpenTibiaUnity.Core.Appearances
         private Color _torsoColor = Color.white;
         private Color _legsColor = Color.white;
         private Color _detailColor = Color.white;
+
+        private Dictionary<int, MaterialPropertyBlock> _channelProps = new Dictionary<int, MaterialPropertyBlock>();
 
         private int _phase = 0;
         private bool _walking = false;
@@ -53,54 +58,64 @@ namespace OpenTibiaUnity.Core.Appearances
 
             if (_addOns != addons)
                 _addOns = addons;
+
+            foreach (var props in _channelProps) {
+                UpdateMaterialProppertyBlock(props.Value);
+            }
+        }
+
+        private void UpdateMaterialProppertyBlock(MaterialPropertyBlock props) {
+            props.SetColor("_HeadColor", _headColor);
+            props.SetColor("_TorsoColor", _torsoColor);
+            props.SetColor("_LegsColor", _legsColor);
+            props.SetColor("_DetailColor", _detailColor);
         }
 
         public override int GetSpriteIndex(int layer, int patternX, int patternY, int patternZ) {
             return (int)((((
-                (layer >= 0 ? layer : (_phase > 0 ? _phase : 0)) % _activeFrameGroup.SpriteInfo.Phases
-                * _activeFrameGroup.SpriteInfo.PatternDepth + (patternZ >= 0 ? (int)(patternZ % _activeFrameGroup.SpriteInfo.PatternDepth) : 0))
-                * _activeFrameGroup.SpriteInfo.PatternHeight + (patternY >= 0 ? (int)(patternY % _activeFrameGroup.SpriteInfo.PatternHeight) : 0))
-                * _activeFrameGroup.SpriteInfo.PatternWidth + (patternX >= 0 ? (int)(patternX % _activeFrameGroup.SpriteInfo.PatternWidth) : 0))
-                * _activeFrameGroup.SpriteInfo.Layers);
+                (layer >= 0 ? layer : (_phase > 0 ? _phase : 0)) % ActiveFrameGroup.SpriteInfo.Phases
+                * ActiveFrameGroup.SpriteInfo.PatternDepth + (patternZ >= 0 ? (int)(patternZ % ActiveFrameGroup.SpriteInfo.PatternDepth) : 0))
+                * ActiveFrameGroup.SpriteInfo.PatternHeight + (patternY >= 0 ? (int)(patternY % ActiveFrameGroup.SpriteInfo.PatternHeight) : 0))
+                * ActiveFrameGroup.SpriteInfo.PatternWidth + (patternX >= 0 ? (int)(patternX % ActiveFrameGroup.SpriteInfo.PatternWidth) : 0))
+                * ActiveFrameGroup.SpriteInfo.Layers);
         }
 
-        public override void Draw(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
-            if (_activeFrameGroup.SpriteInfo.Layers != 2) {
-                var cachedSprite = GetSprite(-1, patternX, patternY, patternZ, _activeFrameGroup.SpriteInfo.IsAnimation);
+        public override void Draw(CommandBuffer commandBuffer, Vector2Int screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+            if (ActiveFrameGroup.SpriteInfo.Layers != 2) {
+                var cachedSprite = GetSprite(-1, patternX, patternY, patternZ, ActiveFrameGroup.SpriteInfo.IsAnimation);
                 if (cachedSprite != null)
-                    InternalDrawTo(screenPosition.x, screenPosition.y, zoom, highlighted, highlightOpacity, cachedSprite);
+                    InternalDrawTo(commandBuffer, screenPosition, zoom, highlighted, highlightOpacity, cachedSprite);
                 return;
             }
 
             var colouriseMaterial = OpenTibiaUnity.GameManager.OutfitTypeMaterial;
-            colouriseMaterial.SetColor("_HeadColor", _headColor);
-            colouriseMaterial.SetColor("_TorsoColor", _torsoColor);
-            colouriseMaterial.SetColor("_LegsColor", _legsColor);
-            colouriseMaterial.SetColor("_DetailColor", _detailColor);
 
             bool dontDraw = false;
-            for (patternY = 0; patternY < _activeFrameGroup.SpriteInfo.PatternHeight; patternY++) {
+            for (patternY = 0; patternY < ActiveFrameGroup.SpriteInfo.PatternHeight; patternY++) {
                 if (patternY > 0 && (_addOns & 1 << (patternY - 1)) == 0)
                     continue;
 
                 int spriteIndex = GetSpriteIndex(-1, patternX, patternY, patternZ);
-                uint spriteId = _activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
 
-                CachedSprite baseSprite, colorSprite;
-                OpenTibiaUnity.AppearanceStorage.GetSprite(_activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex++], out baseSprite);
-                OpenTibiaUnity.AppearanceStorage.GetSprite(_activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex], out colorSprite);
+                OpenTibiaUnity.AppearanceStorage.GetSprite(ActiveFrameGroup.SpriteInfo.SpriteIDs[spriteIndex], out CachedSprite baseSprite);
+                OpenTibiaUnity.AppearanceStorage.GetSprite(ActiveFrameGroup.SpriteInfo.SpriteIDs[spriteIndex + 1], out CachedSprite channelSprite);
 
                 // if these are not loaded yet we should still continue to
-                // ensure that next time all the needed layers are loaded!
-                if (baseSprite == null || colorSprite == null)
+                // ensure that next time all layers are loaded!
+                if (baseSprite == null || channelSprite == null)
                     dontDraw = true;
 
                 if (!dontDraw) {
-                    colouriseMaterial.SetTexture("_ChannelsTex", colorSprite.texture);
-                    colouriseMaterial.SetTextureOffset("_ChannelsTex", colorSprite.rect.position - baseSprite.rect.position);
+                    if (!_channelProps.TryGetValue(spriteIndex, out MaterialPropertyBlock props)) {
+                        props = new MaterialPropertyBlock();
+                        baseSprite.GenerateMaterialProps(props);
+                        channelSprite.GenerateChannelsMaterialProps(props);
+                        UpdateMaterialProppertyBlock(props);
+                        _channelProps.Add(spriteIndex, props);
+                    }
 
-                    InternalDrawTo(screenPosition.x, screenPosition.y, zoom, highlighted, highlightOpacity, baseSprite);
-                    InternalDrawTo(screenPosition.x, screenPosition.y, zoom, highlighted, highlightOpacity, baseSprite, colouriseMaterial);
+                    InternalDrawTo(commandBuffer, screenPosition, zoom, highlighted, highlightOpacity, baseSprite);
+                    InternalDrawTo(commandBuffer, screenPosition, zoom, highlighted, highlightOpacity, baseSprite, colouriseMaterial, props);
                 }
             }
         }

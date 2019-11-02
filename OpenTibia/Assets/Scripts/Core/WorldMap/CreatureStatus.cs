@@ -1,6 +1,8 @@
 ﻿using System;
 using UnityEngine;
 
+using CommandBuffer = UnityEngine.Rendering.CommandBuffer;
+
 namespace OpenTibiaUnity.Core.WorldMap
 {
     public class CreatureStatus : IEquatable<CreatureStatus>
@@ -48,13 +50,11 @@ namespace OpenTibiaUnity.Core.WorldMap
             _dirty = true;
         }
 
-        public void Draw(Vector2 screenPosition) {
+        public void Draw(CommandBuffer commandBuffer, Vector2 screenPosition) {
             RebuildCache();
-            if (!OpenTibiaUnity.GameManager.OutlinedVerdanaFontMaterial.SetPass(0))
-                return;
-            
+            var material = OpenTibiaUnity.GameManager.OutlinedVerdanaFontMaterial;
             var matrix = Matrix4x4.TRS(screenPosition, Quaternion.Euler(180, 0, 0), Vector3.one);
-            Graphics.DrawMeshNow(_mesh, matrix);
+            commandBuffer.DrawMesh(_mesh, matrix, material);
         }
 
         private void RebuildCache() {

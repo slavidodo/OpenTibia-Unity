@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+using CommandBuffer = UnityEngine.Rendering.CommandBuffer;
+
 namespace OpenTibiaUnity.Core.WorldMap
 {
     public class OnscreenMessage
@@ -95,10 +97,8 @@ namespace OpenTibiaUnity.Core.WorldMap
             }
         }
 
-        public void Draw(Vector2 screenPosition) {
+        public void Draw(CommandBuffer commandBuffer, Vector2 screenPosition) {
             RebuildCache();
-            if (!OpenTibiaUnity.GameManager.OutlinedVerdanaFontMaterial.SetPass(0))
-                return;
 
             // TRS matrix:
             // 1. The mesh is anchored to the center, and since our calculations is based on the
@@ -106,8 +106,9 @@ namespace OpenTibiaUnity.Core.WorldMap
             // 2. Rotate the mesh by PI (rad) on the x-axis
             // 3. Scale the text by the precalculated text zoom to make sure the text size remains
             // // the same no matter what the screen zoom is.
+            var material = OpenTibiaUnity.GameManager.OutlinedVerdanaFontMaterial;
             var matrix = Matrix4x4.TRS(screenPosition, Quaternion.Euler(180, 0, 0), Vector3.one);
-            Graphics.DrawMeshNow(_mesh, matrix);
+            commandBuffer.DrawMesh(_mesh, matrix, material);
         }
     }
 }

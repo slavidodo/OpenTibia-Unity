@@ -376,7 +376,7 @@ namespace OpenTibiaUnity.Core.WorldMap
 
         private int ToIndexInternal(int mapX, int mapY, int mapZ) {
             if (mapX < 0 || mapX >= Constants.MapSizeX || mapY < 0 || mapY >= Constants.MapSizeY || mapZ < 0 || mapZ >= Constants.MapSizeZ)
-                throw new System.ArgumentException($"WorldMapStorage.ToIndexpublic: Input co-oridnate ({mapX}, {mapY}, {mapZ}) is out of range.");
+                throw new System.ArgumentException($"WorldMapStorage.ToIndexInternal: Input co-oridnate ({mapX}, {mapY}, {mapZ}) is out of range.");
 
             return ((mapZ + _origin.z) % Constants.MapSizeZ * Constants.MapSizeX + (mapX + _origin.x) % Constants.MapSizeX) * Constants.MapSizeY + (mapY + _origin.y) % Constants.MapSizeY;
         }
@@ -466,6 +466,11 @@ namespace OpenTibiaUnity.Core.WorldMap
             CacheRefresh = false;
             for (int i = 0; i < _fields.Length; i++)
                 _fields[i].UpdateObjectsCache();
+        }
+
+        public void InvalidateFieldsTRS() {
+            for (int i = 0; i < _fields.Length; i++)
+                _fields[i].InvalidateObjectsTRS();
         }
 
         public void InvalidateOnscreenMessages() {

@@ -63,62 +63,65 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
         }
 
         public RenderError Render(Material material) {
-            if (MiniMapStorage == null || !OpenTibiaUnity.GameManager.IsGameRunning || !WorldMapStorage.Valid)
-                return RenderError.MiniMapNotValid;
+            // minimap is disabled for now;
+            return RenderError.MiniMapNotValid;
 
-            Utils.GraphicsUtility.ClearColor(Color.black);
-            if (PositionX < Constants.MapMinX || PositionX > Constants.MapMaxX
-                || PositionY < Constants.MapMinY || PositionY > Constants.MapMaxY
-                || PositionZ < Constants.MapMinZ || PositionZ > Constants.MapMaxZ) {
-                return RenderError.PositionNotValid;
-            }
-
-            Vector2 screenZoom = new Vector2() {
-                x = Screen.width * _zoomScale / Constants.MiniMapSideBarViewWidth,
-                y = Screen.height * _zoomScale / Constants.MiniMapSideBarViewHeight,
-            };
-
-            Vector2 zoom = new Vector2() {
-                x = Constants.MiniMapSideBarViewWidth / _zoomScale,
-                y = Constants.MiniMapSideBarViewHeight / _zoomScale
-            };
-
-            _positionRect.x = PositionX - zoom.x / 2;
-            _positionRect.y = PositionY - zoom.y / 2;
-            _positionRect.width = zoom.x;
-            _positionRect.height = zoom.y;
-            
-            var drawnSectors = new List<MiniMapSector>();
-            
-            Vector3Int position = Vector3Int.zero;
-
-            var transformationMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(_zoomScale, _zoomScale, 1));
-            for (int i = 0; i < 4; i++) {
-                position.Set(
-                    (int)(_positionRect.x + i % 2 * _positionRect.width),
-                    (int)(_positionRect.y + (int)(i / 2) * _positionRect.height),
-                    PositionZ);
-            
-                var sector = MiniMapStorage.AcquireSector(position, false);
-                if (drawnSectors.IndexOf(sector) == -1) {
-                    drawnSectors.Add(sector);
-
-                    var otherRect = new Rect(sector.SectorX, sector.SectorY, Constants.MiniMapSectorSize, Constants.MiniMapSectorSize);
-                    var intersectingRect = Intersection(_positionRect, otherRect);
-
-                    Rect screenRect = new Rect() {
-                        x = (intersectingRect.x - _positionRect.x) * screenZoom.x,
-                        y = (intersectingRect.y - _positionRect.y) * screenZoom.y,
-                        width = intersectingRect.width * screenZoom.x,
-                        height = intersectingRect.height * screenZoom.y
-                    };
-
-                    sector.ApplyPixelChanges();
-                    Graphics.DrawTexture(screenRect, sector.Texture2D);
-                }
-            }
-
-            return RenderError.None;
+            //if (MiniMapStorage == null || !OpenTibiaUnity.GameManager.IsGameRunning || !WorldMapStorage.Valid)
+            //    return RenderError.MiniMapNotValid;
+            //
+            //Utils.GraphicsUtility.ClearColor(Color.black);
+            //if (PositionX < Constants.MapMinX || PositionX > Constants.MapMaxX
+            //    || PositionY < Constants.MapMinY || PositionY > Constants.MapMaxY
+            //    || PositionZ < Constants.MapMinZ || PositionZ > Constants.MapMaxZ) {
+            //    return RenderError.PositionNotValid;
+            //}
+            //
+            //Vector2 screenZoom = new Vector2() {
+            //    x = Screen.width * _zoomScale / Constants.MiniMapSideBarViewWidth,
+            //    y = Screen.height * _zoomScale / Constants.MiniMapSideBarViewHeight,
+            //};
+            //
+            //Vector2 zoom = new Vector2() {
+            //    x = Constants.MiniMapSideBarViewWidth / _zoomScale,
+            //    y = Constants.MiniMapSideBarViewHeight / _zoomScale
+            //};
+            //
+            //_positionRect.x = PositionX - zoom.x / 2;
+            //_positionRect.y = PositionY - zoom.y / 2;
+            //_positionRect.width = zoom.x;
+            //_positionRect.height = zoom.y;
+            //
+            //var drawnSectors = new List<MiniMapSector>();
+            //
+            //Vector3Int position = Vector3Int.zero;
+            //
+            //var transformationMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(_zoomScale, _zoomScale, 1));
+            //for (int i = 0; i < 4; i++) {
+            //    position.Set(
+            //        (int)(_positionRect.x + i % 2 * _positionRect.width),
+            //        (int)(_positionRect.y + (int)(i / 2) * _positionRect.height),
+            //        PositionZ);
+            //
+            //    var sector = MiniMapStorage.AcquireSector(position, false);
+            //    if (drawnSectors.IndexOf(sector) == -1) {
+            //        drawnSectors.Add(sector);
+            //
+            //        var otherRect = new Rect(sector.SectorX, sector.SectorY, Constants.MiniMapSectorSize, Constants.MiniMapSectorSize);
+            //        var intersectingRect = Intersection(_positionRect, otherRect);
+            //
+            //        Rect screenRect = new Rect() {
+            //            x = (intersectingRect.x - _positionRect.x) * screenZoom.x,
+            //            y = (intersectingRect.y - _positionRect.y) * screenZoom.y,
+            //            width = intersectingRect.width * screenZoom.x,
+            //            height = intersectingRect.height * screenZoom.y
+            //        };
+            //
+            //        sector.ApplyPixelChanges();
+            //        Graphics.DrawTexture(screenRect, sector.Texture2D);
+            //    }
+            //}
+            //
+            //return RenderError.None;
         }
 
         public void TranslatePosition(int x, int y, int z) {

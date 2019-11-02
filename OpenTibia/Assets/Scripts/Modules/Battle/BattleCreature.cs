@@ -37,7 +37,7 @@ namespace OpenTibiaUnity.Modules.Battle
             if (outfit) {
                 _cachedSprite = outfit.GetSprite(0, (int)Direction.South, 0, 0, false);
                 outfitImageCompoenent.texture = _cachedSprite.texture;
-                outfitImageCompoenent.uvRect = _cachedSprite.rect;
+                //outfitImageCompoenent.uvRect = _cachedSprite.uv; TODO;
             }
 
             var markColor = creature.Marks.GetMarkColor(MarkType.ClientBattleList);

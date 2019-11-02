@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+using CommandBuffer = UnityEngine.Rendering.CommandBuffer;
+
 namespace OpenTibiaUnity.Core.Appearances
 {
     public class CachedSpriteRequest
@@ -22,14 +24,25 @@ namespace OpenTibiaUnity.Core.Appearances
         public const int HookEast = 19;
         public const int HookSouth = 20;
 
-        public static Vector2 s_TempPoint = Vector2.zero;
-        public static Rect s_TempRect = Rect.zero;
-        public static Vector2 s_FieldVector = new Vector2(Constants.FieldSize, Constants.FieldSize);
+        public static readonly Vector2 s_fieldVector = new Vector2(Constants.FieldSize, Constants.FieldSize);
+        private static readonly Mesh s_mesh;
 
-        public int MapData = -1; // stack position
-        public int MapField = -1; // field index in cached map
+        static AppearanceInstance() {
+            var gameObject = GameObject.CreatePrimitive(PrimitiveType.Quad);
+            s_mesh = gameObject.GetComponent<MeshFilter>().mesh;
+            Object.Destroy(gameObject);
 
-        protected bool _cachedirty = false;
+            s_mesh.vertices = new Vector3[] {
+                new Vector3(0, -1, 0),
+                new Vector3(1, -1, 0),
+                new Vector3(0, 0, 0),
+                new Vector3(1, 0, 0),
+            };
+        }
+
+        public int MapData { get; set; } = -1; // stack position
+        public int MapField { get; set; } = -1; // field index in cached map
+
         protected uint _id;
         protected int _lastCachedSpriteIndex = -1;
         protected int _lastInternalPhase = -1;
@@ -38,13 +51,17 @@ namespace OpenTibiaUnity.Core.Appearances
         protected int _lastPatternY = -1;
         protected int _lastPatternZ = -1;
 
+        private Vector2 _screenPosition = Vector2.zero;
+        protected Matrix4x4 _trsMatrix = Matrix4x4.identity;
+        protected bool _shouldRecalculateTRS = true;
+
         protected AppearanceType _type;
         protected Animation.IAppearanceAnimator[] _animators;
         protected List<CachedSpriteRequest[]> _cachedSprites;
 
         public bool ClampeToFieldSize = false;
 
-        protected Protobuf.Appearances.FrameGroup _activeFrameGroup {
+        protected Protobuf.Appearances.FrameGroup ActiveFrameGroup {
             get {
                 if (_activeFrameGroupIndex < 0)
                     return null;
@@ -97,21 +114,25 @@ namespace OpenTibiaUnity.Core.Appearances
             }
         }
 
+        public void InvalidateTRS() {
+            _shouldRecalculateTRS = true;
+        }
+
         public virtual int GetSpriteIndex(int layer, int patternX, int patternY, int patternZ) {
-            int phase = Phase % (int)_activeFrameGroup.SpriteInfo.Phases;
+            int phase = Phase % (int)ActiveFrameGroup.SpriteInfo.Phases;
             if (!(phase == _lastInternalPhase && patternX == _lastPatternX && patternX >= 0 && patternY == _lastPatternY && patternY >= 0 && patternZ == _lastPatternZ && patternZ >= 0)) {
                 _lastInternalPhase = phase;
                 _lastPatternX = patternX;
                 _lastPatternY = patternY;
                 _lastPatternZ = patternZ;
 
-                _lastCachedSpriteIndex = _activeFrameGroup.SpriteInfo.CalculateSpriteIndex(phase, patternX, patternY, patternZ);
+                _lastCachedSpriteIndex = ActiveFrameGroup.SpriteInfo.CalculateSpriteIndex(phase, patternX, patternY, patternZ);
             }
 
-            return _lastCachedSpriteIndex + (layer >= 0 ? layer % (int)_activeFrameGroup.SpriteInfo.Layers : 0);
+            return _lastCachedSpriteIndex + (layer >= 0 ? layer % (int)ActiveFrameGroup.SpriteInfo.Layers : 0);
         }
 
-        public CachedSprite GetSprite(int layer, int patternX, int patternY, int patternZ, bool animation) {
+        public CachedSprite GetSprite(int layer, int patternX, int patternY, int patternZ, bool _) {
             if (_type.FrameGroups == null)
                 return null;
 
@@ -124,24 +145,25 @@ namespace OpenTibiaUnity.Core.Appearances
 
             CachedSpriteRequest cachedRequest = _cachedSprites[_activeFrameGroupIndex][spriteIndex];
             if (cachedRequest == null) {
-                CachedSprite cachedSprite;
+                var spriteId = ActiveFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
+                var status = OpenTibiaUnity.AppearanceStorage.GetSprite(spriteId, out CachedSprite cachedSprite);
 
-                var spriteId = _activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
-                var status = OpenTibiaUnity.AppearanceStorage.GetSprite(spriteId, out cachedSprite);
-                _cachedSprites[_activeFrameGroupIndex][spriteIndex] = new CachedSpriteRequest(status, cachedSprite);
-                return cachedSprite; // may be null if this is the first time to load this texture
-            }
-
-            // if it was loading, then update status
-            if (cachedRequest.Status == SpriteLoadingStatus.Loading) {
-                var spriteId = _activeFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
+                cachedRequest = new CachedSpriteRequest(status, cachedSprite);
+                _cachedSprites[_activeFrameGroupIndex][spriteIndex] = cachedRequest;
+            } else if (cachedRequest.Status == SpriteLoadingStatus.Loading) { // if it was loading, then update status
+                var spriteId = ActiveFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
                 cachedRequest.Status = OpenTibiaUnity.AppearanceStorage.GetSprite(spriteId, out cachedRequest.CachedSprite);
             }
 
             return cachedRequest.CachedSprite;
         }
         
-        public virtual void Draw(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+        public void Draw(Vector2Int screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+            Draw(null, screenPosition, zoom, patternX, patternY, patternZ, highlighted, highlightOpacity);
+        }
+
+        public virtual void Draw(CommandBuffer commandBuffer, Vector2Int screenPosition, Vector2 zoom,
+                                int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
             // this requires a bit of explanation
             // on outfits, layers are not useful, instead it relies on phases
             // while on the rest of categories, layers are treated as indepedant sprites..
@@ -150,9 +172,9 @@ namespace OpenTibiaUnity.Core.Appearances
             // mostly you'd see this in objects like doors, or in effects like assassin outfit
 
             bool dontDraw = false;
-            var cachedSprites = new CachedSprite[_activeFrameGroup.SpriteInfo.Layers];
-            for (int layer = 0; layer < _activeFrameGroup.SpriteInfo.Layers; layer++) {
-                var cachedSprite = GetSprite(layer, patternX, patternY, patternZ, _activeFrameGroup.SpriteInfo.IsAnimation);
+            var cachedSprites = new CachedSprite[ActiveFrameGroup.SpriteInfo.Layers];
+            for (int layer = 0; layer < ActiveFrameGroup.SpriteInfo.Layers; layer++) {
+                var cachedSprite = GetSprite(layer, patternX, patternY, patternZ, ActiveFrameGroup.SpriteInfo.IsAnimation);
                 if (cachedSprite == null)
                     dontDraw = true;
 
@@ -163,25 +185,42 @@ namespace OpenTibiaUnity.Core.Appearances
                 return;
 
             foreach (var cachedSprite in cachedSprites)
-                InternalDrawTo(screenPosition.x, screenPosition.y, zoom, highlighted, highlightOpacity, cachedSprite);
+                InternalDrawTo(commandBuffer, screenPosition, zoom, highlighted, highlightOpacity, cachedSprite);
         }
         
-        protected void InternalDrawTo(float screenX, float screenY, Vector2 zoom, bool highlighted, float highlightOpacity,
-            CachedSprite cachedSprite, Material material = null) {
-            s_TempPoint.Set(screenX - _type.OffsetX, screenY - _type.OffsetY);
-            if (ClampeToFieldSize) {
-                s_TempRect.position = s_TempPoint * zoom;
-                s_TempRect.size = s_FieldVector * zoom;
-            } else {
-                s_TempRect.position = (s_TempPoint - cachedSprite.size + s_FieldVector) * zoom;
-                s_TempRect.size = cachedSprite.size * zoom;
+        protected void InternalDrawTo(CommandBuffer commandBuffer, Vector2Int screenPosition, Vector2 zoom, bool highlighted,
+                                      float highlightOpacity, CachedSprite cachedSprite, Material material = null, MaterialPropertyBlock props = null) {
+            if (_shouldRecalculateTRS) {
+                Vector2 realPos = new Vector2(screenPosition.x - _type.OffsetX, screenPosition.y - _type.OffsetY);
+
+                Vector3 position, scale;
+                if (ClampeToFieldSize) {
+                    position = realPos * zoom;
+                    scale = s_fieldVector * zoom;
+                } else {
+                    position = (realPos - cachedSprite.size + s_fieldVector) * zoom;
+                    scale = cachedSprite.size * zoom;
+                }
+
+                _trsMatrix = Matrix4x4.TRS(position, Quaternion.Euler(180, 0, 0), scale);
+
+                _screenPosition = screenPosition;
+                _shouldRecalculateTRS = false;
+            } else if (_screenPosition != screenPosition) {
+                _trsMatrix[0, 3] += (screenPosition.x - _screenPosition.x) * zoom.x;
+                _trsMatrix[1, 3] += (screenPosition.y - _screenPosition.y) * zoom.y;
+                _screenPosition = screenPosition;
             }
 
             if (material == null)
                 material = OpenTibiaUnity.GameManager.AppearanceTypeMaterial;
 
-            material.SetFloat("_HighlightOpacity", highlighted ? highlightOpacity : 0);
-            Graphics.DrawTexture(s_TempRect, cachedSprite.texture, cachedSprite.rect, 0, 0, 0, 0, material);
+            if (props == null)
+                props = cachedSprite.materialProperyBlock;
+
+            props.SetFloat("_HighlightOpacity", highlighted ? highlightOpacity : 0);
+            if (commandBuffer != null)
+                commandBuffer.DrawMesh(s_mesh, _trsMatrix, material, 0, 0, props);
         }
 
         public virtual void SwitchFrameGroup(int _, int __) { }

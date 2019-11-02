@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 
+using CommandBuffer = UnityEngine.Rendering.CommandBuffer;
+
 namespace OpenTibiaUnity.Core.Appearances
 {
     public class ObjectInstance : AppearanceInstance
@@ -44,13 +46,13 @@ namespace OpenTibiaUnity.Core.Appearances
             return base.GetSpriteIndex(layer, patternX, patternY, patternZ);
         }
 
-        public override void Draw(Vector2 screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+        public override void Draw(CommandBuffer commandBuffer, Vector2Int screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
             if (_hasSpecialPattern) {
                 patternX = -1;
                 patternY = -1;
             }
             
-            base.Draw(screenPosition, zoom, patternX, patternY, patternZ, highlighted, highlightOpacity);
+            base.Draw(commandBuffer, screenPosition, zoom, patternX, patternY, patternZ, highlighted, highlightOpacity);
         }
 
         protected void UpdateSpecialPattern() {
@@ -86,11 +88,11 @@ namespace OpenTibiaUnity.Core.Appearances
                     _specialPatternY = 1;
                 }
 
-                _specialPatternX = _specialPatternX % (int)_type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternWidth;
-                _specialPatternY = _specialPatternY % (int)_type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternHeight;
+                _specialPatternX %= (int)_type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternWidth;
+                _specialPatternY %= (int)_type.FrameGroups[(int)Protobuf.Shared.FrameGroupType.Idle].SpriteInfo.PatternHeight;
             } else if (_type.IsSplash || _type.IsFluidContainer) {
                 _hasSpecialPattern = true;
-                FluidColor color = FluidColor.Transparent;
+                FluidColor color;
                 if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameNewFluids)) {
                     switch ((FluidType)_data) {
                         case FluidType.None:

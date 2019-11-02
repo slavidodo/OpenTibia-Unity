@@ -27,8 +27,19 @@ namespace OpenTibiaUnity.Core.Appearances
     {
         public uint id { get; set; }
         public Texture2D texture { get; set; }
-        public Rect rect { get; set; }
+        public Vector4 uv { get; set; }
         public Vector2 size { get; set; }
+        public MaterialPropertyBlock materialProperyBlock { get; set; }
+
+        public void GenerateMaterialProps(MaterialPropertyBlock props) {
+            props.SetTexture("_MainTex", texture);
+            props.SetVector("_MainTex_UV", uv);
+        }
+
+        public void GenerateChannelsMaterialProps(MaterialPropertyBlock props) {
+            props.SetTexture("_ChannelsTex", texture);
+            props.SetVector("_ChannelsTex_UV", uv);
+        }
     }
 
     public sealed class SpritesProvider {
@@ -76,7 +87,7 @@ namespace OpenTibiaUnity.Core.Appearances
             _cachedSprites.Clear();
         }
 
-        private SpriteLoadingStatus GetSpriteInfo(uint spriteId, out Rect rect, out Vector2 size, out Texture2D texture) {
+        private SpriteLoadingStatus GetSpriteInfo(uint spriteId, out Vector4 uv, out Vector2 size, out Texture2D texture) {
             SpriteTypeImpl match = _spriteSheet.Find(m => spriteId >= m.FirstSpriteId && spriteId <= m.LastSpriteId);
 
             var loadingStatus = SpriteLoadingStatus.Failed;
@@ -88,7 +99,7 @@ namespace OpenTibiaUnity.Core.Appearances
             }
 
             if (texture == null) {
-                rect = Rect.zero;
+                uv = Vector4.zero;
                 size = Vector2.zero;
                 return loadingStatus;
             }
@@ -99,7 +110,7 @@ namespace OpenTibiaUnity.Core.Appearances
 
             float x = (realId % texPerRow) * size.x;
             float y = texture.width - (realId / texPerRow * size.y) - size.y;
-            rect = new Rect(x / texture.width, y / texture.height, size.x / texture.width, size.y / texture.height);
+            uv = new Vector4(size.x / texture.width, size.y / texture.height, x / texture.width, y / texture.height);
             return loadingStatus;
         }
 
@@ -108,20 +119,19 @@ namespace OpenTibiaUnity.Core.Appearances
             if (cachedSprite != null)
                 return SpriteLoadingStatus.Completed;
 
-            var loadingStatus = GetSpriteInfo(spriteId, out Rect rect, out Vector2 size, out Texture2D texture);
+            var loadingStatus = GetSpriteInfo(spriteId, out Vector4 uv, out Vector2 size, out Texture2D texture);
             if (loadingStatus != SpriteLoadingStatus.Completed)
                 return loadingStatus;
 
             cachedSprite = new CachedSprite {
                 id = spriteId,
-                rect = rect,
+                uv = uv,
                 size = size,
                 texture = texture,
+                materialProperyBlock = new MaterialPropertyBlock(),
             };
-            cachedSprite.id = spriteId;
-            cachedSprite.rect = rect;
-            cachedSprite.size = size;
-            cachedSprite.texture = texture;
+
+            cachedSprite.GenerateMaterialProps(cachedSprite.materialProperyBlock);
 
             InsertCachedSprite(cachedSprite);
             return SpriteLoadingStatus.Completed;

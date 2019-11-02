@@ -124,11 +124,13 @@ namespace OpenTibiaUnity.Modules.Outfit
             Core.Utils.GraphicsUtility.ClearWithTransparency();
 
             if (!!_currentOutfit) {
-                var screenPosition = new Vector2(Constants.FieldSize, Constants.FieldSize);
+                var screenPosition = new Vector2Int(Constants.FieldSize, Constants.FieldSize);
                 var zoom = new Vector2(Screen.width / (float)_renderTexture.width, Screen.height / (float)_renderTexture.height);
 
-                if (!OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerMounts))
-                    screenPosition *= _spacingFactor;
+                if (!OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerMounts)) {
+                    screenPosition.x = (int)(screenPosition.x * _spacingFactor);
+                    screenPosition.y = (int)(screenPosition.x * _spacingFactor);
+                }
 
                 if (_currentOutfit is OutfitInstance)
                     _currentOutfit.Draw(screenPosition, zoom, (int)_currentDirection, 0, 0);
@@ -140,11 +142,11 @@ namespace OpenTibiaUnity.Modules.Outfit
             }
 
             if (!!_currentMount) {
-                var screenPosition = new Vector2(Constants.FieldSize, Constants.FieldSize);
+                float pos = Constants.FieldSize * _spacingFactor;
+                var screenPosition = new Vector2Int((int)pos, (int)pos);
                 var zoom = new Vector2(Screen.width / (float)_renderTexture.width, Screen.height / (float)_renderTexture.height);
 
-                screenPosition *= _spacingFactor;
-                screenPosition += new Vector2(Constants.FieldSize * 2, 0);
+                screenPosition += new Vector2Int(Constants.FieldSize * 2, 0);
 
                 if (_currentMount is OutfitInstance)
                     _currentMount.Draw(screenPosition, zoom, (int)_currentDirection, 0, 0);
