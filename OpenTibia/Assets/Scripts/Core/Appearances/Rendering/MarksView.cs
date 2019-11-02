@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+using CommandBuffer = UnityEngine.Rendering.CommandBuffer;
+
 namespace OpenTibiaUnity.Core.Appearances.Rendering
 {
     public class MarksView
@@ -53,43 +55,43 @@ namespace OpenTibiaUnity.Core.Appearances.Rendering
             _marksViewInformations.Add(information);
         }
 
-        public void DrawMarks(Marks marks, float screenX, float screenY, Vector2 zoom) {
-            // marks renderer is disabled internally
-            //Rect screenRect = new Rect() {
-            //    x = screenX * zoom.x,
-            //    y = screenY * zoom.y,
-            //    width = Constants.FieldSize * zoom.x,
-            //    height = Constants.FieldSize * zoom.y,
-            //};
-            //
-            //var size = _marksStartSize;
-            //var tex2d = OpenTibiaUnity.GameManager.MarksViewTexture;
-            //var material = OpenTibiaUnity.GameManager.MarksViewMaterial;
-            //
-            //foreach (var information in _marksViewInformations) {
-            //    if (!marks.IsMarkSet(information.MarkType))
-            //        continue;
-            //
-            //    uint eightBit = marks.GetMarkColor(information.MarkType);
-            //    Color color;
-            //    if (eightBit > Marks.MarksNumTotal)
-            //        continue;
-            //    else if (eightBit > Marks.MarkNumColors)
-            //        color = s_FrameColors[(int)eightBit];
-            //    else
-            //        color = Colors.ColorFrom8Bit((int)eightBit);
-            //
-            //    Rect texRect = new Rect() {
-            //        x = size * Constants.FieldSize / (float)tex2d.width,
-            //        y = (Constants.MarkThicknessBold - information.MarkThickness) * Constants.FieldSize / (float)tex2d.height,
-            //        width = Constants.FieldSize / (float)tex2d.width,
-            //        height = Constants.FieldSize / (float)tex2d.height,
-            //    };
-            //
-            //    material.SetColor("_Color", color);
-            //    Graphics.DrawTexture(screenRect, tex2d, texRect, 0, 0, 0, 0, color, material);
-            //    size += information.MarkThickness;
-            //}
+        public void DrawMarks(CommandBuffer commandBuffer, Marks marks, int screenX, int screenY, Vector2 zoom) {
+            var texture = OpenTibiaUnity.GameManager.MarksViewTexture;
+            var material = OpenTibiaUnity.GameManager.MarksViewMaterial;
+
+            var position = new Vector2(screenX, screenY) * zoom;
+            var scale = new Vector2(Constants.FieldSize, Constants.FieldSize) * zoom;
+            var transformation = Matrix4x4.TRS(position, Quaternion.Euler(180, 0, 0), scale);
+
+            var size = _marksStartSize;
+
+            foreach (var information in _marksViewInformations) {
+                if (!marks.IsMarkSet(information.MarkType))
+                    continue;
+
+                uint eightBit = marks.GetMarkColor(information.MarkType);
+                if (eightBit > Marks.MarksNumTotal)
+                    continue;
+
+                Color color;
+                if (eightBit > Marks.MarkNumColors)
+                    color = s_FrameColors[(int)eightBit];
+                else
+                    color = Colors.ColorFrom8Bit((int)eightBit);
+
+                var uv = new Vector4() {
+                    z = size * Constants.FieldSize / (float)texture.width,
+                    w = (Constants.MarkThicknessBold - information.MarkThickness) * Constants.FieldSize / (float)texture.height,
+                    x = Constants.FieldSize / (float)texture.width,
+                    y = Constants.FieldSize / (float)texture.height,
+                };
+
+                var props = new MaterialPropertyBlock();
+                props.SetTexture("_MainTex", texture);
+                props.SetVector("_MainTex_ST", uv);
+                props.SetColor("_Color", color);
+                Utils.GraphicsUtility.DrawTexture(commandBuffer, transformation, material, props);
+            }
         }
     }
 

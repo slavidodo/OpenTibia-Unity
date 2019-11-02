@@ -511,7 +511,8 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                 bool highlighted = !!_highlightCreature && _highlightCreature.Id == creature.Id;
 
                 // marks
-                _creaturesMarksView.DrawMarks(creature.Marks, renderAtom.x, renderAtom.y, ScreenZoom);
+                if (creature.Marks.AnyMarkSet())
+                    _creaturesMarksView.DrawMarks(commandBuffer, creature.Marks, renderAtom.x, renderAtom.y, ScreenZoom);
 
                 var offset = Vector2Int.zero;
                 if (isCovered && !!creature.MountOutfit) {

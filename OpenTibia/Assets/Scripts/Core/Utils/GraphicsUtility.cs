@@ -52,12 +52,20 @@ namespace OpenTibiaUnity.Core.Utils
 
         public static void DrawTexture(CommandBuffer commandBuffer, Vector2 position, Vector3 scale, Material mat) {
             var matrix = Matrix4x4.TRS(position, Quaternion.Euler(180, 0, 0), scale);
-            commandBuffer.DrawMesh(s_texMesh, matrix, mat, 0);
+            DrawTexture(commandBuffer, matrix, mat);
         }
 
         public static void DrawTexture(CommandBuffer commandBuffer, Vector2 position, Vector3 scale, Material mat, MaterialPropertyBlock props) {
             var matrix = Matrix4x4.TRS(position, Quaternion.Euler(180, 0, 0), scale);
-            commandBuffer.DrawMesh(s_texMesh, matrix, mat, 0, 0, props);
+            DrawTexture(commandBuffer, matrix, mat, props);
+        }
+
+        public static void DrawTexture(CommandBuffer commandBuffer, Matrix4x4 transformation, Material mat) {
+            commandBuffer.DrawMesh(s_texMesh, transformation, mat, 0);
+        }
+
+        public static void DrawTexture(CommandBuffer commandBuffer, Matrix4x4 transformation, Material mat, MaterialPropertyBlock props) {
+            commandBuffer.DrawMesh(s_texMesh, transformation, mat, 0, 0, props);
         }
     }
 }

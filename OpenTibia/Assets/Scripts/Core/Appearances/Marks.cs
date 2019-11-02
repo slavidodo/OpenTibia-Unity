@@ -29,6 +29,10 @@ namespace OpenTibiaUnity.Core.Appearances
             return MarkUnmarked;
         }
 
+        public bool AnyMarkSet() {
+            return _currentMarks != null && _currentMarks.Count > 0;
+        }
+
         public bool AreAnyMarksSet(IEnumerable<MarkType> markTypes) {
             if (_currentMarks == null)
                 return false;
