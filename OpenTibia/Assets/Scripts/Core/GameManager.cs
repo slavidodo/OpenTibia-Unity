@@ -293,7 +293,7 @@ namespace OpenTibiaUnity.Core
             InvokeRepeating("SaveMiniMap", 0, 0.5f);
 
 #if !UNITY_EDITOR
-            Application.wantsToQuit += Application_wantsToQuit;
+            Application.wantsToQuit += ApplicationWantsToQuit;
 #endif
 
             //QualitySettings.vSyncCount = 1;
