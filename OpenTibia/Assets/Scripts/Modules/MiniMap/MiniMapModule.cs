@@ -31,10 +31,7 @@ namespace OpenTibiaUnity.Modules.MiniMap
             if (Event.current.type != EventType.Repaint)
                 return;
 
-            RenderTexture.active = OpenTibiaUnity.GameManager.MiniMapRenderingTexture;
-            Core.Utils.GraphicsUtility.ClearWithTransparency();
-            OpenTibiaUnity.MiniMapRenderer.Render(null);
-            RenderTexture.active = null;
+            OpenTibiaUnity.MiniMapRenderer.Render(OpenTibiaUnity.GameManager.MiniMapRenderingTexture);
         }
 
         protected void OnZLayerUpButtonClicked() {

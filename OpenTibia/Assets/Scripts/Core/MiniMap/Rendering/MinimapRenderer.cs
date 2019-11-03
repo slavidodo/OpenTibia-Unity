@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 
+using CommandBuffer = UnityEngine.Rendering.CommandBuffer;
+
 namespace OpenTibiaUnity.Core.MiniMap.Rendering
 {
     public sealed class MiniMapRenderer
@@ -8,7 +10,7 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
         private int _zoom = 0;
         private float _zoomScale = 1f;
 
-        private Rect _positionRect = Rect.zero;
+        private RectInt _positionRect = new RectInt(0, 0, 0, 0);
 
         public int _positionX = 0;
         public int _positionY = 0;
@@ -17,13 +19,19 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
         public int PositionX {
             get { return _positionX; }
             set {
-                _positionX = Mathf.Clamp(value, Constants.MapMinX, Constants.MapMaxX);
+                if (_positionX != value) {
+                    _positionX = Mathf.Clamp(value, Constants.MapMinX, Constants.MapMaxX);
+                    UpdatePositionRect();
+                }
             }
         }
         public int PositionY {
             get { return _positionY; }
             set {
-                _positionY = Mathf.Clamp(value, Constants.MapMinY, Constants.MapMaxY);
+                if (_positionY != value) {
+                    _positionY = Mathf.Clamp(value, Constants.MapMinY, Constants.MapMaxY);
+                    UpdatePositionRect();
+                }
             }
         }
         public int PositionZ {
@@ -36,9 +44,13 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
         public Vector3Int Position {
             get { return new Vector3Int(PositionX, PositionY, PositionZ); }
             set {
-                PositionX = value.x;
-                PositionY = value.y;
-                PositionZ = value.z;
+                if (_positionX != value.x || _positionY != value.y) {
+                    _positionX = value.x;
+                    _positionY = value.y;
+                    UpdatePositionRect();
+                }
+
+                _positionZ = value.z;
             }
         }
 
@@ -52,6 +64,8 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
                 if (_zoom != value) {
                     _zoom = value;
                     _zoomScale = Mathf.Pow(2, _zoom);
+
+                    UpdatePositionRect();
                 }
             }
         }
@@ -62,97 +76,70 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
             });
         }
 
-        public RenderError Render(Material material) {
-            // minimap is disabled for now;
-            return RenderError.MiniMapNotValid;
+        private void UpdatePositionRect() {
+            var rectSize = new Vector2(Constants.MiniMapSideBarViewWidth / _zoomScale, Constants.MiniMapSideBarViewHeight / _zoomScale);
+            _positionRect = new RectInt {
+                x = _positionX - (int)(rectSize.x / 2),
+                y = _positionY - (int)(rectSize.y / 2),
+                width = (int)rectSize.x,
+                height = (int)rectSize.y
+            };
+        }
 
-            //if (MiniMapStorage == null || !OpenTibiaUnity.GameManager.IsGameRunning || !WorldMapStorage.Valid)
-            //    return RenderError.MiniMapNotValid;
-            //
-            //Utils.GraphicsUtility.ClearColor(Color.black);
-            //if (PositionX < Constants.MapMinX || PositionX > Constants.MapMaxX
-            //    || PositionY < Constants.MapMinY || PositionY > Constants.MapMaxY
-            //    || PositionZ < Constants.MapMinZ || PositionZ > Constants.MapMaxZ) {
-            //    return RenderError.PositionNotValid;
-            //}
-            //
-            //Vector2 screenZoom = new Vector2() {
-            //    x = Screen.width * _zoomScale / Constants.MiniMapSideBarViewWidth,
-            //    y = Screen.height * _zoomScale / Constants.MiniMapSideBarViewHeight,
-            //};
-            //
-            //Vector2 zoom = new Vector2() {
-            //    x = Constants.MiniMapSideBarViewWidth / _zoomScale,
-            //    y = Constants.MiniMapSideBarViewHeight / _zoomScale
-            //};
-            //
-            //_positionRect.x = PositionX - zoom.x / 2;
-            //_positionRect.y = PositionY - zoom.y / 2;
-            //_positionRect.width = zoom.x;
-            //_positionRect.height = zoom.y;
-            //
-            //var drawnSectors = new List<MiniMapSector>();
-            //
-            //Vector3Int position = Vector3Int.zero;
-            //
-            //var transformationMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(_zoomScale, _zoomScale, 1));
-            //for (int i = 0; i < 4; i++) {
-            //    position.Set(
-            //        (int)(_positionRect.x + i % 2 * _positionRect.width),
-            //        (int)(_positionRect.y + (int)(i / 2) * _positionRect.height),
-            //        PositionZ);
-            //
-            //    var sector = MiniMapStorage.AcquireSector(position, false);
-            //    if (drawnSectors.IndexOf(sector) == -1) {
-            //        drawnSectors.Add(sector);
-            //
-            //        var otherRect = new Rect(sector.SectorX, sector.SectorY, Constants.MiniMapSectorSize, Constants.MiniMapSectorSize);
-            //        var intersectingRect = Intersection(_positionRect, otherRect);
-            //
-            //        Rect screenRect = new Rect() {
-            //            x = (intersectingRect.x - _positionRect.x) * screenZoom.x,
-            //            y = (intersectingRect.y - _positionRect.y) * screenZoom.y,
-            //            width = intersectingRect.width * screenZoom.x,
-            //            height = intersectingRect.height * screenZoom.y
-            //        };
-            //
-            //        sector.ApplyPixelChanges();
-            //        Graphics.DrawTexture(screenRect, sector.Texture2D);
-            //    }
-            //}
-            //
-            //return RenderError.None;
+        public RenderError Render(RenderTexture renderTarget) {
+            if (MiniMapStorage == null || !OpenTibiaUnity.GameManager.IsGameRunning || !WorldMapStorage.Valid)
+                return RenderError.MiniMapNotValid;
+
+            var commandBuffer = new CommandBuffer();
+            commandBuffer.SetRenderTarget(renderTarget);
+            commandBuffer.ClearRenderTarget(false, true, Color.black);
+
+            var zoom = new Vector2() {
+                x = Screen.width / (float)Constants.MiniMapSideBarViewWidth,
+                y = Screen.height / (float)Constants.MiniMapSideBarViewHeight,
+            };
+
+            zoom *= _zoomScale;
+
+            var drawnSectors = new List<MiniMapSector>();
+
+            // 4 is the maximum number of sectors to be drawn (pre-calculated)
+            // todo; provide a function to calculate it (if someone plans to use minimap differently)
+            Vector3Int curPosition = new Vector3Int(0, 0, PositionZ);
+            for (int i = 0; i < 4; i++) {
+                curPosition.x = _positionRect.x + i % 2 * _positionRect.width;
+                curPosition.y = _positionRect.y + (i / 2) * _positionRect.height;
+
+                var sector = MiniMapStorage.AcquireSector(curPosition, false);
+                if (sector == null || drawnSectors.IndexOf(sector) != -1)
+                    continue;
+
+                drawnSectors.Add(sector);
+
+                var sectorRect = new RectInt(sector.SectorX, sector.SectorY, Constants.MiniMapSectorSize, Constants.MiniMapSectorSize);
+                var translation = sectorRect.position - _positionRect.position;
+
+                Matrix4x4 transformation = Matrix4x4.TRS(translation * zoom, Quaternion.Euler(180, 0, 0), Constants.MiniMapSectorSize * zoom);
+
+                var props = new MaterialPropertyBlock();
+                props.SetTexture("_MainTex", sector.SafeDrawTexture);
+                props.SetVector("_MainTex_UV", new Vector4(1, 1, 0, 0));
+                props.SetFloat("_HighlightOpacity", 0);
+                Utils.GraphicsUtility.DrawTexture(commandBuffer, transformation, OpenTibiaUnity.GameManager.AppearanceTypeMaterial, props);
+            }
+
+            Graphics.ExecuteCommandBuffer(commandBuffer);
+
+            return RenderError.None;
+
         }
 
         public void TranslatePosition(int x, int y, int z) {
-            var renderer = OpenTibiaUnity.MiniMapRenderer;
-            var scale = 3 * Mathf.Pow(2, Constants.MiniMapSideBarZoomMax - renderer.Zoom);
-            renderer.PositionX += (int)(x * scale);
-            renderer.PositionY += (int)(y * scale);
-            renderer.PositionZ += z;
-        }
-
-        public static Rect Intersection(Rect r1, Rect r2) {
-            float r1x = r1.x;
-            float r1y = r1.y;
-            float r2x = r2.x;
-            float r2y = r2.y;
-            double r1x2 = r1x; r1x2 += r1.width;
-            double r1y2 = r1y; r1y2 += r1.height;
-            double r2x2 = r2x; r2x2 += r2.width;
-            double r2y2 = r2y; r2y2 += r2.height;
-            if (r1x < r2x) r1x = r2x;
-            if (r1y < r2y) r1y = r2y;
-            if (r1x2 > r2x2) r1x2 = r2x2;
-            if (r1y2 > r2y2) r1y2 = r2y2;
-            r1x2 -= r1x;
-            r1y2 -= r1y;
-            // tx2,ty2 will never overflow (they will never be
-            // larger than the smallest of the two source w,h)
-            // they might underflow, though...
-            if (r1x2 < float.MinValue) r1x2 = float.MinValue;
-            if (r1y2 < float.MinValue) r1y2 = float.MinValue;
-            return new Rect(r1x, r1y, (float)r1x2, (float)r1y2);
+            var scale = 3 * Mathf.Pow(2, Constants.MiniMapSideBarZoomMax - _zoom);
+            _positionX += (int)(x * scale);
+            _positionY += (int)(y * scale);
+            _positionZ += z;
+            UpdatePositionRect();
         }
     }
 }

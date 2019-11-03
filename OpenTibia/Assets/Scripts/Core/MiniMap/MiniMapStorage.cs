@@ -26,6 +26,8 @@ namespace OpenTibiaUnity.Core.MiniMap
             get { return _position; }
             set {
                 var oldPosition = _position;
+                if (oldPosition == value)
+                    return;
 
                 value.x = Mathf.Clamp(value.x, Constants.MapMinX, Constants.MapMaxX);
                 value.y = Mathf.Clamp(value.y, Constants.MapMinY, Constants.MapMaxY);
@@ -36,20 +38,20 @@ namespace OpenTibiaUnity.Core.MiniMap
                 _position = value;
 
                 if (sectorX != _sector.x || sectorY != _sector.y || value.z != _sector.z) {
-                    for (int i = -1; i < 2; i++) {
-                        for (int j = -1; j < 2; j++) {
+                    for (int j = -1; j <= 1; j++) {
+                        for (int i = -1; i <= 1; i++) {
                             AcquireSector(
-                                sectorX + j * Constants.MiniMapSectorSize,
-                                sectorY + i * Constants.MiniMapSectorSize,
+                                sectorX + i * Constants.MiniMapSectorSize,
+                                sectorY + j * Constants.MiniMapSectorSize,
                                 value.z,
-                                i == 0 && j == 0);
+                                j == 0 && i == 0);
                         }
                     }
 
                     _sector.Set(sectorX, sectorY, value.z);
                 }
 
-                onPositionChange.Invoke(this, Position, oldPosition);
+                onPositionChange.Invoke(this, _position, oldPosition);
             }
         }
 
@@ -57,75 +59,43 @@ namespace OpenTibiaUnity.Core.MiniMap
             return AcquireSector(position.x, position.y, position.z, cache);
         }
 
-        public MiniMapSector AcquireSector(int x, int y, int z, bool cache) {
+        public MiniMapSector AcquireSector(int x, int y, int z, bool forceCache) {
             x = System.Math.Max(Constants.MapMinX, System.Math.Min(x, Constants.MapMaxX));
             y = System.Math.Max(Constants.MapMinY, System.Math.Min(y, Constants.MapMaxY));
             z = System.Math.Max(Constants.MapMinZ, System.Math.Min(z, Constants.MapMaxZ));
 
-            int sectorX = x / Constants.MiniMapSectorSize * Constants.MiniMapSectorSize;
-            int sectorY = y / Constants.MiniMapSectorSize * Constants.MiniMapSectorSize;
-            int sectorZ = z;
+            x = x / Constants.MiniMapSectorSize * Constants.MiniMapSectorSize;
+            y = y / Constants.MiniMapSectorSize * Constants.MiniMapSectorSize;
 
-            MiniMapSector sector = null;
-            int it = _sectorCache.Count - 1;
-            while (it > 0) {
-                var tmpSector = _sectorCache[it];
-                if (tmpSector.Equals(sectorX, sectorY, sectorZ)) {
-                    sector = tmpSector;
-                    _sectorCache.RemoveAt(it);
-                    break;
-                }
-
-                it--;
-            }
+            MiniMapSector sector = _sectorCache.Find((sec) => sec.Equals(x, y, z));
+            if (sector)
+                return sector;
+            else
 
             if (!sector) {
-                it = _saveQueue.Count - 1;
-                while (it >= 0) {
-                    var tmpSector = _saveQueue[it];
-                    if (tmpSector.Equals(sectorX, sectorY, sectorZ)) {
-                        sector = tmpSector;
-                        break;
-                    }
-
-                    it--;
-                }
-            }
-
-            if (!sector) {
-                sector = new MiniMapSector(sectorX, sectorY, sectorZ);
-                if (cache) {
+                sector = new MiniMapSector(x, y, z);
+                if (forceCache) {
+                    // load it right now
                     sector.LoadSharedObject();
+
+                    // if it exists in the load queue, then remove it
                     Dequeue(_loadQueue, sector);
+                } else {
+                    // don't load cache, it ain't really needed
+                    Enqueue(_loadQueue, sector);
                 }
             }
 
-            if (_sectorCache.Count >= Constants.MiniMapSectorSize) {
-                MiniMapSector tmpSector = null;
-                foreach (var sec in _sectorCache) {
-                    if (!sec.Dirty) {
-                        tmpSector = sec;
-                        _sectorCache.Remove(sec);
-                        break;
-                    }
-                }
-
-                if (!tmpSector) {
-                    tmpSector = _sectorCache[0];
-                    _sectorCache.RemoveAt(0);
-                }
-
-                Dequeue(_loadQueue, tmpSector);
-                if (tmpSector.Dirty)
-                    Enqueue(_saveQueue, tmpSector);
-            }
+            // pop the oldest sector
+            if (_sectorCache.Count >= Constants.MiniMapCacheSize)
+                _sectorCache.RemoveAt(0);
 
             _sectorCache.Add(sector);
             return sector;
         }
 
         public void UpdateField(Vector3Int position, uint color, int cost, bool fireChangeCall) {
-            var sector = AcquireSector(position, false);
+            var sector = AcquireSector(position, true);
             sector.UpdateField(position, color, cost);
             
             if (fireChangeCall) {
@@ -366,19 +336,24 @@ namespace OpenTibiaUnity.Core.MiniMap
         public void OnIOTimer() {
             _currentIOCount++;
 
-            if (_loadQueue != null && _loadQueue.Count > 0 && _loadQueue[0] != null)
+            if (_loadQueue.Count > 0) {
                 _loadQueue[0].LoadSharedObject();
-            else if (_currentIOCount % 10 == 0 && _saveQueue != null && _saveQueue.Count > 0 && _saveQueue[0] != null)
+                _loadQueue.RemoveAt(0);
+            } else if (_currentIOCount % 10 == 0 && _saveQueue.Count > 0) {
                 _saveQueue[0].SaveSharedObject();
+                _saveQueue.RemoveAt(0);
+            }
         }
 
-        // used in export MiniMap
         public void SaveSectors() {
             foreach (var sector in _saveQueue)
                 sector.SaveSharedObject();
+            _saveQueue.Clear();
 
-            foreach (var sector in _sectorCache)
-                sector.SaveSharedObject();
+            foreach (var sector in _sectorCache) {
+                if (sector.Dirty)
+                    sector.SaveSharedObject();
+            }
         }
     }
 }

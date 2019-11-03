@@ -18,6 +18,13 @@ namespace OpenTibiaUnity.Core.MiniMap
         public Texture2D Texture2D { get; private set; }
         public Texture2D WaypointsTexture2D { get; private set; }
 
+        public Texture2D SafeDrawTexture {
+            get {
+                ApplyPixelChanges();
+                return Texture2D;
+            }
+        }
+
         public MiniMapSector(int x, int y, int z) {
             SectorX = x;
             SectorY = y;
@@ -78,7 +85,11 @@ namespace OpenTibiaUnity.Core.MiniMap
 
             int texelX = x, texelY = Constants.MiniMapSectorSize - y - 1;
             Texture2D.SetPixel(texelX, texelY, Colors.ColorFromARGB(color));
-            WaypointsTexture2D.SetPixel(texelX, texelY, Colors.ColorFrom8Bit(cost));
+
+            byte costb = (byte)cost;
+            if (costb > 210)
+                costb = 210;
+            WaypointsTexture2D.SetPixel(texelX, texelY, new Color32 { r = costb, g = costb, b = costb, a = 255 });
 
             _cost[y * Constants.MiniMapSectorSize + x] = cost;
             MinCost = System.Math.Min(MinCost, cost);
@@ -96,7 +107,7 @@ namespace OpenTibiaUnity.Core.MiniMap
         public uint GetColour(int x, int y, int _) {
             x %= Constants.MiniMapSectorSize;
             y = Constants.MiniMapSectorSize - (y % Constants.MiniMapSectorSize ) - 1;
-            var color = Texture2D.GetPixel(x, y);
+            var color = SafeDrawTexture.GetPixel(x, y);
             return Colors.ARGBFromColor(color);
         }
 
@@ -112,35 +123,38 @@ namespace OpenTibiaUnity.Core.MiniMap
         public bool LoadSharedObject() {
             var sectorName = GetSectorName(this);
 
-            var colorPath = Path.Combine(Application.persistentDataPath, "MiniMap/Colors_" + sectorName + ".png");
-            var waypointPath = Path.Combine(Application.persistentDataPath, "MiniMap/Waypoints_" + sectorName + ".png");
-            if (!File.Exists(colorPath) || !File.Exists(waypointPath))
+            var colorPath = Path.Combine(Application.persistentDataPath, "MiniMap/MiniMap_Color_" + sectorName + ".png");
+            var waypointPath = Path.Combine(Application.persistentDataPath, "MiniMap/MiniMap_WaypointCost_" + sectorName + ".png");
+            if (!File.Exists(colorPath) && !File.Exists(waypointPath))
                 return false;
 
-            var colorBytes = File.ReadAllBytes(colorPath);
-            var waypointBytes = File.ReadAllBytes(waypointPath);
-            if (colorBytes == null || waypointBytes == null)
-                return false;
+            if (File.Exists(colorPath)) {
+                var colorBytes = File.ReadAllBytes(colorPath);
+                if (!Texture2D.LoadImage(colorBytes))
+                    return false;
 
-            if (!Texture2D.LoadImage(colorBytes))
-                return false;
-
-            if (!WaypointsTexture2D.LoadImage(waypointBytes)) {
-                Texture2D.SetPixels(Enumerable.Repeat(Color.black, Constants.MiniMapSectorSize * Constants.MiniMapSectorSize).ToArray());
                 Texture2D.Apply();
-                UncommittedPixelChanges = false;
-                return false;
             }
 
-            for (int x = 0; x < Constants.MiniMapSectorSize; x++) {
-                for (int y = 0; y < Constants.MiniMapSectorSize; y++) {
-                    var cost = Colors.EightBitFromColor(WaypointsTexture2D.GetPixel(x, y));
-                    MinCost = Mathf.Min(MinCost, cost);
-                    _cost[(Constants.MiniMapSectorSize - y - 1) * Constants.MiniMapSectorSize + x] = cost;
+            if (File.Exists(waypointPath)) {
+                var waypointBytes = File.ReadAllBytes(waypointPath);
+                if (!WaypointsTexture2D.LoadImage(waypointBytes))
+                    return false;
+
+                WaypointsTexture2D.Apply();
+                for (int x = 0; x < Constants.MiniMapSectorSize; x++) {
+                    for (int y = 0; y < Constants.MiniMapSectorSize; y++) {
+                        Color32 c = WaypointsTexture2D.GetPixel(x, y);
+                        int cost = c.r;
+                        if (cost >= 210)
+                            cost = Constants.PathCostObstacle;
+
+                        MinCost = Mathf.Min(MinCost, c.r);
+                        _cost[(Constants.MiniMapSectorSize - y - 1) * Constants.MiniMapSectorSize + x] = c.r;
+                    }
                 }
             }
-            
-            Texture2D.Apply();
+
             UncommittedPixelChanges = false;
             return true;
         }
@@ -153,11 +167,12 @@ namespace OpenTibiaUnity.Core.MiniMap
             byte[] waypointsTexBytes = WaypointsTexture2D.EncodeToPNG();
 
             var sectorName = GetSectorName(this);
-            var colorPath = Path.Combine(Application.persistentDataPath, "MiniMap/Colors_" + sectorName + ".png");
-            var waypointsPath = Path.Combine(Application.persistentDataPath, "MiniMap/Waypoints_" + sectorName + ".png");
-            
+            var colorPath = Path.Combine(Application.persistentDataPath, "MiniMap/MiniMap_Color_" + sectorName + ".png");
+            var waypointsPath = Path.Combine(Application.persistentDataPath, "MiniMap/MiniMap_WaypointCost_" + sectorName + ".png");
+
             File.WriteAllBytes(colorPath, colorTexBytes);
             File.WriteAllBytes(waypointsPath, waypointsTexBytes);
+            Dirty = false;
         }
 
         public bool Equals(MiniMapSector sector) {

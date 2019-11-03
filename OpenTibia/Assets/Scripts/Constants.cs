@@ -23,8 +23,8 @@
         public const int MapSizeZ = 8;
         public const int MapMinX = 0; // Tibia restricted it to 24576 -> 24576 + (1 << 14 -1)
         public const int MapMinY = 0;
-        public const int MapMaxX = MapMinX + 2 * (1 << 15 - 1);
-        public const int MapMaxY = MapMinY + 2 * (1 << 15 - 1);
+        public const int MapMaxX = MapMinX + 2 * ((1 << 15) - 1);
+        public const int MapMaxY = MapMinY + 2 * ((1 << 15) - 1);
         public const int MapMinZ = 0;
         public const int MapMaxZ = 15;
 
@@ -71,9 +71,10 @@
         public const int MiniMapSideBarViewHeight = 106;
         public const int MiniMapSideBarViewWidth = 106;
 
+        public const int MiniMapCacheSize = 48;
         public const int MiniMapSectorSize = 256;
         public const int MiniMapSideBarZoomMin = -1;
-        public const int MiniMapSideBarZoomMax = 4;
+        public const int MiniMapSideBarZoomMax = 2;
 
         public const int WorldMapScreenWidth = MapSizeX * FieldSize;
         public const int WorldMapScreenHeight = MapSizeY * FieldSize;

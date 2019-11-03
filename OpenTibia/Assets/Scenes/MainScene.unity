@@ -27862,12 +27862,12 @@ PrefabInstance:
     - target: {fileID: 1861785186114806433, guid: 54eba66ce4c99784c9bc8796c90e8b87,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 200
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1861785186114806433, guid: 54eba66ce4c99784c9bc8796c90e8b87,
         type: 3}
       propertyPath: m_SizeDelta.y
-      value: 50
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1861785186114806433, guid: 54eba66ce4c99784c9bc8796c90e8b87,
         type: 3}
@@ -45618,15 +45618,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42196e4ef25d3d647ad19eca9cd497e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _defaultTexture: {fileID: 0}
-  _northClicked: {fileID: 0}
-  _eastClicked: {fileID: 0}
-  _southClicked: {fileID: 0}
-  _westClicked: {fileID: 0}
-  _northEastClicked: {fileID: 0}
-  _northWestClicked: {fileID: 0}
-  _southWestClicked: {fileID: 0}
-  _southEastClicked: {fileID: 0}
+  _defaultTexture: {fileID: 2800000, guid: ee5076e9629d8484caf12b4c417ab47b, type: 3}
+  _northClicked: {fileID: 2800000, guid: d4e9f31de7da8cf45a2d68b3e011e06d, type: 3}
+  _eastClicked: {fileID: 2800000, guid: 6eef9886c0dd388458b264c4e1fc0a2b, type: 3}
+  _southClicked: {fileID: 2800000, guid: a75692694c9502a439270b1ab1509000, type: 3}
+  _westClicked: {fileID: 2800000, guid: c8c55de4b73d591478f557f8be938ff9, type: 3}
+  _northEastClicked: {fileID: 2800000, guid: db6184440587dfa4283254fad28ac5a6, type: 3}
+  _northWestClicked: {fileID: 2800000, guid: 488182cc5571c4040b0a35b34ed7a6ed, type: 3}
+  _southWestClicked: {fileID: 2800000, guid: d7177e4e59fcded4fac1ef7f7ee0d79a, type: 3}
+  _southEastClicked: {fileID: 2800000, guid: 1c81759743968dd4f93341bc8b4443c3, type: 3}
 --- !u!1001 &2014651879
 PrefabInstance:
   m_ObjectHideFlags: 0

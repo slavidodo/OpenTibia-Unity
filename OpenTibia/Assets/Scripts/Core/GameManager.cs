@@ -291,7 +291,7 @@ namespace OpenTibiaUnity.Core
 
         private void Start() {
             InvokeRepeating("SecondaryTimerCheck", 0, 0.05f);
-            InvokeRepeating("SaveMiniMap", 0, 0.5f);
+            InvokeRepeating("MiniMapIOTimer", 0, 0.25f);
 
 #if !UNITY_EDITOR
             Application.wantsToQuit += ApplicationWantsToQuit;
@@ -394,7 +394,7 @@ namespace OpenTibiaUnity.Core
             onSecondaryTimeCheck.Invoke();
         }
 
-        public void SaveMiniMap() {
+        public void MiniMapIOTimer() {
             if (!IsGameRunning) {
                 if (!_lastMiniMapSaveWasSuccessfull)
                     return;
