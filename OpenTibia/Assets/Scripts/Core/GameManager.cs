@@ -297,8 +297,6 @@ namespace OpenTibiaUnity.Core
             Application.wantsToQuit += ApplicationWantsToQuit;
 #endif
 
-            //QualitySettings.vSyncCount = 1;
-            QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = 1000;
         }
         
