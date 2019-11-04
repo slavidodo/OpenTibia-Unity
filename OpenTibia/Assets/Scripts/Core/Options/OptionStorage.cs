@@ -181,10 +181,26 @@ namespace OpenTibiaUnity.Core.Options
             }).ToList();
         }
 
+        public void UpdateQualitySettings() {
+            if (VsyncEnabled)
+                QualitySettings.vSyncCount = 1;
+            else
+                QualitySettings.vSyncCount = 0;
+
+            if (NoFramerateLimit)
+                Application.targetFrameRate = -1;
+            else
+                Application.targetFrameRate = Mathf.Clamp(FramerateLimit, 10, 200);
+
+            QualitySettings.SetQualityLevel(3); // High
+        }
+
         public void LoadOptions() {
             RemoveStarterMappings();
             
             LoadGeneral();
+
+            UpdateQualitySettings();
         }
 
         public bool SaveOptions() {

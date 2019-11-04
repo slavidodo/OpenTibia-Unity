@@ -295,8 +295,6 @@ namespace OpenTibiaUnity.Core
 #if !UNITY_EDITOR
             Application.wantsToQuit += ApplicationWantsToQuit;
 #endif
-
-            Application.targetFrameRate = 1000;
         }
         
         private void FixedUpdate() {
