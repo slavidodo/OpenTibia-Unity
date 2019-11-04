@@ -5,14 +5,8 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 {
     public sealed class MeshBasedLightmapRenderer : LightmapRenderer
     {
-        private RenderTexture _renderTexture = new RenderTexture(Constants.WorldMapScreenWidth, Constants.WorldMapScreenHeight, 0, RenderTextureFormat.ARGB32, RenderTextureReadWrite.Default);
         private Mesh _lightMesh = new Mesh();
-        private MeshRenderer meshRendere;
-        private Matrix4x4 _lightTransformationMatrix = new Matrix4x4();
         private Color32[] _colorData = new Color32[(Constants.MapSizeX + 1) * (Constants.MapSizeY + 1)];
-        
-        private int _cachedScreenWidth = -1;
-        private int _cachedScreenHeight = -1;
 
         public override Color32 this[int index] {
             get => _colorData[index];
@@ -29,12 +23,11 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         private void CreateMeshBuffers() {
             List<Vector3> verticies = new List<Vector3>((Constants.MapSizeX + 1) * (Constants.MapSizeY + 1));
             for (int y = 0; y < Constants.MapSizeY + 1; y++) {
-                for (int x = 0; x < Constants.MapSizeX + 1; x++) {
+                for (int x = 0; x < Constants.MapSizeX + 1; x++)
                     verticies.Add(new Vector3(x, y));
-                }
             }
 
-            List<int> indicies = new List<int>();
+            List<int> indicies = new List<int>(Constants.MapSizeX * Constants.MapSizeY * 6);
             for (int y = 0; y < Constants.MapSizeY; y++) {
                 int row = y * (Constants.MapSizeX + 1);
                 for (int x = 0; x < Constants.MapSizeX; x++) {
@@ -51,38 +44,20 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             _lightMesh.triangles = indicies.ToArray();
         }
 
-        public override Texture CreateLightmap() {
+        public override Mesh CreateLightmap() {
             for (int x = 0; x < Constants.MapSizeX + 1; x++)
                 _colorData[x] = _colorData[x + Constants.MapSizeX + 1];
-            
+
             for (int y = 0; y < Constants.MapSizeY + 1; y++) {
                 int destIndex = y * (Constants.MapSizeX + 1);
                 _colorData[destIndex] = _colorData[destIndex + 1];
             }
 
-            _lightMesh.colors32 = _colorData;
-            if (_cachedScreenHeight != Screen.height || _cachedScreenWidth != Screen.width) {
-                _cachedScreenWidth = Screen.width;
-                _cachedScreenHeight = Screen.height;
-
-                float zoomX = _cachedScreenWidth / (float)Constants.MapSizeX;
-                float zoomY = _cachedScreenHeight / (float)Constants.MapSizeY;
-
-                var scaleVector = new Vector3(zoomX, zoomY, 1);
-                _lightTransformationMatrix = Matrix4x4.Scale(scaleVector);
-            }
-
-            var previousRenderTexture = RenderTexture.active;
-            RenderTexture.active = _renderTexture;
-            Utils.GraphicsUtility.ClearWithTransparency();
-
-            OpenTibiaUnity.GameManager.InternalColoredMaterial.SetPass(0);
-            Graphics.DrawMeshNow(_lightMesh, _lightTransformationMatrix);
-
-            RenderTexture.active = previousRenderTexture;
             for (int z = 0; z < Constants.MapSizeZ; z++)
                 CachedLayerBrightnessInfo[z] = null;
-            return _renderTexture;
+
+            _lightMesh.colors32 = _colorData;
+            return _lightMesh;
         }
 
         public override void SetLightSource(int x, int y, int z, uint brightness, Color32 defaultColor32) {

@@ -31491,8 +31491,6 @@ MonoBehaviour:
   OutfitTypeMaterial: {fileID: 2100000, guid: 1ec8cb3958bff1148b00e16fe91e3901, type: 2}
   MarksViewMaterial: {fileID: 2100000, guid: 5f7fe41b989626e44ae89aa1efb5edf3, type: 2}
   LightmapMaterial: {fileID: 2100000, guid: 0b8dad65bc5bf2a458aa34403d0a4bfa, type: 2}
-  LightSurfaceMaterial: {fileID: 2100000, guid: 31f4470e7179a9d43b316ad75957531d,
-    type: 2}
   VerdanaFontMaterial: {fileID: 21963141150122312, guid: 09788a34279d69c4b801d0781c4b76db,
     type: 2}
   OutlinedVerdanaFontMaterial: {fileID: 2100000, guid: 71577e056d201e94a8c596cba2ab2f5c,

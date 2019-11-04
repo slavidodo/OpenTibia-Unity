@@ -195,22 +195,16 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                     InternalDrawEffects(commandBuffer);
             }
 
+            if (OptionStorage.ShowLightEffects) {
+                var lightmapMesh = _lightmapRenderer.CreateLightmap();
+                var position = (Constants.FieldSize / 2) * ScreenZoom;
+                var scale = screenSize / new Vector2(Constants.MapSizeX, -Constants.MapSizeY);
+                var transformation = Matrix4x4.TRS(position, Quaternion.Euler(180, 0, 0), scale);
+                commandBuffer.DrawMesh(lightmapMesh, transformation, OpenTibiaUnity.GameManager.LightmapMaterial);
+            }
+
             Graphics.ExecuteCommandBuffer(commandBuffer);
 
-            if (OptionStorage.ShowLightEffects) {
-                // lightmap renderer is disabled internally
-
-                //var lightmapTexture = _lightmapRenderer.CreateLightmap();
-                //var lightmapRect = new Rect() {
-                //    x = (Constants.FieldSize / 2) * ScreenZoom.y,
-                //    y = (Constants.FieldSize / 2) * ScreenZoom.y,
-                //    width = Constants.WorldMapScreenWidth * ScreenZoom.x,
-                //    height = Constants.WorldMapScreenHeight * ScreenZoom.y,
-                //};
-                //
-                //Graphics.DrawTexture(lightmapRect, lightmapTexture, OpenTibiaUnity.GameManager.LightSurfaceMaterial);
-            }
-            
             return RenderError.None;
         }
 
@@ -297,24 +291,26 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             int brightness = aboveGround ? WorldMapStorage.AmbientCurrentBrightness : 0;
             for (int i = 0; i < _creatureCount.Length; i++)
                 _creatureCount[i] = 0;
-            
+
             for (int x = 0; x < Constants.MapSizeX; x++) {
                 for (int y = 0; y < Constants.MapSizeY; y++) {
                     Field field = WorldMapStorage.GetField(x, y, z);
 
                     // update field light
-                    // todo; this shouldn't be called every frame unless
-                    // light probes has changed
+                    // todo; this shouldn't be called every frame unless light probes has changed
                     if (OptionStorage.ShowLightEffects) {
+#if DEBUG
+                        UnityEngine.Profiling.Profiler.BeginSample("Lightmesh reset");
+#endif
                         var colorIndex = _lightmapRenderer.ToColorIndex(x, y);
                         if (z == _playerZPlane && z > 0)
                             _lightmapRenderer[colorIndex] = Utils.Utility.MulColor32(_lightmapRenderer[colorIndex], OptionStorage.LightLevelSeparator / 100f);
 
                         Appearances.ObjectInstance @object;
                         if (z == 0 || (@object = field.ObjectsRenderer[0]) != null && @object.Type.IsGround) {
-                            var color = _lightmapRenderer[colorIndex];
                             _lightmapRenderer.SetFieldBrightness(x, y, brightness, aboveGround);
                             if (z > 0 && field.CacheTranslucent) {
+                                var color = _lightmapRenderer[colorIndex];
                                 color = Utils.Utility.MulColor32(color, OptionStorage.LightLevelSeparator / 100f);
                                 var alterColor = _lightmapRenderer[colorIndex];
                                 if (color.r < alterColor.r)
@@ -329,6 +325,9 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 
                         if (x > 0 && y > 0 && z < 7 && z == _playerZPlane + WorldMapStorage.Position.z - 8 && WorldMapStorage.IsTranslucent(x - 1, y - 1, z + 1))
                             _lightmapRenderer.SetFieldBrightness(x, y, WorldMapStorage.AmbientCurrentBrightness, aboveGround);
+#if DEBUG
+                        UnityEngine.Profiling.Profiler.EndSample();
+#endif
                     }
 
                     for (int i = field.ObjectsCount - 1; i >= 0; i--) {

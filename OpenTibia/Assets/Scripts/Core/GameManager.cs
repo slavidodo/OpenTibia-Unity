@@ -79,7 +79,6 @@ namespace OpenTibiaUnity.Core
         public Material OutfitTypeMaterial = null;
         public Material MarksViewMaterial = null;
         public Material LightmapMaterial = null;
-        public Material LightSurfaceMaterial = null;
         public Material VerdanaFontMaterial = null;
         public Material OutlinedVerdanaFontMaterial = null;
 

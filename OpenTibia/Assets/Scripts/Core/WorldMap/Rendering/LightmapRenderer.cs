@@ -9,7 +9,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 
         public abstract Color32 this[int index] { get; set; }
 
-        public abstract Texture CreateLightmap();
+        public abstract Mesh CreateLightmap();
 
         public abstract void SetLightSource(int x, int y, int z, uint brightness, Color32 color32);
 
