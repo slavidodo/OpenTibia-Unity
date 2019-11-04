@@ -537,8 +537,13 @@ namespace OpenTibiaUnity.Core
         }
 
         private async Task<Appearances.SpritesProvider> LoadSpriteProvider(Stream stream) {
-            await Task.Yield();
-            return new Appearances.SpritesProvider(stream);
+            var spriteProvider = new Appearances.SpritesProvider();
+
+            var c = spriteProvider.Parse(stream).GetEnumerator();
+            while (c.MoveNext() == false)
+                await Task.Yield();
+
+            return spriteProvider;
         }
 
         public void ProcessGamePending() {
