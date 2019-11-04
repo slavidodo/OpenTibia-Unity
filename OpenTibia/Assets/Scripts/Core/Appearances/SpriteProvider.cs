@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -53,7 +54,7 @@ namespace OpenTibiaUnity.Core.Appearances
         List<SpriteTypeImpl> _spriteSheet;
         List<CachedSprite> _cachedSprites = new List<CachedSprite>();
 
-        public IEnumerable<bool> Parse(System.IO.Stream stream) {
+        public IEnumerator Parse(System.IO.Stream stream) {
             using (var reader = new System.IO.BinaryReader(stream)) {
                 uint total = reader.ReadUInt32();
                 _spriteSheet = new List<SpriteTypeImpl>((int)total);
@@ -81,11 +82,9 @@ namespace OpenTibiaUnity.Core.Appearances
 
                     // load a batch of 5 textures at once
                     if (i % 5 == 0)
-                        yield return false;
+                        yield return null;
                 }
             }
-
-            yield return true;
         }
 
         public void Dispose() {

@@ -537,8 +537,8 @@ namespace OpenTibiaUnity.Core
         private async Task<Appearances.SpritesProvider> LoadSpriteProvider(Stream stream) {
             var spriteProvider = new Appearances.SpritesProvider();
 
-            var c = spriteProvider.Parse(stream).GetEnumerator();
-            while (c.MoveNext() == false)
+            var c = spriteProvider.Parse(stream);
+            while (c.MoveNext())
                 await Task.Yield();
 
             return spriteProvider;
