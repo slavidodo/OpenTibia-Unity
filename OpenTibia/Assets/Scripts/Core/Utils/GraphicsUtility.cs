@@ -67,5 +67,13 @@ namespace OpenTibiaUnity.Core.Utils
         public static void DrawTexture(CommandBuffer commandBuffer, Matrix4x4 transformation, Material mat, MaterialPropertyBlock props) {
             commandBuffer.DrawMesh(s_texMesh, transformation, mat, 0, 0, props);
         }
+
+        public static void DrawTextureInstanced(CommandBuffer commandBuffer, Matrix4x4[] matricies, int count, Material mat) {
+            commandBuffer.DrawMeshInstanced(s_texMesh, 0, mat, 0, matricies, count);
+        }
+
+        public static void DrawTextureInstanced(CommandBuffer commandBuffer, Matrix4x4[] matricies, int count, Material mat, MaterialPropertyBlock props) {
+            commandBuffer.DrawMeshInstanced(s_texMesh, 0, mat, 0, matricies, count, props);
+        }
     }
 }

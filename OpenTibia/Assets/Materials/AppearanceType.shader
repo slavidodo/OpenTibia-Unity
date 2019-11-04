@@ -2,7 +2,6 @@
     Properties {
 		[NoScaleOffset] _MainTex("Main Texture", 2D) = "white" {}
 		_HighlightColor("Highlight Color", Color) = (1.0,1.0,1.0,1.0)
-		[PerRendererData] _HighlightOpacity("Highlight Opacity", Float) = 0
     }
 
     SubShader {

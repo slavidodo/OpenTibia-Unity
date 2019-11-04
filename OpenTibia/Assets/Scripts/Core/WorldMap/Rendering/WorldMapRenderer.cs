@@ -27,7 +27,10 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         public Matrix4x4 matrix;
     }
 
-    public class WorldMapRenderer {
+    public class WorldMapRenderer
+    {
+        private static readonly Vector3 s_creatureStatSize = new Vector3(27, 4, 1);
+
         private int _drawnCreaturesCount = 0;
         private int _drawnEffectsCount = 0;
         private int _drawnTextualEffectsCount = 0;
@@ -51,8 +54,6 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         private Appearances.ObjectInstance _previousHang = null;
         private LightmapRenderer _lightmapRenderer = new MeshBasedLightmapRenderer();
         private Appearances.Rendering.MarksView _creaturesMarksView = new Appearances.Rendering.MarksView(0);
-        private readonly Mesh _creatureStatsRectMesh = new Mesh();
-        private readonly Mesh _creatureStatsFlagMesh = new Mesh();
 
         protected WorldMapStorage WorldMapStorage { get => OpenTibiaUnity.WorldMapStorage; }
         protected Creatures.CreatureStorage CreatureStorage { get => OpenTibiaUnity.CreatureStorage; }
@@ -112,18 +113,6 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                 _highlightOpacities[i] = Constants.HighlightMinOpacity + (i / 7f) * (Constants.HighlightMaxOpacity - Constants.HighlightMinOpacity);
             for (int i = 1; i < 7; i++)
                 _highlightOpacities[7 + i] = Constants.HighlightMaxOpacity - (i / 7f) * (Constants.HighlightMaxOpacity - Constants.HighlightMinOpacity);
-
-            _creatureStatsRectMesh.vertices = new Vector3[] {
-                new Vector3(0, 0, 0), new Vector3(27, 0, 0),
-                new Vector3(27, 4, 0), new Vector3(0, 4, 0),
-            };
-            _creatureStatsRectMesh.SetIndices(new int[] { 0, 1, 2, 3 }, MeshTopology.Quads, 0);
-
-            _creatureStatsFlagMesh.vertices = new Vector3[] {
-                new Vector3(0, 0, 0), new Vector3(1, 0, 0),
-                new Vector3(1, 1, 0), new Vector3(0, 1, 0)
-            };
-            _creatureStatsFlagMesh.SetIndices(new int[] { 0, 1, 2, 3 }, MeshTopology.Quads, 0);
         }
         
         public Rect CalculateClipRect() {
@@ -693,13 +682,11 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 
                 for (i = 0; i < matrixArray.Length; i += 1023) {
                     int sliceSize = Mathf.Min(1023, matrixArray.Length - i);
-
                     Array.Copy(matrixArray, i, matriciesToPass, 0, sliceSize);
                     Array.Copy(exArray, i, exToPass, 0, sliceSize);
-
                     MaterialPropertyBlock props = new MaterialPropertyBlock();
                     props.SetVectorArray("_Color", exToPass);
-                    commandBuffer.DrawMeshInstanced(_creatureStatsRectMesh, 0, coloredMaterial, 0, matriciesToPass, sliceSize, props);
+                    Utils.GraphicsUtility.DrawTextureInstanced(commandBuffer, matriciesToPass, sliceSize, coloredMaterial, props);
                 }
 
                 matrixArray = new Matrix4x4[flagDrawData.Count];
@@ -714,26 +701,25 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 
                 for (i = 0; i < matrixArray.Length; i += 1023) {
                     int sliceSize = Mathf.Min(1023, matrixArray.Length - i);
-                
                     Array.Copy(matrixArray, i, matriciesToPass, 0, sliceSize);
                     Array.Copy(exArray, i, exToPass, 0, sliceSize);
-                
                     MaterialPropertyBlock props = new MaterialPropertyBlock();
                     props.SetTexture("_MainTex", OpenTibiaUnity.GameManager.StateFlagsTexture);
-                    props.SetFloatArray("_HighlightOpacity", new float[] { 0.5f });
-                    props.SetVectorArray("_MainTex_ST", exToPass);
-                
-                    commandBuffer.DrawMeshInstanced(_creatureStatsFlagMesh, 0, appearanceMaterial, 0, matriciesToPass, sliceSize, props);
+                    props.SetVectorArray("_MainTex_UV", exToPass);
+                    Utils.GraphicsUtility.DrawTextureInstanced(commandBuffer, matriciesToPass, sliceSize, appearanceMaterial, props);
                 }
             } else {
                 foreach (var data in rectDrawData) {
                     MaterialPropertyBlock props = new MaterialPropertyBlock();
                     props.SetColor("_Color", data.color);
-                    commandBuffer.DrawMesh(_creatureStatsRectMesh, data.matrix, coloredMaterial, 0, 0, props);
+                    Utils.GraphicsUtility.DrawTexture(commandBuffer, data.matrix, coloredMaterial, props);
                 }
 
                 foreach (var data in flagDrawData) {
-
+                    MaterialPropertyBlock props = new MaterialPropertyBlock();
+                    props.SetTexture("_MainTex", OpenTibiaUnity.GameManager.StateFlagsTexture);
+                    props.SetVector("_MainTex_UV", data.uv);
+                    Utils.GraphicsUtility.DrawTexture(commandBuffer, data.matrix, appearanceMaterial, props);
                 }
             }
         }
@@ -881,17 +867,17 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             }
 
             if (descriptor.showHealth || descriptor.showMana) {
-                var basePosition = new Vector2(screenPosition.x - 27 / 2f, screenPosition.y + 4);
-                var actualPosition = new Vector2(basePosition.x + 1, basePosition.y - 1);
+                var basePosition = new Vector2(screenPosition.x - 27 / 2f, screenPosition.y);
+                var actualPosition = new Vector2(basePosition.x + 1, basePosition.y + 1);
 
                 if (descriptor.showHealth) {
                     rectData.Add(new ClassicStatusRectData() {
-                        matrix = Matrix4x4.TRS(basePosition, Quaternion.Euler(180, 0, 0), Vector3.one),
+                        matrix = Matrix4x4.TRS(basePosition, Quaternion.Euler(180, 0, 0), s_creatureStatSize),
                         color = Color.black
                     });
 
                     rectData.Add(new ClassicStatusRectData() {
-                        matrix = Matrix4x4.TRS(actualPosition, Quaternion.Euler(180, 0, 0), new Vector3(creature.HealthPercent / 108f, 0.5f)),
+                        matrix = Matrix4x4.TRS(actualPosition, Quaternion.Euler(180, 0, 0), new Vector3(creature.HealthPercent / 4f, 2, 1)),
                         color = healthColor
                     });
 
@@ -902,12 +888,12 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 
                 if (descriptor.showMana) {
                     rectData.Add(new ClassicStatusRectData() {
-                        matrix = Matrix4x4.TRS(basePosition, Quaternion.Euler(180, 0, 0), Vector3.one),
+                        matrix = Matrix4x4.TRS(basePosition, Quaternion.Euler(180, 0, 0), s_creatureStatSize),
                         color = Color.black
                     });
 
                     rectData.Add(new ClassicStatusRectData() {
-                        matrix = Matrix4x4.TRS(actualPosition, Quaternion.Euler(180, 0, 0), new Vector3(creature.ManaPercent / 108f, 0.5f)),
+                        matrix = Matrix4x4.TRS(actualPosition, Quaternion.Euler(180, 0, 0), new Vector3(creature.ManaPercent / 4f, 2, 1)),
                         color = manaColor
                     });
 
