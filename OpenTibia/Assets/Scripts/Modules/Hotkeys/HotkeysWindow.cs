@@ -108,6 +108,8 @@ namespace OpenTibiaUnity.Modules.Hotkeys
                     UpdateHotkeyPanelWithAction(hotkeysActionPanel, _lists[eventModifiers][i]);
                 }
             }
+
+            OpenTibiaUnity.GameManager.GetModule<GameWindow.GameMapContainer>().onInvalidateTRS.AddListener(OnInvalidateTRS);
         }
 
         protected void OnGUI() {
@@ -153,6 +155,19 @@ namespace OpenTibiaUnity.Modules.Hotkeys
 
             _hotkeyTextInputField.ActivateInputField();
             _hotkeyTextInputField.MoveTextEnd(false);
+        }
+
+        protected override void OnDestroy() {
+            base.OnDestroy();
+
+            var gameMapContainer = OpenTibiaUnity.GameManager?.GetModule<GameWindow.GameMapContainer>();
+            if (gameMapContainer)
+                gameMapContainer.onInvalidateTRS.RemoveListener(OnInvalidateTRS);
+        }
+
+        private void OnInvalidateTRS() {
+            if (!!_objectInstance)
+                _objectInstance.InvalidateTRS();
         }
 
         private void OnLoadedGameAssets() {

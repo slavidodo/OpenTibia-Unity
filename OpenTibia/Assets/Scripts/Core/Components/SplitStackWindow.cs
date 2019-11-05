@@ -20,7 +20,11 @@ namespace OpenTibiaUnity.Core.Components
         private Appearances.ObjectInstance _objectInstance = null;
         private int _objectAmount = 0;
         private int _selectedAmount = 0;
-        
+
+        private int _screenWidth = 0;
+        private int _screenHeight = 0;
+        private Vector2 _screenZoom;
+
         private RenderTexture _renderTexture = null;
 
         public SplitStackWindowButtonEvent onOk;
@@ -85,6 +89,16 @@ namespace OpenTibiaUnity.Core.Components
             onOk = new SplitStackWindowButtonEvent();
         }
 
+        protected void Update() {
+            if (Screen.width != _screenWidth || Screen.height != _screenHeight) {
+                _screenWidth = Screen.width;
+                _screenHeight = Screen.height;
+                _screenZoom = new Vector2(Screen.width / (float)Constants.FieldSize, Screen.height / (float)Constants.FieldSize);
+                if (!!_objectInstance)
+                    _objectInstance.InvalidateTRS();
+            }
+        }
+
         protected void TriggerOk() {
             onOk.Invoke(this);
             Hide();
@@ -123,8 +137,8 @@ namespace OpenTibiaUnity.Core.Components
                 if (_objectInstance == null || _objectInstance.Id != _objectType.Id)
                     _objectInstance = OpenTibiaUnity.AppearanceStorage.CreateObjectInstance(_objectType.Id, _objectAmount);
 
-                var zoom = new Vector2(Screen.width / (float)_renderTexture.width, Screen.height / (float)_renderTexture.height);
-                _objectInstance.Draw(commandBuffer, Vector2Int.zero, zoom, 0, 0, 0);
+                
+                _objectInstance.Draw(commandBuffer, Vector2Int.zero, _screenZoom, 0, 0, 0);
             }
 
             Graphics.ExecuteCommandBuffer(commandBuffer);

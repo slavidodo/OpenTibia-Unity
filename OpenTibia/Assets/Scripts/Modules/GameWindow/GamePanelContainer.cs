@@ -4,7 +4,7 @@ namespace OpenTibiaUnity.Modules.GameWindow
 {
     [ExecuteInEditMode]
     [DisallowMultipleComponent]
-    public class GamePanelContainer : Core.Components.Base.AbstractComponent
+    public class GamePanelContainer : Core.Components.Base.Module
     {
         protected override void OnRectTransformDimensionsChange() {
             base.OnRectTransformDimensionsChange();

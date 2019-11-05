@@ -105,6 +105,9 @@ namespace OpenTibiaUnity.Modules.Outfit
             _initialized = true;
             if (_currentOutfit)
                 OnFirstShow();
+
+
+            OpenTibiaUnity.GameManager.GetModule<GameWindow.GameMapContainer>().onInvalidateTRS.AddListener(OnInvalidateTRS);
         }
 
         protected void OnGUI() {
@@ -170,6 +173,22 @@ namespace OpenTibiaUnity.Modules.Outfit
                 return;
 
             OnFirstShow();
+        }
+
+        protected override void OnDestroy() {
+            base.OnDestroy();
+
+            var gameMapContainer = OpenTibiaUnity.GameManager?.GetModule<GameWindow.GameMapContainer>();
+            if (gameMapContainer)
+                gameMapContainer.onInvalidateTRS.RemoveListener(OnInvalidateTRS);
+        }
+
+        protected void OnInvalidateTRS() {
+            if (!!_currentOutfit)
+                _currentOutfit.InvalidateTRS();
+
+            if (!!_currentMount)
+                _currentMount.InvalidateTRS();
         }
 
         private void OnFirstShow() {

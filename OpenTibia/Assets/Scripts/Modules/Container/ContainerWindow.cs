@@ -37,6 +37,12 @@ namespace OpenTibiaUnity.Modules.Container
             _upButton.onClick.AddListener(OnUpButtonClick);
         }
 
+        protected override void Start() {
+            base.Start();
+
+            OpenTibiaUnity.GameManager.GetModule<GameWindow.GameMapContainer>().onInvalidateTRS.AddListener(OnInvalidateTRS);
+        }
+
         protected void OnGUI() {
             if (Event.current.type != EventType.Repaint)
                 return;
@@ -82,6 +88,20 @@ namespace OpenTibiaUnity.Modules.Container
             if (_slotsRenderTexture != null) {
                 _slotsRenderTexture.Release();
                 _slotsRenderTexture = null;
+            }
+
+            var gameMapContainer = OpenTibiaUnity.GameManager?.GetModule<GameWindow.GameMapContainer>();
+            if (gameMapContainer)
+                gameMapContainer.onInvalidateTRS.RemoveListener(OnInvalidateTRS);
+        }
+
+        protected void OnInvalidateTRS() {
+            if (_containerView != null) {
+                for (int i = 0; i < _containerView.NumberOfTotalObjects; i++) {
+                    var @object = _containerView.GetObject(i + _containerView.IndexOfFirstObject);
+                    if (!!@object)
+                        @object.InvalidateTRS();
+                }
             }
         }
 

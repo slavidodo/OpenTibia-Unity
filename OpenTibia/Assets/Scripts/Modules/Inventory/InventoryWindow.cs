@@ -179,6 +179,8 @@ namespace OpenTibiaUnity.Modules.Inventory
 
             _storeInboxButton.onClick.AddListener(OnStoreInboxButtonClick);
             _storeInboxLegacyButton.onClick.AddListener(OnStoreInboxButtonClick);
+
+            OpenTibiaUnity.GameManager.GetModule<GameWindow.GameMapContainer>().onInvalidateTRS.AddListener(OnInvalidateTRS);
         }
 
         private void OnGUI() {
@@ -212,6 +214,18 @@ namespace OpenTibiaUnity.Modules.Inventory
 
             _slotsRenderTexture.Release();
             _slotsRenderTexture = null;
+
+            var gameMapContainer = OpenTibiaUnity.GameManager?.GetModule<GameWindow.GameMapContainer>();
+            if (gameMapContainer)
+                gameMapContainer.onInvalidateTRS.RemoveListener(OnInvalidateTRS);
+        }
+
+        private void OnInvalidateTRS() {
+            for (int i = 0; i < (int)ClothSlots.Hip; i++) {
+                var @object = BodyContainerView.Objects[i];
+                if (@object)
+                    @object.InvalidateTRS();
+            }
         }
 
         public void OnMouseUp(Event e, MouseButton mouseButton, bool repeat) {

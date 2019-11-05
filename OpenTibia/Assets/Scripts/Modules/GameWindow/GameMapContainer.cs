@@ -5,6 +5,7 @@ using OpenTibiaUnity.Core.Creatures;
 using OpenTibiaUnity.Core.Game;
 using OpenTibiaUnity.Core.Input.GameAction;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 using PlayerAction = OpenTibiaUnity.Protobuf.Shared.PlayerAction;
 
@@ -33,6 +34,14 @@ namespace OpenTibiaUnity.Modules.GameWindow
         
         private RectTransform worldMapRectTransform { get => _gameWorldMap.rectTransform; }
 
+        public UnityEvent onInvalidateTRS;
+
+        protected override void Awake() {
+            base.Awake();
+
+            onInvalidateTRS = new UnityEvent();
+        }
+
         protected override void Start() {
             base.Start();
 
@@ -55,6 +64,8 @@ namespace OpenTibiaUnity.Modules.GameWindow
 
                 if (OpenTibiaUnity.WorldMapStorage != null)
                     OpenTibiaUnity.WorldMapStorage.InvalidateFieldsTRS();
+
+                onInvalidateTRS.Invoke();
             }
         }
 
