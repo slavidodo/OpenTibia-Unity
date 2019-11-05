@@ -266,8 +266,23 @@ namespace OpenTibiaUnity.Core.WorldMap
         public void InvalidateObjectsTRS() {
             UpdateObjectsCache();
 
-            for (int i = 0; i < ObjectsCount; i++)
-                ObjectsRenderer[i].InvalidateTRS();
+            for (int i = 0; i < ObjectsCount; i++) {
+                var @object = ObjectsRenderer[i];
+                if (@object.IsCreature) {
+                    var creature = OpenTibiaUnity.CreatureStorage.GetCreature(@object.Data);
+                    if (!!creature) {
+                        if (!!creature.Outfit)
+                            creature.Outfit.InvalidateTRS();
+                        if (!!creature.MountOutfit)
+                            creature.MountOutfit.InvalidateTRS();
+                    }
+                } else {
+                    @object.InvalidateTRS();
+                }
+            }
+
+            for (int i = 0; i < EffectsCount; i++)
+                Effects[i].InvalidateTRS();
         }
 
         public void UpdateObjectsCache() {
