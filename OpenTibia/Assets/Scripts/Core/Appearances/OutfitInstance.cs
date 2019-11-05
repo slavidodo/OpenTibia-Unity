@@ -20,7 +20,7 @@ namespace OpenTibiaUnity.Core.Appearances
         private Color _legsColor = Color.white;
         private Color _detailColor = Color.white;
 
-        private Dictionary<int, MaterialPropertyBlock> _channelProps = new Dictionary<int, MaterialPropertyBlock>();
+        private Dictionary<uint, MaterialPropertyBlock> _channelProps = new Dictionary<uint, MaterialPropertyBlock>();
 
         private int _phase = 0;
         private bool _walking = false;
@@ -97,8 +97,11 @@ namespace OpenTibiaUnity.Core.Appearances
 
                 int spriteIndex = GetSpriteIndex(-1, patternX, patternY, patternZ);
 
-                OpenTibiaUnity.AppearanceStorage.GetSprite(ActiveFrameGroup.SpriteInfo.SpriteIDs[spriteIndex], out CachedSprite baseSprite);
-                OpenTibiaUnity.AppearanceStorage.GetSprite(ActiveFrameGroup.SpriteInfo.SpriteIDs[spriteIndex + 1], out CachedSprite channelSprite);
+                var baseSpriteId = ActiveFrameGroup.SpriteInfo.SpriteIDs[spriteIndex];
+                var channelSpriteId = ActiveFrameGroup.SpriteInfo.SpriteIDs[++spriteIndex];
+
+                OpenTibiaUnity.AppearanceStorage.GetSprite(baseSpriteId, out CachedSprite baseSprite);
+                OpenTibiaUnity.AppearanceStorage.GetSprite(channelSpriteId, out CachedSprite channelSprite);
 
                 // if these are not loaded yet we should still continue to
                 // ensure that next time all layers are loaded!
@@ -106,12 +109,12 @@ namespace OpenTibiaUnity.Core.Appearances
                     dontDraw = true;
 
                 if (!dontDraw) {
-                    if (!_channelProps.TryGetValue(spriteIndex, out MaterialPropertyBlock props)) {
+                    if (!_channelProps.TryGetValue(channelSpriteId, out MaterialPropertyBlock props)) {
                         props = new MaterialPropertyBlock();
                         baseSprite.GenerateMaterialProps(props);
                         channelSprite.GenerateChannelsMaterialProps(props);
                         UpdateMaterialProppertyBlock(props);
-                        _channelProps.Add(spriteIndex, props);
+                        _channelProps.Add(channelSpriteId, props);
                     }
 
                     InternalDrawTo(commandBuffer, screenPosition, zoom, highlighted, highlightOpacity, baseSprite);
