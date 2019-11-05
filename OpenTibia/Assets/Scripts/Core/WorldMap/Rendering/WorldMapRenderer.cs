@@ -289,8 +289,6 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             
             bool aboveGround = Player.Position.z <= 7;
             int brightness = aboveGround ? WorldMapStorage.AmbientCurrentBrightness : 0;
-            for (int i = 0; i < _creatureCount.Length; i++)
-                _creatureCount[i] = 0;
 
             for (int x = 0; x < Constants.MapSizeX; x++) {
                 for (int y = 0; y < Constants.MapSizeY; y++) {
