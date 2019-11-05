@@ -133,16 +133,17 @@ namespace OpenTibiaUnity.Core.Appearances
             return null;
         }
 
+        public EffectInstance CreateInvisibleEffect() {
+            return new EffectInstance(_invisibleOutfitType.Id, _invisibleOutfitType);
+        }
+
         public OutfitInstance CreateOutfitInstance(uint id, int head, int body, int legs, int feet, int addons) {
             if (_outfitTypes == null)
                 throw new System.Exception("AppearanceStorage.CreateOutfitInstance: proto appearances not loaded.");
 
-            if (id == OutfitInstance.InvisibleOutfitId) {
-                return new OutfitInstance(id, _invisibleOutfitType, head, body, legs, feet, addons);
-            } else if (id >= _minimumOutfitId && id <= _maximumOutfitId) {
+            if (id >= _minimumOutfitId && id <= _maximumOutfitId) {
                 return new OutfitInstance(id, FindAppearanceType(_outfitTypes, id), head, body, legs, feet, addons);
             }
-                
             return null;
         }
 

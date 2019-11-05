@@ -38,8 +38,11 @@ namespace OpenTibiaUnity.Core.Communication.Game
             if (!!objectInstance && objectInstance.Id == objectId)
                 return objectInstance;
 
-            if (objectId == 0)
-                return AppearanceStorage.CreateOutfitInstance(OutfitInstance.InvisibleOutfitId, 0, 0, 0, 0, 0);
+            if (objectId == OutfitInstance.InvisibleOutfitId) {
+                var effect = AppearanceStorage.CreateInvisibleEffect();
+                effect.SetEndless();
+                return effect;
+            }
 
             return AppearanceStorage.CreateObjectInstance(objectId, 0);
         }
