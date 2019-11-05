@@ -116,7 +116,8 @@ namespace OpenTibiaUnity.Modules.Outfit
 
             if (_renderTexture == null) {
                 _renderTexture = new RenderTexture(Constants.FieldSize * 2 * 2, Constants.FieldSize * 2, 0, RenderTextureFormat.ARGB32);
-                _renderTexture.filterMode = FilterMode.Point;
+                _renderTexture.filterMode = FilterMode.Bilinear;
+                _renderTexture.Create();
 
                 _rawImageOutfit.texture = _renderTexture;
                 _rawImageMount.texture = _renderTexture;

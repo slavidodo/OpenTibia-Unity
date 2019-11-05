@@ -113,6 +113,8 @@ namespace OpenTibiaUnity.Modules.GameWindow
                     if (_onscreenTextRenderTexture == null || shouldCreateOnscreenTexture) {
                         _onscreenTextRenderTexture?.Release();
                         _onscreenTextRenderTexture = new RenderTexture(_lastScreenWidth, _lastScreenHeight, 0, RenderTextureFormat.ARGB32);
+                        _onscreenTextRenderTexture.filterMode = FilterMode.Bilinear;
+                        _onscreenTextRenderTexture.Create();
                         _onscreenTextImage.texture = _onscreenTextRenderTexture;
                     }
 

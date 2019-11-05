@@ -110,7 +110,8 @@ namespace OpenTibiaUnity.Core.Components
 
             if (_renderTexture == null) {
                 _renderTexture = new RenderTexture(Constants.FieldSize, Constants.FieldSize, 0, RenderTextureFormat.ARGB32);
-                _renderTexture.filterMode = FilterMode.Point;
+                _renderTexture.filterMode = FilterMode.Bilinear;
+                _renderTexture.Create();
                 _itemImage.texture = _renderTexture;
             }
 

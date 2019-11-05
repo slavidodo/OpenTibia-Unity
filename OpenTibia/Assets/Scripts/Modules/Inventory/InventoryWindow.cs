@@ -107,6 +107,9 @@ namespace OpenTibiaUnity.Modules.Inventory
             Creature.onSkillChange.AddListener(OnSkillChange);
 
             _slotsRenderTexture = new RenderTexture(Constants.FieldSize * (int)ClothSlots.Hip, Constants.FieldSize, 0, RenderTextureFormat.ARGB32);
+            _slotsRenderTexture.filterMode = FilterMode.Bilinear;
+            _slotsRenderTexture.Create();
+
             _dragHandler = new ObjectDragImpl<InventoryWindow>(this);
             ObjectMultiUseHandler.RegisterContainer(this);
 

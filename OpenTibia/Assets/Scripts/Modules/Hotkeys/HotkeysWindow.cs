@@ -130,8 +130,8 @@ namespace OpenTibiaUnity.Modules.Hotkeys
 
             if (s_renderTexture == null) {
                 s_renderTexture = new RenderTexture(Constants.FieldSize, Constants.FieldSize, 0, RenderTextureFormat.ARGB32);
-                s_renderTexture.filterMode = FilterMode.Point;
-
+                s_renderTexture.filterMode = FilterMode.Bilinear;
+                s_renderTexture.Create();
                 _objectImage.texture = s_renderTexture;
             }
 

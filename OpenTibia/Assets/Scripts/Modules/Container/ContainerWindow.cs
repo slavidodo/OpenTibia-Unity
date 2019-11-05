@@ -243,8 +243,11 @@ namespace OpenTibiaUnity.Modules.Container
                 }
             }
 
-            if (shouldCreateRenderTexture)
+            if (shouldCreateRenderTexture) {
                 _slotsRenderTexture = new RenderTexture(Constants.FieldSize * 4, Constants.FieldSize * _rows, 0, RenderTextureFormat.ARGB32);
+                _slotsRenderTexture.filterMode = FilterMode.Bilinear;
+                _slotsRenderTexture.Create();
+            }
 
             _itemViews = new ItemView[_numberOfSlots];
             _containerView = containerView;
