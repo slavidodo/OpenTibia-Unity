@@ -204,6 +204,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             }
 
             Graphics.ExecuteCommandBuffer(commandBuffer);
+            commandBuffer.Dispose();
 
             return RenderError.None;
         }
@@ -223,6 +224,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             InternalDrawOnscreenMessages(commandBuffer);
 
             Graphics.ExecuteCommandBuffer(commandBuffer);
+            commandBuffer.Dispose();
         }
         
         private void UpdateMinMaxZPlane() {

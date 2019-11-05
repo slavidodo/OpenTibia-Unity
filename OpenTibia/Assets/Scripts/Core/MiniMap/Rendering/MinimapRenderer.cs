@@ -129,6 +129,7 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
             }
 
             Graphics.ExecuteCommandBuffer(commandBuffer);
+            commandBuffer.Dispose();
 
             return RenderError.None;
 
