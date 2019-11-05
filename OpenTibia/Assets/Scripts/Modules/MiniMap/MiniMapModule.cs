@@ -42,9 +42,11 @@ namespace OpenTibiaUnity.Modules.MiniMap
         }
         protected void OnZoomOutButtonClicked() {
             OpenTibiaUnity.MiniMapRenderer.Zoom--;
+            OpenTibiaUnity.OptionStorage.MiniMapZoom = OpenTibiaUnity.MiniMapRenderer.Zoom;
         }
         protected void OnZoomInButtonClicked() {
             OpenTibiaUnity.MiniMapRenderer.Zoom++;
+            OpenTibiaUnity.OptionStorage.MiniMapZoom = OpenTibiaUnity.MiniMapRenderer.Zoom;
         }
         protected void OnCenterButtonClicked() {
             OpenTibiaUnity.MiniMapRenderer.Position = OpenTibiaUnity.MiniMapStorage.Position;

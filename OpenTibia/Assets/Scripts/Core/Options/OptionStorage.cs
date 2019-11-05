@@ -116,6 +116,7 @@ namespace OpenTibiaUnity.Core.Options
         public string LoginAddress = string.Empty;
         public int SelectedClientVersion = -1;
         public int SelectedBuildVersion = -1;
+        public int MiniMapZoom = 0;
 
         // internal game options
         public CombatAttackModes CombatAttackMode = CombatAttackModes.Balanced;
@@ -200,6 +201,7 @@ namespace OpenTibiaUnity.Core.Options
             
             LoadGeneral();
 
+            OpenTibiaUnity.MiniMapRenderer.Zoom = MiniMapZoom;
             UpdateQualitySettings();
         }
 
