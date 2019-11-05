@@ -3,6 +3,8 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 
+using CommandBuffer = UnityEngine.Rendering.CommandBuffer;
+
 namespace OpenTibiaUnity.Core.Components
 {
     public class SplitStackWindow : Base.Window
@@ -112,17 +114,20 @@ namespace OpenTibiaUnity.Core.Components
                 _itemImage.texture = _renderTexture;
             }
 
-            RenderTexture.active = _renderTexture;
-            Utils.GraphicsUtility.ClearWithTransparency();
+            var commandBuffer = new CommandBuffer();
+            commandBuffer.SetRenderTarget(_renderTexture);
+            commandBuffer.ClearRenderTarget(false, true, Core.Utils.GraphicsUtility.TransparentColor);
+
             if (!!_objectType) {
                 if (_objectInstance == null || _objectInstance.Id != _objectType.Id)
                     _objectInstance = OpenTibiaUnity.AppearanceStorage.CreateObjectInstance(_objectType.Id, _objectAmount);
 
                 var zoom = new Vector2(Screen.width / (float)_renderTexture.width, Screen.height / (float)_renderTexture.height);
-                _objectInstance.Draw(Vector2Int.zero, zoom, 0, 0, 0);
+                _objectInstance.Draw(commandBuffer, Vector2Int.zero, zoom, 0, 0, 0);
             }
 
-            RenderTexture.active = null;
+            Graphics.ExecuteCommandBuffer(commandBuffer);
+            commandBuffer.Dispose();
         }
     }
 }

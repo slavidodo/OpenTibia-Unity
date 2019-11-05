@@ -157,10 +157,6 @@ namespace OpenTibiaUnity.Core.Appearances
 
             return cachedRequest.CachedSprite;
         }
-        
-        public void Draw(Vector2Int screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
-            Draw(null, screenPosition, zoom, patternX, patternY, patternZ, highlighted, highlightOpacity);
-        }
 
         public virtual void Draw(CommandBuffer commandBuffer, Vector2Int screenPosition, Vector2 zoom,
                                 int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {

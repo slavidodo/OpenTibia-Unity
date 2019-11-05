@@ -6,6 +6,8 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+using CommandBuffer = UnityEngine.Rendering.CommandBuffer;
+
 namespace OpenTibiaUnity.Modules.Inventory
 {
     public class InventoryWindow : Core.Components.Base.MiniWindow, IUseWidget, IMoveWidget, IWidgetContainerWidget
@@ -185,19 +187,21 @@ namespace OpenTibiaUnity.Modules.Inventory
 
             Vector2 zoom = new Vector2(Screen.width / (float)_slotsRenderTexture.width, Screen.height / (float)_slotsRenderTexture.height);
 
-            RenderTexture.active = _slotsRenderTexture;
-            Core.Utils.GraphicsUtility.ClearWithTransparency();
+            var commandBuffer = new CommandBuffer();
+            commandBuffer.SetRenderTarget(_slotsRenderTexture);
+            commandBuffer.ClearRenderTarget(false, true, Core.Utils.GraphicsUtility.TransparentColor);
             for (int i = 0; i < (int)ClothSlots.Hip; i++) {
                 var @object = BodyContainerView.Objects[i];
                 if (@object) {
                     if (!@object.ClampeToFieldSize)
                         @object.ClampeToFieldSize = true;
                     @object.Animate(OpenTibiaUnity.TicksMillis);
-                    @object.Draw(new Vector2Int(Constants.FieldSize * i, 0), zoom, 0, 0, 0);
+                    @object.Draw(commandBuffer, new Vector2Int(Constants.FieldSize * i, 0), zoom, 0, 0, 0);
                 }
             }
 
-            RenderTexture.active = null;
+            Graphics.ExecuteCommandBuffer(commandBuffer);
+            commandBuffer.Dispose();
         }
 
         protected override void OnDestroy() {

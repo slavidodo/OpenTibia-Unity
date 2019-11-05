@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+using CommandBuffer = UnityEngine.Rendering.CommandBuffer;
+
 namespace OpenTibiaUnity.Modules.Hotkeys
 {
     public class HotkeysWindow : Core.Components.Base.Window {
@@ -18,7 +20,7 @@ namespace OpenTibiaUnity.Modules.Hotkeys
         private const KeyCode StartKeyCode = KeyCode.F1;
         private const KeyCode EndKeyCode = KeyCode.F12;
 
-        private static RenderTexture s_RenderTexture;
+        private static RenderTexture s_renderTexture;
 
         public const string TextUseOnYourself = "<color=#AFFEAF>{0}: (use object on yourself)</color>";
         public const string TextUseOnTarget = "<color=#FEAFAF>{0}: (use object on target)</color>";
@@ -126,18 +128,21 @@ namespace OpenTibiaUnity.Modules.Hotkeys
                 return;
             }
 
-            if (s_RenderTexture == null) {
-                s_RenderTexture = new RenderTexture(Constants.FieldSize, Constants.FieldSize, 0, RenderTextureFormat.ARGB32);
-                s_RenderTexture.filterMode = FilterMode.Point;
+            if (s_renderTexture == null) {
+                s_renderTexture = new RenderTexture(Constants.FieldSize, Constants.FieldSize, 0, RenderTextureFormat.ARGB32);
+                s_renderTexture.filterMode = FilterMode.Point;
 
-                _objectImage.texture = s_RenderTexture;
+                _objectImage.texture = s_renderTexture;
             }
 
-            RenderTexture.active = s_RenderTexture;
-            Core.Utils.GraphicsUtility.ClearWithTransparency();
-            var zoom = new Vector2(Screen.width / (float)s_RenderTexture.width, Screen.height / (float)s_RenderTexture.height);
-            _objectInstance.Draw(new Vector2Int(0, 0), zoom, 0, 0, 0);
-            RenderTexture.active = null;
+            var commandBuffer = new CommandBuffer();
+            commandBuffer.SetRenderTarget(s_renderTexture);
+            commandBuffer.ClearRenderTarget(false, true, Core.Utils.GraphicsUtility.TransparentColor);
+
+            var zoom = new Vector2(Screen.width / (float)s_renderTexture.width, Screen.height / (float)s_renderTexture.height);
+            _objectInstance.Draw(commandBuffer, new Vector2Int(0, 0), zoom, 0, 0, 0);
+            Graphics.ExecuteCommandBuffer(commandBuffer);
+            commandBuffer.Dispose();
 
             if (!_objectImage.enabled)
                 _objectImage.enabled = true;

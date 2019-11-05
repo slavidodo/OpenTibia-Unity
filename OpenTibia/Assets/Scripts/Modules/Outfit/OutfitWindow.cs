@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+using CommandBuffer = UnityEngine.Rendering.CommandBuffer;
+
 namespace OpenTibiaUnity.Modules.Outfit
 {
     public class OutfitWindow : Core.Components.Base.Window
@@ -120,8 +122,9 @@ namespace OpenTibiaUnity.Modules.Outfit
                 _rawImageMount.texture = _renderTexture;
             }
 
-            RenderTexture.active = _renderTexture;
-            Core.Utils.GraphicsUtility.ClearWithTransparency();
+            var commandBuffer = new CommandBuffer();
+            commandBuffer.SetRenderTarget(_renderTexture);
+            commandBuffer.ClearRenderTarget(false, true, Core.Utils.GraphicsUtility.TransparentColor);
 
             if (!!_currentOutfit) {
                 var screenPosition = new Vector2Int(Constants.FieldSize, Constants.FieldSize);
@@ -133,9 +136,9 @@ namespace OpenTibiaUnity.Modules.Outfit
                 }
 
                 if (_currentOutfit is OutfitInstance)
-                    _currentOutfit.Draw(screenPosition, zoom, (int)_currentDirection, 0, 0);
+                    _currentOutfit.Draw(commandBuffer, screenPosition, zoom, (int)_currentDirection, 0, 0);
                 else
-                    _currentOutfit.Draw(screenPosition, zoom, 0, 0, 0);
+                    _currentOutfit.Draw(commandBuffer, screenPosition, zoom, 0, 0, 0);
                 
                 if (!_rawImageOutfit.enabled)
                     _rawImageOutfit.enabled = true;
@@ -149,15 +152,16 @@ namespace OpenTibiaUnity.Modules.Outfit
                 screenPosition += new Vector2Int(Constants.FieldSize * 2, 0);
 
                 if (_currentMount is OutfitInstance)
-                    _currentMount.Draw(screenPosition, zoom, (int)_currentDirection, 0, 0);
+                    _currentMount.Draw(commandBuffer, screenPosition, zoom, (int)_currentDirection, 0, 0);
                 else
-                    _currentMount.Draw(screenPosition, zoom, 0, 0, 0);
+                    _currentMount.Draw(commandBuffer, screenPosition, zoom, 0, 0, 0);
                 
                 if (!_rawImageMount.enabled)
                     _rawImageMount.enabled = true;
             }
 
-            RenderTexture.active = null;
+            Graphics.ExecuteCommandBuffer(commandBuffer);
+            commandBuffer.Dispose();
         }
 
         protected override void OnEnable() {
