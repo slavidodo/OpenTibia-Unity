@@ -37596,6 +37596,11 @@ MonoBehaviour:
   _framecounterText: {fileID: 385428486}
   _onscreenTextImage: {fileID: 1467163797}
   shouldTakeScreenshot: 0
+  onInvalidateTRS:
+    m_PersistentCalls:
+      m_Calls: []
+    m_TypeName: UnityEngine.Events.UnityEvent, UnityEngine.CoreModule, Version=0.0.0.0,
+      Culture=neutral, PublicKeyToken=null
 --- !u!1001 &1667073940
 PrefabInstance:
   m_ObjectHideFlags: 0
