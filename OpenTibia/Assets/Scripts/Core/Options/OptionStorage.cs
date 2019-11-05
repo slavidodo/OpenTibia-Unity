@@ -23,11 +23,11 @@ namespace OpenTibiaUnity.Core.Options
         public MouseLootPresets MouseLootPreset { get; set; } = MouseLootPresets.Left;
         public bool AllowAllToInspectMe = false;
         public bool AutoChaseOff = true;
-        public HUDStyles HUDStyle = HUDStyles.Bars;
+        public HUDStyle HUDStyle = HUDStyle.Bars;
         public bool ShowActionBar1 = true;
         public bool ShowActionBar2 = false;
         //private CoulouriseLootValuesTypes ColouriseLootValues = CoulouriseLootValuesTypes.Frames;
-        public AntialiasingModes AntialiasingMode = AntialiasingModes.Antialiasing;
+        public AntialiasingMode GameAntialiasingMode = AntialiasingMode.Antialiasing;
         public bool FullscreenMode = false;
         
         // Advanced Options
@@ -117,6 +117,7 @@ namespace OpenTibiaUnity.Core.Options
         public int SelectedClientVersion = -1;
         public int SelectedBuildVersion = -1;
         public int MiniMapZoom = 0;
+        public int GameQualityLevel = 4;
 
         // internal game options
         public CombatAttackModes CombatAttackMode = CombatAttackModes.Balanced;
@@ -193,7 +194,23 @@ namespace OpenTibiaUnity.Core.Options
             else
                 Application.targetFrameRate = Mathf.Clamp(FramerateLimit, 10, 200);
 
-            QualitySettings.SetQualityLevel(3); // High
+            GameQualityLevel = Mathf.Clamp(GameQualityLevel, 0, 5);
+            QualitySettings.SetQualityLevel(GameQualityLevel);
+
+            switch (GameAntialiasingMode) {
+                case AntialiasingMode.None:
+                    OpenTibiaUnity.GameManager.WorldMapRenderTexture.filterMode = FilterMode.Point;
+                    break;
+
+                case AntialiasingMode.Antialiasing:
+                    OpenTibiaUnity.GameManager.WorldMapRenderTexture.filterMode = FilterMode.Bilinear;
+                    break;
+            }
+        }
+
+        public void UpdateFullscreenMode() {
+            Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
+            Screen.fullScreen = FullscreenMode;
         }
 
         public void LoadOptions() {
@@ -203,6 +220,7 @@ namespace OpenTibiaUnity.Core.Options
 
             OpenTibiaUnity.MiniMapRenderer.Zoom = MiniMapZoom;
             UpdateQualitySettings();
+            UpdateFullscreenMode();
         }
 
         public bool SaveOptions() {

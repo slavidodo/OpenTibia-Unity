@@ -9,6 +9,7 @@
         public static ChangeCharacter MiscChangeCharacter = new ChangeCharacter(12, "MISC_CHANGE_CHARACTER", InputEvent.KeyDown);
 
         public static ShowDialog MiscShowOutfit = new ShowDialog(18, "MISC_SHOW_OUTFIT", InputEvent.KeyDown, DialogType.CharacterOutfit);
+        public static ToggleFullScreen MiscToggleFullScreen = new ToggleFullScreen(19, "MISC_TOGGLE_FULL_SCREEN", InputEvent.KeyDown);
 
         // Chat
         public static ChatMoveCursorHome ChatMoveCursorHome = new ChatMoveCursorHome(259, "CHAT_MOVE_CURSOR_HOME", InputEvent.KeyDown);

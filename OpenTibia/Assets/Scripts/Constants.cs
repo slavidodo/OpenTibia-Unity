@@ -469,7 +469,7 @@
         ShiftPlusRight,
         Left,
     }
-    public enum HUDStyles : int
+    public enum HUDStyle : int
     {
         Bars = 0,
         Arcs = 1,
@@ -480,7 +480,7 @@
         Corners = 1,
         Frames = 2,
     }
-    public enum AntialiasingModes : int
+    public enum AntialiasingMode : int
     {
         None = 0,
         Antialiasing = 1,
