@@ -422,7 +422,7 @@ namespace OpenTibiaUnity.Modules.Login
                     _buildVersionDropdown.value = foundIndex;
                 } else {
                     OnBuildVersionDropdownValueChanged(0);
-                    optionStorage.SelectedBuildVersion = gameManager.ClientVersion;
+                    optionStorage.SelectedBuildVersion = gameManager.BuildVersion;
                 }
             } else {
                 OnBuildVersionDropdownValueChanged(0);
