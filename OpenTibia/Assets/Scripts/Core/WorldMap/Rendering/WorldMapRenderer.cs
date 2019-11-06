@@ -832,7 +832,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                                                        List<ClassicStatusFlagData> flagData, List<ClassicStatusFlagData> speechData,
                                                        int rectX, int rectY, bool visible, ClassicStatusDescriptor descriptor) {
             bool isLocalPlayer = creature.Id == Player.Id;
-            Color healthColor, manaColor;
+            Color32 healthColor, manaColor;
             int healthIdentifier;
             if (visible) {
                 healthIdentifier = creature.HealthPercent;
@@ -846,6 +846,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 
             if (OptionStorage.ShowLightEffects) {
                 float mod = _lightmapRenderer.CalculateCreatureBrightnessFactor(creature, isLocalPlayer);
+                healthIdentifier += (byte)(255 * mod);
                 healthColor = Utils.Utility.MulColor32(healthColor, mod);
                 manaColor = Utils.Utility.MulColor32(manaColor, mod);
             }
