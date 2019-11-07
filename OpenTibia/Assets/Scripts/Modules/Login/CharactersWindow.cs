@@ -86,7 +86,10 @@ namespace OpenTibiaUnity.Modules.Login
         }
 
         protected void OnKeyDown(Event e, bool _) {
-            if (e.alt || e.shift || e.control || !InputHandler.IsHighlighted(this))
+            if ((e.shift || e.control || e.alt) && (e.keyCode < KeyCode.UpArrow || e.keyCode >= KeyCode.LeftArrow))
+                return;
+
+            if (!InputHandler.IsHighlighted(this))
                 return;
             
             switch (e.keyCode) {

@@ -79,7 +79,6 @@ namespace OpenTibiaUnity.Modules.Login
             
             // setup input
             OpenTibiaUnity.InputHandler.AddKeyDownListener(Core.Utils.EventImplPriority.High, OnKeyDown);
-            OpenTibiaUnity.InputHandler.AddKeyUpListener(Core.Utils.EventImplPriority.High, OnKeyUp);
 
             // setup events
             _authButton.onClick.AddListener(OnAuthButtonClick);
@@ -110,44 +109,50 @@ namespace OpenTibiaUnity.Modules.Login
             OpenTibiaUnity.GameManager.InvokeOnMainThread(() => _accountIdentifierInput.Select());
         }
 
-        protected void OnKeyDown(Event e, bool repeat) {
-            if (repeat)
-                OnKeyUp(e, false);
-        }
-
-        protected void OnKeyUp(Event e, bool _) {
-            if (e.alt || e.shift || e.control || !InputHandler.IsHighlighted(this))
+        protected void OnKeyDown(Event e, bool _) {
+            if (e.alt || (e.shift && e.keyCode != KeyCode.Tab) || e.control || !InputHandler.IsHighlighted(this))
                 return;
             
             switch (e.keyCode) {
                 case KeyCode.Tab:
                     e.Use();
 
-                    if (InputHandler.IsHighlighted(_accountIdentifierInput)) {
-                        _passwordInput.Select();
-                        _passwordInput.MoveTextEnd(false);
-                    } else if (InputHandler.IsHighlighted(_passwordInput)) {
-                        if (_tokenInput.transform.parent.gameObject.activeSelf) {
-                            _tokenInput.Select();
-                            _tokenInput.MoveTextEnd(false);
-                        } else {
-                            _addressInput.Select();
-                            _addressInput.MoveTextEnd(false);
+                    var inputFields = new TMPro.TMP_InputField[] {
+                        _accountIdentifierInput,
+                        _passwordInput,
+                        _tokenInput,
+                        _addressInput,
+                    };
+
+                    int direction = e.shift ? -1 : 1;
+                    bool found = false;
+                    for (int i = 0; i < inputFields.Length; i++) {
+                        if (InputHandler.IsHighlighted(inputFields[i])) {
+                            for (int j = i + direction; Mathf.Abs(j - i) <= inputFields.Length; j += direction) {
+                                int newIndex = j % inputFields.Length;
+                                if (newIndex < 0)
+                                    newIndex += inputFields.Length;
+
+                                var newField = inputFields[newIndex];
+                                if (newField.gameObject.activeInHierarchy) {
+                                    found = true;
+                                    newField.Select();
+                                    newField.MoveTextEnd(false);
+                                    break;
+                                }
+                            };
+                            break;
                         }
-                    } else if (InputHandler.IsHighlighted(_tokenInput)) {
-                        _addressInput.Select();
-                        _addressInput.MoveTextEnd(false);
-                    } else { // to fix any error //
-                        _accountIdentifierInput.Select();
-                        _accountIdentifierInput.MoveTextEnd(false);
                     }
-                    
+
+                    if (!found) {
+                        inputFields[0].Select();
+                        inputFields[0].MoveTextEnd(false);
+                    }
+
                     break;
                 case KeyCode.Return:
                 case KeyCode.KeypadEnter:
-                    if (e.type == EventType.KeyDown)
-                        return;
-
                     e.Use();
                     OnOkButtonClick();
                     break;
