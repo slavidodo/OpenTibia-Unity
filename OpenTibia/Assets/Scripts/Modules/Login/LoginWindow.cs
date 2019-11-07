@@ -467,6 +467,13 @@ namespace OpenTibiaUnity.Modules.Login
             int buildVersion = gameManager.BuildVersion;
 
             var specification = ClientSpecification.OpenTibia;
+
+            string versionLiteral;
+            if (clientVersion >= 1100)
+                versionLiteral = $"{clientVersion}.{buildVersion}";
+            else
+                versionLiteral = clientVersion.ToString();
+
             if (clientVersion >= 1200) {
                 if (address.ToLower() == "cipsoft")
                     specification = ClientSpecification.Cipsoft;
@@ -478,12 +485,12 @@ namespace OpenTibiaUnity.Modules.Login
                 gameObject.SetActive(true);
 
                 if (!loaded) {
-                    PopupMessage("Sorry", string.Format("Couldn't load appearances for version {0}.{1}.", clientVersion / 100f, buildVersion));
+                    PopupMessage("Sorry", $"Couldn't load appearances for version {versionLiteral}.");
                     return;
                 }
             } else {
                 if (!gameManager.CanLoadThings(clientVersion, buildVersion, specification)) {
-                    PopupMessage("Sorry", string.Format("Couldn't load appearances for version {0}.{1}.", clientVersion / 100f, buildVersion));
+                    PopupMessage("Sorry", $"Couldn't load appearances for version {versionLiteral}.");
                     return;
                 }
 
