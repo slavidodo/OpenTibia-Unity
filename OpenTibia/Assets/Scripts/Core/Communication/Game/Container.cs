@@ -14,9 +14,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
             bool canUseDepotSearch = false;
             bool isDragAndDropEnabled = true;
             bool isPaginationEnabled = false;
-            int nOfTotalObjects = 0;
+            int nOfTotalObjects;
             int indexOfFirstObject = 0;
-            int nOfContentObjects = 0; // objects in the current shown view //
+            int nOfContentObjects; // objects in the current shown view //
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameContainerPagination)) {
                 if (OpenTibiaUnity.GameManager.ClientVersion >= 1220)
                     canUseDepotSearch = message.ReadBoolean();
@@ -31,7 +31,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     throw new System.Exception("ProtocolGame.ParseOpenContainer: Number of content objects " + nOfContentObjects + " exceeds number of slots per page " + nOfSlotsPerPage);
 
                 if (nOfContentObjects > nOfTotalObjects)
-                    throw new System.Exception("Connection.readSCONTAINER: Number of content objects " + nOfContentObjects + " exceeds number of total objects " + nOfTotalObjects);
+                    throw new System.Exception("ProtocolGame.ParseOpenContainer: Number of content objects " + nOfContentObjects + " exceeds number of total objects " + nOfTotalObjects);
             } else {
                 nOfContentObjects = message.ReadUnsignedByte();
                 nOfTotalObjects = nOfContentObjects;
@@ -39,10 +39,10 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 if (nOfContentObjects > nOfSlotsPerPage)
                     throw new System.Exception("ProtocolGame.ParseOpenContainer: Number of content objects " + nOfContentObjects + " exceeds the capaciy " + nOfSlotsPerPage);
             }
-            
+
             var containerView = ContainerStorage.CreateContainerView(containerId, objectIcon, name, isSubContainer,
                                     isDragAndDropEnabled, isPaginationEnabled, nOfSlotsPerPage,
-                                    nOfTotalObjects - nOfContentObjects, indexOfFirstObject);
+                                    nOfTotalObjects - nOfContentObjects, indexOfFirstObject, nOfContentObjects);
 
             for (int i = 0; i < nOfContentObjects; i++)
                 containerView.AddObject(indexOfFirstObject + i, ReadObjectInstance(message));

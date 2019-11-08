@@ -17,13 +17,13 @@ namespace OpenTibiaUnity.Modules.Container
             _containerWindows = new ContainerWindow[Constants.MaxContainerViews];
         }
 
-        protected void OnAddedContainer(ContainerView containerView) {
+        protected void OnAddedContainer(ContainerView containerView, int expectedNumberOfObjects) {
             var oldWindow = _containerWindows[containerView.Id];
             if (oldWindow) {
-                oldWindow.UpdateProperties(containerView);
+                oldWindow.UpdateProperties(containerView, expectedNumberOfObjects);
             } else {
                 var containerWindow = Instantiate(ModulesManager.Instance.ContainerWindowPrefab);
-                containerWindow.UpdateProperties(containerView);
+                containerWindow.UpdateProperties(containerView, expectedNumberOfObjects);
 
                 var gameWindowLayout = OpenTibiaUnity.GameManager.GetModule<GameWindow.GameInterface>();
                 gameWindowLayout.AddMiniWindow(containerWindow);

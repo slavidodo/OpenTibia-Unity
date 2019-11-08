@@ -227,8 +227,7 @@ namespace OpenTibiaUnity.Core.Components.Base
         protected virtual void OnClientVersionChange(int _, int __) {}
 
         protected void UpdateLayout() {
-            var height = Mathf.Clamp(rectTransform.rect.height, _minContentHeight, _maxContentHeight);
-
+            var height = Mathf.Clamp(PreferredHeight, MinHeight, MaxHeight);
             rectTransform.sizeDelta = new Vector2(rectTransform.sizeDelta.x, height);
         }
     }

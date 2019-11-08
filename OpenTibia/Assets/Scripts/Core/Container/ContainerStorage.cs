@@ -5,6 +5,7 @@ using UnityEngine.Events;
 namespace OpenTibiaUnity.Core.Container
 {
     public class ContainerViewEvent : UnityEvent<ContainerView> { }
+    public class ContainerViewAddEvent : UnityEvent<ContainerView, int> { }
     public class PlayerMoneyEvent : UnityEvent<long, long> { }
     public class PlayerInventoryEvent : UnityEvent<List<InventoryTypeInfo>> { }
 
@@ -13,7 +14,7 @@ namespace OpenTibiaUnity.Core.Container
         private Utils.Delay _multiuseDelay = new Utils.Delay(0, 0);
         private ContainerView[] _bontainerViews = new ContainerView[Constants.MaxContainerViews];
 
-        public ContainerViewEvent onContainerAdded = new ContainerViewEvent();
+        public ContainerViewAddEvent onContainerAdded = new ContainerViewAddEvent();
         public ContainerViewEvent onContainerClosed = new ContainerViewEvent();
 
         public PlayerMoneyEvent onPlayerMoneyChange = new PlayerMoneyEvent();
@@ -98,11 +99,13 @@ namespace OpenTibiaUnity.Core.Container
             return _bontainerViews[containerId];
         }
 
-        public ContainerView CreateContainerView(int containerId, ObjectInstance objectIcon, string name, bool isSubContainer, bool isDragAndDropEnabled, bool isPaginationEnabled, int nOfSlotsPerPage, int nOfTotalObjects, int indexOfFirstObject) {
+        public ContainerView CreateContainerView(int containerId, ObjectInstance objectIcon, string name, bool isSubContainer, bool isDragAndDropEnabled,
+                                                 bool isPaginationEnabled, int nOfSlotsPerPage, int nOfTotalObjects, int indexOfFirstObject,
+                                                 int expectedNOfObjects) {
             var containerView = new ContainerView(containerId, objectIcon, name, isSubContainer, isDragAndDropEnabled, isPaginationEnabled, nOfSlotsPerPage, nOfTotalObjects, indexOfFirstObject);
-            
+
             _bontainerViews[containerId] = containerView;
-            onContainerAdded.Invoke(containerView);
+            onContainerAdded.Invoke(containerView, expectedNOfObjects);
 
             return containerView;
         }

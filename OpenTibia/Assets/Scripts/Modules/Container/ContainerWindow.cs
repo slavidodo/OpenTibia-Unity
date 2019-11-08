@@ -12,6 +12,8 @@ namespace OpenTibiaUnity.Modules.Container
 {
     public class ContainerWindow : Core.Components.Base.MiniWindow, IUseWidget, IMoveWidget, IWidgetContainerWidget
     {
+        private const int ContainerRowHeight = 37;
+
         [SerializeField] private RawImage _iconImage = null;
         [SerializeField] private OTU_ScrollRect _itemsScrollRect = null;
         [SerializeField] private Button _upButton = null;
@@ -238,7 +240,16 @@ namespace OpenTibiaUnity.Modules.Container
             return action;
         }
 
-        public void UpdateProperties(ContainerView containerView) {
+        public void UpdateProperties(ContainerView containerView, int expectedNumberOfObjects = 0) {
+            if (containerView == _containerView)
+                return;
+
+            if (_containerView != null) {
+                _containerView.onObjectAdded.RemoveListener(OnAddedObject);
+                _containerView.onObjectChanged.RemoveListener(OnChangedObject);
+                _containerView.onObjectRemoved.RemoveListener(OnRemovedObject);
+            }
+
             containerView.onObjectAdded.AddListener(OnAddedObject);
             containerView.onObjectChanged.AddListener(OnChangedObject);
             containerView.onObjectRemoved.AddListener(OnRemovedObject);
@@ -246,22 +257,19 @@ namespace OpenTibiaUnity.Modules.Container
             if (_itemViews != null) {
                 foreach (var itemView in _itemViews)
                     Destroy(itemView.gameObject);
-
-                _itemViews = null;
             }
-
-            _numberOfSlots = containerView.NumberOfSlotsPerPage;
-            _rows = (int)Mathf.Ceil((_numberOfSlots + 1) / 4f); // extra slot for the container's icon
 
             bool shouldCreateRenderTexture = true;
             if (_slotsRenderTexture != null) {
-                if (_slotsRenderTexture.height == Constants.FieldSize * _rows) {
+                if (_slotsRenderTexture.height == Constants.FieldSize * _rows)
                     shouldCreateRenderTexture = false;
-                } else {
+                else
                     _slotsRenderTexture.Release();
-                    _slotsRenderTexture = null;
-                }
             }
+
+            _containerView = containerView;
+            _numberOfSlots = containerView.NumberOfSlotsPerPage;
+            _rows = (int)Mathf.Ceil((_numberOfSlots + 1) / 4f); // extra slot for the container's icon
 
             if (shouldCreateRenderTexture) {
                 _slotsRenderTexture = new RenderTexture(Constants.FieldSize * 4, Constants.FieldSize * _rows, 0, RenderTextureFormat.ARGB32);
@@ -269,25 +277,17 @@ namespace OpenTibiaUnity.Modules.Container
                 _slotsRenderTexture.Create();
             }
 
-            _itemViews = new ItemView[_numberOfSlots];
-            _containerView = containerView;
-
-            int paginationHeight = 0;
-            if (containerView.IsPaginationEnabled)
-                paginationHeight += 25;
-
-            _minContentHeight = 34 + paginationHeight;
-
-            int effectiveRows = (int)Mathf.Ceil(_numberOfSlots / 4f);
-            _maxContentHeight = effectiveRows * 34 + (effectiveRows - 1) * 3 + paginationHeight;
-
-            int activeRows = (int)Mathf.Ceil(containerView.NumberOfTotalObjects / 4f);
-            _preferredContentHeight = activeRows * 34 + (activeRows - 1) * 3 + paginationHeight;
-            
             _upButton.gameObject.SetActive(containerView.IsSubContainer);
-
             _titleLabel.SetText(containerView.Name);
 
+            // update height preferences
+            int paginationHeight = CalculatePaginationHeight();
+            _minContentHeight = ContainerRowHeight + paginationHeight;
+            int totalRows = (int)Mathf.Ceil(_numberOfSlots / 4f);
+            _maxContentHeight = totalRows * ContainerRowHeight + paginationHeight;
+            CalculatePreferedHeight(expectedNumberOfObjects);
+
+            _itemViews = new ItemView[_numberOfSlots];
             float w = (float)Constants.FieldSize / _slotsRenderTexture.width;
             float h = (float)Constants.FieldSize / _slotsRenderTexture.height;
             for (int i = 0; i < _numberOfSlots; i++) {
@@ -318,6 +318,8 @@ namespace OpenTibiaUnity.Modules.Container
                 itemView.showAmount = @object.Data > 1;
                 itemView.objectAmount = (int)@object.Data;
             }
+
+            CalculatePreferedHeight(_containerView.NumberOfTotalObjects);
         }
 
         private void OnChangedObject(ContainerView _, int index, ObjectInstance @object) {
@@ -336,8 +338,22 @@ namespace OpenTibiaUnity.Modules.Container
                 itemView.showAmount = @object.Data > 1;
                 itemView.objectAmount = (int)@object.Data;
             }
+
+            CalculatePreferedHeight(_containerView.NumberOfTotalObjects);
         }
 
+        private int CalculatePaginationHeight() {
+            int paginationHeight = 0;
+            if (_containerView.IsPaginationEnabled)
+                paginationHeight += 25;
+            return paginationHeight;
+        }
+
+        private void CalculatePreferedHeight(int numberOfTotalObjects) {
+            int paginationHeight = CalculatePaginationHeight();
+            int activeRows = (int)Mathf.Ceil(numberOfTotalObjects / 4f);
+            _preferredContentHeight = activeRows * ContainerRowHeight + paginationHeight;
+        }
 
         public override void Close() {
             base.Close();
