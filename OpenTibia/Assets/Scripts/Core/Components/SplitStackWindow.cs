@@ -56,37 +56,44 @@ namespace OpenTibiaUnity.Core.Components
             }
         }
 
+        protected override void Awake() {
+            base.Awake();
+
+            // setup input
+            OpenTibiaUnity.InputHandler.AddKeyUpListener(Utils.EventImplPriority.Default, OnKeyUp);
+        }
+
         protected override void Start() {
             base.Start();
             _oKButton.onClick.AddListener(TriggerOk);
             _cancelButton.onClick.AddListener(TriggerCancel);
             _sliderWrapper.slider.onValueChanged.AddListener(TriggerSliderChange);
 
-            OpenTibiaUnity.InputHandler.AddKeyUpListener(Utils.EventImplPriority.Default, (Event e, bool repeat) => {
-                if (!InputHandler.IsHighlighted(this))
-                    return;
-
-                switch (e.keyCode) {
-                    case KeyCode.Return:
-                    case KeyCode.KeypadEnter:
-                        TriggerOk();
-                        break;
-
-                    case KeyCode.Escape:
-                        TriggerCancel();
-                        break;
-
-                    case KeyCode.LeftArrow:
-                        SelectedAmount = Mathf.Max(0, SelectedAmount - (e.shift ? 10 : 1));
-                        break;
-
-                    case KeyCode.RightArrow:
-                        SelectedAmount = Mathf.Min(_objectAmount, SelectedAmount + (e.shift ? 10 : 1));
-                        break;
-                }
-            });
-
             onOk = new SplitStackWindowButtonEvent();
+        }
+
+        private void OnKeyUp(Event e, bool repeat) {
+            if (!InputHandler.IsHighlighted(this))
+                return;
+
+            switch (e.keyCode) {
+                case KeyCode.Return:
+                case KeyCode.KeypadEnter:
+                    TriggerOk();
+                    break;
+
+                case KeyCode.Escape:
+                    TriggerCancel();
+                    break;
+
+                case KeyCode.LeftArrow:
+                    SelectedAmount = Mathf.Max(0, SelectedAmount - (e.shift ? 10 : 1));
+                    break;
+
+                case KeyCode.RightArrow:
+                    SelectedAmount = Mathf.Min(_objectAmount, SelectedAmount + (e.shift ? 10 : 1));
+                    break;
+            }
         }
 
         protected void Update() {

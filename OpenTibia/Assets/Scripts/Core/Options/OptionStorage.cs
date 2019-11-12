@@ -111,13 +111,17 @@ namespace OpenTibiaUnity.Core.Options
         public int GeneralInputSetId = MappingSet.DefaultSet;
         public int GeneralInputSetMode = MappingSet.ChatModeON;
 
+        // legacy client options
+        public bool AutoSwitchHotkeyPreset = true;
+
         // internal client options
         public bool AuthenticatorTokenOn = false;
         public string LoginAddress = string.Empty;
         public int SelectedClientVersion = -1;
         public int SelectedBuildVersion = -1;
         public int MiniMapZoom = 0;
-        public int GameQualityLevel = 4;
+        public int GameResolutionIndex = -1; // maximum available
+        public int GameQualityLevel = -1; // maximum available
 
         // internal game options
         public CombatAttackModes CombatAttackMode = CombatAttackModes.Balanced;
@@ -128,7 +132,7 @@ namespace OpenTibiaUnity.Core.Options
         public OpponentSortTypes OpponentSort = OpponentSortTypes.SortKnownSinceAsc;
         public CyclopediaLootValueSource LootValueSource = CyclopediaLootValueSource.NpcSaleData;
 
-        // public Storages (Mappings) (TODO: Rename Mapping to Preset)
+        // internal storages (mappings) (TODO: Rename Mapping to Preset)
         // These storages are not serialized with default options, as they are independant theirselves..
 
         //[NonSerialized] private List<int> _knownTutorialHint;
@@ -189,12 +193,16 @@ namespace OpenTibiaUnity.Core.Options
             else
                 QualitySettings.vSyncCount = 0;
 
+            FramerateLimit = Mathf.Clamp(FramerateLimit, Constants.MinimumManageableFramerate, Constants.MaximumManageableFramerate);
             if (NoFramerateLimit)
                 Application.targetFrameRate = -1;
             else
-                Application.targetFrameRate = Mathf.Clamp(FramerateLimit, 10, 200);
+                Application.targetFrameRate = FramerateLimit;
 
-            GameQualityLevel = Mathf.Clamp(GameQualityLevel, 0, 5);
+            if (GameQualityLevel == -1)
+                GameQualityLevel = QualitySettings.names.Length - 1;
+            else
+                GameQualityLevel = Mathf.Clamp(GameQualityLevel, 0, QualitySettings.names.Length - 1);
             QualitySettings.SetQualityLevel(GameQualityLevel);
 
             switch (GameAntialiasingMode) {
@@ -210,7 +218,14 @@ namespace OpenTibiaUnity.Core.Options
 
         public void UpdateFullscreenMode() {
             Screen.fullScreenMode = FullScreenMode.ExclusiveFullScreen;
-            Screen.fullScreen = FullscreenMode;
+
+            if (GameResolutionIndex == -1)
+                GameResolutionIndex = Screen.resolutions.Length - 1;
+            else
+                GameResolutionIndex = Mathf.Clamp(GameQualityLevel, 0, Screen.resolutions.Length - 1);
+
+            var resolution = Screen.resolutions[GameResolutionIndex];
+            Screen.SetResolution(resolution.width, resolution.height, FullscreenMode);
         }
 
         public void LoadOptions() {

@@ -73,12 +73,15 @@ namespace OpenTibiaUnity.Modules.Login
             set => _addressInput.text = value;
         }
 
+        protected override void Awake() {
+            base.Awake();
+
+            // setup input
+            OpenTibiaUnity.InputHandler.AddKeyDownListener(Core.Utils.EventImplPriority.High, OnKeyDown);
+        }
 
         protected override void Start() {
             base.Start();
-            
-            // setup input
-            OpenTibiaUnity.InputHandler.AddKeyDownListener(Core.Utils.EventImplPriority.High, OnKeyDown);
 
             // setup events
             _authButton.onClick.AddListener(OnAuthButtonClick);

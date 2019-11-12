@@ -89,7 +89,7 @@ namespace OpenTibiaUnity.Core.Components.Base
             }
         }
 
-        protected virtual new void Start() {
+        protected override void Start() {
             base.Start();
 
             var parentContainerRectTransform = transform.parent?.parent;

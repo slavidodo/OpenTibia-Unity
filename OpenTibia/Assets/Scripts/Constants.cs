@@ -11,6 +11,9 @@
 
         public const string StoreHomeCategoryName = "Home";
 
+        public const int MinimumManageableFramerate = 10;
+        public const int MaximumManageableFramerate = 200;
+
         // Don't modify those unless you know what you are doing.
         public const int PingDelay = 1000;
         public const int ConnectionTimeout = 30 * 1000;
@@ -795,7 +798,7 @@
         Prey = 7,
     }
 
-    public enum StoreOfferSortType: byte
+    public enum StoreOfferSortType : byte
     {
         Automatic = 0,
         MostPopular = 1,
@@ -1165,7 +1168,7 @@
         GamePercentSkillU16,
         GameTournament,
         GameAccountEmailAddress,
-        
+
         LastGameFeature,
     };
 }

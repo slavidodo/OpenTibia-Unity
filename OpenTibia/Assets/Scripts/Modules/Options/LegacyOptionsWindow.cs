@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 
+using TR = OpenTibiaUnity.TextResources;
+
 namespace OpenTibiaUnity.Modules.Options
 {
     [DisallowMultipleComponent]
@@ -16,8 +18,6 @@ namespace OpenTibiaUnity.Modules.Options
 
             _okButton.onClick.AddListener(OnOkClick);
 
-            ModulesManager.Instance.LegacyGeneralOptionsWindow.onClosed.AddListener(() => Open());
-
             OpenTibiaUnity.GameManager.onClientVersionChange.AddListener(OnClientVersionChange);
             if (OpenTibiaUnity.GameManager.ClientVersion != 0)
                 OnClientVersionChange(0, OpenTibiaUnity.GameManager.ClientVersion);
@@ -26,40 +26,68 @@ namespace OpenTibiaUnity.Modules.Options
         }
 
         private void OnClientVersionChange(int oldVersion, int newVersion) {
-            foreach (Transform child in _panelContent) {
+            foreach (Transform child in _panelContent)
                 Destroy(child.gameObject);
-            }
-            
-            CreateOption("General", "Change general\ngame options", OpenGeneralOptions);
-            CreateOption("Graphics", "Change graphics and performance settings", OpenGraphicsOptions);
-            CreateOption("Console", "Customise the console", OpenConsoleOptions);
-            CreateOption("Hotkeys", "Edit your hotkey texts", OpenHotkeyOptions);
-            CreateSeparator();
-            CreateOption("Motd", "Show the most recent message of the day.", ShowMOTD);
 
-            if (newVersion >= 1010)
-                CreateGreenOption("Get Premium", "Gain access to all premium features.", GetPremium);
+            CreateOption(TR.LEGACYOPTIONS_WINDOW_GENERAL_TEXT, TR.LEGACYOPTIONS_WINDOW_GENERAL_DESCRIPTION, OpenGeneralOptions);
+            CreateOption(TR.LEGACYOPTIONS_WINDOW_GRAPHICS_TEXT, TR.LEGACYOPTIONS_WINDOW_GRAPHICS_DESCRIPTION, OpenGraphicsOptions);
+            CreateOption(TR.LEGACYOPTIONS_WINDOW_CONSOLE_TEXT, TR.LEGACYOPTIONS_WINDOW_CONSOLE_DESCRIPTION, OpenConsoleOptions);
+            CreateOption(TR.LEGACYOPTIONS_WINDOW_HOTKEYS_TEXT, TR.LEGACYOPTIONS_WINDOW_HOTKEYS_DESCRIPTION, OpenHotkeyOptions);
+            CreateSeparator();
+            CreateOption(TR.LEGACYOPTIONS_WINDOW_MOTD_TEXT, TR.LEGACYOPTIONS_WINDOW_MOTD_DESCRIPTION, ShowMOTD);
+
+            if (newVersion >= 1010) {
+                CreateGreenOption(TextResources.LEGACYOPTIONS_WINDOW_GETPREMIUM_TEXT, TextResources.LEGACYOPTIONS_WINDOW_GETPREMIUM_DESCRIPTION, GetPremium);
+            }
         }
         
         private void OnOkClick() {
             Close();
         }
 
-        void OpenGeneralOptions() {
+        private void OnGeneralWindowClosed() {
+            SelfOpenAndRevokeListener(ModulesManager.Instance.LegacyGeneralOptionsWindow, OnGeneralWindowClosed);
+        }
+
+        private void OnGraphicsWindowClosed() {
+            SelfOpenAndRevokeListener(ModulesManager.Instance.LegacyGraphicsOptionWindow, OnGraphicsWindowClosed);
+        }
+
+        private void OnConsoleWindowClosed() {
+            SelfOpenAndRevokeListener(ModulesManager.Instance.LegacyConsoleOptionsWindow, OnConsoleWindowClosed);
+        }
+
+        private void OnHotkeysWindowClosed() {
+            SelfOpenAndRevokeListener(ModulesManager.Instance.HotkeysWindow, OnHotkeysWindowClosed);
+        }
+        
+        void SelfOpenAndRevokeListener(Core.Components.Base.Window window, UnityEngine.Events.UnityAction closeCallback) {
+            Open();
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() =>
+                window.onClosed.RemoveListener(closeCallback)
+            );
+        }
+
+        void SelfCloseAndBindListner(Core.Components.Base.Window window, UnityEngine.Events.UnityAction closeCallback) {
             Close();
-            ModulesManager.Instance.LegacyGeneralOptionsWindow.Open();
+            window.Open();
+            window.onClosed.AddListener(closeCallback);
+        }
+
+        void OpenGeneralOptions() {
+            SelfCloseAndBindListner(ModulesManager.Instance.LegacyGeneralOptionsWindow, OnGeneralWindowClosed);
         }
 
         void OpenGraphicsOptions() {
-
+            SelfCloseAndBindListner(ModulesManager.Instance.LegacyGraphicsOptionWindow, OnGraphicsWindowClosed);
         }
 
         void OpenConsoleOptions() {
-
+            SelfCloseAndBindListner(ModulesManager.Instance.LegacyConsoleOptionsWindow, OnConsoleWindowClosed);
         }
 
         void OpenHotkeyOptions() {
-
+            SelfCloseAndBindListner(ModulesManager.Instance.HotkeysWindow, OnHotkeysWindowClosed);
         }
 
         void ShowMOTD() {

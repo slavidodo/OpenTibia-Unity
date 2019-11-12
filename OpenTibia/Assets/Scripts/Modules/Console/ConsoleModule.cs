@@ -45,14 +45,14 @@ namespace OpenTibiaUnity.Modules.Console
             OpenTibiaUnity.ChatStorage.onAddChannel.AddListener(OnAddChannel);
             OpenTibiaUnity.ChatStorage.onClearChannels.AddListener(OnClearChannels);
 
-            _buttonCloseChannel.onClick.AddListener(OnCloseChannelButtonClicked);
+            OpenTibiaUnity.GameManager.onGameStart.AddListener(OnGameStart);
+            OpenTibiaUnity.InputHandler.AddKeyUpListener(Core.Utils.EventImplPriority.Default, OnKeyUp);
         }
 
         protected override void Start() {
             base.Start();
 
-            OpenTibiaUnity.GameManager.onGameStart.AddListener(OnGameStart);
-            OpenTibiaUnity.InputHandler.AddKeyUpListener(Core.Utils.EventImplPriority.Default, OnKeyUp);
+            _buttonCloseChannel.onClick.AddListener(OnCloseChannelButtonClicked);
         }
 
         private void OnGameStart() {

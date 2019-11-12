@@ -43,28 +43,33 @@ namespace OpenTibiaUnity.Core.Components
         public Button.ButtonClickedEvent onOKClick { get; } = new Button.ButtonClickedEvent();
         public Button.ButtonClickedEvent onCancelClick { get; } = new Button.ButtonClickedEvent();
 
+        protected override void Awake() {
+            base.Awake();
+            OpenTibiaUnity.InputHandler.AddKeyDownListener(Utils.EventImplPriority.Default, OnKeyDown);
+        }
+
         protected override void Start() {
             base.Start();
             _oKButton.onClick.AddListener(TriggerOk);
             _cancelButton.onClick.AddListener(TriggerCancel);
+        }
 
-            OpenTibiaUnity.InputHandler.AddKeyUpListener(Utils.EventImplPriority.Default, (Event e, bool repeat) => {
-                if (!InputHandler.IsHighlighted(this))
-                    return;
-                
-                switch (e.keyCode) {
-                    case KeyCode.Return:
-                    case KeyCode.KeypadEnter:
-                        e.Use();
-                        TriggerHideWindow(true);
-                        break;
+        private void OnKeyDown(Event e, bool _) {
+            if (!InputHandler.IsHighlighted(this))
+                return;
 
-                    case KeyCode.Escape:
-                        e.Use();
-                        TriggerHideWindow(false);
-                        break;
-                }
-            });
+            switch (e.keyCode) {
+                case KeyCode.Return:
+                case KeyCode.KeypadEnter:
+                    e.Use();
+                    TriggerHideWindow(true);
+                    break;
+
+                case KeyCode.Escape:
+                    e.Use();
+                    TriggerHideWindow(false);
+                    break;
+            }
         }
 
         protected new void OnRectTransformDimensionsChange() {

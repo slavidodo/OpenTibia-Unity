@@ -1,14 +1,13 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.EventSystems;
 
 namespace OpenTibiaUnity.Core.Components.Base
 {
     [DisallowMultipleComponent]
     public class Window : Module
     {
-        public UnityEvent onOpened = new UnityEvent();
-        public UnityEvent onClosed = new UnityEvent();
+        [System.NonSerialized] public UnityEvent onOpened = new UnityEvent();
+        [System.NonSerialized] public UnityEvent onClosed = new UnityEvent();
 
         public bool ResetPositionOnShow = true;
         

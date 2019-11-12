@@ -34,6 +34,8 @@ namespace OpenTibiaUnity.Modules
 
         [Header("Module.Options")]
         public Options.LegacyGeneralOptionsWindow LegacyGeneralOptionsWindow = null;
+        public Options.LegacyGraphicsOptionsWindow LegacyGraphicsOptionWindow = null;
+        public Options.LegacyConsoleOptionsWindow LegacyConsoleOptionsWindow = null;
         public Options.LegacyOptionsWindow LegacyOptionsWindow = null;
 
         [Header("Module.Outfit")]

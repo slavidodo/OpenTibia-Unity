@@ -2,7 +2,7 @@
 {
     public class TextResources
     {
-        // Login Resources
+        // Login resources
         public const string ACCOUNT_IDENTIFIER_EMAIL = "Email Address:";
         public const string ACCOUNT_IDENTIFIER_ACCOUNTNAME = "Account Name:";
         public const string ACCOUNT_IDENTIFIER_ACCOUNTNUMBER = "Account Number:";
@@ -17,12 +17,12 @@
         public const string LOGIN_WEB_CLIENT_LOGIN_ERROR_NAME_RESOLUTION_FAILURE = "Host not found.";
         public const string LOGIN_WEB_CLIENT_LOGIN_ERROR_NOT_FOUND = "Error downloading {0} - server replied: not found.";
 
-        // Connection Resources
+        // Connection resources
         public const string ERRORMSG_AUTHENTICATION_ERROR = "You have entered incorrect authenticator token.";
         public const string ERRORMSG_10061_LOGIN_HOSTUNREACHABLE = "Cannot connect to a login server.\n\nError(10061): Connection refused.\n\nAll login servers are offline. Check www.opentibiaunity.com for more information.\n\nFor more information take a look at the FAQS in the support section at www.opentibiaunity.com";
         public const string ERRORMSG_10061_GAME_HOSTUNREACHABLE = "Cannot connect to the game server.\n\nError(10061): Connection refused.\n\nThe game server is offline. Check www.opentibiaunity.com for more information.\n\nFor more information take a look at the FAQS in the support section at www.opentibiaunity.com";
 
-        // Pathfinder Resources
+        // Pathfinder resources
         public const string MSG_PATH_GO_UPSTAIRS = "First go upstairs.";
         public const string MSG_NPC_TOO_FAR = "You are too far away.";
         public const string MSG_PATH_UNREACHABLE = "There is no way.";
@@ -148,5 +148,39 @@
         public const string OUTFIT_LABEL_INFO_LEGACY_PROTOCOL = "Choose an outfit and determine the colours of various parts of your character's body";
         public const string OUTFIT_LABEL_INFO_NEW_PROTOCOL = "Select an outfit and determine the colours of the various parts of your character's body.\nTo activate an addon, tick the corresponding box.\nAddons are outfit accessories that can be earned in the game by premium players.";
         public const string OUTFIT_LABEL_INFO_NEW_PROTOCOL_MOUNT = "Select an outfit by clicking the arrows below the character box. Individualise the single parts by using the colour palette. If you are premium and have earned an outfit addon, you can activate it by checking the corresponding box. Mounts earned in the game can be selected from the right-hand box.";
+
+        // LegacyOptions window resources
+        public const string LEGACYOPTIONS_WINDOW_GENERAL_TEXT = "General";
+        public const string LEGACYOPTIONS_WINDOW_GENERAL_DESCRIPTION = "Change general\ngame options";
+        public const string LEGACYOPTIONS_WINDOW_GRAPHICS_TEXT = "Graphics";
+        public const string LEGACYOPTIONS_WINDOW_GRAPHICS_DESCRIPTION = "Change graphics and performance settings";
+        public const string LEGACYOPTIONS_WINDOW_CONSOLE_TEXT = "Console";
+        public const string LEGACYOPTIONS_WINDOW_CONSOLE_DESCRIPTION = "Customise the console";
+        public const string LEGACYOPTIONS_WINDOW_HOTKEYS_TEXT = "Hotkeys";
+        public const string LEGACYOPTIONS_WINDOW_HOTKEYS_DESCRIPTION = "Edit your hotkey texts";
+        public const string LEGACYOPTIONS_WINDOW_MOTD_TEXT = "MOTD";
+        public const string LEGACYOPTIONS_WINDOW_MOTD_DESCRIPTION = "Show the most recent message of the day.";
+        public const string LEGACYOPTIONS_WINDOW_GETPREMIUM_TEXT = "Get Premium";
+        public const string LEGACYOPTIONS_WINDOW_GETPREMIUM_DESCRIPTION = "Gain access to all premium features.";
+
+        public const string LEGACYOPTIONS_GENERAL_TIBIA_CLASSIC_CONTROLS = "Tibia Classic Control";
+        public const string LEGACYOPTIONS_GENERAL_AUTO_CHASE_OFF = "Auto Chase Off";
+        public const string LEGACYOPTIONS_GENERAL_SHOWHINTS = "Show Hints";
+        public const string LEGACYOPTIONS_GENERAL_SHOW_NAMES_OF_CREATURES = "Show Names of Creatures";
+        public const string LEGACYOPTIONS_GENERAL_SHOW_MARKS_ON_CREATURES = "Show Marks on Creatures";
+        public const string LEGACYOPTIONS_GENERAL_SHOW_PVP_FRAMES_ON_CREATURES = "Show PvP Frames on Creatures";
+        public const string LEGACYOPTIONS_GENERAL_SHOW_ICONS_ON_NPCS = "Show Icons on NPCs";
+        public const string LEGACYOPTIONS_GENERAL_SHOW_TEXTUAL_EFFECTS = "Show Textual Effects";
+        public const string LEGACYOPTIONS_GENERAL_SHOW_COOLDOWN_BAR = "Show Cooldown Bar";
+        public const string LEGACYOPTIONS_GENERAL_AUTO_SWITCH_HOTKEY_PRESET = "Auto-Switch Hotkey Preset";
+
+        public const string LEGACYOPTIONS_CONSOLE_SHOW_INFO_MESSAGES = "Show Info Messages in Console";
+        public const string LEGACYOPTIONS_CONSOLE_SHOW_EVENT_MESSAGES = "Show Event Messages in Console";
+        public const string LEGACYOPTIONS_CONSOLE_SHOW_STATUS_MESSAGES = "Show Status Messages in Console";
+        public const string LEGACYOPTIONS_CONSOLE_SHOW_STATUS_MESSAGES_OF_OTHERS = "Show Status Messages of Others in Console";
+        public const string LEGACYOPTIONS_CONSOLE_SHOW_TIMESTAMP = "Show Timestamp in Console";
+        public const string LEGACYOPTIONS_CONSOLE_SHOW_LEVELS = "Show Levels in Console";
+        public const string LEGACYOPTIONS_CONSOLE_SHOW_PRIVATE_MESSAGES = "Show Levels in Console";
+        
     }
 }

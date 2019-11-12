@@ -25,7 +25,7 @@ namespace OpenTibiaUnity.Core
         /// </summary>
         public static GameManager Instance { get; private set; }
 
-        public Material InternalColoredMaterial;
+        [System.NonSerialized] public Material InternalColoredMaterial;
 
 #if !UNITY_EDITOR && UNITY_STANDALONE_WIN
         [DllImport("user32.dll", EntryPoint = "SetWindowText")]

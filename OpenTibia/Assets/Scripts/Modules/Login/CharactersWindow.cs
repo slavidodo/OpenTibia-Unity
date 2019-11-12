@@ -49,12 +49,16 @@ namespace OpenTibiaUnity.Modules.Login
 
         protected int _selectedCharacterIndex = -1;
         protected Core.Components.PopupWindow _popupWindow = null;
-        
-        protected override void Start() {
-            base.Start();
+
+        protected override void Awake() {
+            base.Awake();
 
             // setup input
             OpenTibiaUnity.InputHandler.AddKeyDownListener(Core.Utils.EventImplPriority.High, OnKeyDown);
+        }
+
+        protected override void Start() {
+            base.Start();
 
             // setup events
             _oKButton.onClick.AddListener(OnOkButtonClick);
