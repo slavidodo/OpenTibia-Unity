@@ -34033,12 +34033,13 @@ MonoBehaviour:
     type: 3}
   DefaulYellowButton: {fileID: 4940993309782436368, guid: 9f034190d0785524dab8703b9dcbf0e0,
     type: 3}
+  DefaultButtonWithLabel: {fileID: 1372696804238414081, guid: d0e68f9b9b304ba4985da57e958cfcb3,
+    type: 3}
   HorizontalSeparator: {fileID: 3964082756393489701, guid: dbcd8635ba780f845b8161653d157310,
     type: 3}
   VerticalSeparator: {fileID: 0}
   MiniWindowShadowVariant: {fileID: 2271745625085260739, guid: 674a9cfff1fcebe47aad9b134926f075,
     type: 3}
-  ExitWindowPrefab: {fileID: 0}
   PopupWindowPrefab: {fileID: 3733462666680201248, guid: ab21634412ae8144b9fa4cdf7d65fda4,
     type: 3}
   LabelOnscreenMessageBoxPrefab: {fileID: 8064122559261992854, guid: 8af6b483c0776d349990297feca66b36,

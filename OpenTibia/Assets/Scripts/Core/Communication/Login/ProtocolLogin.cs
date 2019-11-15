@@ -21,7 +21,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
         public string Password { get; set; } = string.Empty;
         public string Token { get; set; } = string.Empty;
 
-        public LoginErrorEvent onpublicError { get; } = new LoginErrorEvent();
+        public LoginErrorEvent onInternalError { get; } = new LoginErrorEvent();
         public LoginErrorEvent onLoginError { get; } = new LoginErrorEvent();
         public LoginTokenErrorEvent onLoginTokenError { get; } = new LoginTokenErrorEvent();
         public MessageOfTheDayEvent onMessageOfTheDay { get; } = new MessageOfTheDayEvent();
@@ -120,9 +120,9 @@ namespace OpenTibiaUnity.Core.Communication.Login
         protected override void OnConnectionSocketError(SocketError code, string message) {
             OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
                 if (code == SocketError.ConnectionRefused || code == SocketError.HostUnreachable)
-                    onpublicError.Invoke(TextResources.ERRORMSG_10061_LOGIN_HOSTUNREACHABLE);
+                    onInternalError.Invoke(TextResources.ERRORMSG_10061_LOGIN_HOSTUNREACHABLE);
                 else
-                    onpublicError.Invoke(string.Format("Error({0}): {1}", code, message));
+                    onInternalError.Invoke(string.Format("Error({0}): {1}", code, message));
             });
 
             _expectingTermination = true;

@@ -1,96 +1,115 @@
-﻿using UnityEngine;
-using UnityEngine.UI;
+﻿using OpenTibiaUnity.Core.Input;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 using UnityEngine.EventSystems;
-using OpenTibiaUnity.Core.Input;
+using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Core.Components
 {
     [RequireComponent(typeof(VerticalLayoutGroup))]
     public class PopupWindow : Base.Window, IPointerClickHandler
     {
+        public delegate void PopupWindowCallback();
+
+        public enum ButtonType
+        {
+            Ok,
+            Cancel,
+            Custom,
+        }
+
+        public struct ButtonDescriptor
+        {
+            public static void DefaultCallback() { }
+
+            public PopupWindowCallback pressedCallback;
+            public ButtonType buttonType;
+            public KeyCode[] keyCodes;
+            public string text;
+
+            public ButtonDescriptor(ButtonType buttonType, PopupWindowCallback pressedCallback = default) {
+                if (pressedCallback == null)
+                    pressedCallback = DefaultCallback;
+
+                this.buttonType = buttonType;
+                this.pressedCallback = pressedCallback;
+                switch (buttonType) {
+                    case ButtonType.Ok:
+                        keyCodes = new KeyCode[] { KeyCode.Return, KeyCode.KeypadEnter };
+                        text = "Ok";
+                        break;
+                    case ButtonType.Cancel:
+                        keyCodes = new KeyCode[] { KeyCode.Escape };
+                        text = "Cancel";
+                        break;
+                    default:
+                        throw new System.ArgumentException("Invalid button type");
+                }
+            }
+
+            public ButtonDescriptor(string text, KeyCode[] keyCodes, PopupWindowCallback pressedCallback = null) {
+                if (pressedCallback == null)
+                    pressedCallback = DefaultCallback;
+
+                this.buttonType = ButtonType.Custom;
+                this.pressedCallback = pressedCallback;
+                this.text = text;
+                this.keyCodes = keyCodes;
+            }
+
+            public ButtonDescriptor(string text, KeyCode keyCode, PopupWindowCallback pressedCallback = null) {
+                if (pressedCallback == null)
+                    pressedCallback = DefaultCallback;
+
+                this.buttonType = ButtonType.Custom;
+                this.pressedCallback = pressedCallback;
+                this.text = text;
+                this.keyCodes = new KeyCode[] { keyCode };
+            }
+        }
+
+        private static int s_popupCounter = 0;
+
         [SerializeField] private TMPro.TextMeshProUGUI _titleLabel = null;
         [SerializeField] private TMPro.TextMeshProUGUI _messagesLabel = null;
         [SerializeField] private RectTransform _separatorPanel = null;
         [SerializeField] private RectTransform _buttonsPanel = null;
 
-        [SerializeField] private Button _oKButton = null;
-        [SerializeField] private Button _cancelButton = null;
-
-        [SerializeField] private bool _sizeCheckRequired = false;
-
-        private Vector2Int _refMaximumSize = Vector2Int.zero;
-
-        private PopupMenuType _popupMenuType = PopupMenuType.OKCancel;
-        public PopupMenuType PopupType {
-            set {
-                if (value != _popupMenuType) {
-                    _oKButton.gameObject.SetActive((value & PopupMenuType.OK) != 0);
-                    _cancelButton.gameObject.SetActive((value & PopupMenuType.Cancel) != 0);
-                    _buttonsPanel.gameObject.SetActive(value != PopupMenuType.NoButtons);
-                    _popupMenuType = value;
-
-                    if (value == PopupMenuType.NoButtons) {
-                        _separatorPanel.gameObject.SetActive(false);
-                        _buttonsPanel.gameObject.SetActive(false);
-                    } else {
-                        _separatorPanel.gameObject.SetActive(true);
-                        _buttonsPanel.gameObject.SetActive(true);
-                    }
-                }
-            }
-        }
-
-        public Button.ButtonClickedEvent onOKClick { get; } = new Button.ButtonClickedEvent();
-        public Button.ButtonClickedEvent onCancelClick { get; } = new Button.ButtonClickedEvent();
+        private List<ButtonDescriptor> _buttons;
 
         protected override void Awake() {
             base.Awake();
             OpenTibiaUnity.InputHandler.AddKeyDownListener(Utils.EventImplPriority.Default, OnKeyDown);
+
+            _buttons = new List<ButtonDescriptor>();
+
+            _buttonsPanel.gameObject.SetActive(false);
+            _separatorPanel.gameObject.SetActive(false);
         }
 
-        protected override void Start() {
-            base.Start();
-            _oKButton.onClick.AddListener(TriggerOk);
-            _cancelButton.onClick.AddListener(TriggerCancel);
+        protected override void OnDestroy() {
+            OpenTibiaUnity.InputHandler.RemoveKeyDownListener(OnKeyDown);
         }
 
         private void OnKeyDown(Event e, bool _) {
             if (!InputHandler.IsHighlighted(this))
                 return;
 
-            switch (e.keyCode) {
-                case KeyCode.Return:
-                case KeyCode.KeypadEnter:
-                    e.Use();
-                    TriggerHideWindow(true);
-                    break;
-
-                case KeyCode.Escape:
-                    e.Use();
-                    TriggerHideWindow(false);
-                    break;
+            ButtonDescriptor descriptor = default;
+            if (FindDescriptor(ref descriptor, e.keyCode)) {
+                e.Use();
+                OnButtonClick(descriptor);
             }
         }
 
-        protected new void OnRectTransformDimensionsChange() {
-            base.OnRectTransformDimensionsChange();
-            if (_sizeCheckRequired) {
-                int maxWidth = _refMaximumSize.x;
-                int maxHeight = _refMaximumSize.y;
+        public void OnPointerClick(PointerEventData eventData) {
+            Select();
+        }
 
-                var layoutElement = _messagesLabel.GetComponent<LayoutElement>();
-                if (maxWidth > 0 && rectTransform.sizeDelta.x > maxWidth) {
-                    layoutElement.preferredWidth = maxWidth;
-                } else {
-                    layoutElement.preferredWidth = -1;
-                }
-
-                if (maxHeight > 0 && rectTransform.sizeDelta.y > maxHeight) {
-                    layoutElement.preferredHeight = maxHeight;
-                } else {
-                    layoutElement.preferredHeight = -1;
-                }
-            }
+        private void OnButtonClick(ButtonDescriptor descriptor) {
+            Destroy();
+            descriptor.pressedCallback.Invoke();
         }
 
         public void SetTitle(string title) {
@@ -98,50 +117,98 @@ namespace OpenTibiaUnity.Core.Components
         }
 
         public void SetMessage(string message, int maxWidth = -1, int maxHeight = -1) {
-            _refMaximumSize = new Vector2Int(maxWidth, maxHeight);
-            _sizeCheckRequired = true;
+            _messagesLabel.SetText(message);
+
+            var preferedSize = _messagesLabel.GetPreferredValues();
 
             var layoutElement = _messagesLabel.GetComponent<LayoutElement>();
-            layoutElement.preferredWidth = -1;
-            layoutElement.preferredHeight = -1;
-
-            _messagesLabel.SetText(message);
-            LayoutRebuilder.MarkLayoutForRebuild(rectTransform);
+            layoutElement.preferredWidth = Mathf.Min(maxWidth, preferedSize.x);
+            layoutElement.preferredHeight = Mathf.Min(maxHeight, preferedSize.y);
         }
 
         public void SetMessageAlignment(TMPro.TextAlignmentOptions alignment) {
             _messagesLabel.alignment = alignment;
         }
 
-        protected void TriggerHideWindow(bool enter) {
-            Hide();
-
-            if (enter && (_popupMenuType & PopupMenuType.OK) != 0)
-                TriggerOk();
-            else if (!enter && (_popupMenuType & PopupMenuType.Cancel) != 0)
-                TriggerCancel();
-        }
-        
-        public void OnPointerClick(PointerEventData eventData) {
-            Select();
+        public void Destroy() {
+            UnlockFromOverlay();
+            Destroy(gameObject);
         }
 
-        public void TriggerOk() {
-            if (LockedToOverlay)
-                Close();
-            else
-                Hide();
+        private bool FindDescriptor(ref ButtonDescriptor descriptor, KeyCode keyCode) {
+            int index = _buttons.FindIndex((x) => x.keyCodes.Contains(keyCode));
+            if (index == -1)
+                return false;
 
-            onOKClick.Invoke();
+            descriptor = _buttons[index];
+            return true;
         }
 
-        public void TriggerCancel() {
-            if (LockedToOverlay)
-                Close();
-            else
-                Hide();
+        public bool ButtonConflicts(ButtonDescriptor other) {
+            foreach (var buttonDescriptor in _buttons) {
+                foreach (var keyCode in other.keyCodes) {
+                    if (buttonDescriptor.keyCodes.Contains(keyCode))
+                        return true;
+                }
+            }
+            return false;
+        }
 
-            onCancelClick.Invoke();
+        public void AddButton(ButtonDescriptor descriptor) {
+            if (ButtonConflicts(descriptor))
+                throw new System.ArgumentException("There is a conflict adding this button.");
+
+            var button = Instantiate(OpenTibiaUnity.GameManager.DefaultButtonWithLabel, _buttonsPanel.transform);
+            button.onClick.AddListener(() => {
+                OnButtonClick(descriptor);
+            });
+
+            var label = button.GetComponentInChildren<TMPro.TextMeshProUGUI>();
+            label.SetText(descriptor.text);
+
+            var labelSize = label.GetPreferredValues();
+
+            var layoutElement = button.gameObject.AddComponent<LayoutElement>();
+            layoutElement.minWidth = labelSize.x + 20;
+
+            _buttons.Add(descriptor);
+
+            _buttonsPanel.gameObject.SetActive(true);
+            _separatorPanel.gameObject.SetActive(true);
+        }
+
+        private static PopupWindow InstantiatePrefab(Transform parent) {
+            var instance = Instantiate(OpenTibiaUnity.GameManager.PopupWindowPrefab, parent);
+            instance.gameObject.name = $"PopupWindow_{s_popupCounter++}";
+            return instance;
+        }
+
+        public static PopupWindow CreateOkCancelPopup(Transform parent, string title, string message, PopupWindowCallback onOk, PopupWindowCallback onCancel) {
+            var okDesc = new ButtonDescriptor(ButtonType.Ok, onOk);
+            var cancelDesc = new ButtonDescriptor(ButtonType.Cancel, onCancel);
+            return CreatePopupWindow(parent, title, message, okDesc, cancelDesc);
+        }
+
+        public static PopupWindow CreateOkPopup(Transform parent, string title, string message, PopupWindowCallback onOk) {
+            var okDesc = new ButtonDescriptor(ButtonType.Ok, onOk);
+            return CreatePopupWindow(parent, title, message, okDesc);
+        }
+
+        public static PopupWindow CreateCancelPopup(Transform parent, string title, string message, PopupWindowCallback onCancel) {
+            var cancelDesc = new ButtonDescriptor(ButtonType.Cancel, onCancel);
+            return CreatePopupWindow(parent, title, message, cancelDesc);
+        }
+
+        public static PopupWindow CreatePopupWindow(Transform parent, string title, string message, params ButtonDescriptor[] buttons) {
+            PopupWindow instance = InstantiatePrefab(parent);
+            instance.SetTitle(title);
+            instance.SetMessage(message);
+            foreach (var desc in buttons)
+                instance.AddButton(desc);
+
+            instance.ResetLocalPosition();
+            instance.Open();
+            return instance;
         }
     }
 }

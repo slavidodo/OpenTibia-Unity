@@ -48,7 +48,7 @@ namespace OpenTibiaUnity.Modules.Login
         protected Session _session = null;
 
         protected int _selectedCharacterIndex = -1;
-        protected Core.Components.PopupWindow _popupWindow = null;
+        protected PopupWindow _popupWindow = null;
 
         protected override void Awake() {
             base.Awake();
@@ -65,14 +65,6 @@ namespace OpenTibiaUnity.Modules.Login
             _cancelButton.onClick.AddListener(OnCancelButtonClick);
             _getPremiumLegacyButton.onClick.AddListener(OnGetPremiumButtonClicked);
             _getPremiumV12Button.onClick.AddListener(OnGetPremiumButtonClicked);
-            
-            // setup popup message
-            _popupWindow = Instantiate(OpenTibiaUnity.GameManager.PopupWindowPrefab, transform.parent);
-            _popupWindow.name = "PopupWindow_CharactersWindow";
-            _popupWindow.Hide();
-
-            _popupWindow.onOKClick.AddListener(OnPopupOkClick);
-            _popupWindow.onCancelClick.AddListener(OnPopupCancelClick);
 
             // setup game events
             OpenTibiaUnity.GameManager.onGameStart.AddListener(OnGameStart);
@@ -190,7 +182,7 @@ namespace OpenTibiaUnity.Modules.Login
                 protocolGame.Disconnect();
 
             OpenTibiaUnity.ProtocolGame = null;
-            PopupMessage("Sorry", message);
+            PopupOk("Sorry", message);
         }
 
         protected void OnProtocolGameLoginError(string message) {
@@ -199,11 +191,11 @@ namespace OpenTibiaUnity.Modules.Login
             protocolGame.Disconnect();
             OpenTibiaUnity.ProtocolGame = null;
 
-            PopupMessage("Sorry", message);
+            PopupOk("Sorry", message);
         }
 
         protected void OnProtocolGameLoginAdvice(string advice) {
-            PopupMessage("For your information", advice);
+            PopupOk("For your information", advice);
             _popupIsAdvice = true;
         }
 
@@ -214,18 +206,20 @@ namespace OpenTibiaUnity.Modules.Login
             OpenTibiaUnity.ProtocolGame = null;
 
             // TODO show a waiting time widget & then reconnect //
-            PopupMessage("Sorry", message);
+            PopupOk("Sorry", message);
         }
 
         protected void OnGameStart() {
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             RemoveProtocolGameListeners(protocolGame);
 
-            if (_popupWindow.Visible) {
-                if (_popupIsAdvice)
+            if (_popupWindow != null) {
+                if (_popupIsAdvice) {
                     return;
-                else
-                    _popupWindow.Close();
+                } else {
+                    _popupWindow.Destroy();
+                    _popupWindow = null;
+                }
             }
 
             SwitchToGameplayCanvas();
@@ -411,15 +405,23 @@ namespace OpenTibiaUnity.Modules.Login
                     : 200;
             }
         }
-        
-        protected void PopupMessage(string title, string message, PopupMenuType popupType = PopupMenuType.OK, TMPro.TextAlignmentOptions alignment = TMPro.TextAlignmentOptions.MidlineGeoAligned) {
-            _popupWindow.Open();
 
-            _popupWindow.PopupType = popupType;
+        protected PopupWindow PopupOk(string title, string message) {
+            if (_popupWindow != null)
+                _popupWindow.Destroy();
 
-            _popupWindow.SetTitle(title);
+            _popupWindow = PopupWindow.CreateOkPopup(transform.parent, title, message, OnPopupOkClick);
             _popupWindow.SetMessage(message, 500, 250);
-            _popupWindow.SetMessageAlignment(alignment);
+            return _popupWindow;
+        }
+
+        protected PopupWindow PopupCancel(string title, string message) {
+            if (_popupWindow != null)
+                _popupWindow.Destroy();
+
+            _popupWindow = PopupWindow.CreateCancelPopup(transform.parent, title, message, OnPopupOkClick);
+            _popupWindow.SetMessage(message, 500, 250);
+            return _popupWindow;
         }
 
         protected async void DoEnterGame(string characterName, string worldAddress, string worldName, int worldPort) {
@@ -450,11 +452,11 @@ namespace OpenTibiaUnity.Modules.Login
                 else
                     versionLiteral = clientVersion.ToString();
 
-                PopupMessage("Sorry", string.Format($"Couldn't load appearances for version {versionLiteral}."));
+                PopupOk("Sorry", string.Format($"Couldn't load appearances for version {versionLiteral}."));
                 return;
             }
 
-            PopupMessage("Connecting", "Connecting to the game world. Please wait.", PopupMenuType.Cancel);
+            PopupCancel("Connecting", "Connecting to the game world. Please wait.");
 
             OpenTibiaUnity.ChatStorage.Reset();
             OpenTibiaUnity.ContainerStorage.Reset();

@@ -144,6 +144,10 @@
         public const string CHANNEL_MSG_HELP = "Welcome to the help channel.\nIn this channel you can ask questions about Tibia.Experienced players will gladly help you to the best of their knowledge.\nFor detailed information about quests and other game content please take a look at our supported fansites at http://www.tibia.com/community/?subtopic=fansites\nPlease remember to write in English here so everybody can understand you.";
         public const string CHANNEL_MSG_ADVERTISING = "Here you can advertise all kinds of things. Among others, you can trade Tibia items, advertise ingame events, seek characters for a quest or a hunting group, find members for your guild or look for somebody to help you with something.\nIt goes without saying that all advertisements must be conform to the Tibia Rules.Keep in mind that it is illegal to advertise trades including premium time, real money or Tibia characters.";
 
+        // Exit window resources
+        public const string EXIT_WINDOW_TITLE = "Warning";
+        public const string EXIT_WINDOW_MESSAGE = "If you shut down the program, your character might stay in the game.\nClick on \"logout\" to ensure that your character leaves the game properly.\nClick on \"Exit\" if you want to exit the program without logging out your character.";
+
         // Outfit window resources
         public const string OUTFIT_LABEL_INFO_LEGACY_PROTOCOL = "Choose an outfit and determine the colours of various parts of your character's body";
         public const string OUTFIT_LABEL_INFO_NEW_PROTOCOL = "Select an outfit and determine the colours of the various parts of your character's body.\nTo activate an addon, tick the corresponding box.\nAddons are outfit accessories that can be earned in the game by premium players.";

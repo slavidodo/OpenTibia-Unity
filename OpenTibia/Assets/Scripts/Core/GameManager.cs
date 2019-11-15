@@ -10,6 +10,9 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Core
 {
+    using PopupButtonType = Components.PopupWindow.ButtonType;
+    using PopupButtonDescriptor = Components.PopupWindow.ButtonDescriptor;
+
     [DisallowMultipleComponent]
     public class GameManager : MonoBehaviour {
         public class TacticsChangeEvent : UnityEvent<CombatAttackModes, CombatChaseModes, bool, CombatPvPModes> { }
@@ -42,10 +45,10 @@ namespace OpenTibiaUnity.Core
         public Button DefaulBlueButton = null;
         public Button DefaulGreenButton = null;
         public Button DefaulYellowButton = null;
+        public Button DefaultButtonWithLabel = null;
         public GameObject HorizontalSeparator = null;
         public GameObject VerticalSeparator = null;
         public GameObject MiniWindowShadowVariant = null;
-        public Components.ExitWindow ExitWindowPrefab = null;
         public Components.PopupWindow PopupWindowPrefab = null;
         public TMPro.TextMeshProUGUI LabelOnscreenMessageBoxPrefab = null;
         public Components.SplitStackWindow SplitStackWindowPrefab = null;
@@ -201,7 +204,6 @@ namespace OpenTibiaUnity.Core
 
         // private fields
         private Queue<UnityAction> _actionQueue;
-        private Components.ExitWindow _exitWindow;
         private bool _lastMiniMapSaveWasSuccessfull = false;
 
         private bool _loadingClientAssets = false;
@@ -210,6 +212,8 @@ namespace OpenTibiaUnity.Core
         private int _loadedBuildVersion = 0;
 
         private List<Components.Base.Module> _modules;
+
+        private bool _showingQuitNotification = false;
 
         private void Awake() {
             // setup static fields
@@ -231,7 +235,6 @@ namespace OpenTibiaUnity.Core
             _loadedClientAssetsLock = new object();
 
             // quit-notification related
-            _exitWindow = null;
             OpenTibiaUnity.Quiting = false;
 
             InternalColoredMaterial = new Material(Shader.Find("Hidden/Internal-Colored"));
@@ -429,17 +432,28 @@ namespace OpenTibiaUnity.Core
         }
 
         public bool ShowQuitNotification() {
-            // are you sure you want to exit?
-            if (ExitWindowPrefab == null)
+            if (_showingQuitNotification)
                 return false;
 
-            if (_exitWindow == null) {
-                _exitWindow = Instantiate(ExitWindowPrefab, GameCanvas.transform);
-                _exitWindow.rectTransform.anchoredPosition = new Vector2(0, 0);
-            } else if (_exitWindow.gameObject.activeSelf == false) {
-                _exitWindow.gameObject.SetActive(true);
-                _exitWindow.rectTransform.anchoredPosition = new Vector2(0, 0);
+            Components.PopupWindow exitWindow = null;
+            _showingQuitNotification = true;
+
+            void OnExitClick() {
+                Application.Quit();
             }
+            void OnLogoutClicked() {
+                _showingQuitNotification = false;
+                if (IsGameRunning)
+                    ProtocolGame.Disconnect(false);
+            }
+            void OnCancelClicked() {
+                _showingQuitNotification = false;
+            }
+
+            exitWindow = Components.PopupWindow.CreatePopupWindow(ActiveCanvas.transform, TextResources.EXIT_WINDOW_TITLE, TextResources.EXIT_WINDOW_MESSAGE,
+                new PopupButtonDescriptor("Exit", KeyCode.E, OnExitClick),
+                new PopupButtonDescriptor(PopupButtonType.Ok, OnLogoutClicked) { text = "Logout" },
+                new PopupButtonDescriptor(PopupButtonType.Cancel, OnCancelClicked));
             return true;
         }
 

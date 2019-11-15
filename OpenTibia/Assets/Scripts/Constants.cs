@@ -562,13 +562,6 @@
         Statement = 1,
         Bot = 2,
     }
-    public enum PopupMenuType
-    {
-        NoButtons = 0,
-        OK = 1 << 0,
-        Cancel = 1 << 1,
-        OKCancel = OK | Cancel,
-    }
     public enum RenderError
     {
         None,

@@ -54,7 +54,6 @@ namespace OpenTibiaUnity.Modules.Login
         protected Core.Components.PopupWindow _popupWindow;
         protected bool _popupIsMOTD = false;
 
-
         // Properties
         protected string AcccountIdentifier {
             get => _accountIdentifierInput.text;
@@ -89,14 +88,6 @@ namespace OpenTibiaUnity.Modules.Login
             _cancelButton.onClick.AddListener(OnCancelButtonClick);
             _clientVersionDropdown.onValueChanged.AddListener(OnClientVersionDropdownValueChanged);
             _buildVersionDropdown.onValueChanged.AddListener(OnBuildVersionDropdownValueChanged);
-
-            // setup popup message
-            _popupWindow = Instantiate(OpenTibiaUnity.GameManager.PopupWindowPrefab, transform.parent);
-            _popupWindow.name = "PopupWindow_LoginWindow";
-            _popupWindow.Hide();
-
-            _popupWindow.onOKClick.AddListener(OnPopupOkClick);
-            _popupWindow.onCancelClick.AddListener(OnPopupCancelClick);
 
             // setup client versions
             var options = new System.Collections.Generic.List<TMPro.TMP_Dropdown.OptionData>();
@@ -351,6 +342,8 @@ namespace OpenTibiaUnity.Modules.Login
         }
 
         protected void OnPopupOkClick() {
+            _popupWindow = null;
+
             if (_loginWebClient) {
                 RemoveLoginWebClientListeners();
                 _loginWebClient = null;
@@ -375,6 +368,8 @@ namespace OpenTibiaUnity.Modules.Login
         }
 
         protected void OnPopupCancelClick() {
+            _popupWindow = null;
+
             if (_loginWebClient) {
                 RemoveLoginWebClientListeners();
                 _loginWebClient = null;
@@ -442,16 +437,20 @@ namespace OpenTibiaUnity.Modules.Login
             // todo: save account name & password encrypted //
         }
 
-        protected void PopupMessage(string title, string message, PopupMenuType popupType = PopupMenuType.OK, TMPro.TextAlignmentOptions alignment = TMPro.TextAlignmentOptions.MidlineGeoAligned) {
-            _popupWindow.Open();
-            _popupWindow.LockToOverlay();
-            _popupWindow.ResetLocalPosition();
+        protected void PopupOk(string title, string message) {
+            if (_popupWindow != null)
+                _popupWindow.Destroy();
 
-            _popupWindow.PopupType = popupType;
-
-            _popupWindow.SetTitle(title);
+            _popupWindow = Core.Components.PopupWindow.CreateOkPopup(transform.parent, title, message, OnPopupOkClick);
             _popupWindow.SetMessage(message, 500, 250);
-            _popupWindow.SetMessageAlignment(alignment);
+        }
+
+        protected void PopupCancel(string title, string message) {
+            if (_popupWindow != null)
+                _popupWindow.Destroy();
+
+            _popupWindow = Core.Components.PopupWindow.CreateCancelPopup(transform.parent, title, message, OnPopupOkClick);
+            _popupWindow.SetMessage(message, 500, 250);
         }
 
         protected async void DoLogin(string accountIdentifier, string password, string token, string address) {
@@ -488,12 +487,12 @@ namespace OpenTibiaUnity.Modules.Login
                 gameObject.SetActive(true);
 
                 if (!loaded) {
-                    PopupMessage("Sorry", $"Couldn't load appearances for version {versionLiteral}.");
+                    PopupOk("Sorry", $"Couldn't load appearances for version {versionLiteral}.");
                     return;
                 }
             } else {
                 if (!gameManager.CanLoadThings(clientVersion, buildVersion, specification)) {
-                    PopupMessage("Sorry", $"Couldn't load appearances for version {versionLiteral}.");
+                    PopupOk("Sorry", $"Couldn't load appearances for version {versionLiteral}.");
                     return;
                 }
 
@@ -540,7 +539,7 @@ namespace OpenTibiaUnity.Modules.Login
             }
 
             gameObject.SetActive(clientVersion >= 1100);
-            PopupMessage("Connecting", "Your character list is being loaded. Please wait.", PopupMenuType.Cancel);
+            PopupCancel("Connecting", "Your character list is being loaded. Please wait.");
         }
 
         public void DoLoginWithNewToken(string token) {
@@ -567,7 +566,7 @@ namespace OpenTibiaUnity.Modules.Login
 
         private void AddProtocolLoginListners() {
             if (_protocolLogin) {
-                _protocolLogin.onpublicError.AddListener(OnProtocolLoginpublicError);
+                _protocolLogin.onInternalError.AddListener(OnProtocolLoginInternalError);
                 _protocolLogin.onLoginError.AddListener(OnProtocolLoginError);
                 _protocolLogin.onLoginTokenError.AddListener(OnProtocolLoginTokenError);
                 _protocolLogin.onMessageOfTheDay.AddListener(OnProtocolLoginMOTD);
@@ -579,7 +578,7 @@ namespace OpenTibiaUnity.Modules.Login
 
         private void RemoveProtocolLoginListeners() {
             if (_protocolLogin) {
-                _protocolLogin.onpublicError.RemoveListener(OnProtocolLoginpublicError);
+                _protocolLogin.onInternalError.RemoveListener(OnProtocolLoginInternalError);
                 _protocolLogin.onLoginError.RemoveListener(OnProtocolLoginError);
                 _protocolLogin.onLoginTokenError.RemoveListener(OnProtocolLoginTokenError);
                 _protocolLogin.onMessageOfTheDay.RemoveListener(OnProtocolLoginMOTD);
@@ -590,20 +589,21 @@ namespace OpenTibiaUnity.Modules.Login
         }
 
         #region ProtocolLoginListeners
-        private void OnProtocolLoginpublicError(string message) {
-            PopupMessage("Sorry", message, PopupMenuType.OK, TMPro.TextAlignmentOptions.MidlineLeft);
+        private void OnProtocolLoginInternalError(string message) {
+            PopupOk("Sorry", message);
+            _popupWindow.SetMessageAlignment(TMPro.TextAlignmentOptions.MidlineLeft);
         }
 
         private void OnProtocolLoginError(string message) {
-            PopupMessage("Sorry", message);
+            PopupOk("Sorry", message);
         }
         
         private void OnProtocolLoginTokenError(int tries) {
-            PopupMessage("Authentication Error", TextResources.ERRORMSG_AUTHENTICATION_ERROR);
+            PopupOk("Authentication Error", TextResources.ERRORMSG_AUTHENTICATION_ERROR);
         }
 
         private void OnProtocolLoginMOTD(int number, string message) {
-            PopupMessage("Message of the day", message);
+            PopupOk("Message of the day", message);
             _popupIsMOTD = true;
         }
 
@@ -614,11 +614,13 @@ namespace OpenTibiaUnity.Modules.Login
         private void OnProtocolLoginCharacterList(CharacterList characterList) {
             ModulesManager.Instance.CharactersWindow.Setup(_sessionKey, _protocolAccountIdentifier, _protocolPassword, _protocolToken, characterList);
 
-            if (_popupWindow.Visible) {
-                if (_popupIsMOTD)
+            if (_popupWindow != null) {
+                if (_popupIsMOTD) {
                     return;
-                else
-                    _popupWindow.Close();
+                } else {
+                    _popupWindow.Destroy();
+                    _popupWindow = null;
+                }
             }
 
             ShowCharactersWindow();
@@ -631,11 +633,11 @@ namespace OpenTibiaUnity.Modules.Login
 
         #region LoginWebClientListeners
         private void OnLoginWebClientTechnicalError(string message) {
-            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupMessage("Sorry", message));
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupOk("Sorry", message));
         }
 
         private void OnLoginWebClientLoginError(string message) {
-            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupMessage("Sorry", message));
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupOk("Sorry", message));
         }
         
         private void OnLoginWebClientTokenError(string message) {
@@ -645,7 +647,10 @@ namespace OpenTibiaUnity.Modules.Login
         private void OnLoginWebClientSuccess(Session session, Playdata playdata) {
             OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
                 ModulesManager.Instance.CharactersWindow.Setup(session, playdata);
-                _popupWindow.Close();
+                if (_popupWindow) {
+                    _popupWindow.Destroy();
+                    _popupWindow = null;
+                }
                 ShowCharactersWindow();
             });
         }
