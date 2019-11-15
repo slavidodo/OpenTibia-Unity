@@ -54,10 +54,10 @@ namespace OpenTibiaUnity.Core.Appearances
             _text = text;
         }
 
-        public override void Draw(CommandBuffer commandBuffer, Vector2Int screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+        public override void Draw(CommandBuffer commandBuffer, Vector2Int screenPosition, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
             RebuildCache();
             var material = OpenTibiaUnity.GameManager.OutlinedVerdanaFontMaterial;
-            var matrix = Matrix4x4.TRS(new Vector2(screenPosition.x, screenPosition.y), Quaternion.Euler(180, 0, 0), zoom);
+            var matrix = Matrix4x4.TRS(new Vector2(screenPosition.x, screenPosition.y), Quaternion.Euler(180, 0, 0), Vector3.one);
             commandBuffer.DrawMesh(_mesh, matrix, material);
         }
 

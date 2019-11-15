@@ -111,7 +111,7 @@ namespace OpenTibiaUnity.Modules.Outfit
         }
 
         protected void OnGUI() {
-            if (Event.current.type != EventType.Repaint)
+            if (Event.current.type != EventType.Repaint || !Visible)
                 return;
 
             if (!_currentOutfit && !_currentMount)
@@ -130,19 +130,21 @@ namespace OpenTibiaUnity.Modules.Outfit
             commandBuffer.SetRenderTarget(_renderTexture);
             commandBuffer.ClearRenderTarget(false, true, Core.Utils.GraphicsUtility.TransparentColor);
 
+            var zoom = new Vector2(Screen.width / (float)_renderTexture.width, Screen.height / (float)_renderTexture.height);
+            commandBuffer.SetViewMatrix(Matrix4x4.TRS(Vector3.zero, Quaternion.identity, zoom) *
+                OpenTibiaUnity.GameManager.MainCamera.worldToCameraMatrix);
+
             if (!!_currentOutfit) {
                 var screenPosition = new Vector2Int(Constants.FieldSize, Constants.FieldSize);
-                var zoom = new Vector2(Screen.width / (float)_renderTexture.width, Screen.height / (float)_renderTexture.height);
-
                 if (!OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerMounts)) {
                     screenPosition.x = (int)(screenPosition.x * _spacingFactor);
                     screenPosition.y = (int)(screenPosition.x * _spacingFactor);
                 }
 
                 if (_currentOutfit is OutfitInstance)
-                    _currentOutfit.Draw(commandBuffer, screenPosition, zoom, (int)_currentDirection, 0, 0);
+                    _currentOutfit.Draw(commandBuffer, screenPosition, (int)_currentDirection, 0, 0);
                 else
-                    _currentOutfit.Draw(commandBuffer, screenPosition, zoom, 0, 0, 0);
+                    _currentOutfit.Draw(commandBuffer, screenPosition, 0, 0, 0);
                 
                 if (!_rawImageOutfit.enabled)
                     _rawImageOutfit.enabled = true;
@@ -150,15 +152,12 @@ namespace OpenTibiaUnity.Modules.Outfit
 
             if (!!_currentMount) {
                 float pos = Constants.FieldSize * _spacingFactor;
-                var screenPosition = new Vector2Int((int)pos, (int)pos);
-                var zoom = new Vector2(Screen.width / (float)_renderTexture.width, Screen.height / (float)_renderTexture.height);
-
-                screenPosition += new Vector2Int(Constants.FieldSize * 2, 0);
+                var screenPosition = new Vector2Int((int)pos + 2 * Constants.FieldSize, (int)pos);
 
                 if (_currentMount is OutfitInstance)
-                    _currentMount.Draw(commandBuffer, screenPosition, zoom, (int)_currentDirection, 0, 0);
+                    _currentMount.Draw(commandBuffer, screenPosition, (int)_currentDirection, 0, 0);
                 else
-                    _currentMount.Draw(commandBuffer, screenPosition, zoom, 0, 0, 0);
+                    _currentMount.Draw(commandBuffer, screenPosition, 0, 0, 0);
                 
                 if (!_rawImageMount.enabled)
                     _rawImageMount.enabled = true;

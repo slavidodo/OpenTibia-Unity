@@ -183,6 +183,10 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                 commandBuffer.ClearRenderTarget(false, true, Color.black);
             }
 
+            commandBuffer.SetViewMatrix(
+                Matrix4x4.TRS(Vector3.zero, Quaternion.identity, ScreenZoom) * 
+                OpenTibiaUnity.GameManager.MainCamera.worldToCameraMatrix);
+
             for (int z = 0; z <= _maxZPlane; z++) {
                 for (int i = 0; i < _creatureCount.Length; i++)
                     _creatureCount[i] = 0;
@@ -394,7 +398,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                 }
                 
                 if (OptionStorage.HighlightMouseTarget && HighlightTile.HasValue && HighlightTile.Value.z == z)
-                    _tileCursor.DrawTo(commandBuffer, (HighlightTile.Value.x + 1f) * Constants.FieldSize, (HighlightTile.Value.y + 1f) * Constants.FieldSize, ScreenZoom, OpenTibiaUnity.TicksMillis);
+                    _tileCursor.Draw(commandBuffer, (HighlightTile.Value.x + 1) * Constants.FieldSize, (HighlightTile.Value.y + 1) * Constants.FieldSize, OpenTibiaUnity.TicksMillis);
             }
         }
 
@@ -448,7 +452,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 
                 var screenPosition = new Vector2Int(rectX - objectsHeight, rectY - objectsHeight);
                 bool highlighted = HighlightObject is Appearances.ObjectInstance && HighlightObject == @object;
-                @object.Draw(commandBuffer, screenPosition, ScreenZoom, absoluteX, absoluteY, absoluteZ, highlighted, _highlightOpacity);
+                @object.Draw(commandBuffer, screenPosition, absoluteX, absoluteY, absoluteZ, highlighted, _highlightOpacity);
 
                 isLying = isLying || type.IsLyingCorpse;
                 if (type.IsHangable && @object.Hang == Appearances.AppearanceInstance.HookSouth)
@@ -471,7 +475,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             // draw hang object
             if (!!_previousHang) {
                 bool highlighted = HighlightObject is Appearances.ObjectInstance && HighlightObject == _previousHang;
-                _previousHang.Draw(commandBuffer, _hangPixel, ScreenZoom, _hangPattern.x, _hangPattern.y, _hangPattern.z, highlighted, _highlightOpacity);
+                _previousHang.Draw(commandBuffer, _hangPixel, _hangPattern.x, _hangPattern.y, _hangPattern.z, highlighted, _highlightOpacity);
                 _previousHang = null;
             }
 
@@ -506,13 +510,13 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                 if (isCovered && !!creature.MountOutfit) {
                     offset += creature.MountOutfit.Type.Offset;
                     var screenPosition = new Vector2Int(renderAtom.x + offset.x, renderAtom.y + offset.y);
-                    creature.MountOutfit.Draw(commandBuffer, screenPosition, ScreenZoom, (int)creature.Direction, 0, 0, highlighted, _highlightOpacity);
+                    creature.MountOutfit.Draw(commandBuffer, screenPosition, (int)creature.Direction, 0, 0, highlighted, _highlightOpacity);
                 }
 
                 if (isCovered) {
                     offset += creature.Outfit.Type.Offset;
                     var screenPosition = new Vector2Int(renderAtom.x + offset.x, renderAtom.y + offset.y);
-                    creature.Outfit.Draw(commandBuffer, screenPosition, ScreenZoom, (int)creature.Direction, 0, !!creature.MountOutfit ? 1 : 0, highlighted, _highlightOpacity);
+                    creature.Outfit.Draw(commandBuffer, screenPosition, (int)creature.Direction, 0, !!creature.MountOutfit ? 1 : 0, highlighted, _highlightOpacity);
                 }
 
                 if (positionZ == _playerZPlane && (CreatureStorage.IsOpponent(creature) || creature.Id == Player.Id)) {
@@ -595,7 +599,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                         renderAtom.Update(effect, x, y, (int)brightness, absoluteX, absoluteY, absoluteZ, positionZ, effectLightX, effectLightY);
                         _drawnEffectsCount++;
                     } else {
-                        effect.Draw(commandBuffer, screenPosition, ScreenZoom, absoluteX, absoluteY, absoluteZ);
+                        effect.Draw(commandBuffer, screenPosition, absoluteX, absoluteY, absoluteZ);
                         if (drawLyingObjects && OptionStorage.ShowLightEffects && effect.Type.IsLight) {
                             var color = Colors.ColorFrom8Bit((byte)effect.Type.LightColor);
                             _lightmapRenderer.SetLightSource(effectLightX, effectLightY, positionZ, brightness, color);
@@ -611,7 +615,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                 var @object = field.ObjectsRenderer[i];
                 if (@object.Type.IsTop) {
                     bool highlighted = HighlightObject is Appearances.ObjectInstance && HighlightObject == @object;
-                    @object.Draw(commandBuffer, screenPosition, ScreenZoom, absoluteX, absoluteY, absoluteZ, highlighted, _highlightOpacity);
+                    @object.Draw(commandBuffer, screenPosition, absoluteX, absoluteY, absoluteZ, highlighted, _highlightOpacity);
                 }
             }
         }
@@ -744,7 +748,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                 var renderAtom = _drawnEffets[i];
                 if (renderAtom.Object is Appearances.AppearanceInstance effect) {
                     var screenPosition = new Vector2Int(renderAtom.x, renderAtom.y);
-                    effect.Draw(commandBuffer, screenPosition, ScreenZoom, renderAtom.fieldX, renderAtom.fieldY, renderAtom.fieldZ);
+                    effect.Draw(commandBuffer, screenPosition, renderAtom.fieldX, renderAtom.fieldY, renderAtom.fieldZ);
                     if (OptionStorage.ShowLightEffects && effect.Type.IsLight) {
                         var color = Colors.ColorFrom8Bit((byte)effect.Type.LightColor);
                         _lightmapRenderer.SetLightSource(renderAtom.lightX, renderAtom.lightY, renderAtom.positionZ, (uint)renderAtom.z, color);
@@ -763,7 +767,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                     pos.x -= Player.AnimationDelta.x * LayerZoom.x;
                     pos.y -= Player.AnimationDelta.y * LayerZoom.y;
 
-                    textualEffect.Draw(commandBuffer, new Vector2Int((int)pos.x, (int)pos.y), Vector2.one, 0, 0, 0);
+                    textualEffect.Draw(commandBuffer, new Vector2Int((int)pos.x, (int)pos.y), 0, 0, 0);
                 }
             }
         }

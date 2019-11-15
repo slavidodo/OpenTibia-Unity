@@ -184,24 +184,27 @@ namespace OpenTibiaUnity.Modules.Inventory
         }
 
         private void OnGUI() {
-            if (Event.current.type != EventType.Repaint)
+            if (Event.current.type != EventType.Repaint || _minimized)
                 return;
 
             var gameManager = OpenTibiaUnity.GameManager;
             InternalStartMouseAction(Input.mousePosition, MouseButton.None, false, true);
 
-            Vector2 zoom = new Vector2(Screen.width / (float)_slotsRenderTexture.width, Screen.height / (float)_slotsRenderTexture.height);
-
             var commandBuffer = new CommandBuffer();
             commandBuffer.SetRenderTarget(_slotsRenderTexture);
             commandBuffer.ClearRenderTarget(false, true, Core.Utils.GraphicsUtility.TransparentColor);
+
+            var zoom = new Vector2(Screen.width / (float)_slotsRenderTexture.width, Screen.height / (float)_slotsRenderTexture.height);
+            commandBuffer.SetViewMatrix(Matrix4x4.TRS(Vector3.zero, Quaternion.identity, zoom) *
+                OpenTibiaUnity.GameManager.MainCamera.worldToCameraMatrix);
+
             for (int i = 0; i < (int)ClothSlots.Hip; i++) {
                 var @object = BodyContainerView.Objects[i];
                 if (@object) {
                     if (!@object.ClampeToFieldSize)
                         @object.ClampeToFieldSize = true;
                     @object.Animate(OpenTibiaUnity.TicksMillis);
-                    @object.Draw(commandBuffer, new Vector2Int(Constants.FieldSize * i, 0), zoom, 0, 0, 0);
+                    @object.Draw(commandBuffer, new Vector2Int(Constants.FieldSize * i, 0), 0, 0, 0);
                 }
             }
 

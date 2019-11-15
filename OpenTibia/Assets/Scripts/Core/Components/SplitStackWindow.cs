@@ -23,7 +23,7 @@ namespace OpenTibiaUnity.Core.Components
 
         private int _screenWidth = 0;
         private int _screenHeight = 0;
-        private Vector2 _screenZoom;
+        private Matrix4x4 _viewMatrix;
 
         private RenderTexture _renderTexture = null;
 
@@ -100,7 +100,10 @@ namespace OpenTibiaUnity.Core.Components
             if (Screen.width != _screenWidth || Screen.height != _screenHeight) {
                 _screenWidth = Screen.width;
                 _screenHeight = Screen.height;
-                _screenZoom = new Vector2(Screen.width / (float)Constants.FieldSize, Screen.height / (float)Constants.FieldSize);
+                var zoom = new Vector2(Screen.width / (float)Constants.FieldSize, Screen.height / (float)Constants.FieldSize);
+                _viewMatrix = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, zoom)
+                    * OpenTibiaUnity.GameManager.MainCamera.worldToCameraMatrix;
+
                 if (!!_objectInstance)
                     _objectInstance.InvalidateTRS();
             }
@@ -138,14 +141,15 @@ namespace OpenTibiaUnity.Core.Components
 
             var commandBuffer = new CommandBuffer();
             commandBuffer.SetRenderTarget(_renderTexture);
-            commandBuffer.ClearRenderTarget(false, true, Core.Utils.GraphicsUtility.TransparentColor);
+            commandBuffer.ClearRenderTarget(false, true, Utils.GraphicsUtility.TransparentColor);
+            commandBuffer.SetViewMatrix(_viewMatrix);
 
             if (!!_objectType) {
                 if (_objectInstance == null || _objectInstance.Id != _objectType.Id)
                     _objectInstance = OpenTibiaUnity.AppearanceStorage.CreateObjectInstance(_objectType.Id, _objectAmount);
 
                 
-                _objectInstance.Draw(commandBuffer, Vector2Int.zero, _screenZoom, 0, 0, 0);
+                _objectInstance.Draw(commandBuffer, Vector2Int.zero, 0, 0, 0);
             }
 
             Graphics.ExecuteCommandBuffer(commandBuffer);

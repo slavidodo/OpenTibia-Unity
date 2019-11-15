@@ -114,7 +114,7 @@ namespace OpenTibiaUnity.Modules.Hotkeys
 
         protected void OnGUI() {
             var e = Event.current;
-            if (e.type != EventType.Repaint)
+            if (e.type != EventType.Repaint || !Visible)
                 return;
 
             if (!_activeActionPanel) {
@@ -142,7 +142,10 @@ namespace OpenTibiaUnity.Modules.Hotkeys
             commandBuffer.ClearRenderTarget(false, true, Core.Utils.GraphicsUtility.TransparentColor);
 
             var zoom = new Vector2(Screen.width / (float)s_renderTexture.width, Screen.height / (float)s_renderTexture.height);
-            _objectInstance.Draw(commandBuffer, new Vector2Int(0, 0), zoom, 0, 0, 0);
+            commandBuffer.SetViewMatrix(Matrix4x4.TRS(Vector3.zero, Quaternion.identity, zoom) *
+                OpenTibiaUnity.GameManager.MainCamera.worldToCameraMatrix);
+
+            _objectInstance.Draw(commandBuffer, new Vector2Int(0, 0), 0, 0, 0);
             Graphics.ExecuteCommandBuffer(commandBuffer);
             commandBuffer.Dispose();
 

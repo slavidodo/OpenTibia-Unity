@@ -80,11 +80,11 @@ namespace OpenTibiaUnity.Core.Appearances
                 * ActiveFrameGroup.SpriteInfo.Layers);
         }
 
-        public override void Draw(CommandBuffer commandBuffer, Vector2Int screenPosition, Vector2 zoom, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+        public override void Draw(CommandBuffer commandBuffer, Vector2Int screenPosition, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
             if (ActiveFrameGroup.SpriteInfo.Layers != 2) {
                 var cachedSprite = GetSprite(-1, patternX, patternY, patternZ, ActiveFrameGroup.SpriteInfo.IsAnimation);
                 if (cachedSprite != null)
-                    InternalDrawTo(commandBuffer, screenPosition, zoom, highlighted, highlightOpacity, cachedSprite);
+                    InternalDraw(commandBuffer, screenPosition, highlighted, highlightOpacity, cachedSprite);
                 return;
             }
 
@@ -117,8 +117,8 @@ namespace OpenTibiaUnity.Core.Appearances
                         _channelProps.Add(channelSpriteId, props);
                     }
 
-                    InternalDrawTo(commandBuffer, screenPosition, zoom, highlighted, highlightOpacity, baseSprite);
-                    InternalDrawTo(commandBuffer, screenPosition, zoom, highlighted, highlightOpacity, baseSprite, colouriseMaterial, props);
+                    InternalDraw(commandBuffer, screenPosition, highlighted, highlightOpacity, baseSprite);
+                    InternalDraw(commandBuffer, screenPosition, highlighted, highlightOpacity, baseSprite, colouriseMaterial, props);
                 }
             }
         }

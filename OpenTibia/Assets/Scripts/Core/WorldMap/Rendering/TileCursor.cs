@@ -33,14 +33,14 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             _props.SetTexture("_MainTex", s_texture2D);
         }
 
-        public void DrawTo(CommandBuffer commandBuffer, float screenX, float screenY, Vector2 zoom, int ticks) {
+        public void Draw(CommandBuffer commandBuffer, int screenX, int screenY, int ticks) {
             Animate(ticks);
 
-            var position = new Vector3(screenX * zoom.x, screenY * zoom.y, 0);
-            var scale = new Vector3(Constants.FieldSize * zoom.x, Constants.FieldSize * zoom.y, 0);
-
+            var position = new Vector3(screenX, screenY, 0);
+            var scale = new Vector3(Constants.FieldSize, Constants.FieldSize, 0);
             var uv = new Vector4(1f / s_cachedFrameCount, 1f, (float)_currentFrame / s_cachedFrameCount, 0);
             _props.SetVector("_MainTex_UV", uv);
+
             Utils.GraphicsUtility.DrawTexture(commandBuffer, position, scale, OpenTibiaUnity.GameManager.AppearanceTypeMaterial, _props);
         }
     }

@@ -59,7 +59,17 @@ namespace OpenTibiaUnity.Core.Appearances
         protected Animation.IAppearanceAnimator[] _animators;
         protected List<CachedSpriteRequest[]> _cachedSprites;
 
-        public bool ClampeToFieldSize = false;
+        private bool _clampToFieldSize = false;
+
+        public bool ClampeToFieldSize {
+            get => _clampToFieldSize;
+            set {
+                if (value != _clampToFieldSize) {
+                    _shouldRecalculateTRS = true;
+                    _clampToFieldSize = value;
+                }
+            }
+        }
 
         protected Protobuf.Appearances.FrameGroup ActiveFrameGroup {
             get {
@@ -158,8 +168,8 @@ namespace OpenTibiaUnity.Core.Appearances
             return cachedRequest.CachedSprite;
         }
 
-        public virtual void Draw(CommandBuffer commandBuffer, Vector2Int screenPosition, Vector2 zoom,
-                                int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
+        public virtual void Draw(CommandBuffer commandBuffer, Vector2Int screenPosition, int patternX,
+                                int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
             // this requires a bit of explanation
             // on outfits, layers are not useful, instead it relies on phases
             // while on the rest of categories, layers are treated as indepedant sprites..
@@ -181,30 +191,23 @@ namespace OpenTibiaUnity.Core.Appearances
                 return;
 
             foreach (var cachedSprite in cachedSprites)
-                InternalDrawTo(commandBuffer, screenPosition, zoom, highlighted, highlightOpacity, cachedSprite);
+                InternalDraw(commandBuffer, screenPosition, highlighted, highlightOpacity, cachedSprite);
         }
         
-        protected void InternalDrawTo(CommandBuffer commandBuffer, Vector2Int screenPosition, Vector2 zoom, bool highlighted,
+        protected void InternalDraw(CommandBuffer commandBuffer, Vector2Int screenPosition, bool highlighted,
                                       float highlightOpacity, CachedSprite cachedSprite, Material material = null, MaterialPropertyBlock props = null) {
             if (_shouldRecalculateTRS) {
-                Vector2 realPos = new Vector2(screenPosition.x - _type.OffsetX, screenPosition.y - _type.OffsetY);
-
-                Vector3 position, scale;
-                if (ClampeToFieldSize) {
-                    position = realPos * zoom;
-                    scale = s_fieldVector * zoom;
-                } else {
-                    position = (realPos - cachedSprite.size + s_fieldVector) * zoom;
-                    scale = cachedSprite.size * zoom;
-                }
-
-                _trsMatrix = Matrix4x4.TRS(position, Quaternion.Euler(180, 0, 0), scale);
+                var position = new Vector2(screenPosition.x - _type.OffsetX, screenPosition.y - _type.OffsetY);
+                if (ClampeToFieldSize)
+                    _trsMatrix = Matrix4x4.TRS(position, Quaternion.Euler(180, 0, 0), s_fieldVector);
+                else
+                    _trsMatrix = Matrix4x4.TRS(position - cachedSprite.size + s_fieldVector, Quaternion.Euler(180, 0, 0), cachedSprite.size);
 
                 _screenPosition = screenPosition;
                 _shouldRecalculateTRS = false;
             } else if (_screenPosition != screenPosition) {
-                _trsMatrix[0, 3] += (screenPosition.x - _screenPosition.x) * zoom.x;
-                _trsMatrix[1, 3] += (screenPosition.y - _screenPosition.y) * zoom.y;
+                _trsMatrix[0, 3] += (screenPosition.x - _screenPosition.x);
+                _trsMatrix[1, 3] += (screenPosition.y - _screenPosition.y);
                 _screenPosition = screenPosition;
             }
 
