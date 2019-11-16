@@ -12,6 +12,8 @@
         public static ToggleFullScreen MiscToggleFullScreen = new ToggleFullScreen(19, "MISC_TOGGLE_FULL_SCREEN", InputEvent.KeyDown);
 
         // Chat
+        public static ChatMoveCursorLeft ChatMoveCursorLeft = new ChatMoveCursorLeft(257, "CHAT_MOVE_CURSOR_LEFT", InputEvent.KeyDown);
+        public static ChatMoveCursorRight ChatMoveCursorRight = new ChatMoveCursorRight(258, "CHAT_MOVE_CURSOR_RIGHT", InputEvent.KeyDown);
         public static ChatMoveCursorHome ChatMoveCursorHome = new ChatMoveCursorHome(259, "CHAT_MOVE_CURSOR_HOME", InputEvent.KeyDown);
         public static ChatMoveCursorEnd ChatMoveCursorEnd = new ChatMoveCursorEnd(260, "CHAT_MOVE_CURSOR_END", InputEvent.KeyDown);
         public static ChatDeletePrev ChatDeletePrev = new ChatDeletePrev(261, "CHAT_DELETE_PREV", InputEvent.KeyDown | InputEvent.KeyRepeat);
@@ -20,6 +22,9 @@
         public static ChatCopySelected ChatCopySelected = new ChatCopySelected(264, "CHAT_COPY_SELECTED", InputEvent.KeyDown);
         public static ChatInsertClipboard ChatInsertClipboard = new ChatInsertClipboard(265, "CHAT_INSERT_CLIPBOARD", InputEvent.KeyDown);
         public static ChatCutSelected ChatCutSelected = new ChatCutSelected(266, "CHAT_CUT_SELECTED", InputEvent.KeyDown);
+        public static ChatHistoryPrev ChatHistoryPrev = new ChatHistoryPrev(267, "CHAT_HISTORY_PREV", InputEvent.KeyDown);
+        public static ChatHistoryNext ChatHistoryNext = new ChatHistoryNext(268, "CHAT_HISTORY_NEXT", InputEvent.KeyDown);
+        public static ChatSendText ChatSendText = new ChatSendText(269, "CHAT_SEND_TEXT", InputEvent.KeyDown);
 
         // Player
         public static PlayerMove PlayerMoveRight = new PlayerMove(512, "PLAYER_MOVE_RIGHT", InputEvent.KeyDown | InputEvent.KeyRepeat, Direction.East);

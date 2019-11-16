@@ -5,17 +5,6 @@ using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Console
 {
-    public class ChannelInformation
-    {
-        public Channel channel;
-        public Core.Utils.RingBuffer<ChannelMessage> talkHistory;
-
-        public ChannelInformation(Channel channel) {
-            this.channel = channel;
-            talkHistory = new Core.Utils.RingBuffer<ChannelMessage>(Constants.MaxTalkHistory);
-        }
-    }
-
     public class ConsoleModule : Core.Components.Base.Module
     {
         [SerializeField] private Sprite _channelButtonActiveSprite = null;
@@ -32,21 +21,21 @@ namespace OpenTibiaUnity.Modules.Console
         [SerializeField] private Button _buttonCloseChannel = null;
         
         private SortedDictionary<object, ChannelTab> _channelTabs = null;
-        private SortedDictionary<object, ChannelInformation> _knownChannels = null;
+        private Core.Utils.RingBuffer<string> _talkHistory = null;
         private Channel _activeChannel = null;
         private ChannelTab _activeChannelTab = null;
-        
+        private int _historyIndex = 0;
+
         protected override void Awake() {
             base.Awake();
             
             _channelTabs = new SortedDictionary<object, ChannelTab>();
-            _knownChannels = new SortedDictionary<object, ChannelInformation>();
+            _talkHistory = new Core.Utils.RingBuffer<string>(200);
 
             OpenTibiaUnity.ChatStorage.onAddChannel.AddListener(OnAddChannel);
             OpenTibiaUnity.ChatStorage.onClearChannels.AddListener(OnClearChannels);
 
             OpenTibiaUnity.GameManager.onGameStart.AddListener(OnGameStart);
-            OpenTibiaUnity.InputHandler.AddKeyUpListener(Core.Utils.EventImplPriority.Default, OnKeyUp);
         }
 
         protected override void Start() {
@@ -60,18 +49,7 @@ namespace OpenTibiaUnity.Modules.Console
             _chatInputField.text = string.Empty;
         }
 
-        private void OnKeyUp(Event e, bool repeated) {
-            if (!Core.Input.InputHandler.IsGameObjectHighlighted(_chatInputField.gameObject))
-                return;
-
-            if (e.keyCode == KeyCode.Return || e.keyCode == KeyCode.KeypadEnter)
-                SendChannelMessage();
-        }
-
         private void OnAddChannel(Channel channel) {
-            // make sure we know this channel before doing anything
-            _knownChannels[channel.Id] = new ChannelInformation(channel);
-
             // get the channel button if exists, force create if not
             var channelButton = GetChannelTab(channel, true);
 
@@ -91,7 +69,6 @@ namespace OpenTibiaUnity.Modules.Console
                 Destroy(p.Value.gameObject);
 
             _channelTabs.Clear();
-            _knownChannels.Clear();
             _activeChannel = null;
             _activeChannelTab = null;
         }
@@ -101,8 +78,6 @@ namespace OpenTibiaUnity.Modules.Console
                 SelectChannelButton(GetChannelTab(channel, true));
             else
                 GetChannelTab(channel, true);
-
-            _knownChannels[channel.Id].talkHistory.AddItem(channelMessage);
 
             if (channel == _activeChannel)
                 _consoleBuffer.AddChannelMessage(channelMessage);
@@ -117,8 +92,7 @@ namespace OpenTibiaUnity.Modules.Console
         private void OnCloseChannelButtonClicked() {
             if (!_activeChannelTab || !_activeChannel.Closable)
                 return;
-            
-            _knownChannels.Remove(_activeChannel.Id);
+
             _channelTabs.Remove(_activeChannel.Id);
 
             OpenTibiaUnity.ChatStorage.LeaveChannel(_activeChannel.Id);
@@ -146,6 +120,29 @@ namespace OpenTibiaUnity.Modules.Console
 
         }
 
+        public void OnChatHistory(int offset) {
+            int length = _talkHistory.Length;
+            if (length < 1)
+                _historyIndex = -1;
+            else
+                _historyIndex = Mathf.Clamp(_historyIndex + offset, 0, length);
+
+            string text;
+            if (_historyIndex >= 0 && _historyIndex < length)
+                text = _talkHistory.GetItemAt(_historyIndex);
+            else
+                text = string.Empty;
+
+            SetInputText(text);
+        }
+
+        public void SetNextMessage() {
+            if (_historyIndex == _talkHistory.Length)
+                return;
+
+            SetInputText(_talkHistory.GetItemAt(_historyIndex++));
+        }
+
         public void SetInputText(string text) {
             _chatInputField.text = text;
             _chatInputField.MoveTextEnd(false);
@@ -153,13 +150,16 @@ namespace OpenTibiaUnity.Modules.Console
 
         public void SendChannelMessage() {
             var text = _chatInputField.text;
-            if (text.Length != 0)
+            if (text.Length != 0) {
+                _talkHistory.AddItem(text);
+                _historyIndex = _talkHistory.Length;
                 _chatInputField.text = OpenTibiaUnity.ChatStorage.SendChannelMessage(text, _activeChannel, MessageModeType.None);
 
-            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
-                _chatInputField.ActivateInputField();
-                _chatInputField.MoveTextEnd(false);
-            });
+                OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
+                    _chatInputField.ActivateInputField();
+                    _chatInputField.MoveTextEnd(false);
+                });
+            }
         }
         
         private ChannelTab GetChannelTab(Channel channel, bool forceCreate) {
@@ -198,7 +198,7 @@ namespace OpenTibiaUnity.Modules.Console
             _activeChannelTab.SetImage(_channelButtonActiveSprite);
             _activeChannelTab.SetState(ChannelButtonState.Active);
 
-            _consoleBuffer.ResetTalkHistory(_knownChannels[_activeChannel.Id].talkHistory);
+            _consoleBuffer.ResetChannelHistory(_activeChannel.History);
 
             _buttonCloseChannel.gameObject.SetActive(_activeChannel.Closable);
             _toggleShowServerMessages.gameObject.SetActive(_activeChannel.Closable);

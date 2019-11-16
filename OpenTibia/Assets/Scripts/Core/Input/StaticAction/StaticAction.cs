@@ -30,7 +30,7 @@ namespace OpenTibiaUnity.Core.Input.StaticAction
         public abstract bool Perform(bool repeat = false);
 
         public virtual bool KeyCallback(uint eventMask, char _, UnityEngine.KeyCode __, UnityEngine.EventModifiers ___) {
-            return Perform(eventMask == InputEvent.KeyRepeat);
+            return Perform((eventMask & InputEvent.KeyRepeat) != 0);
         }
 
         public virtual bool TextCallback(uint eventMask, char _) {

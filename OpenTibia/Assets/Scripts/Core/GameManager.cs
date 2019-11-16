@@ -146,6 +146,8 @@ namespace OpenTibiaUnity.Core
         public UnityEvent onGameEnd { get; private set; }
         public UnityEvent onProcessChangeCharacter { get; private set; }
         public UnityEvent onRequestShowOptionsHotkey { get; private set; }
+        public UnityEvent onRequestChatHistoryPrev { get; private set; }
+        public UnityEvent onRequestChatHistoryNext { get; private set; }
         public RequestChatSendEvent onRequestChatSend { get; private set; }
         public RequestOutfitDialogEvent onRequestOutfitDialog { get; private set; }
         public RequestNPCTradeEvent onRequestNPCTrade { get; private set; }
@@ -251,6 +253,8 @@ namespace OpenTibiaUnity.Core
             onGameEnd = new UnityEvent();
             onProcessChangeCharacter = new UnityEvent();
             onRequestShowOptionsHotkey = new UnityEvent();
+            onRequestChatHistoryPrev = new UnityEvent();
+            onRequestChatHistoryNext = new UnityEvent();
             onRequestChatSend = new RequestChatSendEvent();
             onRequestOutfitDialog = new RequestOutfitDialogEvent();
             onRequestNPCTrade = new RequestNPCTradeEvent();

@@ -82,7 +82,7 @@ namespace OpenTibiaUnity.Modules.Console
             textInput.text = text;
         }
 
-        public void ResetTalkHistory(IEnumerable<ChannelMessage> talkHistory) {
+        public void ResetChannelHistory(IEnumerable<ChannelMessage> talkHistory) {
             _history = talkHistory.ToList();
 
             string text = "";

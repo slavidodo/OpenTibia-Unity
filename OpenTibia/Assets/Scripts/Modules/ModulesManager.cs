@@ -60,6 +60,8 @@ namespace OpenTibiaUnity.Modules
             var gameManager = OpenTibiaUnity.GameManager;
 
             gameManager.onRequestShowOptionsHotkey.AddListener(OnRequestShowOptionsHotkey);
+            gameManager.onRequestChatHistoryPrev.AddListener(OnRequestChatHistoryPrev);
+            gameManager.onRequestChatHistoryNext.AddListener(OnRequestChatHistoryNext);
             gameManager.onRequestChatSend.AddListener(OnRequestChatSend);
             gameManager.onRequestOutfitDialog.AddListener(OnRequestOutfitDialog);
             gameManager.onRequestNPCTrade.AddListener(OnRequestNPCTrade);
@@ -70,6 +72,22 @@ namespace OpenTibiaUnity.Modules
             HotkeysWindow.Open();
         }
 
+        private void OnRequestChatHistoryPrev() {
+            var chatModule = OpenTibiaUnity.GameManager.GetModule<Console.ConsoleModule>();
+            if (!chatModule)
+                return;
+
+            chatModule.OnChatHistory(-1);
+        }
+
+        private void OnRequestChatHistoryNext() {
+            var chatModule = OpenTibiaUnity.GameManager.GetModule<Console.ConsoleModule>();
+            if (!chatModule)
+                return;
+
+            chatModule.OnChatHistory(1);
+        }
+
         private void OnRequestChatSend(string text, bool autoSend, int channelId) {
             var chatModule = OpenTibiaUnity.GameManager.GetModule<Console.ConsoleModule>();
             if (!chatModule)
@@ -78,7 +96,9 @@ namespace OpenTibiaUnity.Modules
             if (channelId != -1)
                 chatModule.SelectChannel(OpenTibiaUnity.ChatStorage.GetChannel(channelId), true);
 
-            chatModule.SetInputText(text);
+            if (text != null)
+                chatModule.SetInputText(text);
+
             if (autoSend)
                 chatModule.SendChannelMessage();
         }

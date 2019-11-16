@@ -7,7 +7,7 @@ namespace OpenTibiaUnity.Core.Chat
     {
         public class ChannelMessageAddEvent : UnityEvent<Channel, ChannelMessage> { }
 
-        protected const int MessagesSize = 50000;
+        protected const int MessagesSize = 200;
         public const int MaxNameLength = 30;
 
         protected Utils.UnionStrInt _id = null;
@@ -18,7 +18,7 @@ namespace OpenTibiaUnity.Core.Chat
         protected MessageModeType _sendMode = 0;
 
         protected List<object> _nicklistItems = null;
-        protected List<ChannelMessage> _messages = null;
+        protected Utils.RingBuffer<ChannelMessage> _history = null;
 
         public ChannelMessageAddEvent onAddChannelMessage = new ChannelMessageAddEvent();
 
@@ -29,6 +29,8 @@ namespace OpenTibiaUnity.Core.Chat
         public MessageModeType SendMode { get => _sendMode; }
         public bool CanModerate { get; set; } = false;
 
+        public Utils.RingBuffer<ChannelMessage> History { get => _history; }
+
         public bool IsPrivate { get => ChatStorage.s_IsPrivateChannel(_id); }
 
         public Channel(Utils.UnionStrInt id, string name, MessageModeType sendMode) {
@@ -38,15 +40,15 @@ namespace OpenTibiaUnity.Core.Chat
             _closable = true;
             _sendAllowed = true;
             _nicklistItems = new List<object>();
-            _messages = new List<ChannelMessage>(MessagesSize);
+            _history = new Utils.RingBuffer<ChannelMessage>(MessagesSize);
         }
 
         public void ClearMessages() {
-            _messages.Clear();
+            _history.RemoveAll();
         }
 
         public void AppendMessage(ChannelMessage message) {
-            _messages.Add(message);
+            _history.AddItem(message);
             onAddChannelMessage.Invoke(this, message);
         }
 
