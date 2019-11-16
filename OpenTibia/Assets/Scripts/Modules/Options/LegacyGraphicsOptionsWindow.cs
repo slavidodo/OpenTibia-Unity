@@ -13,6 +13,8 @@ namespace OpenTibiaUnity.Modules.Options
         [SerializeField] private Core.Components.CheckboxWrapper _antialiasingCheckboxWrapper = null;
         [SerializeField] private Core.Components.CheckboxWrapper _noFramerateLimitCheckboxWrapper = null;
         [SerializeField] private Core.Components.SliderWrapper _framerateLimitSliderWrapper = null;
+        [SerializeField] private Core.Components.CheckboxWrapper _showLightEffectsCheckboxWrapper = null;
+        [SerializeField] private Core.Components.SliderWrapper _ambientLightSliderWrapper = null;
 
         [SerializeField] private Button _okButton = null;
         [SerializeField] private Button _cancelButton = null;
@@ -37,7 +39,11 @@ namespace OpenTibiaUnity.Modules.Options
             _resolutionDropdown.value = currentResolutionIndex;
             _qualityDropdown.value = QualitySettings.GetQualityLevel();
 
+            _noFramerateLimitCheckboxWrapper.onValueChanged.AddListener(OnNoFramerateLimitValueChanged);
             _framerateLimitSliderWrapper.SetMinMax(Constants.MinimumManageableFramerate, Constants.MaximumManageableFramerate);
+
+            _showLightEffectsCheckboxWrapper.onValueChanged.AddListener(OnShowLightEffectsValueChanged);
+            _ambientLightSliderWrapper.SetMinMax(0, 100);
 
             RevertOptionsBack();
         }
@@ -61,6 +67,14 @@ namespace OpenTibiaUnity.Modules.Options
             ModulesManager.Instance.LegacyOptionsWindow.Open();
         }
 
+        private void OnNoFramerateLimitValueChanged(bool value) {
+            _framerateLimitSliderWrapper.SetEnabled(!value);
+        }
+
+        private void OnShowLightEffectsValueChanged(bool value) {
+            _ambientLightSliderWrapper.SetEnabled(value);
+        }
+
         private void UpdateOptionStorage() {
             var optionStorage = OpenTibiaUnity.OptionStorage;
 
@@ -73,6 +87,8 @@ namespace OpenTibiaUnity.Modules.Options
             optionStorage.VsyncEnabled = _vsyncCheckboxWrapper.checkbox.Checked;
             optionStorage.NoFramerateLimit = _noFramerateLimitCheckboxWrapper.checkbox.Checked;
             optionStorage.FramerateLimit = (int)_framerateLimitSliderWrapper.slider.value;
+            optionStorage.ShowLightEffects = _showLightEffectsCheckboxWrapper.checkbox.Checked;
+            optionStorage.AmbientBrightness = (int)_ambientLightSliderWrapper.slider.value;
 
             optionStorage.UpdateQualitySettings();
             optionStorage.UpdateFullscreenMode();
@@ -99,10 +115,14 @@ namespace OpenTibiaUnity.Modules.Options
             _antialiasingCheckboxWrapper.checkbox.Checked = optionStorage.GameAntialiasingMode != AntialiasingMode.None;
 
             _noFramerateLimitCheckboxWrapper.checkbox.Checked = optionStorage.NoFramerateLimit;
-
             _framerateLimitSliderWrapper.SetEnabled(!optionStorage.NoFramerateLimit);
             _framerateLimitSliderWrapper.slider.value = optionStorage.FramerateLimit;
             _framerateLimitSliderWrapper.ForceUpdateLabel();
+
+            _showLightEffectsCheckboxWrapper.checkbox.Checked = optionStorage.ShowLightEffects;
+            _ambientLightSliderWrapper.SetEnabled(optionStorage.ShowLightEffects);
+            _ambientLightSliderWrapper.slider.value = optionStorage.AmbientBrightness;
+            _ambientLightSliderWrapper.ForceUpdateLabel();
         }
     }
 }

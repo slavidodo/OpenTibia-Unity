@@ -139,7 +139,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         public RenderError RenderWorldMap(Rect worldMapLayerRect, RenderTexture renderTarget) {
             if (WorldMapStorage == null || CreatureStorage == null || Player == null || !WorldMapStorage.Valid)
                 return RenderError.WorldMapNotValid;
-            
+
             _lastWorldMapLayerRect = worldMapLayerRect;
             if (_lastWorldMapLayerRect.width < Constants.WorldMapMinimumWidth || _lastWorldMapLayerRect.height < Constants.WorldMapMinimumHeight)
                 return RenderError.SizeNotEffecient;
@@ -308,14 +308,14 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 #endif
                         var colorIndex = _lightmapRenderer.ToColorIndex(x, y);
                         if (z == _playerZPlane && z > 0)
-                            _lightmapRenderer[colorIndex] = Utils.Utility.MulColor32(_lightmapRenderer[colorIndex], OptionStorage.LightLevelSeparator / 100f);
+                            _lightmapRenderer[colorIndex] = Utils.Utility.MulColor32(_lightmapRenderer[colorIndex], OptionStorage.FixedLightLevelSeparator / 100f);
 
                         Appearances.ObjectInstance @object;
                         if (z == 0 || (@object = field.ObjectsRenderer[0]) != null && @object.Type.IsGround) {
                             _lightmapRenderer.SetFieldBrightness(x, y, brightness, aboveGround);
                             if (z > 0 && field.CacheTranslucent) {
                                 var color = _lightmapRenderer[colorIndex];
-                                color = Utils.Utility.MulColor32(color, OptionStorage.LightLevelSeparator / 100f);
+                                color = Utils.Utility.MulColor32(color, OptionStorage.FixedLightLevelSeparator / 100f);
                                 var alterColor = _lightmapRenderer[colorIndex];
                                 if (color.r < alterColor.r)
                                     color.r = alterColor.r;
