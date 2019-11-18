@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Communication.Game
 {
-    public partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame
     {
         private Dictionary<MessageModeType, int> _messageModesDict;
 

@@ -1,6 +1,6 @@
 ﻿namespace OpenTibiaUnity.Core.Communication.Game
 {
-    public partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame
     {
         private void ParseRestingAreaState(Internal.CommunicationStream message) {
             bool inRestingArea = message.ReadBoolean();

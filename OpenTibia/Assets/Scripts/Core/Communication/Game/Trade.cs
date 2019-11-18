@@ -2,7 +2,8 @@
 
 namespace OpenTibiaUnity.Core.Communication.Game
 {
-    public partial class ProtocolGame : Internal.Protocol {
+    public partial class ProtocolGame
+    {
         private void ParseNPCOffer(Internal.CommunicationStream message) {
             string npcName = null;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameNameOnNpcTrade))
@@ -69,7 +70,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
             int size = message.ReadUnsignedByte();
             for (int i = 0; i < size; i++)
-                objects.Add(ReadObjectInstance(message));
+                objects.Add(ProtocolGameExtentions.ReadObjectInstance(message));
 
             OpenTibiaUnity.GameManager.onRequestOwnOffer.Invoke(creatureName, objects);
         }
@@ -79,7 +80,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
             int size = message.ReadUnsignedByte();
             for (int i = 0; i < size; i++)
-                objects.Add(ReadObjectInstance(message));
+                objects.Add(ProtocolGameExtentions.ReadObjectInstance(message));
 
             OpenTibiaUnity.GameManager.onRequestCounterOffer.Invoke(creatureName, objects);
         }

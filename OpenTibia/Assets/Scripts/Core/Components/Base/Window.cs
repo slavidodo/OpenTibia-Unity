@@ -15,17 +15,27 @@ namespace OpenTibiaUnity.Core.Components.Base
 
         protected bool _changingVisibility = false;
 
-        public void Open(bool resetPosition = true) {
+        public void OpenWithoutNotify(bool resetPosition = true) {
             Show();
             LockToOverlay();
             Select();
-            
+
+            if (resetPosition)
+                ResetLocalPosition();
+        }
+
+        public void Open(bool resetPosition = true) {
+            OpenWithoutNotify(resetPosition);
             onOpened.Invoke();
         }
 
-        public override void Close() {
+        public override void CloseWithoutNotify() {
             Hide();
             UnlockFromOverlay();
+        }
+
+        public override void Close() {
+            CloseWithoutNotify();
             onClosed.Invoke();
         }
 

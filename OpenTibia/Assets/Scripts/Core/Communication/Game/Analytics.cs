@@ -1,7 +1,7 @@
 ﻿
 namespace OpenTibiaUnity.Core.Communication.Game
 {
-    public partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame
     {
         private void ParseClientCheck(Internal.CommunicationStream message) {
             // TODO
@@ -24,7 +24,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseItemLooted(Internal.CommunicationStream message) {
-            var @object = ReadObjectInstance(message);
+            var @object = ProtocolGameExtentions.ReadObjectInstance(message);
             string name = message.ReadString();
         }
 
@@ -48,10 +48,10 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
         public void ParseKillTracking(Internal.CommunicationStream message) {
             string name = message.ReadString();
-            var outfit = ReadCreatureOutfit(message);
+            var outfit = ProtocolGameExtentions.ReadCreatureOutfit(message);
             int lootCount = message.ReadUnsignedByte();
             for (int i = 0; i < lootCount; i++) {
-                var @object = ReadObjectInstance(message);
+                var @object = ProtocolGameExtentions.ReadObjectInstance(message);
             }
         }
     }

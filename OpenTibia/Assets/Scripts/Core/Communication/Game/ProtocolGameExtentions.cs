@@ -1,13 +1,31 @@
-﻿
+﻿using OpenTibiaUnity.Core.Appearances;
+using OpenTibiaUnity.Core.Communication.Internal;
+using OpenTibiaUnity.Core.Creatures;
+using OpenTibiaUnity.Core.MiniMap;
+using OpenTibiaUnity.Core.WorldMap;
+using UnityEngine;
+
 namespace OpenTibiaUnity.Core.Communication.Game
 {
-    using AppearanceInstance = Appearances.AppearanceInstance;
-    using ObjectInstance = Appearances.ObjectInstance;
-    using OutfitInstance = Appearances.OutfitInstance;
-
-    public partial class ProtocolGame : Internal.Protocol
+    public static class ProtocolGameExtentions
     {
-        private AppearanceInstance ReadCreatureOutfit(Internal.CommunicationStream message, AppearanceInstance instance = null) {
+        private static AppearanceStorage AppearanceStorage {
+            get => OpenTibiaUnity.AppearanceStorage;
+        }
+        private static CreatureStorage CreatureStorage {
+            get => OpenTibiaUnity.CreatureStorage;
+        }
+        private static MiniMapStorage MiniMapStorage {
+            get => OpenTibiaUnity.MiniMapStorage;
+        }
+        private static WorldMapStorage WorldMapStorage {
+            get => OpenTibiaUnity.WorldMapStorage;
+        }
+        private static Player Player {
+            get => OpenTibiaUnity.Player;
+        }
+
+        public static AppearanceInstance ReadCreatureOutfit(CommunicationStream message, AppearanceInstance instance = null) {
             int outfitId;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameOutfitIdU16))
                 outfitId = message.ReadUnsignedShort();
@@ -24,7 +42,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerAddons))
                     addonsFlags = message.ReadUnsignedByte();
 
-                OutfitInstance outfitInstance = instance as OutfitInstance;
+                var outfitInstance = instance as OutfitInstance;
                 if (!!outfitInstance) {
                     outfitInstance.UpdateProperties(headColor, torsoColor, legsColor, detailColor, addonsFlags);
                     return instance;
@@ -34,7 +52,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             }
 
             uint objectId = message.ReadUnsignedShort();
-            ObjectInstance objectInstance = instance as ObjectInstance;
+            var objectInstance = instance as ObjectInstance;
             if (!!objectInstance && objectInstance.Id == objectId)
                 return objectInstance;
 
@@ -47,10 +65,10 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return AppearanceStorage.CreateObjectInstance(objectId, 0);
         }
 
-        private AppearanceInstance ReadMountOutfit(Internal.CommunicationStream message, AppearanceInstance instance = null) {
+        public static AppearanceInstance ReadMountOutfit(CommunicationStream message, AppearanceInstance instance = null) {
             uint outfitId = message.ReadUnsignedShort();
 
-            OutfitInstance outfitInstance = instance as OutfitInstance;
+            var outfitInstance = instance as OutfitInstance;
             if (!!outfitInstance && outfitInstance.Id == outfitId)
                 return outfitInstance;
 
@@ -59,10 +77,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
             return null;
         }
-        
-        private Creatures.Creature ReadCreatureInstance(Internal.CommunicationStream message, int type = -1,
-                    UnityEngine.Vector3Int? absolutePosition = null) {
 
+        public static Creature ReadCreatureInstance(CommunicationStream message, int type = -1, Vector3Int? absolutePosition = null) {
             if (type == -1)
                 type = message.ReadUnsignedShort();
 
@@ -71,7 +87,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
             var gameManager = OpenTibiaUnity.GameManager;
 
-            Creatures.Creature creature;
+            Creature creature;
             switch (type) {
                 case AppearanceInstance.UnknownCreature:
                 case AppearanceInstance.OutdatedCreature: {
@@ -79,7 +95,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                         uint removeId = message.ReadUnsignedInt();
                         uint newId = message.ReadUnsignedInt();
                         CreatureType creatureType;
-                        
+
                         if (gameManager.ClientVersion >= 910) {
                             creatureType = message.ReadEnum<CreatureType>();
                         } else {
@@ -90,11 +106,11 @@ namespace OpenTibiaUnity.Core.Communication.Game
                             else
                                 creatureType = CreatureType.NPC;
                         }
-                        
+
                         if (newId == Player.Id)
                             creature = Player;
                         else
-                            creature = new Creatures.Creature(newId);
+                            creature = new Creature(newId);
 
                         creature = CreatureStorage.ReplaceCreature(creature, removeId);
                         if (!creature)
@@ -103,7 +119,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                         creature.Type = creatureType;
                         if (gameManager.ClientVersion >= 1120)
                             creature.SetSummonerId(creature.IsSummon ? message.ReadUnsignedInt() : 0);
-                        
+
                         creature.Name = message.ReadString();
                     } else {
                         uint creatureId = message.ReadUnsignedInt();
@@ -148,7 +164,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                         if (gameManager.ClientVersion < 1185)
                             creature.NumberOfPvPHelpers = message.ReadUnsignedShort();
                     }
-                    
+
                     if (gameManager.ClientVersion >= 854)
                         creature.Unpassable = message.ReadUnsignedByte() != 0;
                     else
@@ -175,24 +191,24 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
             if (absolutePosition.HasValue)
                 creature.Position = absolutePosition.Value;
-            
+
             CreatureStorage.MarkOpponentVisible(creature, true);
             CreatureStorage.InvalidateOpponents();
             return creature;
         }
 
-        private ObjectInstance ReadObjectInstance(Internal.CommunicationStream message, int id = -1) {
+        public static ObjectInstance ReadObjectInstance(CommunicationStream message, int id = -1) {
             if (id == -1)
                 id = message.ReadUnsignedShort();
 
             if (id == 0)
                 return null;
             else if (id <= AppearanceInstance.Creature)
-                throw new System.Exception("ProtocolGameUtility.ReadObjectInstance: Invalid type (id = " + id + ")");
+                throw new System.Exception("ProtocolGameExtentions.ReadObjectInstance: Invalid type (id = " + id + ")");
 
             var @object = AppearanceStorage.CreateObjectInstance((uint)id, 0);
             if (!@object)
-                throw new System.Exception("ProtocolGameUtility.ReadObjectInstance: Invalid instance with id " + id);
+                throw new System.Exception("ProtocolGameExtentions.ReadObjectInstance: Invalid instance with id " + id);
 
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameObjectMarks))
                 @object.Marks.SetMark(MarkType.Permenant, message.ReadUnsignedByte());
@@ -217,8 +233,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return @object;
         }
 
-        private int ReadField(Internal.CommunicationStream message, int x, int y, int z) {
-            var mapPosition = new UnityEngine.Vector3Int(x, y, z);
+        public static int ReadField(CommunicationStream message, int x, int y, int z) {
+            var mapPosition = new Vector3Int(x, y, z);
             var absolutePosition = WorldMapStorage.ToAbsolute(mapPosition);
 
             int typeOrId;
@@ -249,7 +265,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     if (stackPos < Constants.MapSizeW)
                         WorldMapStorage.AppendObject(mapPosition, @object);
                     else
-                        throw new System.Exception("ProtocolGameUtility.ReadField: Expected creatures but received regular object.");
+                        throw new System.Exception("ProtocolGameExtentions.ReadField: Expected creatures but received regular object.");
                 }
 
                 stackPos++;
@@ -258,8 +274,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return typeOrId - 65280;
         }
 
-        private int ReadArea(Internal.CommunicationStream message, int startx, int starty, int endx, int endy) {
-            UnityEngine.Vector3Int position = WorldMapStorage.Position;
+        public static int ReadArea(CommunicationStream message, int startx, int starty, int endx, int endy) {
+            var position = WorldMapStorage.Position;
 
             int z, endz, zstep;
             if (position.z <= Constants.GroundLayer) {
@@ -271,19 +287,19 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 endz = System.Math.Max(-1, position.z - Constants.MapMaxZ + 1);
                 zstep = -1;
             }
-            
+
             int skip = 0;
             for (; z != endz; z += zstep) {
                 for (int x = startx; x <= endx; x++) {
-                    for (int y = starty;  y <= endy; y++) {
+                    for (int y = starty; y <= endy; y++) {
                         if (skip > 0)
                             skip--;
                         else
                             skip = ReadField(message, x, y, z);
-                        
-                        UnityEngine.Vector3Int mapPosition = new UnityEngine.Vector3Int(x, y, z);
-                        UnityEngine.Vector3Int absolutePosition = WorldMapStorage.ToAbsolute(mapPosition);
-                        
+
+                        var mapPosition = new Vector3Int(x, y, z);
+                        var absolutePosition = WorldMapStorage.ToAbsolute(mapPosition);
+
                         if (absolutePosition.z == MiniMapStorage.PositionZ) {
                             WorldMapStorage.UpdateMiniMap(mapPosition);
                             uint color = WorldMapStorage.GetMiniMapColour(mapPosition);
@@ -297,7 +313,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             return skip;
         }
 
-        private int ReadFloor(Internal.CommunicationStream message, int z, int skip) {
+        public static int ReadFloor(CommunicationStream message, int z, int skip) {
             for (int x = 0; x <= Constants.MapSizeX - 1; x++) {
                 for (int y = 0; y <= Constants.MapSizeY - 1; y++) {
                     if (skip > 0)
@@ -305,8 +321,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     else
                         skip = ReadField(message, x, y, z);
 
-                    UnityEngine.Vector3Int mapPosition = new UnityEngine.Vector3Int(x, y, z);
-                    UnityEngine.Vector3Int absolutePosition = WorldMapStorage.ToAbsolute(mapPosition);
+                    var mapPosition = new Vector3Int(x, y, z);
+                    var absolutePosition = WorldMapStorage.ToAbsolute(mapPosition);
 
                     if (absolutePosition.z == MiniMapStorage.PositionZ) {
                         WorldMapStorage.UpdateMiniMap(mapPosition);

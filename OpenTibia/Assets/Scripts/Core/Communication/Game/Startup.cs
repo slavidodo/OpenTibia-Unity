@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Communication.Game
 {
-    public partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame
     {
         public ushort BeatDuration = 0;
 

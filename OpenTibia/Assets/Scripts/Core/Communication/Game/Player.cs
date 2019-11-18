@@ -19,7 +19,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
         public uint StoreOfferId;
     }
     
-    public partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame
     {
         private void ParseDeath(Internal.CommunicationStream message) {
             var deathType = DeathType.DeathTypeRegular;
@@ -54,7 +54,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
         private void ParseSetInventory(Internal.CommunicationStream message) {
             var slot = message.ReadEnum<ClothSlots>();
-            var @object = ReadObjectInstance(message);
+            var @object = ProtocolGameExtentions.ReadObjectInstance(message);
             
             OpenTibiaUnity.ContainerStorage.BodyContainerView.SetObject(slot, @object);
         }
@@ -360,10 +360,10 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParseOutfitDialog(Internal.CommunicationStream message) {
-            var outfit = ReadCreatureOutfit(message);
+            var outfit = ProtocolGameExtentions.ReadCreatureOutfit(message);
             Appearances.AppearanceInstance mountOutfit = null;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerMounts))
-                mountOutfit = ReadMountOutfit(message);
+                mountOutfit = ProtocolGameExtentions.ReadMountOutfit(message);
 
             var outfitList = new List<ProtocolOutfit>();
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameNewOutfitProtocol)) {

@@ -1,13 +1,13 @@
 ﻿namespace OpenTibiaUnity.Core.Communication.Game
 {
-    public partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame
     {
         private void ParseInspectionList(Internal.CommunicationStream message) {
             bool isPlayer = message.ReadBoolean();
 
             int size = message.ReadUnsignedByte();
             for (int i = 0; i < size; i++) {
-                var @object = ReadObjectInstance(message);
+                var @object = ProtocolGameExtentions.ReadObjectInstance(message);
                 if (isPlayer) {
                     var slot = message.ReadEnum<ClothSlots>();
                 }
@@ -26,7 +26,7 @@
 
             if (isPlayer) {
                 string playerName = message.ReadString();
-                var outfit = ReadCreatureOutfit(message);
+                var outfit = ProtocolGameExtentions.ReadCreatureOutfit(message);
 
                 int details = message.ReadUnsignedByte();
                 for (int j = 0; j < details; j++) {

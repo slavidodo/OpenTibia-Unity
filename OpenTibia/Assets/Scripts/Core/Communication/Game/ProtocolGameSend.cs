@@ -1,10 +1,10 @@
-﻿using OpenTibiaUnity.Assets.Scripts.Core.Communication.Attributes;
+﻿using OpenTibiaUnity.Core.Communication.Attributes;
 using OpenTibiaUnity.Core.Communication.Types;
 using System.Collections.Generic;
 
 namespace OpenTibiaUnity.Core.Communication.Game
 {
-    public partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame
     {
         [ClientFeature(GameFeature.GameWorldProxyIdentification)]
         private void SendProxyWorldNameIdentification() {

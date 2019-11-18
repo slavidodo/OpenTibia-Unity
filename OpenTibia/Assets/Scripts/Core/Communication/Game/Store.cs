@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace OpenTibiaUnity.Core.Communication.Game
 {
-    public partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame
     {
         private void ParseStoreButtonIndicators(Internal.CommunicationStream message) {
             message.ReadBoolean(); // sale on items?

@@ -89,7 +89,8 @@ namespace OpenTibiaUnity.Core.Components
         }
 
         protected override void OnDestroy() {
-            OpenTibiaUnity.InputHandler.RemoveKeyDownListener(OnKeyDown);
+            if (OpenTibiaUnity.InputHandler != null)
+                OpenTibiaUnity.InputHandler.RemoveKeyDownListener(OnKeyDown);
         }
 
         private void OnKeyDown(Event e, bool _) {

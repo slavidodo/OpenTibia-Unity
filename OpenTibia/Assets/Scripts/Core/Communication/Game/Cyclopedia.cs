@@ -1,6 +1,6 @@
 ﻿namespace OpenTibiaUnity.Core.Communication.Game
 {
-    public partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame
     {
         private void ParseMonsterCyclopedia(Internal.CommunicationStream message) {
             int count = message.ReadUnsignedShort();
@@ -291,7 +291,7 @@
             string characterName = message.ReadString();
             string vocation = message.ReadString();
             ushort level = message.ReadUnsignedShort();
-            var outfit = ReadCreatureOutfit(message);
+            var outfit = ProtocolGameExtentions.ReadCreatureOutfit(message);
         }
 
         private void ReadCyclopediaCharacterInfoGeneralStats(Internal.CommunicationStream message) {

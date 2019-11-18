@@ -31,7 +31,7 @@ namespace OpenTibiaUnity.Core.Cyclopedia
         public static uint GreyColor = 0xAAAAAA;
         public static uint WhiteColor = 0xFFFFFF;
 
-        private Dictionary<ushort, uint> _objectMarketAveragePrices;
+        private Dictionary<ushort, uint> _objectMarketAveragePrices = new Dictionary<ushort, uint>();
 
         public uint GetObjectColor(ushort objectId) {
             var lootValue = GetObjectLootValue(objectId);

@@ -2,11 +2,11 @@
 
 namespace OpenTibiaUnity.Core.Communication.Game
 {
-    public partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame
     {
         private void ParseOpenContainer(Internal.CommunicationStream message) {
             byte containerId = message.ReadUnsignedByte();
-            var objectIcon = ReadObjectInstance(message);
+            var objectIcon = ProtocolGameExtentions.ReadObjectInstance(message);
             string name = message.ReadString();
             byte nOfSlotsPerPage = message.ReadUnsignedByte(); // capacity of shown view
             bool isSubContainer = message.ReadBoolean();
@@ -45,7 +45,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                                     nOfTotalObjects - nOfContentObjects, indexOfFirstObject, nOfContentObjects);
 
             for (int i = 0; i < nOfContentObjects; i++)
-                containerView.AddObject(indexOfFirstObject + i, ReadObjectInstance(message));
+                containerView.AddObject(indexOfFirstObject + i, ProtocolGameExtentions.ReadObjectInstance(message));
         }
 
         private void ParseCloseContainer(Internal.CommunicationStream message) {
@@ -58,7 +58,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             ushort slot = 0;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameContainerPagination))
                 slot = message.ReadUnsignedShort();
-            var @object = ReadObjectInstance(message);
+            var @object = ProtocolGameExtentions.ReadObjectInstance(message);
 
             var containerView = ContainerStorage.GetContainerView(containerId);
             if (!!containerView)
@@ -72,7 +72,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 slot = message.ReadUnsignedShort();
             else
                 slot = message.ReadUnsignedByte();
-            var @object = ReadObjectInstance(message);
+            var @object = ProtocolGameExtentions.ReadObjectInstance(message);
 
             var containerView = ContainerStorage.GetContainerView(containerId);
             if (!!containerView)
@@ -89,7 +89,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 ushort itemId = message.ReadUnsignedShort();
                 
                 if (itemId != 0)
-                    appendObject = ReadObjectInstance(message, itemId);
+                    appendObject = ProtocolGameExtentions.ReadObjectInstance(message, itemId);
             } else {
                 slot = message.ReadUnsignedByte();
             }

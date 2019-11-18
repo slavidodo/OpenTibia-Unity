@@ -218,6 +218,9 @@ namespace OpenTibiaUnity.Core
         private bool _showingQuitNotification = false;
 
         private void Awake() {
+            // setup basic utilities
+            Random.InitState(new System.DateTime().Millisecond);
+
             // setup static fields
             Instance = this;
             MainThread = Thread.CurrentThread;

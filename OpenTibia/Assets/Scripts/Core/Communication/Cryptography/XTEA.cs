@@ -1,4 +1,4 @@
-﻿using System;
+﻿using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Communication.Cryptography
 {
@@ -6,7 +6,6 @@ namespace OpenTibiaUnity.Core.Communication.Cryptography
     {
         public const int BlockSize = 2 * sizeof(uint);
 
-        Random _random = new Random();
         uint[] _key = new uint[4];
 
         public XTEA() {
@@ -14,10 +13,10 @@ namespace OpenTibiaUnity.Core.Communication.Cryptography
         }
 
         private void GenerateKey() {
-            _key[0] = (uint)_random.Next();
-            _key[1] = (uint)_random.Next();
-            _key[2] = (uint)_random.Next();
-            _key[3] = (uint)_random.Next();
+            _key[0] = (uint)Random.Range(int.MinValue, int.MaxValue);
+            _key[1] = (uint)Random.Range(int.MinValue, int.MaxValue);
+            _key[2] = (uint)Random.Range(int.MinValue, int.MaxValue);
+            _key[3] = (uint)Random.Range(int.MinValue, int.MaxValue);
         }
 
         public void WriteKey(Internal.CommunicationStream message) {
@@ -28,20 +27,22 @@ namespace OpenTibiaUnity.Core.Communication.Cryptography
         }
 
         public int Encrypt(Internal.CommunicationStream message, int offset = 0, int length = int.MaxValue) {
-            length = Math.Min(length, (int)message.Length - offset);
+            length = Mathf.Min(length, (int)message.Length - offset);
             message.Position = offset + length;
 
-            int encryptedLength = (int)(Math.Floor((length + BlockSize - 1) / (double)BlockSize) * BlockSize);
+            int encryptedLength = (int)(Mathf.Floor((length + BlockSize - 1f) / BlockSize) * BlockSize);
             if (encryptedLength > length) {
                 byte[] tmp = new byte[encryptedLength - length];
-                _random.NextBytes(tmp);
+                for (int i = 0; i < tmp.Length; i++)
+                    tmp[i] = (byte)Random.Range(0, 255);
+
                 message.Write(tmp, 0, tmp.Length);
                 length = encryptedLength;
             }
 
-            int i = offset;
-            while (i < offset + length) {
-                message.Position = i;
+            int s = offset;
+            while (s < offset + length) {
+                message.Position = s;
                 uint v0 = message.ReadUnsignedInt();
                 uint v1 = message.ReadUnsignedInt();
                 uint delta = 0x61C88647;
@@ -56,14 +57,14 @@ namespace OpenTibiaUnity.Core.Communication.Cryptography
                 message.WriteUnsignedInt(v0);
                 message.WriteUnsignedInt(v1);
 
-                i += BlockSize;
+                s += BlockSize;
             }
 
             return length;
         }
 
         public int Decrypt(Internal.CommunicationStream message, int offset = 0, int length = int.MaxValue) {
-            length = Math.Min(length, (int)message.Length - offset);
+            length = Mathf.Min(length, (int)message.Length - offset);
             length -= length % BlockSize;
             int i = offset;
             while (i < offset + length) {
@@ -82,7 +83,7 @@ namespace OpenTibiaUnity.Core.Communication.Cryptography
                 message.WriteUnsignedInt(v1);
                 i += BlockSize;
             }
-            
+
             message.Position = offset;
             int payloadLength = message.ReadUnsignedShort();
             int messageLength = payloadLength + Internal.Connection.PacketLengthSize;

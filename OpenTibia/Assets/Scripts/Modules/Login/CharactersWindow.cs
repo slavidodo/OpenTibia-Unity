@@ -182,7 +182,7 @@ namespace OpenTibiaUnity.Modules.Login
                 protocolGame.Disconnect();
 
             OpenTibiaUnity.ProtocolGame = null;
-            PopupOk("Sorry", message);
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupOk("Sorry", message));
         }
 
         protected void OnProtocolGameLoginError(string message) {
@@ -191,11 +191,11 @@ namespace OpenTibiaUnity.Modules.Login
             protocolGame.Disconnect();
             OpenTibiaUnity.ProtocolGame = null;
 
-            PopupOk("Sorry", message);
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupOk("Sorry", message));
         }
 
         protected void OnProtocolGameLoginAdvice(string advice) {
-            PopupOk("For your information", advice);
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupOk("For your information", advice));
             _popupIsAdvice = true;
         }
 
@@ -206,7 +206,7 @@ namespace OpenTibiaUnity.Modules.Login
             OpenTibiaUnity.ProtocolGame = null;
 
             // TODO show a waiting time widget & then reconnect //
-            PopupOk("Sorry", message);
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => PopupOk("Sorry", message));
         }
 
         protected void OnGameStart() {
@@ -425,7 +425,7 @@ namespace OpenTibiaUnity.Modules.Login
         }
 
         protected async void DoEnterGame(string characterName, string worldAddress, string worldName, int worldPort) {
-            Close();
+            CloseWithoutNotify();
 
             var gameManager = OpenTibiaUnity.GameManager;
             if (!gameManager.IsLoadingClientAssets && !gameManager.HasLoadedClientAssets) {

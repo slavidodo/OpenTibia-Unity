@@ -15,7 +15,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
         Game,
     }
 
-    public partial class ProtocolGame : Internal.Protocol {
+    public partial class ProtocolGame : Internal.Protocol
+    {
         public class ConnectionError : UnityEvent<string, bool> {}
         public class LoginErrorEvent : UnityEvent<string> {}
         public class LoginAdviceEvent : UnityEvent<string> {}

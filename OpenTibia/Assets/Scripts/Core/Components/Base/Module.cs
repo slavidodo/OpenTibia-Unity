@@ -20,6 +20,10 @@
                 OpenTibiaUnity.GameManager.UnregisterModule(this);
         }
 
+        public virtual void CloseWithoutNotify() {
+
+        }
+
         public virtual void Close() {
 
         }

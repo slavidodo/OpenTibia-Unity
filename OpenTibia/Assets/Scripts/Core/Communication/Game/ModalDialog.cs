@@ -1,6 +1,6 @@
 ﻿namespace OpenTibiaUnity.Core.Communication.Game
 {
-    public partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame
     {
         private void ParseShowModalDialog(Internal.CommunicationStream message) {
             uint windowId = message.ReadUnsignedInt();

@@ -1,6 +1,6 @@
 ﻿namespace OpenTibiaUnity.Core.Communication.Game
 {
-    public partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame
     {
         private UnityEngine.Vector3Int _lastSnapback = UnityEngine.Vector3Int.zero;
         private int _snapbackCount = 0;
@@ -14,8 +14,8 @@
             WorldMapStorage.ResetMap();
             WorldMapStorage.InvalidateOnscreenMessages();
             WorldMapStorage.Position = position;
-            
-            ReadArea(message, 0, 0, Constants.MapSizeX - 1, Constants.MapSizeY - 1);
+
+            ProtocolGameExtentions.ReadArea(message, 0, 0, Constants.MapSizeX - 1, Constants.MapSizeY - 1);
             WorldMapStorage.Valid = true;
             WorldMapStorage.CacheRefresh = true;
         }
@@ -28,7 +28,7 @@
             MiniMapStorage.Position = position;
             WorldMapStorage.ScrollMap(0, 1);
             WorldMapStorage.InvalidateOnscreenMessages();
-            ReadArea(message, 0, 0, Constants.MapSizeX - 1, 0);
+            ProtocolGameExtentions.ReadArea(message, 0, 0, Constants.MapSizeX - 1, 0);
             WorldMapStorage.CacheRefresh = true;
         }
 
@@ -40,7 +40,7 @@
             MiniMapStorage.Position = position;
             WorldMapStorage.ScrollMap(-1, 0);
             WorldMapStorage.InvalidateOnscreenMessages();
-            ReadArea(message, Constants.MapSizeX - 1, 0, Constants.MapSizeX - 1, Constants.MapSizeY - 1);
+            ProtocolGameExtentions.ReadArea(message, Constants.MapSizeX - 1, 0, Constants.MapSizeX - 1, Constants.MapSizeY - 1);
             WorldMapStorage.CacheRefresh = true;
         }
 
@@ -52,7 +52,7 @@
             MiniMapStorage.Position = position;
             WorldMapStorage.ScrollMap(0, -1);
             WorldMapStorage.InvalidateOnscreenMessages();
-            ReadArea(message, 0, Constants.MapSizeY - 1, Constants.MapSizeX - 1, Constants.MapSizeY - 1);
+            ProtocolGameExtentions.ReadArea(message, 0, Constants.MapSizeY - 1, Constants.MapSizeX - 1, Constants.MapSizeY - 1);
             WorldMapStorage.CacheRefresh = true;
         }
 
@@ -64,7 +64,7 @@
             MiniMapStorage.Position = position;
             WorldMapStorage.ScrollMap(1, 0);
             WorldMapStorage.InvalidateOnscreenMessages();
-            ReadArea(message, 0, 0, 0, Constants.MapSizeY - 1);
+            ProtocolGameExtentions.ReadArea(message, 0, 0, 0, Constants.MapSizeY - 1);
             WorldMapStorage.CacheRefresh = true;
         }
 
@@ -75,7 +75,7 @@
 
             var mapPosition = WorldMapStorage.ToMap(absolutePosition);
             WorldMapStorage.ResetField(mapPosition, true, false);
-            ReadField(message, mapPosition.x, mapPosition.y, mapPosition.z);
+            ProtocolGameExtentions.ReadField(message, mapPosition.x, mapPosition.y, mapPosition.z);
 
             if (absolutePosition.z == MiniMapStorage.PositionZ) {
                 WorldMapStorage.UpdateMiniMap(mapPosition);
@@ -101,13 +101,13 @@
             
             Appearances.ObjectInstance @object;
             if (typeOrId == Appearances.AppearanceInstance.Creature || typeOrId == Appearances.AppearanceInstance.OutdatedCreature || typeOrId == Appearances.AppearanceInstance.UnknownCreature) {
-                var creature = ReadCreatureInstance(message, typeOrId, absolutePosition);
+                var creature = ProtocolGameExtentions.ReadCreatureInstance(message, typeOrId, absolutePosition);
                 if (creature.Id == Player.Id)
                     Player.StopAutowalk(true);
                 
                 @object = AppearanceStorage.CreateObjectInstance(Appearances.AppearanceInstance.Creature, creature.Id);
             } else {
-                @object = ReadObjectInstance(message, typeOrId);
+                @object = ProtocolGameExtentions.ReadObjectInstance(message, typeOrId);
             }
 
             if (stackPos == 255) {
@@ -157,10 +157,10 @@
                 if (typeOrId == Appearances.AppearanceInstance.UnknownCreature
                         || typeOrId == Appearances.AppearanceInstance.OutdatedCreature
                         || typeOrId == Appearances.AppearanceInstance.Creature) {
-                    creature = ReadCreatureInstance(message, typeOrId, absolutePosition);
+                    creature = ProtocolGameExtentions.ReadCreatureInstance(message, typeOrId, absolutePosition);
                     objectInstance = AppearanceStorage.CreateObjectInstance(Appearances.AppearanceInstance.Creature, creature.Id);
                 } else {
-                    objectInstance = ReadObjectInstance(message, typeOrId);
+                    objectInstance = ProtocolGameExtentions.ReadObjectInstance(message, typeOrId);
                 }
 
                 WorldMapStorage.ChangeObject(mapPosition, stackPos, objectInstance);
@@ -180,7 +180,7 @@
                 int otherType = message.ReadUnsignedShort();
                 if (otherType == Appearances.AppearanceInstance.Creature || otherType == Appearances.AppearanceInstance.OutdatedCreature
                     || otherType == Appearances.AppearanceInstance.UnknownCreature) {
-                    creature = ReadCreatureInstance(message, otherType);
+                    creature = ProtocolGameExtentions.ReadCreatureInstance(message, otherType);
                 } else {
                     throw new System.Exception("ProtocolGame.ParseChangeOnMap: Received object of type " + otherType + " when a creature was expected.");
                 }
@@ -374,12 +374,12 @@
 
             if (position.z > Constants.GroundLayer) {
                 WorldMapStorage.ScrollMap(0, 0, -1);
-                ReadFloor(message, 2 * Constants.UndergroundLayer, 0);
+                ProtocolGameExtentions.ReadFloor(message, 2 * Constants.UndergroundLayer, 0);
             } else if (position.z == Constants.GroundLayer) {
                 WorldMapStorage.ScrollMap(0, 0, -(Constants.UndergroundLayer + 1));
                 int skip = 0;
                 for (int zposition = Constants.UndergroundLayer; zposition <= Constants.GroundLayer; zposition++)
-                    skip = ReadFloor(message, zposition, skip);
+                    skip = ProtocolGameExtentions.ReadFloor(message, zposition, skip);
             }
 
             Player.StopAutowalk(true);
@@ -412,13 +412,13 @@
             if (position.z > Constants.GroundLayer + 1) {
                 WorldMapStorage.ScrollMap(0, 0, 1);
                 if (position.z <= Constants.MapMaxZ - Constants.UndergroundLayer) {
-                    ReadFloor(message, 2 * Constants.UndergroundLayer, 0);
+                    ProtocolGameExtentions.ReadFloor(message, 2 * Constants.UndergroundLayer, 0);
                 }
             } else if (position.z == Constants.GroundLayer + 1) {
                 WorldMapStorage.ScrollMap(0, 0, Constants.UndergroundLayer + 1);
                 int skip = 0;
                 for (int zposition = Constants.UndergroundLayer; zposition >= 0; zposition--)
-                    skip = ReadFloor(message, zposition, skip);
+                    skip = ProtocolGameExtentions.ReadFloor(message, zposition, skip);
             }
 
             Player.StopAutowalk(true);

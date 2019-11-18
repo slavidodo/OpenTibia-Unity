@@ -155,7 +155,6 @@ namespace OpenTibiaUnity.Core.Communication.Login
                 message.WriteUnsignedByte(0x00);
             
             int payloadStart = (int)message.Position;
-            var random = new System.Random();
             if (gameManager.GetFeature(GameFeature.GameLoginPacketEncryption)) {
                 message.WriteUnsignedByte(0); // first byte must be zero
 

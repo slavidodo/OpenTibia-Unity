@@ -89,8 +89,8 @@ namespace OpenTibiaUnity.Core.Communication.Internal
 
                 if (!_packetReader.PreparePacket())
                     OnConnectionError("Protocol.OnConnectionReceived: Failed to prepare packet.");
-            } catch (Exception) {
-                OnConnectionError("Protocol.OnConnectionReceived: Failed to prepare packet.");
+            } catch (Exception e) {
+                OnConnectionError($"Protocol.OnConnectionReceived: Failed to prepare packet ({e.Message}).");
             }
         }
         protected virtual void OnConnectionSent(CommunicationStream stream) { }

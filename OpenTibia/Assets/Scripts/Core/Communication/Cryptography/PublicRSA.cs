@@ -1,7 +1,7 @@
 ﻿using Org.BouncyCastle.Crypto.Engines;
 using Org.BouncyCastle.Crypto.Parameters;
 using Org.BouncyCastle.Math;
-using System;
+using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Communication.Cryptography
 {
@@ -17,7 +17,6 @@ namespace OpenTibiaUnity.Core.Communication.Cryptography
         
         private static readonly RsaEngine OpenTibiaEncryptEngine;
         private static readonly RsaEngine RealTibiaEncryptEngine;
-        private static readonly Random s_Random;
 
         static PublicRSA() {
             var openTibiaEncryptKey = new RsaKeyParameters(false, new BigInteger(OpenTibiaM), new BigInteger(OpenTibiaE));
@@ -27,18 +26,17 @@ namespace OpenTibiaUnity.Core.Communication.Cryptography
             var realTibiaEncruptKey = new RsaKeyParameters(false, new BigInteger(RealTibiaM), new BigInteger(RealTibiaE));
             RealTibiaEncryptEngine = new RsaEngine();
             RealTibiaEncryptEngine.Init(true, realTibiaEncruptKey);
-
-            s_Random = new Random();
         }
 
         public static void EncryptMessage(Internal.CommunicationStream stream, int payloadStart, int blockSize) {
-            blockSize = Math.Min(blockSize, (int)stream.Length - payloadStart);
+            blockSize = Mathf.Min(blockSize, (int)stream.Length - payloadStart);
             stream.Position = payloadStart + blockSize;
 
-            int length = (int)(Math.Floor((blockSize + RSABlockSize - 1D) / RSABlockSize) * RSABlockSize);
+            int length = (int)(Mathf.Floor((blockSize + RSABlockSize - 1f) / RSABlockSize) * RSABlockSize);
             if (length > blockSize) {
                 var tmp = new byte[length - blockSize];
-                s_Random.NextBytes(tmp);
+                for (int i = 0; i < tmp.Length; i++)
+                    tmp[i] = (byte)Random.Range(0, 255);
                 stream.Write(tmp, 0, tmp.Length);
                 blockSize = length;
             }

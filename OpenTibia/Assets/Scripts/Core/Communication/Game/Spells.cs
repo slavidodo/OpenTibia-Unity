@@ -1,6 +1,6 @@
 ﻿namespace OpenTibiaUnity.Core.Communication.Game
 {
-    public partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame
     {
         private void ParseSpellDelay(Internal.CommunicationStream message) {
             byte spellId = message.ReadUnsignedByte();

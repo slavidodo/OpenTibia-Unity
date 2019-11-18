@@ -35,7 +35,7 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameProtocolSequenceNumber)) {
                 uint recvCompression = _inputStream.ReadUnsignedInt();
                 payloadOffset = (int)_inputStream.Position;
-                
+
                 _compressed = (recvCompression & 1U << 31) != 0;
             } else if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameProtocolChecksum)) {
                 var recvChecksum = _inputStream.ReadUnsignedInt();

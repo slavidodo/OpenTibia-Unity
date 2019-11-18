@@ -1,6 +1,6 @@
 ﻿namespace OpenTibiaUnity.Core.Communication.Game
 {
-    public partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame
     {
         private void ParsePreyFreeListRerollAvailability(Internal.CommunicationStream message) {
             byte slot = message.ReadUnsignedByte();
@@ -27,7 +27,7 @@
 
                 case PreySlotStates.Active: {
                     string monsterName = message.ReadString();
-                    var monsterOutfit = ReadCreatureOutfit(message);
+                    var monsterOutfit = ProtocolGameExtentions.ReadCreatureOutfit(message);
                     var bonusType = message.ReadEnum<PreyBonusTypes>();
                     int bonusValue = message.ReadUnsignedShort();
                     int bonusGrade = message.ReadUnsignedByte();
@@ -39,7 +39,7 @@
                     byte size = message.ReadUnsignedByte();
                     for (int i = 0; i < size; i++) {
                         string monsterName = message.ReadString();
-                        var monsterOutfit = ReadCreatureOutfit(message);
+                        var monsterOutfit = ProtocolGameExtentions.ReadCreatureOutfit(message);
                     }
                     break;
                 }
@@ -51,7 +51,7 @@
                     byte size = message.ReadUnsignedByte();
                     for (int i = 0; i < size; i++) {
                         string monsterName = message.ReadString();
-                        var monsterOutfit = ReadCreatureOutfit(message);
+                        var monsterOutfit = ProtocolGameExtentions.ReadCreatureOutfit(message);
                     }
                     break;
                 }

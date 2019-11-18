@@ -2,7 +2,7 @@
 
 namespace OpenTibiaUnity.Core.Communication.Game
 {
-    public partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame
     {
         private void ParseAmbientLight(Internal.CommunicationStream message) {
             int intensity = message.ReadUnsignedByte();

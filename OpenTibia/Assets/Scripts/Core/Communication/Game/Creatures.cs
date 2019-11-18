@@ -2,7 +2,7 @@
 
 namespace OpenTibiaUnity.Core.Communication.Game
 {
-    public partial class ProtocolGame : Internal.Protocol
+    public partial class ProtocolGame
     {
         private void ParseCreatureMark(Internal.CommunicationStream message) {
             uint creatureId = message.ReadUnsignedInt();
@@ -60,13 +60,13 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
         private void ParseCreatureOutfit(Internal.CommunicationStream message) {
             uint creatureId = message.ReadUnsignedInt();
-            var outfit = ReadCreatureOutfit(message);
+            var outfit = ProtocolGameExtentions.ReadCreatureOutfit(message);
             
             var creature = CreatureStorage.GetCreature(creatureId);
             if (!!creature) {
                 creature.Outfit = outfit;
                 if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GamePlayerMounts))
-                    creature.MountOutfit = ReadMountOutfit(message, creature.MountOutfit);
+                    creature.MountOutfit = ProtocolGameExtentions.ReadMountOutfit(message, creature.MountOutfit);
             }/*else {
                 throw new System.Exception("ProtocolGame.ParseCreatureOutfit: Unknown creature id: " + creatureId);
             }*/
