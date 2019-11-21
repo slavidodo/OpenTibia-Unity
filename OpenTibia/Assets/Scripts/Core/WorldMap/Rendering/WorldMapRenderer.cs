@@ -201,8 +201,8 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 
             if (OptionStorage.ShowLightEffects) {
                 var lightmapMesh = _lightmapRenderer.CreateLightmap();
-                var position = (Constants.FieldSize / 2) * ScreenZoom;
-                var scale = screenSize / new Vector2(Constants.MapSizeX, -Constants.MapSizeY);
+                var position = new Vector3(Constants.FieldSize / 2, Constants.FieldSize / 2, 0);
+                var scale = new Vector2(Constants.FieldSize, -Constants.FieldSize);
                 var transformation = Matrix4x4.TRS(position, Quaternion.Euler(180, 0, 0), scale);
                 commandBuffer.DrawMesh(lightmapMesh, transformation, OpenTibiaUnity.GameManager.LightmapMaterial);
             }
@@ -295,6 +295,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             
             bool aboveGround = Player.Position.z <= 7;
             int brightness = aboveGround ? WorldMapStorage.AmbientCurrentBrightness : 0;
+            float levelSeparator = OptionStorage.FixedLightLevelSeparator / 100f;
 
             for (int x = 0; x < Constants.MapSizeX; x++) {
                 for (int y = 0; y < Constants.MapSizeY; y++) {
@@ -304,25 +305,24 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                     // todo; this shouldn't be called every frame unless light probes has changed
                     if (OptionStorage.ShowLightEffects) {
 #if DEBUG
-                        UnityEngine.Profiling.Profiler.BeginSample("Lightmesh reset");
+                        UnityEngine.Profiling.Profiler.BeginSample("Lightmesh Level-Separator");
 #endif
                         var colorIndex = _lightmapRenderer.ToColorIndex(x, y);
-                        if (z == _playerZPlane && z > 0)
-                            _lightmapRenderer[colorIndex] = Utils.Utility.MulColor32(_lightmapRenderer[colorIndex], OptionStorage.FixedLightLevelSeparator / 100f);
+                        if (z == _playerZPlane && z > 0) {
+                            var color32 = _lightmapRenderer[colorIndex];
+                            _lightmapRenderer[colorIndex] = Utils.Utility.MulColor32(color32, levelSeparator);
+                        }
 
                         Appearances.ObjectInstance @object;
                         if (z == 0 || (@object = field.ObjectsRenderer[0]) != null && @object.Type.IsGround) {
+                            var color = _lightmapRenderer[colorIndex];
                             _lightmapRenderer.SetFieldBrightness(x, y, brightness, aboveGround);
                             if (z > 0 && field.CacheTranslucent) {
-                                var color = _lightmapRenderer[colorIndex];
-                                color = Utils.Utility.MulColor32(color, OptionStorage.FixedLightLevelSeparator / 100f);
+                                color = Utils.Utility.MulColor32(color, levelSeparator);
                                 var alterColor = _lightmapRenderer[colorIndex];
-                                if (color.r < alterColor.r)
-                                    color.r = alterColor.r;
-                                if (color.g < alterColor.g)
-                                    color.g = alterColor.g;
-                                if (color.b < alterColor.b)
-                                    color.b = alterColor.b;
+                                if (color.r < alterColor.r) color.r = alterColor.r;
+                                if (color.g < alterColor.g) color.g = alterColor.g;
+                                if (color.b < alterColor.b) color.b = alterColor.b;
                                 _lightmapRenderer[colorIndex] = color;
                             }
                         }

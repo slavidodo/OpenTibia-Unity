@@ -5,8 +5,10 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 {
     public sealed class MeshBasedLightmapRenderer : LightmapRenderer
     {
+        private const int VertexCount = (Constants.MapSizeX + 1) * (Constants.MapSizeY + 1);
+
         private Mesh _lightMesh = new Mesh();
-        private Color32[] _colorData = new Color32[(Constants.MapSizeX + 1) * (Constants.MapSizeY + 1)];
+        private Color32[] _colorData = new Color32[VertexCount];
 
         public override Color32 this[int index] {
             get => _colorData[index];
@@ -21,30 +23,31 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         }
 
         private void CreateMeshBuffers() {
-            List<Vector3> verticies = new List<Vector3>((Constants.MapSizeX + 1) * (Constants.MapSizeY + 1));
+            var vertices = new List<Vector3>(VertexCount);
             for (int y = 0; y < Constants.MapSizeY + 1; y++) {
                 for (int x = 0; x < Constants.MapSizeX + 1; x++)
-                    verticies.Add(new Vector3(x, y));
+                    vertices.Add(new Vector3(x, y));
             }
 
-            List<int> indicies = new List<int>(Constants.MapSizeX * Constants.MapSizeY * 6);
+            var indices = new List<int>(Constants.MapSizeX * Constants.MapSizeY * 6);
             for (int y = 0; y < Constants.MapSizeY; y++) {
-                int row = y * (Constants.MapSizeX + 1);
+                int rowsize = Constants.MapSizeX + 1;
+                int row = y * rowsize;
                 for (int x = 0; x < Constants.MapSizeX; x++) {
                     int v0 = x + row;
                     int v1 = v0 + 1;
-                    int v2 = x + row + Constants.MapSizeX + 1;
+                    int v2 = v0 + rowsize;
                     int v3 = v2 + 1;
-
-                    indicies.AddRange(new int[] { v0, v1, v3, v0, v3, v2 });
+                    indices.AddRange(new int[] { v0, v1, v3, v0, v2, v3 });
                 }
             }
 
-            _lightMesh.vertices = verticies.ToArray();
-            _lightMesh.triangles = indicies.ToArray();
+            _lightMesh.vertices = vertices.ToArray();
+            _lightMesh.triangles = indices.ToArray();
         }
 
         public override Mesh CreateLightmap() {
+            // lerp inner colormaps
             for (int x = 0; x < Constants.MapSizeX + 1; x++)
                 _colorData[x] = _colorData[x + Constants.MapSizeX + 1];
 
@@ -64,13 +67,12 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             if (x < 0 || x > Constants.MapSizeX || y < 0 || y > Constants.MapSizeY || brightness <= 0)
                 return;
 
-            int nrX = Mathf.Clamp(x - (int)brightness, 0, Constants.MapSizeX);
-            int prX = Mathf.Clamp(x + (int)brightness, 0, Constants.MapSizeX);
-            int nrY = Mathf.Clamp(y - (int)brightness, 0, Constants.MapSizeY);
-            int prY = Mathf.Clamp(y + (int)brightness, 0, Constants.MapSizeY);
-
             var layerInformation = GetLayerInformation(z);
-            
+
+            int nrX = Mathf.Max(x - (int)brightness, 0);
+            int prX = Mathf.Min(x + (int)brightness, Constants.MapSizeX);
+            int nrY = Mathf.Max(y - (int)brightness, 0);
+            int prY = Mathf.Min(y + (int)brightness, Constants.MapSizeY);
             for (int j = nrY; j < prY; j++) {
                 int dY = j + 1 - y;
                 dY = dY * dY;
@@ -80,7 +82,10 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 
                     float magnitude = (brightness - Mathf.Sqrt(dX + dY)) / 5f;
                     if (magnitude >= 0) {
-                        var color32 = Utils.Utility.MulColor32(defaultColor32, Mathf.Min(magnitude, 1f));
+                        if (magnitude > 1)
+                            magnitude = 1;
+
+                        var color32 = Utils.Utility.MulColor32(defaultColor32, magnitude);
                         int index = j * Constants.MapSizeX + i;
                         if (layerInformation[index])
                             color32 = Utils.Utility.MulColor32(color32, OpenTibiaUnity.OptionStorage.FixedLightLevelSeparator / 100f);
@@ -112,7 +117,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
         }
 
         public override int GetFieldBrightness(int x, int y) {
-            if (x >= 0 && x < Constants.MapSizeX && y >= 0 && y < Constants.MapSizeY) {
+            if (x < Constants.MapSizeX && y < Constants.MapSizeY) {
                 var color32 = _colorData[ToColorIndex(x, y)];
                 return (color32.r + color32.g + color32.b) / 3;
             }

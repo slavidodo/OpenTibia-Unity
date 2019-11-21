@@ -1,16 +1,17 @@
-﻿Shader "OpenTibiaUnity/Colored"
+﻿Shader "OpenTibiaUnity/Lightmap"
 {
 	Properties
 	{
 	}
 
-		SubShader
+	SubShader
 	{
 		Tags { "Queue" = "Transparent" "IgnoreProjector" = "True" "RenderType" = "Transparent" }
 
 		Pass
 		{
 			Blend DstColor Zero
+			BlendOp Add
 			Cull Off
 
 			CGPROGRAM

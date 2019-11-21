@@ -798,7 +798,6 @@ namespace OpenTibiaUnity.Core.WorldMap
                     int fieldIndex = ((z + _origin.z) % Constants.MapSizeZ * Constants.MapSizeX
                         + (x + _origin.x) % Constants.MapSizeX) * Constants.MapSizeY
                         + (y + _origin.y) % Constants.MapSizeY;
-
                     int index = y * Constants.MapSizeX + x;
 
                     var field = _fields[fieldIndex];
