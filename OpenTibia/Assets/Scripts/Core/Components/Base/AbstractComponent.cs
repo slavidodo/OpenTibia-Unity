@@ -98,7 +98,6 @@ namespace OpenTibiaUnity.Core.Components.Base
             if (!LockedToOverlay)
                 return;
 
-            var gameManager = OpenTibiaUnity.GameManager;
             if (QueuedLockComponents.Count == 0) {
                 // no more components to lock, restore overlay.
                 LockingBlocker.gameObject.SetActive(false);

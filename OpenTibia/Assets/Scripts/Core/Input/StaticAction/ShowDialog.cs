@@ -13,7 +13,7 @@
 
             switch (_dialogType) {
                 case DialogType.OptionsHotkey:
-                    OpenTibiaUnity.GameManager.onRequestShowOptionsHotkey.Invoke();
+                    OpenTibiaUnity.GameManager.onRequestHotkeysDialog.Invoke();
                     break;
                 case DialogType.CharacterOutfit:
                     if (!!protocolGame && protocolGame.IsGameRunning)

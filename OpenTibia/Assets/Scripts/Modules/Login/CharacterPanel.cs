@@ -15,6 +15,18 @@ namespace OpenTibiaUnity.Modules.Login
         public Color normalColor = Core.Colors.ColorFromRGB(0x414141);
         public Color alternateColor = Core.Colors.ColorFromRGB(0x484848);
         public Color highlightColor = Core.Colors.ColorFromRGB(0x585858);
+
+        private bool _colorReversed = false;
+        public bool ColorReversed {
+            get => _colorReversed;
+            set {
+                if (_colorReversed != value) {
+                    _colorReversed = value;
+                    if (!toggleComponent.isOn)
+                        imageComponent.color = GetDefaultColor();
+                }
+            }
+        }
         
         private Toggle _toggleComponent;
         public Toggle toggleComponent {
@@ -40,25 +52,29 @@ namespace OpenTibiaUnity.Modules.Login
             base.Awake();
 
             toggleComponent.onValueChanged.AddListener(OnToggleValueChanged);
-            imageComponent.color = normalColor;
+            imageComponent.color = GetDefaultColor();
         }
         
         protected void OnToggleValueChanged(bool value) {
             if (value)
                 imageComponent.color = highlightColor;
             else
-                imageComponent.color = (transform.GetSiblingIndex() & 1) == 0 ? alternateColor : normalColor;
+                imageComponent.color = GetDefaultColor();
         }
-        
+
+        public void OnPointerClick(PointerEventData eventData) {
+            if (eventData.clickCount == 2) {
+                onDoubleClick.Invoke();
+            }
+        }
+
         public override void Select() {
             toggleComponent.isOn = true;
             toggleComponent.Select();
         }
         
-        public void OnPointerClick(PointerEventData eventData) {
-            if (eventData.clickCount == 2) {
-                onDoubleClick.Invoke();
-            }
+        private Color GetDefaultColor() {
+            return (transform.GetSiblingIndex() & 1) == 0 ? normalColor : alternateColor;
         }
     }
 }

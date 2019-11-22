@@ -59,7 +59,7 @@ namespace OpenTibiaUnity.Modules
 
             var gameManager = OpenTibiaUnity.GameManager;
 
-            gameManager.onRequestShowOptionsHotkey.AddListener(OnRequestShowOptionsHotkey);
+            gameManager.onRequestHotkeysDialog.AddListener(OnRequestHotkeysDialog);
             gameManager.onRequestChatHistoryPrev.AddListener(OnRequestChatHistoryPrev);
             gameManager.onRequestChatHistoryNext.AddListener(OnRequestChatHistoryNext);
             gameManager.onRequestChatSend.AddListener(OnRequestChatSend);
@@ -68,7 +68,7 @@ namespace OpenTibiaUnity.Modules
             gameManager.onRequestCloseNPCTrade.AddListener(OnRequestCloseNPCTrade);
         }
         
-        private void OnRequestShowOptionsHotkey() {
+        private void OnRequestHotkeysDialog() {
             HotkeysWindow.Open();
         }
 

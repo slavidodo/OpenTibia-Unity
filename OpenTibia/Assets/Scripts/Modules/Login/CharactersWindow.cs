@@ -81,6 +81,14 @@ namespace OpenTibiaUnity.Modules.Login
             ForceClientVersionUpdate();
         }
 
+        protected override void OnEnable() {
+            base.OnEnable();
+
+            // select first element
+            if (_charactersScrollRect.content.childCount > 0)
+                OpenTibiaUnity.GameManager.InvokeOnMainThread(() => SelectCharacterByIndex(_selectedCharacterIndex));
+        }
+
         protected void OnKeyDown(Event e, bool _) {
             if ((e.shift || e.control || e.alt) && (e.keyCode < KeyCode.UpArrow || e.keyCode >= KeyCode.LeftArrow))
                 return;
@@ -114,9 +122,6 @@ namespace OpenTibiaUnity.Modules.Login
         protected void OnOkButtonClick() {
             if (_selectedCharacterIndex < 0 || _selectedCharacterIndex >= _charactersScrollRect.content.childCount)
                 return;
-
-            var child = _charactersScrollRect.content.GetChild(_selectedCharacterIndex);
-            var characterPanel = child.GetComponent<CharacterPanel>();
 
             string characterName;
             string worldName;
@@ -226,17 +231,25 @@ namespace OpenTibiaUnity.Modules.Login
         }
 
         protected void OnProcessChangeCharacter() {
+            var selectionCharacterIndex = _selectedCharacterIndex;
             Open();
+            SwitchToGameplayCanvas();
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => SelectCharacterByIndex(selectionCharacterIndex));
         }
 
         protected void OnGameEnd() {
-            gameObject.SetActive(true);
-            ResetLocalPosition();
-            LockToOverlay();
-
+            var selectionCharacterIndex = _selectedCharacterIndex;
+            Open();
             SwitchToBackgroundCanvas();
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => SelectCharacterByIndex(selectionCharacterIndex));
         }
 
+        private void OnCharacterValueToggleValueChanged(CharacterPanel panel, bool value) {
+            if (_changingVisibility || !value)
+                return;
+
+            _selectedCharacterIndex = panel.transform.GetSiblingIndex();
+        }
 
         public void Setup(string sessionKey, string accountName, string password, string token, CharacterList characterList) {
             _sessionKey = sessionKey;
@@ -247,24 +260,27 @@ namespace OpenTibiaUnity.Modules.Login
             _session = null;
             _playdata = null;
 
-            var content = _charactersScrollRect.content;
-            foreach (Transform child in content)
+            foreach (Transform child in _charactersScrollRect.content)
                 Destroy(child.gameObject);
-            
-            for (int i = 0; i < characterList.Characters.Count; i++) {
-                int characterIndex = i;
 
+            int characterCount = characterList.Characters.Count;
+            for (int i = 0; i < characterCount; i++) {
                 var character = characterList.Characters[i];
-                var characterPanel = Instantiate(ModulesManager.Instance.CharacterPanelPrefab);
-                characterPanel.transform.SetParent(content);
+                var world = characterList.FindWorld(character.WorldId);
+                string worldName = world.Name;
+                if (world.Preview)
+                    worldName += " (Preview)";
+
+                var characterPanel = Instantiate(ModulesManager.Instance.CharacterPanelPrefab, _charactersScrollRect.content);
+                characterPanel.ColorReversed = characterCount % 3 == 0;
                 characterPanel.characterName.text = character.Name;
-                characterPanel.worldName.text = characterList.FindWorld(character.WorldId).Name;
-                characterPanel.toggleComponent.onValueChanged.AddListener((value) => { if (value) _selectedCharacterIndex = characterIndex; });
+                characterPanel.worldName.text = worldName;
+                characterPanel.toggleComponent.onValueChanged.AddListener((value) => OnCharacterValueToggleValueChanged(characterPanel, value));
                 characterPanel.toggleComponent.group = _charactersToggleGroup;
                 characterPanel.onDoubleClick.AddListener(OnOkButtonClick);
             }
 
-            _selectedCharacterIndex = -1;
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => SelectCharacterByIndex(0));
         }
 
         public void Setup(Session session, Playdata playData) {
@@ -275,31 +291,43 @@ namespace OpenTibiaUnity.Modules.Login
             _password = null;
             _token = null;
 
-            var content = _charactersScrollRect.content;
-            foreach (Transform child in content)
+            foreach (Transform child in _charactersScrollRect.content)
                 Destroy(child.gameObject);
-            
-            for (int i = 0; i < playData.Characters.Count; i++) {
-                int characterIndex = i;
 
+            int characterCount = playData.Characters.Count;
+            for (int i = 0; i < characterCount; i++) {
                 var character = playData.Characters[i];
-                var characterPanel = Instantiate(ModulesManager.Instance.CharacterPanelPrefab);
-                characterPanel.GetComponent<LayoutElement>().minHeight = 34;
-
-                characterPanel.transform.SetParent(content);
-                characterPanel.characterName.text = character.Name;
-
                 var world = playData.FindWorld(character.WorldId);
+                string worldName = world.Name;
+                if (world.PreviewState == 1)
+                    worldName += " (Experimental)";
+                if (OpenTibiaUnity.GameManager.ClientVersion >= 1200)
+                    worldName += $"\n({world.GetPvPTypeDescription()})";
 
-                characterPanel.worldName.text = string.Format("{0}\n({1})", world.Name, world.GetPvPTypeDescription());
-                characterPanel.toggleComponent.onValueChanged.AddListener((value) => { if (value) _selectedCharacterIndex = characterIndex; });
+                var characterPanel = Instantiate(ModulesManager.Instance.CharacterPanelPrefab, _charactersScrollRect.content);
+                characterPanel.ColorReversed = characterCount % 3 == 0;
+                characterPanel.characterName.text = character.Name;
+                characterPanel.worldName.text = worldName;
+                characterPanel.toggleComponent.onValueChanged.AddListener((value) => OnCharacterValueToggleValueChanged(characterPanel, value));
                 characterPanel.toggleComponent.group = _charactersToggleGroup;
+                characterPanel.GetComponent<LayoutElement>().minHeight = 34;
                 characterPanel.onDoubleClick.AddListener(OnOkButtonClick);
             }
 
-            _selectedCharacterIndex = -1;
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => SelectCharacterByIndex(0));
         }
 
+        private bool SelectCharacterByIndex(int index) {
+            if (index >= _charactersScrollRect.content.childCount)
+                return false;
+
+            var child = _charactersScrollRect.content.GetChild(index);
+            var characterPanel = child.GetComponent<CharacterPanel>();
+            characterPanel.Select();
+
+            _selectedCharacterIndex = index;
+            return true;
+        }
         protected void AddProtocolGameListeners(Core.Communication.Game.ProtocolGame protocolGame) {
             protocolGame.onConnectionError.AddListener(OnProtocolGameConnectionError);
             protocolGame.onLoginError.AddListener(OnProtocolGameLoginError);

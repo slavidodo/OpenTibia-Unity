@@ -158,6 +158,11 @@ namespace OpenTibiaUnity.Modules.Hotkeys
 
             _hotkeyTextInputField.ActivateInputField();
             _hotkeyTextInputField.MoveTextEnd(false);
+
+            // select first element
+            if (_hotkeysScrollRect.content.childCount > 0) {
+                OpenTibiaUnity.GameManager.InvokeOnMainThread(() => SelectPanelByIndex(0));
+            }
         }
 
         protected override void OnDestroy() {
@@ -437,11 +442,8 @@ namespace OpenTibiaUnity.Modules.Hotkeys
             else if (_hotkeysScrollRect.content.childCount > 1)
                 index = Mathf.Min(_activeActionPanel.transform.GetSiblingIndex() + 1, _hotkeysScrollRect.content.childCount - 1);
 
-            if (index != -1) {
-                var child = _hotkeysScrollRect.content.GetChild(index);
-                var characterPanel = child.GetComponent<HotkeyActionPanel>();
-                characterPanel.Select();
-            }
+            if (index != -1)
+                SelectPanelByIndex(index);
         }
 
         protected void SelectPrevHotkeyPanel() {
@@ -451,11 +453,18 @@ namespace OpenTibiaUnity.Modules.Hotkeys
             else if (_hotkeysScrollRect.content.childCount > 1)
                 index = Mathf.Max(_activeActionPanel.transform.GetSiblingIndex() - 1, 0);
 
-            if (index != -1) {
-                var child = _hotkeysScrollRect.content.GetChild(index);
-                var characterPanel = child.GetComponent<HotkeyActionPanel>();
-                characterPanel.Select();
-            }
+            if (index != -1)
+                SelectPanelByIndex(index);
+        }
+
+        private bool SelectPanelByIndex(int index) {
+            if (index >= _hotkeysScrollRect.content.childCount)
+                return false;
+
+            var child = _hotkeysScrollRect.content.GetChild(index);
+            var hotkeyPanel = child.GetComponent<HotkeyActionPanel>();
+            hotkeyPanel.Select();
+            return true;
         }
 
         private T GetHotkeyActionForPanel<T>(HotkeyActionPanel panel) where T : HotkeyAction {
