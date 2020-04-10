@@ -19,16 +19,14 @@
         }
 
         public static Rune GetRune(int id) {
-            int lastIndex = Runes.Length - 1;
-
-            int index = 0;
-            while (index <= lastIndex) {
-                int tmpIndex = index + lastIndex >> 1;
-                var rune = Runes[tmpIndex];
+            int l = 0, r = Runes.Length - 1;
+            while (l <= r) {
+                int i = l + r >> 1;
+                var rune = Runes[i];
                 if (rune._id < id)
-                    index = tmpIndex + 1;
+                    l = i + 1;
                 else if (rune._id > id)
-                    lastIndex = tmpIndex - 1;
+                    r = i - 1;
                 else
                     return rune;
             }
@@ -37,16 +35,14 @@
         }
 
         public static Spell GetSpell(int id) {
-            int lastIndex = Spells.Length - 1;
-
-            int index = 0;
-            while (index <= lastIndex) {
-                int tmpIndex = index + lastIndex >> 1;
-                var spell = Spells[tmpIndex];
+            int l = 0, r = Spells.Length - 1;
+            while (l <= r) {
+                int i = l + r >> 1;
+                var spell = Spells[i];
                 if (spell._id < id)
-                    index = tmpIndex + 1;
+                    l = i + 1;
                 else if (spell._id > id)
-                    lastIndex = tmpIndex - 1;
+                    r = i - 1;
                 else
                     return spell;
             }

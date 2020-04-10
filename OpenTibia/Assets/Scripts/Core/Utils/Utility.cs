@@ -81,7 +81,7 @@ namespace OpenTibiaUnity.Core.Utils
         }
 
         public static OperatingSystem GetCurrentOs() {
-            if (OpenTibiaUnity.GameManager.IsRealTibia || OpenTibiaUnity.GameManager.IsOpenTibia)
+            if (OpenTibiaUnity.GameManager.IsRealTibia)
                 return GetRealTibiaOS();
 
 #if UNITY_STANDALONE_LINUX

@@ -14,6 +14,7 @@ namespace OpenTibiaUnity.Core.Creatures
         private bool _autowalkPathAborting = false;
         private bool _autowalkTargetDiagonal = false;
         private bool _autowalkTargetExact = false;
+#pragma warning disable CS0414 // Remove unread private members
         private bool _premium = false;
         private bool _hasReachedMain = false;
 
@@ -21,6 +22,7 @@ namespace OpenTibiaUnity.Core.Creatures
         private int _profession = 0;
         private int _bankGoldBalance = 0;
         private int _inventoryGoldBalance = 0;
+#pragma warning restore CS0414 // Remove unread private members
 
         private double _experienceBonus = 0.0f;
 
@@ -127,7 +129,9 @@ namespace OpenTibiaUnity.Core.Creatures
             get => (_stateFlags & 1 << (int)PlayerState.Fighting) > 0;
         }
 
-        public Player(uint id, string name = null) : base(id, CreatureType.Player, name) {}
+        public Player() : this(0) {}
+        public Player(uint id) : this(id, null) {}
+        public Player(uint id, string name) : base(id, CreatureType.Player, null) {}
 
         public void StartAutowalk(UnityEngine.Vector3Int tarReadPosition, bool diagonal, bool exact) {
             StartAutowalk(tarReadPosition.x, tarReadPosition.y, tarReadPosition.z, diagonal, exact);

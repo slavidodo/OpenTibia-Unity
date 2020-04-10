@@ -173,7 +173,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             if (HighlightObject is Creatures.Creature tmpCreature)
                 _highlightCreature = tmpCreature;
             else if (HighlightObject is Appearances.ObjectInstance tmpObject && tmpObject.IsCreature)
-                _highlightCreature = CreatureStorage.GetCreature(tmpObject.Data);
+                _highlightCreature = CreatureStorage.GetCreatureById(tmpObject.Data);
             else
                 _highlightCreature = null;
 
@@ -339,7 +339,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                         if (!@object.IsCreature)
                             continue;
 
-                        var creature = CreatureStorage.GetCreature(@object.Data);
+                        var creature = CreatureStorage.GetCreatureById(@object.Data);
                         if (!creature)
                             continue;
 
@@ -504,7 +504,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
 
                 // marks
                 if (creature.Marks.AnyMarkSet())
-                    _creaturesMarksView.DrawMarks(commandBuffer, creature.Marks, renderAtom.x, renderAtom.y, ScreenZoom);
+                    _creaturesMarksView.DrawMarks(commandBuffer, creature.Marks, renderAtom.x, renderAtom.y);
 
                 var offset = Vector2Int.zero;
                 if (isCovered && !!creature.MountOutfit) {
@@ -689,7 +689,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                     Array.Copy(exArray, i, exToPass, 0, sliceSize);
                     MaterialPropertyBlock props = new MaterialPropertyBlock();
                     props.SetVectorArray("_Color", exToPass);
-                    Utils.GraphicsUtility.DrawTextureInstanced(commandBuffer, matriciesToPass, sliceSize, coloredMaterial, props);
+                    Utils.GraphicsUtility.DrawInstanced(commandBuffer, matriciesToPass, sliceSize, coloredMaterial, props);
                 }
 
                 var drawDataArray = new List<ClassicStatusFlagData>[] { flagDrawData, speechDrawData };
@@ -715,14 +715,14 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                         MaterialPropertyBlock props = new MaterialPropertyBlock();
                         props.SetTexture("_MainTex", texture);
                         props.SetVectorArray("_MainTex_UV", exToPass);
-                        Utils.GraphicsUtility.DrawTextureInstanced(commandBuffer, matriciesToPass, sliceSize, appearanceMaterial, props);
+                        Utils.GraphicsUtility.DrawInstanced(commandBuffer, matriciesToPass, sliceSize, appearanceMaterial, props);
                     }
                 }
             } else {
                 foreach (var data in rectDrawData) {
                     MaterialPropertyBlock props = new MaterialPropertyBlock();
                     props.SetColor("_Color", data.color);
-                    Utils.GraphicsUtility.DrawTexture(commandBuffer, data.matrix, coloredMaterial, props);
+                    Utils.GraphicsUtility.Draw(commandBuffer, data.matrix, coloredMaterial, props);
                 }
 
                 var statesTexture = OpenTibiaUnity.GameManager.StateFlagsTexture;
@@ -730,7 +730,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                     MaterialPropertyBlock props = new MaterialPropertyBlock();
                     props.SetTexture("_MainTex", statesTexture);
                     props.SetVector("_MainTex_UV", data.uv);
-                    Utils.GraphicsUtility.DrawTexture(commandBuffer, data.matrix, appearanceMaterial, props);
+                    Utils.GraphicsUtility.Draw(commandBuffer, data.matrix, appearanceMaterial, props);
                 }
 
                 var speechTexture = OpenTibiaUnity.GameManager.SpeechFlagsTexture;
@@ -738,7 +738,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                     MaterialPropertyBlock props = new MaterialPropertyBlock();
                     props.SetTexture("_MainTex", speechTexture);
                     props.SetVector("_MainTex_UV", data.uv);
-                    Utils.GraphicsUtility.DrawTexture(commandBuffer, data.matrix, appearanceMaterial, props);
+                    Utils.GraphicsUtility.Draw(commandBuffer, data.matrix, appearanceMaterial, props);
                 }
             }
         }
@@ -947,8 +947,8 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                 screenPosition.x += Constants.StateFlagGap + Constants.StateFlagSize;
             }
 
-            if (creature.PKFlag > PKFlag.None) {
-                var r = NormalizeFlagRect(GetPKFlagTextureRect(creature.PKFlag), flagsTexture);
+            if (creature.PkFlag > PkFlag.None) {
+                var r = NormalizeFlagRect(GetPKFlagTextureRect(creature.PkFlag), flagsTexture);
                 flagData.Add(new ClassicStatusFlagData {
                     matrix = Matrix4x4.TRS(screenPosition, Quaternion.Euler(180, 0, 0), flagSize),
                     uv = new Vector4(r.width, r.height, r.x, r.y)
@@ -988,7 +988,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
                 screenPosition.x -= dX;
             
             var gameManager = OpenTibiaUnity.GameManager;
-            if ((gameManager.GetFeature(GameFeature.GameCreatureMarks) && gameManager.ClientVersion < 1185) || dX > 0)
+            if (!gameManager.GetFeature(GameFeature.GameCreatureMarks) || dX > 0)
                 screenPosition.y += Constants.StateFlagGap + Constants.StateFlagSize;
             
             if (creature.GuildFlag > GuildFlag.None) {
@@ -1168,7 +1168,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             };
         }
 
-        private Rect GetPKFlagTextureRect(PKFlag pkFlag) {
+        private Rect GetPKFlagTextureRect(PkFlag pkFlag) {
             return new Rect {
                 x = (int)pkFlag * Constants.StateFlagSize,
                 y = 2 * Constants.StateFlagSize,

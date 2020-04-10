@@ -66,16 +66,15 @@ namespace OpenTibiaUnity.Core.Container
         }
 
         public int GetAvailableInventory(uint id, int data) {
-            int lastIndex = _playerInventory.Count - 1;
-            int index = 0;
-            while (index <= lastIndex) {
-                int tmpIndex = index + lastIndex >> 1;
-                var typeInfo = _playerInventory[tmpIndex];
+            int l = 0, r = _playerInventory.Count - 1;
+            while (l <= r) {
+                int i = l + r >> 1;
+                var typeInfo = _playerInventory[i];
                 int direction = typeInfo.Compare((int)id, data);
                 if (direction < 0)
-                    index = tmpIndex + 1;
+                    l = i + 1;
                 else if (direction > 0)
-                    lastIndex = tmpIndex - 1;
+                    r = i - 1;
                 else
                     return typeInfo.Count;
             }

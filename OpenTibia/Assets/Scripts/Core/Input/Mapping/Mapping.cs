@@ -62,7 +62,7 @@ namespace OpenTibiaUnity.Core.Input.Mapping
             return true;
         }
 
-        public bool OnKeyInput(uint eventMask, char character, KeyCode keyCode, EventModifiers rawModifiers) {
+        public bool OnKeyInput(InputEvent eventMask, char character, KeyCode keyCode, EventModifiers rawModifiers) {
             EventModifiers eventModifiers = EventModifiers.None;
             if ((rawModifiers & EventModifiers.Shift) != 0) eventModifiers |= EventModifiers.Shift;
             if ((rawModifiers & EventModifiers.Control) != 0) eventModifiers |= EventModifiers.Control;
@@ -70,7 +70,7 @@ namespace OpenTibiaUnity.Core.Input.Mapping
 
             bool isBlockerActive = OpenTibiaUnity.GameManager.ActiveBlocker.gameObject.activeSelf;
             foreach (var binding in _bindings) {
-                if (binding.AppliesTo(eventMask, keyCode, eventModifiers, isBlockerActive)) {
+                if (binding.AppliesTo(eventMask, keyCode, eventModifiers)) {
                     if (binding.Action is StaticAction.StaticAction staticAction)
                         return staticAction.KeyCallback(eventMask, character, keyCode, eventModifiers);
                     else
@@ -81,9 +81,9 @@ namespace OpenTibiaUnity.Core.Input.Mapping
             return false;
         }
 
-        public void OnTextInput(uint eventMask, char character) {
+        public void OnTextInput(InputEvent eventMask, char character) {
             foreach (var binding in _bindings) {
-                if (binding.AppliesTo(eventMask, KeyCode.None, EventModifiers.None, false)) {
+                if (binding.AppliesTo(eventMask, KeyCode.None, EventModifiers.None)) {
                     if (binding.Action is StaticAction.StaticAction) {
                         var staticAction = binding.Action as StaticAction.StaticAction;
                         staticAction.TextCallback(eventMask, character);

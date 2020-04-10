@@ -1,7 +1,7 @@
-﻿using UnityEditor;
-using UnityEngine;
+﻿using OpenTibiaUnity.Core.Components;
+using UnityEditor;
 
-namespace OpenTibiaUnity.Core.Components
+namespace OpenTibiaUnityEditor.Core.Components
 {
     [CustomEditor(typeof(Draggable), true)]
     [CanEditMultipleObjects]

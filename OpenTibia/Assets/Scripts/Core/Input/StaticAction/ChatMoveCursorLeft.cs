@@ -4,7 +4,7 @@ namespace OpenTibiaUnity.Core.Input.StaticAction
 {
     public class ChatMoveCursorLeft : StaticAction
     {
-        public ChatMoveCursorLeft(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
+        public ChatMoveCursorLeft(int id, string label, InputEvent eventMask) : base(id, label, eventMask, false) { }
 
         public override bool Perform(bool repeat = false) {
             TMPro.TMP_InputField inputField = StaticAction.GetSelectedInputField();
@@ -16,7 +16,7 @@ namespace OpenTibiaUnity.Core.Input.StaticAction
             return false;
         }
 
-        public override bool KeyCallback(uint eventMask, char _, KeyCode __, EventModifiers eventModifiers) {
+        public override bool KeyCallback(InputEvent eventMask, char _, KeyCode __, EventModifiers eventModifiers) {
             TMPro.TMP_InputField inputField = StaticAction.GetSelectedInputField();
             if (!!inputField) {
                 inputField.caretPosition = Mathf.Max(inputField.caretPosition - 1, 0);

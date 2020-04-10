@@ -280,7 +280,7 @@
             }
         }
 
-        public static Core.Components.ObjectContextMenu CreateObjectContextMenu(UnityEngine.Vector3Int absolute,
+        public static UI.Legacy.ObjectContextMenu CreateObjectContextMenu(UnityEngine.Vector3Int absolute,
             Core.Appearances.ObjectInstance lookObject, int lookObjectStackPos,
             Core.Appearances.ObjectInstance useObject, int useObjectStackPos,
             Core.Creatures.Creature creature) {
@@ -288,7 +288,7 @@
             var canvas = GameManager.ActiveCanvas;
             var gameObject = UnityEngine.Object.Instantiate(GameManager.ContextMenuBasePrefab, canvas.transform);
 
-            var objectContextMenu = gameObject.AddComponent<Core.Components.ObjectContextMenu>();
+            var objectContextMenu = gameObject.AddComponent<UI.Legacy.ObjectContextMenu>();
             objectContextMenu.Set(absolute, lookObject, lookObjectStackPos, useObject, useObjectStackPos, creature);
             return objectContextMenu;
         }

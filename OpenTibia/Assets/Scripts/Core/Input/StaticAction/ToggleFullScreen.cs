@@ -8,7 +8,7 @@ namespace OpenTibiaUnity.Core.Input.StaticAction
 {
     public class ToggleFullScreen : StaticAction
     {
-        public ToggleFullScreen(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
+        public ToggleFullScreen(int id, string label, InputEvent eventMask) : base(id, label, eventMask, false) { }
 
         public override bool Perform(bool repeat = false) {
             var optionStorage = OpenTibiaUnity.OptionStorage;

@@ -175,8 +175,8 @@
         LoginSuccess = 23,
         LoginToken = 24, // removed in tibia 12
         StoreButtonIndicators = 25,
-        PingBack = 29,
-        Ping = 30,
+        Ping = 29,
+        PingBack = 30,
         Challenge = 31,
         Death = 40,
         Stash = 41,

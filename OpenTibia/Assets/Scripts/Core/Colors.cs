@@ -4,6 +4,17 @@ namespace OpenTibiaUnity.Core
 {
     public static class Colors
     {
+        public static Color Default = ColorFromRGB(0xC0C0C0);
+        public static Color DefaultDisabled = ColorFromRGB(0x6F6F6F);
+
+        public static Color White = ColorFromRGB(0xFFFFFF);
+        public static Color DarkRed = ColorFromRGB(0xE04040);
+        public static Color Red = ColorFromRGB(0xF55E5E);
+        public static Color LightRed = ColorFromRGB(0xF8A4A4);
+        public static Color DarkGreen = ColorFromRGB(0x40E040);
+        public static Color Green = ColorFromRGB(0x00EB00);
+        public static Color LightGreen = ColorFromRGB(0xB4F8B4);
+
         public const int HSI_SI_VALUES = 7;
         public const int HSI_H_STEPS = 19;
 

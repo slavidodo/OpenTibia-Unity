@@ -94,8 +94,13 @@ namespace OpenTibiaUnity.Core.Communication.Game
             var storeCategory = OpenTibiaUnity.StoreStorage.FindCategory(categoryName);
 
             int offerCount = message.ReadUnsignedShort();
-            for (int i = 0; i < offerCount; i++)
-                storeCategory.AddOffer(ReadStoreOffer(message));
+            for (int i = 0; i < offerCount; i++) {
+                var offer = ReadStoreOffer(message);
+
+                // server may be sending information about non-existant category
+                if (storeCategory != null)
+                    storeCategory.AddOffer(offer);
+            }
 
             if (gameManager.ClientVersion >= 1180 && categoryName == Constants.StoreHomeCategoryName) {
                 byte featuredOfferCount = message.ReadUnsignedByte();
@@ -136,7 +141,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         public StoreOffer ReadExtendedStoreOffer(Internal.CommunicationStream message) {
-            string name = name = message.ReadString();
+            string name = message.ReadString();
             var storeOffer = new StoreOffer(name, null);
 
             byte quantityCount = message.ReadUnsignedByte();
@@ -211,7 +216,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             bool useTransferableCoins = message.ReadBoolean();
 
             bool disabled = message.ReadBoolean();
-            List<string> disabledReasons = new List<string>();
+            var disabledReasons = new List<string>();
             if (disabled) {
                 int errorCount = message.ReadUnsignedByte();
                 for (int i = 0; i < errorCount; i++)

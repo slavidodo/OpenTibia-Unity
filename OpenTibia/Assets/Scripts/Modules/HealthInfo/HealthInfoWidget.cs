@@ -1,22 +1,34 @@
 ﻿using OpenTibiaUnity.Core.Creatures;
 using UnityEngine;
-using UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.HealthInfo
 {
-    public class HealthInfoWidget : Core.Components.Base.AbstractComponent
+    public class HealthInfoWidget : UI.Legacy.SidebarWidget
     {
-        public const int BarWidth = 94;
-        
-        [SerializeField] private RawImage _healthBarImageComponent = null;
-        [SerializeField] private RawImage _manaBarImageComponent = null;
+        // serialized fields
+        [SerializeField]
+        private UI.Legacy.Slider _healthBar = null;
+        [SerializeField]
+        private UI.Legacy.Slider _manaBar = null;
 
-        [SerializeField] private TMPro.TextMeshProUGUI _healthValueText = null;
-        [SerializeField] private TMPro.TextMeshProUGUI _manaValueText = null;
+        protected override void Start() {
+            base.Start();
 
-        protected override void Awake() {
-            base.Awake();
+            var player = OpenTibiaUnity.Player;
+            if (player != null) {
+                OnSkillChange(player, SkillType.Health, player.GetSkill(SkillType.Health));
+                OnSkillChange(player, SkillType.Mana, player.GetSkill(SkillType.Mana));
+            }
+        }
+
+        protected override void OnEnable() {
+            base.OnEnable();
             Creature.onSkillChange.AddListener(OnSkillChange);
+        }
+
+        protected override void OnDisable() {
+            base.OnDisable();
+            Creature.onSkillChange.RemoveListener(OnSkillChange);
         }
 
         private void OnSkillChange(Creature creature, SkillType skillType, Skill skill) {
@@ -24,30 +36,9 @@ namespace OpenTibiaUnity.Modules.HealthInfo
             if (!player || (skillType != SkillType.Health && skillType != SkillType.Mana))
                 return;
 
-            RawImage imageComponent;
-            TMPro.TextMeshProUGUI textComponent;
-            if (skillType == SkillType.Health) {
-                imageComponent = _healthBarImageComponent;
-                textComponent = _healthValueText;
-            } else {
-                imageComponent = _manaBarImageComponent;
-                textComponent = _manaValueText;
-            }
-
-            var rectTransform = imageComponent.GetComponent<RectTransform>();
-
-            // setting new width
-            var percent = skill.Level / (float)skill.BaseLevel;
-            var rect = new Rect(imageComponent.uvRect);
-            rect.width = percent;
-            imageComponent.uvRect = rect;
-
-            rect = new Rect(rectTransform.rect);
-            rect.width = BarWidth * percent;
-            rectTransform.sizeDelta = new Vector2(BarWidth * percent, rectTransform.sizeDelta.y);
-
-            // setting text
-            textComponent.text = skill.Level.ToString();
+            var progressBar = (skillType == SkillType.Health) ? _healthBar : _manaBar;
+            progressBar.SetMinMax(0, skill.BaseLevel);
+            progressBar.value = skill.Level;
         }
     }
 }

@@ -106,7 +106,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             // 2. Rotate the mesh by PI (rad) on the x-axis
             // 3. Scale the text by the precalculated text zoom to make sure the text size remains
             // // the same no matter what the screen zoom is.
-            var material = OpenTibiaUnity.GameManager.OutlinedVerdanaFontMaterial;
+            var material = OpenTibiaUnity.GameManager.LabelOnscreenMessage.materialForRendering;
             var matrix = Matrix4x4.TRS(screenPosition, Quaternion.Euler(180, 0, 0), Vector3.one);
             commandBuffer.DrawMesh(_mesh, matrix, material);
         }

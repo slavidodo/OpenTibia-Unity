@@ -2,7 +2,8 @@
 using OpenTibiaUnity.Core.Chat;
 using UnityEngine;
 using UnityEngine.Events;
-using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using UnityUI = UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Console
 {
@@ -16,46 +17,96 @@ namespace OpenTibiaUnity.Modules.Console
         FlashingFinished,
     }
     
-    public class ChannelTab : Core.Components.DraggableTabButton
+    [RequireComponent(typeof(UnityUI.Image))]
+    public class ChannelTab : UI.Legacy.DraggableTabButton
     {
-        private static Color s_ActiveColor = Colors.ColorFromRGB(MessageColors.White);
+        // constants
         private static Color s_InactiveColor = Colors.ColorFromRGB(MessageColors.Grey);
-        private static Color s_FlashingColor = Colors.ColorFromRGB(MessageColors.Red);
         
         private const float FlashingDuration = 2f;
         private const float FlashingReverseAfter = 1f;
 
-        public class ChannelButtonClickedEvent : UnityEvent<ChannelTab> { }
-        
-        [SerializeField] private TMPro.TextMeshProUGUI _channelNameLabel = null;
+        // serialized fields
+        [SerializeField]
+        private UnityUI.Image _activeFixImage = null;
 
-        public ChannelButtonClickedEvent onClick = new ChannelButtonClickedEvent();
-        public Channel Channel;
+        // fields
         private ChannelButtonState _state = ChannelButtonState.Active;
         private float _flashingTicks = 0;
         private float _lastFlashingTime = 0;
         private bool _lastColorIsFlashing = false;
+        private Channel _channel = null;
+        private Sprite _activeSprite = null;
+        private Sprite _inactiveSprite = null;
+
+        // public fields
+        public UnityEvent onPointerDown = new UnityEvent();
+
+        // properties
+        public Channel channel {
+            get => _channel;
+            set {
+                if (_channel != value) {
+                    _channel = value;
+                    text = _channel.Name;
+                    layoutElement.preferredWidth = Mathf.Max(120, preferredValues.x * 1.5f);
+                }
+            }
+        }
+
+        public Sprite activeSprite { set => _activeSprite = value; }
+        public Sprite inactiveSprite { set => _inactiveSprite = value; }
+
+        public ChannelButtonState state {
+            get => _state;
+            set {
+                if (value == ChannelButtonState.FlashingFinished)
+                    value = ChannelButtonState.Flashing;
+
+                _state = value;
+                _flashingTicks = 0;
+                _lastFlashingTime = Time.time;
+                _lastColorIsFlashing = true;
+
+                switch (_state) {
+                    case ChannelButtonState.Active:
+                        color = Color.white;
+                        image.sprite = _activeSprite;
+                        break;
+                    case ChannelButtonState.Inactive:
+                        color = s_InactiveColor;
+                        image.sprite = _inactiveSprite;
+                        break;
+                    case ChannelButtonState.Flashing:
+                        color = Colors.Red;
+                        break;
+                }
+
+                _activeFixImage.gameObject.SetActive(_state == ChannelButtonState.Active);
+            }
+        }
 
         protected override void Start() {
             base.Start();
 
-            GetComponent<Button>().onClick.AddListener(OnButtonClick);
+            AllowLabelTransitions = false;
         }
 
         protected void Update() {
+            // todo, replace with InvokeRepeating
             if (_state == ChannelButtonState.Flashing) {
                 _flashingTicks += Time.deltaTime;
                 if (_flashingTicks >= FlashingDuration) {
                     _state = ChannelButtonState.FlashingFinished;
-                    _channelNameLabel.color = s_FlashingColor;
+                    color = Colors.Red;
                     return;
                 }
                 
                 if (Time.time - _lastFlashingTime >= FlashingReverseAfter) {
                     if (_lastColorIsFlashing)
-                        _channelNameLabel.color = s_ActiveColor;
+                        color = Color.white;
                     else
-                        _channelNameLabel.color = s_FlashingColor;
+                        color = Colors.Red;
 
                     _lastColorIsFlashing = !_lastColorIsFlashing;
                     _lastFlashingTime = Time.time;
@@ -63,39 +114,10 @@ namespace OpenTibiaUnity.Modules.Console
             }
         }
 
-        public void SetText(string text) {
-            _channelNameLabel.SetText(text);
-            GetComponent<LayoutElement>().preferredWidth = Mathf.Max(120, _channelNameLabel.preferredWidth * 1.5f);
-        }
+        public override void OnPointerDown(PointerEventData eventData) {
+            base.OnPointerDown(eventData);
 
-        public void SetImage(Sprite sprite) {
-            GetComponent<Image>().sprite = sprite;
-        }
-
-        public void SetState(ChannelButtonState state) {
-            if (state == ChannelButtonState.FlashingFinished)
-                state = ChannelButtonState.Flashing;
-
-            _state = state;
-            _flashingTicks = 0;
-            _lastFlashingTime = Time.time;
-            _lastColorIsFlashing = true;
-
-            switch (state) {
-                case ChannelButtonState.Active:
-                    _channelNameLabel.color = s_ActiveColor;
-                    break;
-                case ChannelButtonState.Inactive:
-                    _channelNameLabel.color = s_InactiveColor;
-                    break;
-                case ChannelButtonState.Flashing:
-                    _channelNameLabel.color = s_FlashingColor;
-                    break;
-            }
-        }
-
-        private void OnButtonClick() {
-            onClick.Invoke(this);
+            onPointerDown.Invoke();
         }
     }
 }

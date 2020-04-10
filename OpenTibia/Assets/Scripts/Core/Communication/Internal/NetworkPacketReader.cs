@@ -30,7 +30,7 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             return _inputStream.BytesAvailable >= bytes;
         }
 
-        public bool PreparePacket() {
+        public void PreparePacket() {
             int payloadOffset = 0;
             if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameProtocolSequenceNumber)) {
                 uint recvCompression = _inputStream.ReadUnsignedInt();
@@ -42,8 +42,9 @@ namespace OpenTibiaUnity.Core.Communication.Internal
                 payloadOffset = (int)_inputStream.Position;
                 uint checksum = Cryptography.Adler32Checksum.CalculateAdler32Checksum(_inputStream, payloadOffset, (int)_inputStream.Length - payloadOffset);
                 if (recvChecksum != checksum)
-                    return false;
+                    throw new System.Exception($"Received checksum doesn't match the expected one ({recvChecksum} != {checksum})");
 
+                // TODO; is this really neseccary?
                 _inputStream.Position = payloadOffset;
                 _compressed = false;
             }
@@ -51,11 +52,10 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             if (_xTEA != null) {
                 int length = (int)_inputStream.Length - payloadOffset;
                 if (_xTEA.Decrypt(_inputStream, payloadOffset, length) == 0)
-                    return false;
+                    throw new System.Exception("failed to decrypt XTEA");
             }
             
             onPacketReady.Invoke();
-            return true;
         }
     }
 }

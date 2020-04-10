@@ -309,7 +309,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             int secureMode = message.ReadUnsignedByte();
             int pvpMode = message.ReadUnsignedByte();
 
-            OpenTibiaUnity.GameManager.onTacticsChangeEvent.Invoke(
+            OpenTibiaUnity.GameManager.onTacticsChange.Invoke(
                 (CombatAttackModes)attackMode,
                 (CombatChaseModes)chaseMode,
                 secureMode == 1,

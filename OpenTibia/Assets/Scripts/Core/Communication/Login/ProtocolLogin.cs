@@ -1,20 +1,21 @@
-﻿using System.Net.Sockets;
-using OpenTibiaUnity.Core.Communication.Types;
+﻿using OpenTibiaUnity.Core.Communication.Types;
+using System.Net.Sockets;
 using UnityEngine.Events;
 
 namespace OpenTibiaUnity.Core.Communication.Login
 {
-    public class ProtocolLogin : Internal.Protocol
+    public sealed class ProtocolLogin : Internal.Protocol
     {
         public class LoginErrorEvent : UnityEvent<string> { }
         public class LoginTokenErrorEvent : UnityEvent<int> { }
         public class MessageOfTheDayEvent : UnityEvent<int, string> { }
         public class UpdateRequiredEvent : UnityEvent { }
         public class SessionKeyEvent : UnityEvent<string> { }
-        public class CharacterListEvent : UnityEvent<CharacterList> { }
+        public class PlayDataEvent : UnityEvent<PlayData> { }
 
-        protected bool _tokenSuccess = false;
-        protected bool _expectingTermination = false;
+        private bool _tokenSuccess = false;
+        private bool _expectingTermination = false;
+        private string _sessionKey = string.Empty;
 
         public string EmailAddress { get; set; } = string.Empty;
         public string AccountName { get; set; } = string.Empty;
@@ -27,10 +28,12 @@ namespace OpenTibiaUnity.Core.Communication.Login
         public MessageOfTheDayEvent onMessageOfTheDay { get; } = new MessageOfTheDayEvent();
         public UpdateRequiredEvent onUpdateRequired { get; } = new UpdateRequiredEvent();
         public SessionKeyEvent onSessionKey { get; } = new SessionKeyEvent();
-        public CharacterListEvent onCharacterList { get; } = new CharacterListEvent();
+        public PlayDataEvent onPlayData { get; } = new PlayDataEvent();
 
         protected override void OnConnectionEstablished() {
-            SendLogin();
+            // login should be sent on the main thread
+            // since it makes use of UnityEngine.Random
+            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => SendLogin());
             _connection.Receive();
         }
 
@@ -40,7 +43,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
 
             OnConnectionSocketError(SocketError.ConnectionRefused, string.Empty);
         }
-        
+
         protected override void OnCommunicationDataReady() {
             LoginserverMessageType prevMessageType = 0;
             LoginserverMessageType lastMessageType = 0;
@@ -64,7 +67,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
             }
         }
 
-        protected void ParseMessage(Types.LoginserverMessageType messageType) {
+        private void ParseMessage(LoginserverMessageType messageType) {
             switch (messageType) {
                 case LoginserverMessageType.ErrorLegacy:
                 case LoginserverMessageType.Error:
@@ -93,19 +96,100 @@ namespace OpenTibiaUnity.Core.Communication.Login
                     break;
 
                 case LoginserverMessageType.SessionKey:
-                    onSessionKey.Invoke(_inputStream.ReadString());
+                    _sessionKey = _inputStream.ReadString();
                     break;
 
                 case LoginserverMessageType.CharacterList:
-                    var characterList = new CharacterList();
-                    characterList.Parse(_inputStream);
-                    onCharacterList.Invoke(characterList);
+                    var playData = ReadPlayData(_inputStream);
+
+                    if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameSessionKey)) {
+                        playData.Session.Key = _sessionKey;
+                    } else {
+                        playData.Session.AccountName = AccountName;
+                        playData.Session.Password = Password;
+                    }
+                    onPlayData.Invoke(playData);
                     _expectingTermination = true;
                     break;
 
                 default:
                     throw new System.Exception("unknown message type");
             }
+        }
+
+        private PlayData ReadPlayData(Internal.CommunicationStream stream) {
+            var playData = new PlayData();
+
+            if (OpenTibiaUnity.GameManager.ClientVersion >= 1010) {
+                byte worldCount = stream.ReadUnsignedByte();
+                for (int i = 0; i < worldCount; i++) {
+                    int id = stream.ReadUnsignedByte();
+                    string name = stream.ReadString();
+                    string hostname = stream.ReadString();
+                    ushort port = stream.ReadUnsignedShort();
+                    bool preview = stream.ReadBoolean();
+
+                    playData.Worlds.Add(new PlayData.PlayDataWorld {
+                        Id = id,
+                        Name = name,
+                        ExternalAddress = hostname,
+                        ExternalPort = port,
+                        PreviewState = preview ? 1 : 0
+                    });
+                }
+
+                byte characterCount = stream.ReadUnsignedByte();
+                for (int i = 0; i < characterCount; i++) {
+                    var worldId = stream.ReadUnsignedByte();
+                    string name = stream.ReadString();
+
+                    playData.Characters.Add(new PlayData.PlayDataCharacter {
+                        WorldId = worldId,
+                        Name = name
+                    });
+                }
+            } else {
+                int characterCount = stream.ReadUnsignedByte();
+                for (int i = 0; i < characterCount; i++) {
+                    string characterName = stream.ReadString();
+                    string worldName = stream.ReadString();
+                    uint worldIpLong = stream.ReadUnsignedInt();
+                    ushort worldPort = stream.ReadUnsignedShort();
+
+                    int worldId = 0;
+                    int index = playData.Worlds.FindIndex(x => x.Name == worldName);
+                    if (index == -1) {
+                        worldId = playData.Worlds.Count;
+                        playData.Worlds.Add(new PlayData.PlayDataWorld {
+                            Id = worldId,
+                            Name = worldName,
+                            ExternalAddress = new System.Net.IPAddress((long)worldIpLong).ToString(),
+                            ExternalPort = worldPort
+                        });
+                    } else {
+                        worldId = playData.Worlds[index].Id;
+                    }
+
+                    playData.Characters.Add(new PlayData.PlayDataCharacter {
+                        Name = characterName,
+                        WorldId = worldId
+                    });
+                }
+            }
+
+            uint now = (uint)System.DateTime.Now.Second;
+            if (OpenTibiaUnity.GameManager.ClientVersion >= 1077) {
+                stream.ReadUnsignedByte(); // todo map accountState to strings
+                playData.Session.IsPremium = stream.ReadBoolean();
+                playData.Session.PremiumUntil = stream.ReadUnsignedInt();
+                playData.Session.InfinitePremium = playData.Session.IsPremium && playData.Session.PremiumUntil == 0;
+            } else {
+                uint premiumDays = stream.ReadUnsignedShort();
+                playData.Session.IsPremium = premiumDays > 0;
+                playData.Session.PremiumUntil = premiumDays > 0 ? (now + premiumDays * 86400U) : 0;
+                playData.Session.InfinitePremium = premiumDays == ushort.MaxValue;
+            }
+            return playData;
         }
 
         protected override void OnConnectionError(string message, bool _ = false) {
@@ -118,18 +202,12 @@ namespace OpenTibiaUnity.Core.Communication.Login
         }
 
         protected override void OnConnectionSocketError(SocketError code, string message) {
-            OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
-                if (code == SocketError.ConnectionRefused || code == SocketError.HostUnreachable)
-                    onInternalError.Invoke(TextResources.ERRORMSG_10061_LOGIN_HOSTUNREACHABLE);
-                else
-                    onInternalError.Invoke(string.Format("Error({0}): {1}", code, message));
-            });
-
+            onInternalError.Invoke($"{TextResources.ERRORMSG_HEADER_LOGIN}Error: {message} ({code}){TextResources.ERRORMSG_FOOTER}");
             _expectingTermination = true;
             Disconnect();
         }
-        
-        protected void SendLogin() {
+
+        private void SendLogin() {
             var message = _packetWriter.PrepareStream();
             message.WriteEnum(LoginclientMessageType.EnterAccount);
             message.WriteUnsignedShort((ushort)Utils.Utility.GetCurrentOs());
@@ -153,7 +231,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
 
             if (gameManager.GetFeature(GameFeature.GamePreviewState))
                 message.WriteUnsignedByte(0x00);
-            
+
             int payloadStart = (int)message.Position;
             if (gameManager.GetFeature(GameFeature.GameLoginPacketEncryption)) {
                 message.WriteUnsignedByte(0); // first byte must be zero
@@ -171,7 +249,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
                 message.WriteUnsignedInt(0);
 
             message.WriteString(Password);
-            
+
             if (gameManager.GetFeature(GameFeature.GameLoginPacketEncryption))
                 Cryptography.PublicRSA.EncryptMessage(message, payloadStart, Cryptography.PublicRSA.RSABlockSize);
 

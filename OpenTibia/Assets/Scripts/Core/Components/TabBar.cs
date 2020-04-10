@@ -1,17 +1,18 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
 
-namespace OpenTibiaUnity.Core.Components
+using UnityUI = UnityEngine.UI;
+
+namespace OpenTibiaUnity.UI.Legacy
 {
-    [RequireComponent(typeof(HorizontalOrVerticalLayoutGroup))]
-    public class TabBar : Base.AbstractComponent
+    [RequireComponent(typeof(UnityUI.HorizontalOrVerticalLayoutGroup))]
+    public class TabBar : Core.Components.Base.AbstractComponent
     {
-        HorizontalOrVerticalLayoutGroup _layoutGroup;
+        private UnityUI.HorizontalOrVerticalLayoutGroup _layoutGroup = null;
 
         protected override void Awake() {
             base.Awake();
 
-            _layoutGroup = GetComponent<HorizontalOrVerticalLayoutGroup>();
+            _layoutGroup = GetComponent<UnityUI.HorizontalOrVerticalLayoutGroup>();
         }
         
         public void AddTabButton(TabButton button) {

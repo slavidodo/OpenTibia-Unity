@@ -75,22 +75,25 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             _terminated = false;
             _address = address;
             _port = port;
-            
-            var addresses = Dns.GetHostAddresses(_address);
-            if (addresses == null || addresses.Length == 0) {
-                onConnectionSocketError.Invoke(SocketError.AddressNotAvailable, "Invalid IP/Hostname given as a parameter.");
-                return;
-            }
-            
-            var endPoint = new IPEndPoint(addresses[0], port);
-            _socket = new Socket(endPoint.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
             try {
+                var addresses = Dns.GetHostAddresses(_address);
+                if (addresses == null || addresses.Length == 0) {
+                    onConnectionSocketError.Invoke(SocketError.AddressNotAvailable, "Invalid IP/Hostname given as a parameter.");
+                    return;
+                }
+
+                var endPoint = new IPEndPoint(addresses[0], port);
+
+                _socket = new Socket(endPoint.Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+
                 var asyncResult = _socket.BeginConnect(endPoint, null, null);
                 asyncResult.AsyncWaitHandle.WaitOne(Constants.ConnectionTimeout);
                 OnConnectionConnected(asyncResult);
             } catch (SocketException e) {
                 onConnectionSocketError.Invoke(e.SocketErrorCode, e.Message);
+            } catch (Exception e) {
+                onConnectionSocketError.Invoke(SocketError.NotSocket, e.Message);
             }
         }
 

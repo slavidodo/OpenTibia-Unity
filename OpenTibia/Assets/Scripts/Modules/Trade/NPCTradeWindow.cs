@@ -1,22 +1,22 @@
 ﻿using OpenTibiaUnity.Core.Container;
 using OpenTibiaUnity.Core.Trade;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+
+using UnityUI = UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Trade
 {
-    public class NPCTradeWindow : Core.Components.Base.MiniWindow
+    public class NPCTradeWindow : UI.Legacy.SidebarWidget
     {
-        [SerializeField] private Toggle _buyToggle = null;
-        [SerializeField] private Toggle _sellToggle = null;
-        [SerializeField] private Slider _amountSlider = null;
+        [SerializeField] private UI.Legacy.Toggle _buyToggle = null;
+        [SerializeField] private UI.Legacy.Toggle _sellToggle = null;
+        [SerializeField] private UI.Legacy.Slider _amountSlider = null;
         [SerializeField] private TMPro.TextMeshProUGUI _amountLabel = null;
         [SerializeField] private TMPro.TextMeshProUGUI _priceLabel = null;
         [SerializeField] private TMPro.TextMeshProUGUI _moneyLabel = null;
-        [SerializeField] private Button _acceptButton = null;
-        [SerializeField] private ToggleGroup _tradeItemsToggleGroup = null;
+        [SerializeField] private UI.Legacy.Button _acceptButton = null;
+        [SerializeField] private UnityUI.ToggleGroup _tradeItemsToggleGroup = null;
 
         [SerializeField] private NPCTradeItem _nPCTradeItemTemplate = null;
 
@@ -90,7 +90,7 @@ namespace OpenTibiaUnity.Modules.Trade
             else
                 title = TextResources.WINDOWTITLE_NPCTRADE_NO_NAME;
 
-            _titleLabel.text = title;
+            _title.text = title;
 
             _currentTradeItem = null;
 
@@ -158,11 +158,11 @@ namespace OpenTibiaUnity.Modules.Trade
         }
 
         private NPCTradeItem CreateTradeItem(TradeObjectRef tradeObject) {
-            var tradeItem = Instantiate(_nPCTradeItemTemplate, _panelContent);
+            var tradeItem = Instantiate(_nPCTradeItemTemplate, _content);
             tradeItem.tradeObject = tradeObject;
-            tradeItem.toggleComponent.group = _tradeItemsToggleGroup;
-            tradeItem.toggleComponent.onValueChanged.AddListener((value) => OnTradeItemValueChanged(tradeItem, value));
-            tradeItem.itemLabel.text = string.Format("{0}: {1} gold", tradeObject.Name, tradeObject.Price);
+            tradeItem.toggle.group = _tradeItemsToggleGroup;
+            tradeItem.toggle.onValueChanged.AddListener((value) => OnTradeItemValueChanged(tradeItem, value));
+            tradeItem.text = string.Format("{0}: {1} gold", tradeObject.Name, tradeObject.Price);
             return tradeItem;
         }
 
@@ -184,7 +184,7 @@ namespace OpenTibiaUnity.Modules.Trade
             }
 
             if (_buyTradeItems.Count > 0)
-                _buyTradeItems[0].toggleComponent.isOn = true;
+                _buyTradeItems[0].toggle.isOn = true;
             else
                 _currentTradeItem = null;
 
@@ -209,7 +209,7 @@ namespace OpenTibiaUnity.Modules.Trade
             }
 
             if (_sellTradeItems.Count > 0)
-                _sellTradeItems[0].toggleComponent.isOn = true;
+                _sellTradeItems[0].toggle.isOn = true;
             else
                 _currentTradeItem = null;
 

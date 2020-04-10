@@ -8,15 +8,18 @@ namespace OpenTibiaUnity.Modules.GameWindow
     {
         protected override void OnRectTransformDimensionsChange() {
             base.OnRectTransformDimensionsChange();
-
             UpdateLayout();
         }
 
         protected void UpdateLayout() {
-            var parent = transform.parent;
-            var gameWindowLayout = parent.GetComponent<GameInterface>();
-            if (!!gameWindowLayout)
-                gameWindowLayout.UpdateLayout();
+            GameInterface gameInterface;
+            if (OpenTibiaUnity.GameManager != null)
+                gameInterface = OpenTibiaUnity.GameManager.GetModule<GameInterface>();
+            else
+                gameInterface = rectTransform.parent.GetComponent<GameInterface>();
+
+            if (gameInterface)
+                gameInterface.UpdateLayout(this);
         }
     }
 }

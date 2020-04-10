@@ -2,7 +2,7 @@
 {
     public class ChatHistoryPrev : StaticAction
     {
-        public ChatHistoryPrev(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
+        public ChatHistoryPrev(int id, string label, InputEvent eventMask) : base(id, label, eventMask, false) { }
 
         public override bool Perform(bool repeat = false) {
             OpenTibiaUnity.GameManager.onRequestChatHistoryPrev.Invoke();

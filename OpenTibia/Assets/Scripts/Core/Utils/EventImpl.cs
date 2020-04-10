@@ -17,24 +17,23 @@ namespace OpenTibiaUnity.Core.Utils
 
     public abstract class EventImplBase
     {
-        protected static void publicAddListener<T>(ref List<KeyValuePair<EventImplPriority, T>> list, EventImplPriority priority, T action) {
-            int lastIndex = list.Count - 1;
-            int index = 0;
-            while (index < lastIndex) {
-                int tmpIndex = index + lastIndex >> 1;
-                var listener = list[tmpIndex];
+        protected static void InternalAddListener<T>(ref List<KeyValuePair<EventImplPriority, T>> list, EventImplPriority priority, T action) {
+            int l = 0, r = list.Count - 1;
+            while (l <= r) {
+                int i = l + r >> 1;
+                var listener = list[i];
                 if (listener.Key < priority)
-                    index = tmpIndex + 1;
+                    l = i + 1;
                 else if (listener.Key > priority)
-                    lastIndex = tmpIndex - 1;
+                    r = i - 1;
                 else
                     break;
             }
 
-            list.Insert(index, new KeyValuePair<EventImplPriority, T>(priority, action));
+            list.Insert(l, new KeyValuePair<EventImplPriority, T>(priority, action));
         }
 
-        protected static bool publicRemoveListener<T>(ref List<KeyValuePair<EventImplPriority, T>> list, T action) {
+        protected static bool InternalRemoveListener<T>(ref List<KeyValuePair<EventImplPriority, T>> list, T action) {
             return list.RemoveAll((x) => x.Value.Equals(action)) != 0;
         }
     }
@@ -47,15 +46,15 @@ namespace OpenTibiaUnity.Core.Utils
             if (Listeners == null)
                 Listeners = new List<KeyValuePair<EventImplPriority, System.Action>>();
 
-            publicAddListener(ref Listeners, priority, action);
+            InternalAddListener(ref Listeners, priority, action);
         }
 
         public void RemoveListener(System.Action action) {
             if (Listeners != null)
-                publicRemoveListener(ref Listeners, action);
+                InternalRemoveListener(ref Listeners, action);
         }
 
-        public virtual void Invoke() {
+        public void Invoke() {
             int index = Listeners.Count - 1;
             while (index >= 0)
                 Listeners[index--].Value.Invoke();
@@ -81,15 +80,15 @@ namespace OpenTibiaUnity.Core.Utils
             if (Listeners == null)
                 Listeners = new List<KeyValuePair<EventImplPriority, System.Action<T0>>>();
 
-            publicAddListener(ref Listeners, priority, action);
+            InternalAddListener(ref Listeners, priority, action);
         }
 
         public void RemoveListener(System.Action<T0> action) {
             if (Listeners != null)
-                publicRemoveListener(ref Listeners, action);
+                InternalRemoveListener(ref Listeners, action);
         }
 
-        public virtual void Invoke(T0 t0) {
+        public void Invoke(T0 t0) {
             int index = Listeners.Count - 1;
             while (index >= 0)
                 Listeners[index--].Value.Invoke(t0);
@@ -115,15 +114,15 @@ namespace OpenTibiaUnity.Core.Utils
             if (Listeners == null)
                 Listeners = new List<KeyValuePair<EventImplPriority, System.Action<T0, T1>>>();
 
-            publicAddListener(ref Listeners, priority, action);
+            InternalAddListener(ref Listeners, priority, action);
         }
 
         public void RemoveListener(System.Action<T0, T1> action) {
             if (Listeners != null)
-                publicRemoveListener(ref Listeners, action);
+                InternalRemoveListener(ref Listeners, action);
         }
 
-        public virtual void Invoke(T0 t0, T1 t1) {
+        public void Invoke(T0 t0, T1 t1) {
             if (Listeners == null)
                 return;
 
@@ -155,15 +154,15 @@ namespace OpenTibiaUnity.Core.Utils
             if (Listeners == null)
                 Listeners = new List<KeyValuePair<EventImplPriority, System.Action<T0, T1, T2>>>();
 
-            publicAddListener(ref Listeners, priority, action);
+            InternalAddListener(ref Listeners, priority, action);
         }
 
         public void RemoveListener(System.Action<T0, T1, T2> action) {
             if (Listeners != null)
-                publicRemoveListener(ref Listeners, action);
+                InternalRemoveListener(ref Listeners, action);
         }
 
-        public virtual void Invoke(T0 t0, T1 t1, T2 t2) {
+        public void Invoke(T0 t0, T1 t1, T2 t2) {
             if (Listeners == null)
                 return;
 
@@ -195,15 +194,15 @@ namespace OpenTibiaUnity.Core.Utils
             if (Listeners == null)
                 Listeners = new List<KeyValuePair<EventImplPriority, System.Action<T0, T1, T2, T3>>>();
 
-            publicAddListener(ref Listeners, priority, action);
+            InternalAddListener(ref Listeners, priority, action);
         }
 
         public void RemoveListener(System.Action<T0, T1, T2, T3> action) {
             if (Listeners != null)
-                publicRemoveListener(ref Listeners, action);
+                InternalRemoveListener(ref Listeners, action);
         }
 
-        public virtual void Invoke(T0 t0, T1 t1, T2 t2, T3 t3) {
+        public void Invoke(T0 t0, T1 t1, T2 t2, T3 t3) {
             if (Listeners == null)
                 return;
 

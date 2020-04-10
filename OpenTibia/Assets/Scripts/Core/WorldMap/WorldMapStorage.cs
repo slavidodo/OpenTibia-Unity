@@ -115,9 +115,9 @@ namespace OpenTibiaUnity.Core.WorldMap
 
             return otherObj;
         }
-        public Appearances.ObjectInstance DeleteObject(UnityEngine.Vector3Int mapPosition, int stackPos) {
+        public Appearances.ObjectInstance DeleteObject(UnityEngine.Vector3Int mapPosition, int stackPos, bool visibleRemark = true) {
             Appearances.ObjectInstance otherObj = GetField(mapPosition).DeleteObject(stackPos);
-            if (!!otherObj && otherObj.IsCreature)
+            if (visibleRemark && !!otherObj && otherObj.IsCreature)
                 OpenTibiaUnity.CreatureStorage.MarkOpponentVisible(otherObj.Data, false);
 
             if (!!otherObj)
@@ -773,7 +773,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             for (int i = 0; i < field.ObjectsCount; i++) {
                 var @object = field.ObjectsNetwork[i];
                 if (@object.IsCreature && creature == null) {
-                    creature = OpenTibiaUnity.CreatureStorage.GetCreature(@object.Data);
+                    creature = OpenTibiaUnity.CreatureStorage.GetCreatureById(@object.Data);
                     if (!creature.Trapper && creature.Unpassable)
                         return creature.IsHuman && OpenTibiaUnity.GameManager.ClientVersion > 953
                             ? EnterPossibleFlag.PossibleNoAnimation : EnterPossibleFlag.NotPossible;

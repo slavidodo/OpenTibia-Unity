@@ -52,7 +52,7 @@ namespace OpenTibiaUnity.Core.WorldMap
 
         public void Draw(CommandBuffer commandBuffer, Vector2 screenPosition) {
             RebuildCache();
-            var material = OpenTibiaUnity.GameManager.OutlinedVerdanaFontMaterial;
+            var material = OpenTibiaUnity.GameManager.LabelOnscreenText.materialForRendering;
             var matrix = Matrix4x4.TRS(screenPosition, Quaternion.Euler(180, 0, 0), Vector3.one);
             commandBuffer.DrawMesh(_mesh, matrix, material);
         }
@@ -61,13 +61,13 @@ namespace OpenTibiaUnity.Core.WorldMap
             if (_dirty) {
                 _dirty = false;
                 var textComponent = OpenTibiaUnity.GameManager.LabelOnscreenText;
-                textComponent.fontSize = 11;
-                textComponent.fontStyle = TMPro.FontStyles.Bold;
+                textComponent.fontSize = 12;
+                textComponent.fontStyle = TMPro.FontStyles.Normal;
                 textComponent.alignment = TMPro.TextAlignmentOptions.Center;
                 textComponent.text = _name;
                 textComponent.color = _color;
                 textComponent.ForceMeshUpdate(true);
-                
+
                 _size = textComponent.GetRenderedValues();
                 if (_mesh == null)
                     _mesh = new Mesh();

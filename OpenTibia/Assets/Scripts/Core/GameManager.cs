@@ -6,15 +6,15 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
+
+using UnityUI = UnityEngine.UI;
 
 namespace OpenTibiaUnity.Core
 {
-    using PopupButtonType = Components.PopupWindow.ButtonType;
-    using PopupButtonDescriptor = Components.PopupWindow.ButtonDescriptor;
 
     [DisallowMultipleComponent]
-    public class GameManager : MonoBehaviour {
+    public class GameManager : MonoBehaviour
+    {
         public class TacticsChangeEvent : UnityEvent<CombatAttackModes, CombatChaseModes, bool, CombatPvPModes> { }
         public class VersionChangeEvent : UnityEvent<int, int> { }
         public class ClientSpecificationChangeEvent : UnityEvent<ClientSpecification, ClientSpecification> { }
@@ -22,6 +22,8 @@ namespace OpenTibiaUnity.Core
         public class RequestOutfitDialogEvent : UnityEvent<Appearances.AppearanceInstance, Appearances.AppearanceInstance, List<Communication.Game.ProtocolOutfit>, List<Communication.Game.ProtocolMount>> { }
         public class RequestNPCTradeEvent : UnityEvent<string, List<Trade.TradeObjectRef>, List<Trade.TradeObjectRef>> { }
         public class RequestTradeOfferEvent : UnityEvent<string, List<Appearances.ObjectInstance>> { }
+        public class RequestModalDialogEvent : UnityEvent<Communication.Game.ProtocolModalDialog> { }
+        public class ReceiveChannelsEvent : UnityEvent<List<Chat.Channel>> { }
 
         /// <summary>
         /// Game Manager should only exist once..
@@ -41,20 +43,21 @@ namespace OpenTibiaUnity.Core
         // Prefabs
         [Header("Prefabs")]
         public TMPro.TextMeshProUGUI DefaultLabel = null;
-        public Button DefaultButton = null;
-        public Button DefaulBlueButton = null;
-        public Button DefaulGreenButton = null;
-        public Button DefaulYellowButton = null;
-        public Button DefaultButtonWithLabel = null;
+        public UI.Legacy.Button ButtonPrefab = null;
+        public UI.Legacy.Button BlueButtonPrefab = null;
+        public UI.Legacy.Button GreenButtonPrefab = null;
+        public UI.Legacy.Button YellowButtonPrefab = null;
         public GameObject HorizontalSeparator = null;
         public GameObject VerticalSeparator = null;
-        public GameObject MiniWindowShadowVariant = null;
-        public Components.PopupWindow PopupWindowPrefab = null;
+        public GameObject SidebarWidgetShadowVariant = null;
+        public UI.Legacy.MessageWidget MessageWidgetPrefab = null;
+        public UI.Legacy.ConnectionLostWidget ConnectionLostWidgetPrefab = null;
         public TMPro.TextMeshProUGUI LabelOnscreenMessageBoxPrefab = null;
-        public Components.SplitStackWindow SplitStackWindowPrefab = null;
+        public UI.Legacy.SplitStackWidget SplitStackWindowPrefab = null;
         public GameObject ContextMenuBasePrefab = null;
-        public LayoutElement ContextMenuItemPrefab = null;
-        public Components.CheckboxWrapper PanelCheckBox = null;
+        public GameObject ContextMenuItemPrefab = null;
+        public UI.Legacy.CheckboxPanel PanelCheckBox = null;
+        public UI.Legacy.ItemPanel ItemPanelPrefab = null;
 
         // Utility objects for rendering
         [Header("Utility Invariants")]
@@ -74,7 +77,7 @@ namespace OpenTibiaUnity.Core
         public RectTransform WorldMapRenderingPanel = null;
 
         [Header("Windows")]
-        public Components.Base.Window LoadingAppearancesWindow = null;
+        public UI.Legacy.PopUpBase LoadingAppearancesWindow = null;
 
         [Header("Materials")]
         public Material ColoredMaterial = null;
@@ -84,6 +87,7 @@ namespace OpenTibiaUnity.Core
         public Material LightmapMaterial = null;
         public Material VerdanaFontMaterial = null;
         public Material OutlinedVerdanaFontMaterial = null;
+        public Material BitmapVerdanaFontMaterial = null;
 
         [Header("Render Textures")]
         public CustomRenderTexture WorldMapRenderTexture = null;
@@ -100,6 +104,11 @@ namespace OpenTibiaUnity.Core
         public Texture2D TileCursorTexture = null;
         public Texture2D StateFlagsTexture = null;
         public Texture2D SpeechFlagsTexture = null;
+
+        [Header("Colors")]
+        public Color NormalColor = Colors.ColorFromRGB(0x414141);
+        public Color AlternateColor = Colors.ColorFromRGB(0x484848);
+        public Color HighlightColor = Colors.ColorFromRGB(0x585858);
 
         // Properties
         public Thread MainThread { get; private set; }
@@ -128,7 +137,7 @@ namespace OpenTibiaUnity.Core
         public Communication.Game.ProtocolGame ProtocolGame { get; set; }
         public int PendingCharacterIndex { get; set; } = -1;
         public UnityEvent onSecondaryTimeCheck { get; private set; }
-        public TacticsChangeEvent onTacticsChangeEvent { get; private set; }
+        public TacticsChangeEvent onTacticsChange { get; private set; }
 #if !UNITY_EDITOR && UNITY_STANDALONE_WIN
         public System.IntPtr WindowPtr { get; private set; }
 #endif
@@ -144,6 +153,7 @@ namespace OpenTibiaUnity.Core
         public UnityEvent onLoadedGameAssets { get; private set; }
         public UnityEvent onGameStart { get; private set; }
         public UnityEvent onGameEnd { get; private set; }
+        public UnityEvent onProcessLogoutCharacter { get; private set; }
         public UnityEvent onProcessChangeCharacter { get; private set; }
         public UnityEvent onRequestHotkeysDialog { get; private set; }
         public UnityEvent onRequestChatHistoryPrev { get; private set; }
@@ -155,6 +165,8 @@ namespace OpenTibiaUnity.Core
         public RequestTradeOfferEvent onRequestOwnOffer { get; private set; }
         public RequestTradeOfferEvent onRequestCounterOffer { get; private set; }
         public UnityEvent onRequestCloseTrade { get; private set; }
+        public RequestModalDialogEvent onRequestModalDialog { get; private set; }
+        public ReceiveChannelsEvent onReceiveChannels { get; private set; }
 
         public Canvas ActiveBlocker {
             get {
@@ -168,8 +180,8 @@ namespace OpenTibiaUnity.Core
             get => BackgroundCanvas && BackgroundCanvas.gameObject.activeSelf ? BackgroundCanvas : (GameCanvas ? GameCanvas : null);
         }
 
-        public GraphicRaycaster ActiveRaycaster {
-            get => ActiveCanvas ? ActiveCanvas.GetComponent<GraphicRaycaster>() : null;
+        public UnityUI.GraphicRaycaster ActiveRaycaster {
+            get => ActiveCanvas ? ActiveCanvas.GetComponent<UnityUI.GraphicRaycaster>() : null;
         }
 
         public bool IsGameRunning {
@@ -201,8 +213,6 @@ namespace OpenTibiaUnity.Core
                     _loadedClientAssets = value;
             }
         }
-
-        public int ShouldSendPingAt { get; set; } = -1;
 
         // private fields
         private Queue<UnityAction> _actionQueue;
@@ -246,7 +256,7 @@ namespace OpenTibiaUnity.Core
 
             // events
             onSecondaryTimeCheck = new UnityEvent();
-            onTacticsChangeEvent = new TacticsChangeEvent();
+            onTacticsChange = new TacticsChangeEvent();
             onClientVersionChange = new VersionChangeEvent();
             onProtocolVersionChange = new VersionChangeEvent();
             onBuildVersionChange = new VersionChangeEvent();
@@ -254,6 +264,7 @@ namespace OpenTibiaUnity.Core
             onLoadedGameAssets = new UnityEvent();
             onGameStart = new UnityEvent();
             onGameEnd = new UnityEvent();
+            onProcessLogoutCharacter = new UnityEvent();
             onProcessChangeCharacter = new UnityEvent();
             onRequestHotkeysDialog = new UnityEvent();
             onRequestChatHistoryPrev = new UnityEvent();
@@ -265,6 +276,8 @@ namespace OpenTibiaUnity.Core
             onRequestOwnOffer = new RequestTradeOfferEvent();
             onRequestCounterOffer = new RequestTradeOfferEvent();
             onRequestCloseTrade = new UnityEvent();
+            onRequestModalDialog = new RequestModalDialogEvent();
+            onReceiveChannels = new ReceiveChannelsEvent();
 
             // setup ingame facilities
             OptionStorage = new Options.OptionStorage();
@@ -294,6 +307,7 @@ namespace OpenTibiaUnity.Core
             
             // initialize core game actions
             Game.ObjectMultiUseHandler.Initialize();
+            Game.ObjectDragHandler.Initialize();
 
             _modules = new List<Components.Base.Module>();
         }
@@ -310,7 +324,7 @@ namespace OpenTibiaUnity.Core
         private void FixedUpdate() {
             // this is called before any other action
             float time = Time.time;
-            float deltaTime = Time.deltaTime;
+            float deltaTime = Time.fixedDeltaTime;
 
             TicksSecondsF = time;
             TicksSeconds = (int)TicksSecondsF;
@@ -323,12 +337,6 @@ namespace OpenTibiaUnity.Core
             DeltaTicksMillis = (int)DeltaTicksMillisF;
 
             DequeueMainThreadActions();
-
-            if (ShouldSendPingAt != -1 && OpenTibiaUnity.TicksMillis >= ShouldSendPingAt) {
-                ShouldSendPingAt = -1;
-                if (IsGameRunning)
-                    ProtocolGame.SendPing();
-            }
         }
 
         private void OnGUI() {
@@ -442,25 +450,24 @@ namespace OpenTibiaUnity.Core
             if (_showingQuitNotification)
                 return false;
 
-            Components.PopupWindow exitWindow = null;
             _showingQuitNotification = true;
 
             void OnExitClick() {
                 Application.Quit();
             }
-            void OnLogoutClicked() {
+            void OnLogoutClick() {
                 _showingQuitNotification = false;
                 if (IsGameRunning)
                     ProtocolGame.Disconnect(false);
             }
-            void OnCancelClicked() {
+            void OnCancelClick() {
                 _showingQuitNotification = false;
             }
 
-            exitWindow = Components.PopupWindow.CreatePopupWindow(ActiveCanvas.transform, TextResources.EXIT_WINDOW_TITLE, TextResources.EXIT_WINDOW_MESSAGE,
-                new PopupButtonDescriptor("Exit", KeyCode.E, OnExitClick),
-                new PopupButtonDescriptor(PopupButtonType.Ok, OnLogoutClicked) { text = "Logout" },
-                new PopupButtonDescriptor(PopupButtonType.Cancel, OnCancelClicked));
+            var exitWidget = UI.Legacy.MessageWidget.CreateMessageWidget(ActiveCanvas.transform, TextResources.EXIT_WINDOW_TITLE, TextResources.EXIT_WINDOW_MESSAGE);
+            exitWidget.AddButton("Exit", KeyCode.E, OnExitClick);
+            exitWidget.AddButton(UI.Legacy.PopUpButtonMask.Ok, "Logout", OnLogoutClick);
+            exitWidget.AddButton(UI.Legacy.PopUpButtonMask.Cancel, OnCancelClick);
             return true;
         }
 
@@ -578,9 +585,7 @@ namespace OpenTibiaUnity.Core
             ProtocolGame.onConnectionError.AddListener(OnConnectionError);
             ProtocolGame.onLoginAdvice.AddListener(OnLoginAdvice);
             ProtocolGame.onConnectionLost.AddListener(OnConnectionLost);
-            ProtocolGame.onConnectionRecovered.AddListener(OnConnectionRecovered);
 
-            ShouldSendPingAt = OpenTibiaUnity.TicksMillis + Constants.PingDelay;
             InvokeRepeating("OnCheckAlive", 1, 1);
         }
 
@@ -594,14 +599,6 @@ namespace OpenTibiaUnity.Core
             if (BackgroundCanvas && BackgroundCanvas.gameObject) {
                 BackgroundCanvas.gameObject.SetActive(true);
                 EventSystem.SetSelectedGameObject(BackgroundCanvas.gameObject);
-            }
-
-            var modules = GetModules<Components.Base.Module>();
-            foreach (var module in modules) {
-                if (module.Destroyable)
-                    Destroy(module.gameObject);
-                else if (module.Closable)
-                    module.Close();
             }
 
 #if !UNITY_EDITOR && UNITY_STANDALONE_WIN
@@ -635,7 +632,10 @@ namespace OpenTibiaUnity.Core
         }
 
         private void OnConnectionLost() {
+            var protocolGame = OpenTibiaUnity.ProtocolGame;
+            protocolGame.onConnectionRecovered.AddListener(OnConnectionRecovered);
 
+            var connectionLostWidget = UI.Legacy.ConnectionLostWidget.CreateWidget();
         }
 
         private void OnConnectionRecovered() {

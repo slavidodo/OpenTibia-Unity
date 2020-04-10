@@ -269,7 +269,7 @@ namespace OpenTibiaUnity.Core.WorldMap
             for (int i = 0; i < ObjectsCount; i++) {
                 var @object = ObjectsRenderer[i];
                 if (@object.IsCreature) {
-                    var creature = OpenTibiaUnity.CreatureStorage.GetCreature(@object.Data);
+                    var creature = OpenTibiaUnity.CreatureStorage.GetCreatureById(@object.Data);
                     if (!!creature) {
                         if (!!creature.Outfit)
                             creature.Outfit.InvalidateTRS();

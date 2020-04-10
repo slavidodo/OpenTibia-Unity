@@ -17,6 +17,10 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
     public partial class ProtocolGame : Internal.Protocol
     {
+        public const int PingRetryCount = 3;
+        public const int PingRetryInterval = 5;
+        public const int PingLatencyInterval = 15;
+
         public class ConnectionError : UnityEvent<string, bool> {}
         public class LoginErrorEvent : UnityEvent<string> {}
         public class LoginAdviceEvent : UnityEvent<string> {}
@@ -31,16 +35,16 @@ namespace OpenTibiaUnity.Core.Communication.Game
         private static Chat.MessageStorage MessageStorage { get { return OpenTibiaUnity.MessageStorage; } }
         private static Container.ContainerStorage ContainerStorage { get { return OpenTibiaUnity.ContainerStorage; } }
         private static Creatures.Player Player { get { return OpenTibiaUnity.Player; } }
-        
-        private ConnectionState _connectionState = ConnectionState.Disconnected;
+
         private bool _firstReceived = false;
         private bool _connectionWasLost = false;
-        
-        private System.Diagnostics.Stopwatch _pingTimer = new System.Diagnostics.Stopwatch();
-        private int _pingReceived = 0;
+        private int _pingEarliestTime = 0;
+        private int _pingLatestTime = 0;
+        private int _pingTimeout = 0;
+        private int _pingCount = 0;
         private int _pingSent = 0;
-        private int _ping = 0;
-        //private Compression.InflateWrapper _inflateWrapper;
+        private int _currentCounter = 0;
+        private int _lastActivity = 0;
 
         public string WorldName { get; set; } = string.Empty;
         public string AccountName { get; set; } = string.Empty;
@@ -48,7 +52,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
         public string Token { get; set; } = string.Empty;
         public string SessionKey { get; set; } = string.Empty;
         public string CharacterName { get; set; } = string.Empty;
-        public int Ping { get => _ping; }
+        public ConnectionError onConnectionInternalError { get; } = new ConnectionError();
         public ConnectionError onConnectionError { get; } = new ConnectionError();
         public LoginErrorEvent onLoginError { get; } = new LoginErrorEvent();
         public LoginAdviceEvent onLoginAdvice { get; } = new LoginAdviceEvent();
@@ -56,31 +60,32 @@ namespace OpenTibiaUnity.Core.Communication.Game
         public ConnectionStatusEvent onConnectionLost { get; } = new ConnectionStatusEvent();
         public ConnectionStatusEvent onConnectionRecovered { get; } = new ConnectionStatusEvent();
 
-        public ConnectionState ConnectionState { get => _connectionState; }
+        public ConnectionState ConnectionState { get; private set; } = ConnectionState.Disconnected;
+        public bool IsGameRunning { get => ConnectionState == ConnectionState.Game; }
+        public bool IsPending { get => ConnectionState == ConnectionState.Pending;}
 
-        public bool IsGameRunning {
-            get => _connectionState == ConnectionState.Game;
-        }
-
-        public bool IsPending {
-            get => _connectionState == ConnectionState.Pending;
-        }
+        public int Latency { get; private set; } = 0;
 
         public ProtocolGame() : base() {
             SetConnectionState(ConnectionState.Disconnected, false);
         }
 
         public override void Connect(string address, int port) {
-            _pingTimer.Start();
-
             BuildMessageModesMap(OpenTibiaUnity.GameManager.ClientVersion);
             SetConnectionState(ConnectionState.ConnectingStage1);
+
+            _pingEarliestTime = 0;
+            _pingLatestTime = 0;
+            _pingTimeout = 0;
+            _pingCount = 0;
+            _pingSent = 0;
+            Latency = 0;
 
             base.Connect(address, port);
         }
 
         public override void Disconnect(bool dispatch = true) {
-            if ((_connectionState == ConnectionState.Game || _connectionState == ConnectionState.Pending) && !dispatch) {
+            if ((ConnectionState == ConnectionState.Game || ConnectionState == ConnectionState.Pending) && !dispatch) {
                 SendQuitGame();
             } else {
                 base.Disconnect();
@@ -98,15 +103,13 @@ namespace OpenTibiaUnity.Core.Communication.Game
             if (gameManager.GetFeature(GameFeature.GameWorldProxyIdentification)) {
                 // send the world name and the server will do the rest
                 SendProxyWorldNameIdentification();
-
-                // reset the inflater to clear sync
-                //_inflateWrapper = new Compression.InflateWrapper();
-
-                // older clients doesn't wait for challange, so we need to send the
-                // login packet from now on.
             } else if (!gameManager.GetFeature(GameFeature.GameChallengeOnLogin)) {
-                SendLogin(0, 0);
-                SetConnectionState(ConnectionState.ConnectingStage2);
+                // older clients doesn't wait for challange, so send login now
+                // we still need to call this on main thread
+                OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
+                    SendLogin(0, 0);
+                    SetConnectionState(ConnectionState.ConnectingStage2);
+                });
             }
 
             _connection.Receive();
@@ -115,8 +118,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
         protected override void OnConnectionTerminated() {
             base.OnConnectionTerminated();
             UnityAction action = () => {
-                if (_connectionState != ConnectionState.Game && _connectionState != ConnectionState.Pending) {
-                    switch (_connectionState) {
+                if (ConnectionState != ConnectionState.Game && ConnectionState != ConnectionState.Pending) {
+                    switch (ConnectionState) {
                         case ConnectionState.Disconnected:
                             OnConnectionError("Could not initialize a connection to the game server. Please try again later or contact customer support if the problem persists.", true);
                             break;
@@ -128,7 +131,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                             break;
                     }
                 } else {
-                    _connectionState = ConnectionState.Disconnected;
+                    ConnectionState = ConnectionState.Disconnected;
                     OpenTibiaUnity.GameManager.ProcessGameEnd();
                 }
             };
@@ -144,8 +147,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
             onConnectionError.Invoke(message, disconnecting);
         }
 
-        protected override void OnConnectionSocketError(System.Net.Sockets.SocketError e, string message) {
-            OnConnectionError(message, true);
+        protected override void OnConnectionSocketError(System.Net.Sockets.SocketError code, string message) {
+            onConnectionInternalError.Invoke($"{TextResources.ERRORMSG_HEADER_LOGIN}Error: {message} ({code}){TextResources.ERRORMSG_FOOTER}", true);
         }
 
         protected override void OnCommunicationDataReady() {
@@ -171,6 +174,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 return;
             }
 
+            _lastActivity = OpenTibiaUnity.TicksMillis;
+
             GameserverMessageType curMessageType = 0;
             GameserverMessageType lastMessageType = 0;
             GameserverMessageType prevMessageType = 0;
@@ -189,7 +194,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
                         }
                     }
 
-                    CheckPing(curMessageType);
+                    if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameClientPing))
+                        CheckPing(curMessageType);
+
                     ParseMessage(curMessageType);
 
                     prevMessageType = lastMessageType;
@@ -241,9 +248,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
         
         private void SetConnectionState(ConnectionState connectionState, bool dispatch = true) {
-            var oldState = _connectionState;
-            _connectionState = connectionState;
-            switch (_connectionState) {
+            var oldState = ConnectionState;
+            ConnectionState = connectionState;
+            switch (ConnectionState) {
                 case ConnectionState.Disconnected:
                     if (dispatch) {
                         if (oldState == ConnectionState.Game || oldState == ConnectionState.Pending)
@@ -292,7 +299,24 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
         
         private void CheckPing(GameserverMessageType type) {
-            
+            if (type != GameserverMessageType.Ping && type != GameserverMessageType.PingBack) {
+                _pingEarliestTime = UnityEngine.Mathf.Min(_pingLatestTime, _currentCounter + PingRetryInterval);
+            } else if (type == GameserverMessageType.PingBack) {
+                _pingEarliestTime = _pingLatestTime = _currentCounter + PingLatencyInterval;
+                _pingTimeout = _pingEarliestTime + PingRetryCount * PingRetryInterval;
+                if (_pingCount > 0)
+                    _pingCount--;
+
+                // if ping sent is equal to received ping
+                // the connection is stable enough
+                if (_pingCount == 0) {
+                    Latency = OpenTibiaUnity.TicksMillis - _pingSent;
+                    if (_connectionWasLost) {
+                        _connectionWasLost = false;
+                        onConnectionRecovered.Invoke();
+                    }
+                }
+            }
         }
 
         private bool ParseMessage(GameserverMessageType messageType) {
@@ -332,12 +356,12 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     ParseStoreButtonIndicators(_inputStream);
                     break;
                 case GameserverMessageType.Ping:
+                    if (!gameManager.GetFeature(GameFeature.GameClientPing))
+                        goto default;
+                    ParsePing(_inputStream);
+                    break;
                 case GameserverMessageType.PingBack: {
-                    if ((messageType == GameserverMessageType.Ping && gameManager.GetFeature(GameFeature.GameClientPing)) ||
-                        (messageType == GameserverMessageType.PingBack && !gameManager.GetFeature(GameFeature.GameClientPing)))
-                        ParsePingBack(_inputStream);
-                    else
-                        ParsePing(_inputStream);
+                    ParsePingBack(_inputStream);
                     break;
                 }
                 case GameserverMessageType.Challenge:
@@ -811,38 +835,50 @@ namespace OpenTibiaUnity.Core.Communication.Game
         private void MessageProcessingFinished() {
             WorldMapStorage.RefreshFields();
             MiniMapStorage.RefreshSectors();
-            CreatureStorage.RefreshOpponents();
         }
 
         public void OnCheckAlive() {
+            _currentCounter++;
             if (IsGameRunning || IsPending) {
-                // TODO, check for on connection lost :)
+                bool connectionWasLost;
+                if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameClientPing)) {
+                    int counter = _currentCounter;
+                    if (_pingEarliestTime == 0)
+                        _pingEarliestTime = counter;
+
+                    if (counter >= _pingEarliestTime && (counter - _pingEarliestTime) % PingRetryInterval == 0 && ((counter - _pingEarliestTime) / PingRetryInterval) < PingRetryCount) {
+                        _pingTimeout = _pingEarliestTime + PingRetryCount * PingRetryInterval;
+                        _pingCount++;
+                        _pingSent = OpenTibiaUnity.TicksMillis;
+                        SendPing();
+                    }
+
+                    connectionWasLost = counter >= _pingTimeout;
+                } else {
+                    connectionWasLost = _lastActivity - OpenTibiaUnity.TicksMillis >= 5000;
+                }
+
+                if (connectionWasLost) {
+                    if (!_connectionWasLost) {
+                        _connectionWasLost = true;
+                        onConnectionLost.Invoke();
+                    }
+                } else if (!OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameClientPing)) { // if there was no ping utility
+                    if (_connectionWasLost) {
+                        _connectionWasLost = false;
+                        onConnectionRecovered.Invoke();
+                    }
+                }
             }
         }
 
         private void ParsePingBack(Internal.CommunicationStream message) {
-            _pingReceived++;
-            
-            if (_pingReceived == _pingSent)
-                _ping = (int)_pingTimer.ElapsedMilliseconds;
-            else
-                ChatStorage.AddDebugMessage("ProtocolGame.ParsePingBack: Got an invalid ping from server");
-
-            OpenTibiaUnity.GameManager.ShouldSendPingAt = OpenTibiaUnity.TicksMillis + Constants.PingDelay;
+            if (!OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameClientPing))
+                SendPingBack();
         }
 
         private void ParsePing(Internal.CommunicationStream message) {
-            // onPing.Invoke();
-            InternalSendPingBack();
-        }
-
-        public void SendPing() {
-            if (_pingReceived != _pingSent)
-                return;
-
-            InternalSendPing();
-            _pingSent++;
-            _pingTimer.Restart();
+            SendPingBack();
         }
     }
 }

@@ -134,5 +134,9 @@ namespace OpenTibiaUnity.Core.Appearances
             _position.y = (int)((mY - 1) / Constants.FieldSize);
             return true;
         }
+
+        public override AppearanceInstance Clone() {
+            return new MissileInstance(Id, Type, Position, Target);
+        }
     }
 }

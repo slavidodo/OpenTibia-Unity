@@ -16,13 +16,10 @@ namespace OpenTibiaUnity.Core.Communication.Game
             var initialPosition = message.ReadPosition();
             int modifier = message.ReadUnsignedByte();
 
-            Appearances.AppearanceInstance effect = null;
-            byte effectId = 0;
-
             var fromPosition = initialPosition;
             ushort unclampedOffset = 0;
-            while (modifier != 0) {
-                if (modifier == 1) {
+            while (modifier != 0) { // 0: end loop
+                if (modifier == 1) { // delta -> used to define a change in position
                     unclampedOffset = message.ReadUnsignedShort();
                     int offset = unclampedOffset % 256;
                     fromPosition.x += offset % Constants.MapSizeX;
@@ -35,6 +32,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     fromPosition.y++;
                 }
 
+                byte effectId;
+                Appearances.AppearanceInstance effect;
                 if ((unclampedOffset >= 1024 && modifier == 1) || (modifier & 3) == 0) {
                     effectId = message.ReadUnsignedByte();
                     int deltaX = message.ReadSignedByte();

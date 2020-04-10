@@ -143,37 +143,35 @@ namespace OpenTibiaUnity.Core.Appearances
         }
 
         private CachedSprite FindCachedSprite(uint spriteId) {
-            int lastIndex = _cachedSprites.Count - 1;
-            int index = 0;
-            while (index <= lastIndex) {
-                int tmpIndex = index + lastIndex >> 1;
-                var cachedSprite = _cachedSprites[tmpIndex];
-                if (cachedSprite.id > spriteId)
-                    index = tmpIndex + 1;
-                else if (cachedSprite.id < spriteId)
-                    lastIndex = tmpIndex - 1;
+            int l = 0, r = _cachedSprites.Count - 1;
+            while (l <= r) {
+                int i = l + (r - l) / 2;
+                var other = _cachedSprites[i];
+                if (other.id > spriteId)
+                    l = i + 1;
+                else if (other.id < spriteId)
+                    r = i - 1;
                 else
-                    return cachedSprite;
+                    return other;
             }
 
             return null;
         }
 
-        private void InsertCachedSprite(CachedSprite cachedSprite) {
-            int index = 0;
-            int lastIndex = _cachedSprites.Count - 1;
-            while (index <= lastIndex) {
-                int tmpIndex = index + lastIndex >> 1;
-                var foundCache = _cachedSprites[tmpIndex];
-                if (foundCache.id < cachedSprite.id)
-                    index = tmpIndex + 1;
-                else if (foundCache.id > cachedSprite.id)
-                    lastIndex = tmpIndex - 1;
+        private void InsertCachedSprite(CachedSprite sprite) {
+            int l = 0, r = _cachedSprites.Count - 1;
+            while (l <= r) {
+                int i = l + (r - l) / 2;
+                var other = _cachedSprites[i];
+                if (other.id < sprite.id)
+                    l = i + 1;
+                else if (other.id > sprite.id)
+                    r = i - 1;
                 else
                     return;
             }
 
-            _cachedSprites.Insert(index, cachedSprite);
+            _cachedSprites.Insert(l, sprite);
         }
     }
 }

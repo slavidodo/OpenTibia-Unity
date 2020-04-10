@@ -148,15 +148,14 @@ namespace OpenTibiaUnity.Core.Appearances
         }
 
         private AppearanceType FindAppearanceType(List<AppearanceType> list, uint id) {
-            int lastIndex = list.Count - 1;
-            int index = 0;
-            while (index <= lastIndex) {
-                int tmpIndex = index + lastIndex >> 1;
+            int l = 0, r = list.Count - 1;
+            while (l <= r) {
+                int tmpIndex = l + (r - l) / 2;
                 var appearanceType = list[tmpIndex];
                 if (appearanceType.Id < id)
-                    index = tmpIndex + 1;
+                    l = tmpIndex + 1;
                 else if (appearanceType.Id > id)
-                    lastIndex = tmpIndex - 1;
+                    r = tmpIndex - 1;
                 else
                     return appearanceType;
             }

@@ -21,5 +21,9 @@
             if (animator != null)
                 animator.Finished = true;
         }
+
+        public override AppearanceInstance Clone() {
+            return new EffectInstance(Id, Type);
+        }
     }
 }

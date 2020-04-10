@@ -34,7 +34,7 @@ namespace OpenTibiaUnity.Core.Creatures
 
         public class CreatureTypesCreatureChangeEvent : UnityEvent<Creature, CreatureType, CreatureType> { };
         public class PartyFlagsCreatureChangeEvent : UnityEvent<Creature, PartyFlag, PartyFlag> { };
-        public class PKFlagsCreatureChangeEvent : UnityEvent<Creature, PKFlag, PKFlag> { };
+        public class PkFlagsCreatureChangeEvent : UnityEvent<Creature, PkFlag, PkFlag> { };
         public class GuildFlagsCreatureChangeEvent : UnityEvent<Creature, GuildFlag, GuildFlag> { };
         public class SpeechCategoryCreatureChangeEvent : UnityEvent<Creature, SpeechCategory, SpeechCategory> { };
 
@@ -45,7 +45,7 @@ namespace OpenTibiaUnity.Core.Creatures
         public static BoolCreatureChangeEvent onUnpassableChange = new BoolCreatureChangeEvent();
         public static DirectionCreatureChangeEvent onDirectionChange = new DirectionCreatureChangeEvent();
         public static PartyFlagsCreatureChangeEvent onPartyFlagChange = new PartyFlagsCreatureChangeEvent();
-        public static PKFlagsCreatureChangeEvent onPKFlagChange = new PKFlagsCreatureChangeEvent();
+        public static PkFlagsCreatureChangeEvent onPkFlagChange = new PkFlagsCreatureChangeEvent();
         public static GuildFlagsCreatureChangeEvent onGuildFlagChange = new GuildFlagsCreatureChangeEvent();
         public static OutfitCreatureChangeEvent onOutfitChange = new OutfitCreatureChangeEvent(); // outfit
         public static OutfitCreatureChangeEvent onMountOutfitChange = new OutfitCreatureChangeEvent(); // mountOutfit
@@ -107,10 +107,10 @@ namespace OpenTibiaUnity.Core.Creatures
             set { if (_partyFlag != value) { var old = _partyFlag; _partyFlag = value; onPartyFlagChange.Invoke(this, _partyFlag, old); } }
         }
 
-        protected PKFlag _pKFlag = PKFlag.None;
-        public PKFlag PKFlag {
-            get { return _pKFlag; }
-            set { if (_pKFlag != value) { var old = _pKFlag; _pKFlag = value; onPKFlagChange.Invoke(this, _pKFlag, old); } }
+        protected PkFlag _pkFlag = PkFlag.None;
+        public PkFlag PkFlag {
+            get { return _pkFlag; }
+            set { if (_pkFlag != value) { var old = _pkFlag; _pkFlag = value; onPkFlagChange.Invoke(this, _pkFlag, old); } }
         }
 
         protected SummonType _summonType = SummonType.None;
@@ -234,7 +234,7 @@ namespace OpenTibiaUnity.Core.Creatures
                 || _partyFlag == PartyFlag.Member_SharedXP_Off;
         }
         public bool HasFlag {
-            get => PKFlag != PKFlag.None
+            get => PkFlag != PkFlag.None
                 || PartyFlag != PartyFlag.None
                 || SummonType != SummonType.None
                 || GuildFlag != GuildFlag.None
@@ -284,7 +284,7 @@ namespace OpenTibiaUnity.Core.Creatures
             _movementRunning = false;
             Name = null;
             _partyFlag = PartyFlag.None;
-            _pKFlag = PKFlag.Revenge;
+            _pkFlag = PkFlag.Revenge;
             _type = CreatureType.Monster;
             m_Visible = false;
             _guildFlag = GuildFlag.None;
@@ -446,11 +446,11 @@ namespace OpenTibiaUnity.Core.Creatures
             PartyFlag = partyFlag;
         }
 
-        public void SetPKFlag(PKFlag pkFlag) {
-            if (pkFlag < PKFlag.First || pkFlag > PKFlag.Last)
+        public void SetPKFlag(PkFlag pkFlag) {
+            if (pkFlag < PkFlag.First || pkFlag > PkFlag.Last)
                 throw new System.ArgumentException("Creature.SetPKFlag: Invalid pkFlag (" + (int)pkFlag + ")");
 
-            PKFlag = pkFlag;
+            PkFlag = pkFlag;
         }
 
         public void SetSpeechCategory(SpeechCategory speechCategory) {

@@ -4,7 +4,7 @@
     {
         private DialogType _dialogType;
 
-        public ShowDialog(int id, string label, uint eventMask, DialogType dialogType) : base(id, label, eventMask, false) {
+        public ShowDialog(int id, string label, InputEvent eventMask, DialogType dialogType) : base(id, label, eventMask, false) {
             _dialogType = dialogType;
         }
 

@@ -282,12 +282,14 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
         private void ParseChannels(Internal.CommunicationStream message) {
             int count = message.ReadUnsignedByte();
-            List<Chat.Channel> channels = new List<Chat.Channel>();
+            List<Chat.Channel> channels = new List<Chat.Channel>(count);
             for (int i = 0; i < count; i++) {
                 int id = message.ReadUnsignedShort();
                 string name = message.ReadString();
                 channels.Add(new Chat.Channel(id, name, MessageModeType.None));
             }
+
+            OpenTibiaUnity.GameManager.onReceiveChannels.Invoke(channels);
         }
 
         private void ParseOpenChannel(Internal.CommunicationStream message) {

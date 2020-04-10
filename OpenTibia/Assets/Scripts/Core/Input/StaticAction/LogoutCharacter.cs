@@ -2,11 +2,12 @@
 {
     public class LogoutCharacter : StaticAction
     {
-        public LogoutCharacter(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
+        public LogoutCharacter(int id, string label, InputEvent eventMask) : base(id, label, eventMask, false) { }
 
         public override bool Perform(bool repeat = false) {
             var protocolGame = OpenTibiaUnity.ProtocolGame;
             if (!!protocolGame) {
+                OpenTibiaUnity.GameManager.onProcessLogoutCharacter.Invoke();
                 protocolGame.Disconnect(false);
                 return true;
             }

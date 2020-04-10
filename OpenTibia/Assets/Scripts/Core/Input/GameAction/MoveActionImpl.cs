@@ -37,20 +37,20 @@
             if (_objectType.IsUnmovable) {
                 OpenTibiaUnity.WorldMapStorage.AddOnscreenMessage(MessageModeType.Failure, TextResources.GAME_MOVE_UNMOVEABLE);
             } else if (_objectType.IsStackable && _objectAmount > 1 && _moveAmount == MoveActionImpl.MoveAsk) {
-                // TODO: SplitStackWidget
-                var splitStackWindow = UnityEngine.Object.Instantiate(OpenTibiaUnity.GameManager.SplitStackWindowPrefab,
-                    OpenTibiaUnity.GameManager.ActiveCanvas.transform);
-
+                var gameManager = OpenTibiaUnity.GameManager;
+                var splitStackWindow = UnityEngine.Object.Instantiate(gameManager.SplitStackWindowPrefab, gameManager.ActiveCanvas.transform);
+                
                 splitStackWindow.ObjectType = _objectType;
                 splitStackWindow.ObjectAmount = _objectAmount;
                 splitStackWindow.SelectedAmount = _objectAmount;
                 splitStackWindow.onOk.AddListener(OnSplitStackWindowOk);
+                splitStackWindow.Show();
             } else {
-                Performpublic(_moveAmount);
+                InternalPerform(_moveAmount);
             }
         }
 
-        protected void Performpublic(int moveAmount) {
+        protected void InternalPerform(int moveAmount) {
             if (moveAmount == MoveActionImpl.MoveAll)
                 moveAmount = _objectAmount;
             else if (moveAmount <= 0 || moveAmount > _objectAmount)
@@ -61,8 +61,8 @@
                 protocolGame.SendMoveObject(_sourceAbsolute, (ushort)_objectType.Id, _stackPos, _destAbsolute, moveAmount);
         }
 
-        protected void OnSplitStackWindowOk(Components.SplitStackWindow splitStackWindow) {
-            Performpublic(splitStackWindow.SelectedAmount);
+        protected void OnSplitStackWindowOk(UI.Legacy.SplitStackWidget splitStackWindow) {
+            InternalPerform(splitStackWindow.SelectedAmount);
         }
     }
 }

@@ -1,52 +1,137 @@
 ﻿using OpenTibiaUnity.Core.Appearances;
-using OpenTibiaUnity.Core.Components;
 using OpenTibiaUnity.Core.Creatures;
-using UnityEngine.UI;
+using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.Rendering;
+using UnityUI = UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Battle
 {
-    public class BattleCreature : Core.Components.Base.AbstractComponent
+    public class BattleCreature : Core.Components.Base.AbstractComponent, IPointerEnterHandler, IPointerExitHandler
     {
-        public RawImage markImageComponent = null;
-        public RawImage outfitImageCompoenent = null;
+        // static fields
+        private static Core.Appearances.Rendering.MarksView _creaturesMarksView;
 
-        public TMPro.TextMeshProUGUI nameTextComponent = null;
-        public Slider healthProgressBar = null;
-        public RawImage healthProgressFillArea = null;
-
-        protected CachedSprite _cachedSprite;
-        private Creature _creature = null;
-
-        public Creature Creature { get => _creature; }
-
-        protected override void Start() {
-            base.Start();
-
-            healthProgressBar.minValue = 0;
-            healthProgressBar.maxValue = 100;
+        static BattleCreature() {
+            _creaturesMarksView = new Core.Appearances.Rendering.MarksView(0);
+            _creaturesMarksView.AddMarkToView(MarkType.ClientBattleList, Constants.MarkThicknessBold);
+            _creaturesMarksView.AddMarkToView(MarkType.Permenant, Constants.MarkThicknessBold);
         }
 
-        public void UpdateDetails(Creature creature) {
-            _creature = creature;
+        // serialized field
+        [SerializeField]
+        private UnityUI.RawImage _image = null;
+        [SerializeField]
+        private TMPro.TextMeshProUGUI _nameLabel = null;
+        [SerializeField]
+        private UI.Legacy.Slider _healthBar = null;
 
-            nameTextComponent.text = creature.Name;
-            healthProgressBar.value = creature.HealthPercent;
-            healthProgressFillArea.color = Creature.GetHealthColor((int)healthProgressBar.value);
+        // fields
+        private RenderTexture _renderTexture;
+        private AppearanceInstance _outfit;
 
-            var outfit = creature.Outfit;
-            if (outfit) {
-                _cachedSprite = outfit.GetSprite(0, (int)Direction.South, 0, 0, false);
-                outfitImageCompoenent.texture = _cachedSprite.texture;
-                //outfitImageCompoenent.uvRect = _cachedSprite.uv; TODO;
+        // properties
+        public string creatureName {
+            get => _nameLabel.text;
+            set => _nameLabel.text = value;
+        }
+
+        public int healthPercent {
+            get => (int)_healthBar.value;
+            set {
+                if (value != _healthBar.value) {
+                    _healthBar.value = value;
+                    UpdateHealthBarColor();
+                }
+            }
+        }
+
+        private Creature _creature = null;
+        public Creature creature {
+            get => _creature;
+            set {
+                if (_creature == value)
+                    return;
+
+                _creature = value;
+                _outfit = _creature?.Outfit?.Clone();
+                if (_creature != null) {
+                    creatureName = creature.Name;
+                    healthPercent = (int)creature.GetSkillValue(SkillType.HealthPercent);
+                }
+
+                if (_outfit != null) {
+                    _outfit.OffsetDisabled = true; // disable offset to use all space
+                    _outfit.SetClamping(true);
+                }
+            }
+        }
+
+        private void OnGUI() {
+            var e = Event.current;
+            if (e.type != EventType.Repaint || !_outfit)
+                return;
+
+            if (_renderTexture == null) {
+                _renderTexture = new RenderTexture(Constants.FieldSize, Constants.FieldSize, 0, RenderTextureFormat.ARGB32);
+                _renderTexture.filterMode = FilterMode.Bilinear;
+                _renderTexture.Create();
+
+                _image.texture = _renderTexture;
             }
 
-            var markColor = creature.Marks.GetMarkColor(MarkType.ClientBattleList);
-            if (markColor == Marks.MarkUnmarked) {
-                markImageComponent.gameObject.SetActive(false);
-            } else {
-                markImageComponent.gameObject.SetActive(true);
-                markImageComponent.color = Core.Colors.ColorFromARGB(markColor);
+            using (var commandBuffer = new CommandBuffer()) {
+                commandBuffer.SetRenderTarget(_renderTexture);
+                commandBuffer.ClearRenderTarget(false, true, Core.Utils.GraphicsUtility.TransparentColor);
+
+                var zoom = new Vector2(Screen.width / (float)_renderTexture.width, Screen.height / (float)_renderTexture.height);
+                commandBuffer.SetViewMatrix(Matrix4x4.TRS(Vector3.zero, Quaternion.identity, zoom) *
+                    OpenTibiaUnity.GameManager.MainCamera.worldToCameraMatrix);
+
+                _outfit.Animate(OpenTibiaUnity.TicksMillis);
+                _outfit.Draw(commandBuffer, Vector2Int.zero, (int)Direction.South, 0, 0);
+
+                // here we actually draw marks after the creature
+                // this is sustained for better view
+                _creaturesMarksView.DrawMarks(commandBuffer, creature.Marks, 0, 0);
+
+                Graphics.ExecuteCommandBuffer(commandBuffer);
             }
+        }
+
+        protected override void OnDestroy() {
+            base.OnDestroy();
+            if (_renderTexture != null) {
+                _renderTexture.Release();
+                _renderTexture = null;
+            }
+
+            var battleWidget = OpenTibiaUnity.GameManager.GetModule<BattleWidget>();
+            if (battleWidget)
+                battleWidget.activeWidget = null;
+        }
+
+        public void OnPointerEnter(PointerEventData eventData) {
+            OpenTibiaUnity.CreatureStorage.Aim = creature;
+            OpenTibiaUnity.GameManager.GetModule<BattleWidget>().activeWidget = this;
+        }
+
+        public void OnPointerExit(PointerEventData eventData) {
+            OpenTibiaUnity.CreatureStorage.Aim = null;
+            OpenTibiaUnity.GameManager.GetModule<BattleWidget>().activeWidget = null;
+        }
+
+        public void UpdateMark(bool set, uint color) {
+            if (!set) {
+                _nameLabel.color = Core.Colors.Default;
+                return;
+            }
+
+            _nameLabel.color = Core.Appearances.Rendering.MarksView.GetMarksColor(color);
+        }
+
+        private void UpdateHealthBarColor() {
+            _healthBar.fillColor = Creature.GetHealthColor((int)_healthBar.value);
         }
     }
 }

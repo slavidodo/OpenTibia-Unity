@@ -41,7 +41,7 @@ namespace OpenTibiaUnity.Core.WorldMap.Rendering
             var uv = new Vector4(1f / s_cachedFrameCount, 1f, (float)_currentFrame / s_cachedFrameCount, 0);
             _props.SetVector("_MainTex_UV", uv);
 
-            Utils.GraphicsUtility.DrawTexture(commandBuffer, position, scale, OpenTibiaUnity.GameManager.AppearanceTypeMaterial, _props);
+            Utils.GraphicsUtility.Draw(commandBuffer, position, scale, OpenTibiaUnity.GameManager.AppearanceTypeMaterial, _props);
         }
     }
 }

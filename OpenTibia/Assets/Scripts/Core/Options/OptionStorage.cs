@@ -129,7 +129,7 @@ namespace OpenTibiaUnity.Core.Options
         public bool CombatSecureMode = true;
         public CombatPvPModes CombatPvPMode = CombatPvPModes.Dove;
         public OpponentFilters OpponentFilter = OpponentFilters.None;
-        public OpponentSortTypes OpponentSort = OpponentSortTypes.SortKnownSinceAsc;
+        public OpponentSortType OpponentSort = OpponentSortType.SortKnownSinceAsc;
         public CyclopediaLootValueSource LootValueSource = CyclopediaLootValueSource.NpcSaleData;
 
         // internal storages (mappings) (TODO: Rename Mapping to Preset)
@@ -222,7 +222,7 @@ namespace OpenTibiaUnity.Core.Options
             if (GameResolutionIndex == -1)
                 GameResolutionIndex = Screen.resolutions.Length - 1;
             else
-                GameResolutionIndex = Mathf.Clamp(GameQualityLevel, 0, Screen.resolutions.Length - 1);
+                GameResolutionIndex = Mathf.Clamp(GameResolutionIndex, 0, Screen.resolutions.Length - 1);
 
             var resolution = Screen.resolutions[GameResolutionIndex];
             Screen.SetResolution(resolution.width, resolution.height, FullscreenMode);

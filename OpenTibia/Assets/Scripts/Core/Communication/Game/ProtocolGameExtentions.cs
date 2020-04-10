@@ -123,7 +123,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
                         creature.Name = message.ReadString();
                     } else {
                         uint creatureId = message.ReadUnsignedInt();
-                        creature = CreatureStorage.GetCreature(creatureId);
+                        creature = CreatureStorage.GetCreatureById(creatureId);
                         if (!creature)
                             throw new System.Exception("ProtocolGame.ReadCreatureInstance: Outdated creature not found.");
                     }
@@ -136,13 +136,18 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     creature.Brightness = message.ReadUnsignedByte();
                     creature.LightColor = Colors.ColorFrom8Bit(message.ReadUnsignedByte());
                     creature.SetSkill(SkillType.Speed, message.ReadUnsignedShort());
-                    creature.SetPKFlag(message.ReadEnum<PKFlag>());
+                    creature.SetPKFlag(message.ReadEnum<PkFlag>());
                     creature.SetPartyFlag(message.ReadEnum<PartyFlag>());
 
                     if (gameManager.GetFeature(GameFeature.GameCreatureEmblems) && type == AppearanceInstance.UnknownCreature)
                         creature.SetGuildFlag(message.ReadEnum<GuildFlag>());
 
                     if (gameManager.GetFeature(GameFeature.GameCreatureMarks)) {
+                        // todo; at 11.20 SummonOther was removed
+                        // back at 12.03 Hireling was added with the same enum number
+                        // optimally we shouldn't allow any invalid enum value between
+                        // these versions, so we could use separate enums then cast to
+                        // to the preferred one
                         creature.Type = message.ReadEnum<CreatureType>();
                         if (gameManager.ClientVersion >= 1120)
                             creature.SetSummonerId(creature.IsSummon ? message.ReadUnsignedInt() : 0);
@@ -174,7 +179,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
                 case AppearanceInstance.Creature: {
                     uint creatureId = message.ReadUnsignedInt();
-                    creature = CreatureStorage.GetCreature(creatureId);
+                    creature = CreatureStorage.GetCreatureById(creatureId);
                     if (!creature)
                         throw new System.Exception(string.Format("ProtocolGame.ReadCreatureInstance: Known creature not found ({0}).", creatureId));
 
@@ -193,7 +198,6 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 creature.Position = absolutePosition.Value;
 
             CreatureStorage.MarkOpponentVisible(creature, true);
-            CreatureStorage.InvalidateOpponents();
             return creature;
         }
 

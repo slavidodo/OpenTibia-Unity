@@ -38,7 +38,7 @@ namespace OpenTibiaUnity.Core.Components
             onEndDrag = new DragEvent();
         }
 
-        public override Vector2 CalculateRelativeMousePosition(Vector3 mousePosition) {
+        public override Vector2 CalculateAbsoluteMousePosition(Vector2 mousePosition) {
             return new Vector2(mousePosition.x, mousePosition.y) + _initialMousePositionOverrider;
         }
 
@@ -50,7 +50,7 @@ namespace OpenTibiaUnity.Core.Components
 
         public void OnDrag(PointerEventData eventData) {
             if (_draggingEnabled) {
-                var relativeMousePosition = CalculateRelativeMousePosition(eventData.position);
+                var relativeMousePosition = CalculateAbsoluteMousePosition(eventData.position);
 
                 float x = _initialPosition.x + (relativeMousePosition.x - _initialMousePosition.x);
                 float y = _initialPosition.y + (relativeMousePosition.y - _initialMousePosition.y);
@@ -77,7 +77,7 @@ namespace OpenTibiaUnity.Core.Components
             var size = rectTransform.rect.size;
 
             _initialMousePositionOverrider = pivotDelta * size;
-            _initialMousePosition = CalculateRelativeMousePosition(eventData.position);
+            _initialMousePosition = CalculateAbsoluteMousePosition(eventData.position);
             _initialPosition = rectTransform.position;
 
             Vector2 initialOffset = new Vector2() {

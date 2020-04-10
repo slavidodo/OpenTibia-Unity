@@ -1,11 +1,12 @@
 ﻿using OpenTibiaUnity.Core.Chat;
-using OpenTibiaUnity.Core.Components;
 using OpenTibiaUnity.Core.Input.GameAction;
 using UnityEngine;
 
+using TR = OpenTibiaUnity.TextResources;
+
 namespace OpenTibiaUnity.Modules.Console
 {
-    public class ChannelMessageContextMenu : ContextMenuBase
+    public class ChannelMessageContextMenu : UI.Legacy.ContextMenuBase
     {
         private Channel _channel = null;
         private ChannelMessage _channelMessage = null;
@@ -27,25 +28,25 @@ namespace OpenTibiaUnity.Modules.Console
                 isHuman = !string.IsNullOrEmpty(_channelMessage.Speaker);
 
             if (isHuman && _channelMessage.Speaker != OpenTibiaUnity.Player.Name) {
-                CreateTextItem(string.Format(TextResources.CTX_VIEW_PRIVATE_MESSAGE, _channelMessage.Speaker), () => {
+                CreateTextItem(string.Format(TR.CTX_VIEW_PRIVATE_MESSAGE, _channelMessage.Speaker), () => {
                     // todo, notify about expected channel :)
                     new PrivateChatActionImpl(PrivateChatActionType.OpenMessageChannel, PrivateChatActionImpl.ChatChannelNoChannel, _channelMessage.Speaker).Perform();
                 });
 
                 // TODO, this should only appear if this player isn't already on the vip list //
                 if (true) {
-                    CreateTextItem(string.Format(TextResources.CTX_VIEW_ADD_BUDDY, _channelMessage.Speaker), "TODO", () => {
+                    CreateTextItem(string.Format(TR.CTX_VIEW_ADD_BUDDY, _channelMessage.Speaker), "TODO", () => {
                         // TODO
                     });
                 }
                 
                 if (chatStorage.HasOwnPrivateChannel) {
-                    if (_channel.Id == chatStorage.OwnPrivateChannelId) {
-                        CreateTextItem(TextResources.CTX_VIEW_PRIVATE_INVITE, () => {
+                    if (_channel.Id != chatStorage.OwnPrivateChannelId) {
+                        CreateTextItem(TR.CTX_VIEW_PRIVATE_INVITE, () => {
                             new PrivateChatActionImpl(PrivateChatActionType.ChatChannelInvite, chatStorage.OwnPrivateChannelId, _channelMessage.Speaker).Perform();
                         });
                     } else {
-                        CreateTextItem(TextResources.CTX_VIEW_PRIVATE_EXCLUDE, () => {
+                        CreateTextItem(TR.CTX_VIEW_PRIVATE_EXCLUDE, () => {
                             new PrivateChatActionImpl(PrivateChatActionType.ChatChannelExclude, chatStorage.OwnPrivateChannelId, _channelMessage.Speaker).Perform();
                         });
                     }
@@ -53,11 +54,11 @@ namespace OpenTibiaUnity.Modules.Console
                 
                 var nameFilterSet = OpenTibiaUnity.OptionStorage.GetNameFilterSet(NameFilterSet.DefaultSet);
                 if (nameFilterSet.IsBlacklisted(_channelMessage.Speaker)) {
-                    CreateTextItem(string.Format(TextResources.CTX_VIEW_PLAYER_UNIGNORE, _channelMessage.Speaker), "TODO", () => {
+                    CreateTextItem(string.Format(TR.CTX_VIEW_PLAYER_UNIGNORE, _channelMessage.Speaker), "TODO", () => {
                         // TODO
                     });
                 } else {
-                    CreateTextItem(string.Format(TextResources.CTX_VIEW_PLAYER_IGNORE, _channelMessage.Speaker), "TODO", () => {
+                    CreateTextItem(string.Format(TR.CTX_VIEW_PLAYER_IGNORE, _channelMessage.Speaker), "TODO", () => {
                         // TODO
                     });
                 }
@@ -66,25 +67,25 @@ namespace OpenTibiaUnity.Modules.Console
             }
 
             if (!string.IsNullOrEmpty(_channelMessage.Speaker)) {
-                CreateTextItem(TextResources.CTX_VIEW_COPY_NAME, () => {
+                CreateTextItem(TR.CTX_VIEW_COPY_NAME, () => {
                     GUIUtility.systemCopyBuffer = _channelMessage.Speaker;
                 });
             }
 
             var selectedString = Core.StringHelper.GetSelection(_inputField);
             if (!string.IsNullOrEmpty(selectedString)) {
-                CreateTextItem(TextResources.CTX_VIEW_COPY_SELECTED, () => {
+                CreateTextItem(TR.CTX_VIEW_COPY_SELECTED, () => {
                     GUIUtility.systemCopyBuffer = selectedString;
                 });
             }
 
-            CreateTextItem(TextResources.CTX_VIEW_COPY_MESSAGE, () => {
+            CreateTextItem(TR.CTX_VIEW_COPY_MESSAGE, () => {
                 GUIUtility.systemCopyBuffer = _channelMessage.PlainText;
             });
 
             CreateSeparatorItem();
 
-            CreateTextItem(TextResources.CTX_VIEW_SELECT_ALL, () => {
+            CreateTextItem(TR.CTX_VIEW_SELECT_ALL, () => {
                 _inputField.selectionStringAnchorPosition = 0;
                 _inputField.selectionStringFocusPosition = _inputField.text.Length - 1;
             });

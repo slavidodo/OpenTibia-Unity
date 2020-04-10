@@ -18,7 +18,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
     public class LoginWebClient : Web.WebClient
     {
         public class LoginErrorEvent : UnityEvent<string> { };
-        public class LoginSuccessEvent : UnityEvent<Session, Playdata> { };
+        public class LoginSuccessEvent : UnityEvent<PlayData> { };
 
         public string AccountIdentifier { get; set; }
         public string Password { get; set; }
@@ -85,9 +85,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
                 return;
             }
 
-            JToken sessionKeyToken = null,
-                lastLoginTimeToken = null,
-                statusToken = null;
+            JToken sessionKeyToken, lastLoginTimeToken, statusToken;
             if (!sessionObject.TryGetValue("sessionkey", out sessionKeyToken)
                 || !sessionObject.TryGetValue("lastlogintime", out lastLoginTimeToken)
                 || !sessionObject.TryGetValue("status", out statusToken)) {
@@ -95,8 +93,9 @@ namespace OpenTibiaUnity.Core.Communication.Login
                 return;
             }
 
-            Session session = new Session() {
-                SessionKey = SafeString(sessionKeyToken),
+            var playdata = new PlayData();
+            playdata.Session = new PlayData.PlayDataSession {
+                Key = SafeString(sessionKeyToken),
                 Status = SafeString(statusToken),
                 LastLoginTime = SafeUint(lastLoginTimeToken),
                 PremiumUntil = SafeUint(sessionObject.GetValue("premiumuntil")),
@@ -104,24 +103,19 @@ namespace OpenTibiaUnity.Core.Communication.Login
             };
 
             if (ClientVersion >= 1148) {
-                session.FpsTracking = (bool)sessionObject.GetValue("fpstracking");
-                session.IsReturner = (bool)sessionObject.GetValue("isreturner");
-                session.ReturnerNotification = (bool)sessionObject.GetValue("returnernotification");
-                session.ShowRewardNews = (bool)sessionObject.GetValue("showrewardnews");
+                playdata.Session.FpsTracking = (bool)sessionObject.GetValue("fpstracking");
+                playdata.Session.IsReturner = (bool)sessionObject.GetValue("isreturner");
+                playdata.Session.ReturnerNotification = (bool)sessionObject.GetValue("returnernotification");
+                playdata.Session.ShowRewardNews = (bool)sessionObject.GetValue("showrewardnews");
             }
 
             if (ClientVersion >= 1149 && BuildVersion >= 5921) {
-                session.OptionTracking = (bool)sessionObject.GetValue("optiontracking");
+                playdata.Session.OptionTracking = (bool)sessionObject.GetValue("optiontracking");
             }
-
-            var playdata = new Playdata();
 
             List<int> worldIds = new List<int>();
             foreach (var worldObject in worldsArray.Children<JObject>()) {
-                JToken idToken = null,
-                nameToken = null,
-                previewStateToken = null;
-
+                JToken idToken, nameToken, previewStateToken;
                 if (!worldObject.TryGetValue("id", out idToken)
                     || !worldObject.TryGetValue("name", out nameToken)
                     || !worldObject.TryGetValue("previewstate", out previewStateToken))
@@ -142,9 +136,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
                 bool antiCheatProtection = true;
 
                 if (ClientVersion >= 1148) {
-                    JToken externalAddressProtectedToken = null,
-                        externalPortProtectedToken = null;
-
+                    JToken externalAddressProtectedToken, externalPortProtectedToken;
                     if (!worldObject.TryGetValue("externaladdressprotected", out externalAddressProtectedToken)
                         || !worldObject.TryGetValue("externalportprotected", out externalPortProtectedToken))
                         continue;
@@ -154,9 +146,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
                 }
 
                 if (ClientVersion >= 1149 && BuildVersion >= 5921) {
-                    JToken externalAddressUnprotectedToken = null,
-                        externalPortUnprotectedToken = null;
-
+                    JToken externalAddressUnprotectedToken, externalPortUnprotectedToken;
                     if (!worldObject.TryGetValue("externaladdressunprotected", out externalAddressUnprotectedToken)
                         || !worldObject.TryGetValue("externalportunprotected", out externalPortUnprotectedToken))
                         continue;
@@ -165,9 +155,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
                     externalAddressUnprotected = SafeString(externalAddressUnprotectedToken);
                     externalPortUnprotected = SafeInt(externalPortUnprotectedToken);
                 } else {
-                    JToken externalAddressToken = null,
-                        externalPortToken = null;
-
+                    JToken externalAddressToken, externalPortToken;
                     if (!worldObject.TryGetValue("externaladdress", out externalAddressToken)
                         || !worldObject.TryGetValue("externalport", out externalPortToken))
                         continue;
@@ -179,20 +167,9 @@ namespace OpenTibiaUnity.Core.Communication.Login
                 if (ClientVersion >= 1148 && worldObject.TryGetValue("anticheatprotection", out JToken antiChearProtectionToken))
                     antiCheatProtection = SafeBool(antiChearProtectionToken);
 
-                bool isTournamentActive = false;
-                bool isTournamentWorld = false;
-                bool isRestrictedStore = false;
-                int currentTournamentPhase = -1;
-                if (ClientVersion >= 1215) {
-                    isTournamentActive = SafeBool(worldObject.GetValue("istournamentactive"));
-                    isTournamentWorld = SafeBool(worldObject.GetValue("istournamentworld"));
-                    isRestrictedStore = SafeBool(worldObject.GetValue("restrictedstore"));
-                    currentTournamentPhase = SafeInt(worldObject.GetValue("currenttournamentphase"));
-                }
-
                 worldIds.Add(worldId);
-                playdata.Worlds.Add(new Playdata.World() {
-                    _id = worldId,
+                playdata.Worlds.Add(new PlayData.PlayDataWorld() {
+                    Id = worldId,
                     PreviewState = SafeInt(previewStateToken),
                     ExternalPort = externalPort,
                     ExternalPortProtected = externalPortProtected,
@@ -212,13 +189,14 @@ namespace OpenTibiaUnity.Core.Communication.Login
                     IsTournamentWorld = SafeBool(worldObject.GetValue("istournamentworld")),
                     RestrictStore = SafeBool(worldObject.GetValue("restrictedstore")),
                     CurrentTournamentPhase = SafeInt(worldObject.GetValue("currenttournamentphase"), -1),
+
+                    // 12.20
+                    IsMainCharacter = SafeBool(worldObject.GetValue("ismaincharacter")),
                 });
             }
 
             foreach (var characterObject in charactersArray.Children<JObject>()) {
-                JToken worldIdToken = null,
-                    nameToken = null;
-
+                JToken worldIdToken, nameToken;
                 if (!characterObject.TryGetValue("worldid", out worldIdToken)
                     || !characterObject.TryGetValue("name", out nameToken))
                     continue;
@@ -227,7 +205,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
                 if (!worldIds.Contains(worldId))
                     continue;
 
-                var character = new Playdata.Character() {
+                var character = new PlayData.PlayDataCharacter() {
                     WorldId = worldId,
                     Name = SafeString(nameToken),
 
@@ -256,7 +234,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
                 playdata.Characters.Add(character);
             }
 
-            onLoginSuccess.Invoke(session, playdata);
+            onLoginSuccess.Invoke(playdata);
         }
         
         protected override void OnParsingFailed() {

@@ -31,7 +31,6 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             _packetWriter.onPacketFinished.AddListener(OnPacketWriterFinished);
             _packetReader.onPacketReady.AddListener(OnPacketReaderReady);
 
-
             _connection = new Connection();
             AddConnectionListeners();
             
@@ -87,8 +86,7 @@ namespace OpenTibiaUnity.Core.Communication.Internal
                 stream.CopyTo(_inputStream);
                 _inputStream.Position = 0;
 
-                if (!_packetReader.PreparePacket())
-                    OnConnectionError("Protocol.OnConnectionReceived: Failed to prepare packet.");
+                _packetReader.PreparePacket();
             } catch (Exception e) {
                 OnConnectionError($"Protocol.OnConnectionReceived: Failed to prepare packet ({e.Message}).");
             }
@@ -100,6 +98,8 @@ namespace OpenTibiaUnity.Core.Communication.Internal
                 if (!!_connection && _connection.Established) {
                     OnCommunicationDataReady();
                     
+                    // TODO; this is incorrect as it has to wait
+                    // for the main thread work to be done.
                     if (!!_connection && _connection.Established && !_connection.Terminated)
                         _connection.Receive();
                 }

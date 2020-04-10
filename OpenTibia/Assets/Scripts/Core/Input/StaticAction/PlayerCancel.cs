@@ -2,7 +2,7 @@
 {
     public class PlayerCancel : StaticAction
     {
-        public PlayerCancel(int id, string label, uint eventMask) : base(id, label, eventMask) { }
+        public PlayerCancel(int id, string label, InputEvent eventMask) : base(id, label, eventMask) { }
 
         public override bool Perform(bool repeat = false) {
             var protocolGame = OpenTibiaUnity.ProtocolGame;

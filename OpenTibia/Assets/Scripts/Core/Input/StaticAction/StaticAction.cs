@@ -8,15 +8,15 @@ namespace OpenTibiaUnity.Core.Input.StaticAction
 
         protected int _id = 0;
         protected string _label = null;
-        protected uint _eventMask = 0;
+        protected InputEvent _eventMask = 0;
         protected bool _hidden = true;
 
         public int Id { get => _id; }
         public string Label { get => _label; }
         public bool Hidden { get => _hidden; }
-        public uint EventMask { get => _eventMask; }
+        public InputEvent EventMask { get => _eventMask; }
 
-        public StaticAction(int id, string label, uint eventMask = 0, bool hidden = false) {
+        public StaticAction(int id, string label, InputEvent eventMask = 0, bool hidden = false) {
             if (id < 0 || id > 65535)
                 throw new System.ArgumentException("StaticAction.StaticAction: _id out of range: " + id);
 
@@ -29,11 +29,11 @@ namespace OpenTibiaUnity.Core.Input.StaticAction
 
         public abstract bool Perform(bool repeat = false);
 
-        public virtual bool KeyCallback(uint eventMask, char _, UnityEngine.KeyCode __, UnityEngine.EventModifiers ___) {
+        public virtual bool KeyCallback(InputEvent eventMask, char _, UnityEngine.KeyCode __, UnityEngine.EventModifiers ___) {
             return Perform((eventMask & InputEvent.KeyRepeat) != 0);
         }
 
-        public virtual bool TextCallback(uint eventMask, char _) {
+        public virtual bool TextCallback(InputEvent _, char __) {
             return Perform(false);
         }
 

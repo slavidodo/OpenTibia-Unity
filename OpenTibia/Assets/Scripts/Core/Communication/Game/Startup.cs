@@ -31,8 +31,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
 
         private void ParseWorldEntered(Internal.CommunicationStream message) {
             bool hasLoginPendingFeature = OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameLoginPending);
-            if ((hasLoginPendingFeature && _connectionState == ConnectionState.Pending)
-                || (!hasLoginPendingFeature && _connectionState > ConnectionState.Disconnected && _connectionState != ConnectionState.Game)) {
+            if ((hasLoginPendingFeature && ConnectionState == ConnectionState.Pending)
+                || (!hasLoginPendingFeature && ConnectionState > ConnectionState.Disconnected && ConnectionState != ConnectionState.Game)) {
                 MiniMapStorage.Position = Vector3Int.zero;
                 WorldMapStorage.Position = Vector3Int.zero;
                 WorldMapStorage.ResetMap();

@@ -25,6 +25,7 @@
         public static ChatHistoryPrev ChatHistoryPrev = new ChatHistoryPrev(267, "CHAT_HISTORY_PREV", InputEvent.KeyDown);
         public static ChatHistoryNext ChatHistoryNext = new ChatHistoryNext(268, "CHAT_HISTORY_NEXT", InputEvent.KeyDown);
         public static ChatSendText ChatSendText = new ChatSendText(269, "CHAT_SEND_TEXT", InputEvent.KeyDown);
+        public static ShowDialog ChatChannelOpen = new ShowDialog(270, "CHAT_CHANNEL_OPEN", InputEvent.KeyDown, DialogType.ChatChannelSelection);
 
         // Player
         public static PlayerMove PlayerMoveRight = new PlayerMove(512, "PLAYER_MOVE_RIGHT", InputEvent.KeyDown | InputEvent.KeyRepeat, Direction.East);

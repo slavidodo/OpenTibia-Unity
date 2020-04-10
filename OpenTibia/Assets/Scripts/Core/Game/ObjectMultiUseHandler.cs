@@ -1,5 +1,4 @@
 ﻿using OpenTibiaUnity.Core.Appearances;
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,14 +12,14 @@ namespace OpenTibiaUnity.Core.Game
         private static Vector3Int s_AbsolutePosition = Vector3Int.zero;
         private static ObjectInstance s_Object = null;
         private static int s_PositionOrData = 0;
-        private static List<object> s_ObjectUseImpls;
+        private static List<IUseWidget> s_ObjectUseImpls;
 
         public static ObjectMultiUseDelegate onUse = null;
         public static bool AnyDraggingObject = false;
 
         static ObjectMultiUseHandler() {
             if (s_ObjectUseImpls == null)
-                s_ObjectUseImpls = new List<object>();
+                s_ObjectUseImpls = new List<IUseWidget>();
         }
         
         private static void OnMouseDown(Event e, MouseButton mouseButton, bool repeat) {
@@ -44,7 +43,7 @@ namespace OpenTibiaUnity.Core.Game
                 return;
             
             foreach (var widget in s_ObjectUseImpls) {
-                int targetStackPos = ((IUseWidget)widget).GetTopObjectUnderPoint(e.mousePosition, out ObjectInstance targetObject);
+                int targetStackPos = widget.GetTopObjectUnderPoint(e.mousePosition, out ObjectInstance targetObject);
                 if (targetStackPos == -1)
                     continue;
                 

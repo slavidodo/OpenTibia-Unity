@@ -16,7 +16,7 @@ namespace OpenTibiaUnity.Core.Components.Base
         public RectTransform rectTransform {
             get {
                 if (!_rectTransform)
-                    _rectTransform = transform as RectTransform;
+                    _rectTransform = GetComponent<RectTransform>();
                 return _rectTransform;
             }
         }
@@ -29,9 +29,6 @@ namespace OpenTibiaUnity.Core.Components.Base
                 return _parentRectTransform;
             }
         }
-
-        public bool LockedToOverlay { get; private set; } = false;
-        public Canvas LockingBlocker { get; private set; } = null;
 
         public void ClampToParent() {
             rectTransform.localPosition = ClampLocalPositionToParent(rectTransform.localPosition);
@@ -46,84 +43,14 @@ namespace OpenTibiaUnity.Core.Components.Base
             return localPosition;
         }
 
-        public void LockToOverlay() {
-            // is this component locked already?
-            if (LockedToOverlay) {
-                // is this component the current locked one?
-                if (TopLockedComponent == this)
-                    return;
-                else if (TopLockedComponent != null)
-                    QueuedLockComponents.Add(TopLockedComponent);
-                // it's locked but must re.init
-                QueuedLockComponents.Remove(this);
-            } else if (TopLockedComponent != null) {
-                // a component is locked already, push that to the stack and lock the new one.
-                QueuedLockComponents.Add(TopLockedComponent);
-            }
-
-            // lock this component to overlay
-            InternalLockToOverlay();
+        public virtual Vector2 CalculateAbsoluteMousePosition() {
+            return CalculateAbsoluteMousePosition(UnityEngine.Input.mousePosition);
         }
 
-        private void InternalLockToOverlay() {
-            var gameManager = OpenTibiaUnity.GameManager;
-            if (TopLockedComponent != null) {
-                if (gameManager.ActiveBlocker && TopLockedComponent.LockingBlocker != gameManager.ActiveBlocker) {
-                    TopLockedComponent.LockingBlocker.gameObject.SetActive(false);
-                    gameManager.ActiveBlocker.gameObject.SetActive(true);
-                }
-            } else if (gameManager.ActiveBlocker) {
-                gameManager.ActiveBlocker.gameObject.SetActive(true);
-            }
-
-            if (gameManager.ActiveBlocker) {
-                gameManager.ActiveBlocker.transform.SetAsLastSibling();
-                transform.SetParent(gameManager.ActiveCanvas.transform);
-            }
-
-            transform.SetAsLastSibling();
-
-            var canvas = transform.GetComponent<Canvas>();
-            if (canvas)
-                canvas.sortingOrder = ++BlockerIndexCounter;
-
-            AbstractComponent.TopLockedComponent = this;
-
-            LockedToOverlay = true;
-            if (gameManager.ActiveBlocker)
-                LockingBlocker = gameManager.ActiveBlocker;
-        }
-
-        public void UnlockFromOverlay() {
-            if (!LockedToOverlay)
-                return;
-
-            if (QueuedLockComponents.Count == 0) {
-                // no more components to lock, restore overlay.
-                LockingBlocker.gameObject.SetActive(false);
-                TopLockedComponent = null;
-            } else {
-                var component = QueuedLockComponents[0];
-                QueuedLockComponents.RemoveAt(0);
-                component.InternalLockToOverlay();
-            }
-
-            LockedToOverlay = false;
-            LockingBlocker = null;
-        }
-
-        public void ResetLocalPosition() {
-            GetComponent<RectTransform>().localPosition = new Vector3(0, 0, 0);
-        }
-
-        public virtual Vector2 CalculateRelativeMousePosition() {
-            return CalculateRelativeMousePosition(UnityEngine.Input.mousePosition);
-        }
-
-        public virtual Vector2 CalculateRelativeMousePosition(Vector3 mousePosition) {
+        public virtual Vector2 CalculateAbsoluteMousePosition(Vector2 mousePosition) {
             var pivotDelta = rectTransform.pivot - new Vector2(0, 1);
             var size = rectTransform.rect.size;
-            return new Vector2(mousePosition.x + (pivotDelta.x * size.x), mousePosition.y + (pivotDelta.y * size.y));
+            return mousePosition + pivotDelta * size;
         }
 
         public virtual void Select() {

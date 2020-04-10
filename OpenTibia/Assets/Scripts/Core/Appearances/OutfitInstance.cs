@@ -31,8 +31,8 @@ namespace OpenTibiaUnity.Core.Appearances
         public int Detail { get => _detailHsiColor; }
         public int AddOns { get => _addOns; }
 
-        public OutfitInstance(uint id, AppearanceType type, int head, int torso, int legs, int feet, int addons) : base(id, type) {
-            UpdateProperties(head, torso, legs, feet, addons);
+        public OutfitInstance(uint id, AppearanceType type, int head, int torso, int legs, int detail, int addons) : base(id, type) {
+            UpdateProperties(head, torso, legs, detail, addons);
         }
 
         public void UpdateProperties(int head, int torso, int legs, int detail, int addons) {
@@ -154,6 +154,10 @@ namespace OpenTibiaUnity.Core.Appearances
                 return !animator.Finished;
             }
             return false;
+        }
+
+        public override AppearanceInstance Clone() {
+            return new OutfitInstance(Id, Type, Head, Torso, Legs, Detail, AddOns);
         }
     }
 }

@@ -1,11 +1,11 @@
-﻿using OpenTibiaUnity.Core.Components;
+﻿using OpenTibiaUnity.UI.Legacy;
 using UnityEngine;
 
 namespace OpenTibiaUnity.Core.Utils
 {
     public static class UIHelper
     {
-        public static void EnsureChildVisible(OTU_ScrollRect scrollRect, RectTransform child) {
+        public static void EnsureChildVisible(ScrollRect scrollRect, RectTransform child) {
             var content = scrollRect.content;
             var viewport = scrollRect.viewport;
             if (child.parent != content)

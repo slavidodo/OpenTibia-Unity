@@ -17,6 +17,7 @@
         // Don't modify those unless you know what you are doing.
         public const int PingDelay = 1000;
         public const int ConnectionTimeout = 30 * 1000;
+        public const int CharacterSwitchTimeout = 5 * 1000;
 
         public const int MapWidth = 15;
         public const int MapHeight = 11;
@@ -24,7 +25,7 @@
         public const int MapSizeX = MapWidth + 3;
         public const int MapSizeY = MapHeight + 3;
         public const int MapSizeZ = 8;
-        public const int MapMinX = 0; // Tibia restricted it to 24576 -> 24576 + (1 << 14 -1)
+        public const int MapMinX = 0; // was restricted to 24576, that's why flash-client didn't show minimap properly on custom servers
         public const int MapMinY = 0;
         public const int MapMaxX = MapMinX + 2 * ((1 << 15) - 1);
         public const int MapMaxY = MapMinY + 2 * ((1 << 15) - 1);
@@ -187,6 +188,7 @@
         Monster,
         NPC,
         Summon,
+        SummonOther, // legacy
 
         First = Player,
         Last = Summon,
@@ -209,7 +211,7 @@
         First = None,
         Last = Other,
     }
-    public enum PKFlag : byte
+    public enum PkFlag : byte
     {
         None,
         Attacker,
@@ -624,7 +626,7 @@
         Summons = 1 << 5,
     }
 
-    public enum OpponentSortTypes
+    public enum OpponentSortType
     {
         SortDistanceDesc,
         SortDistanceAsc,
@@ -634,13 +636,6 @@
         SortNameAsc,
         SortKnownSinceDesc,
         SortKnownSinceAsc,
-    }
-
-    public enum OpponentStates
-    {
-        NoAction,
-        Refresh,
-        Rebuild,
     }
 
     public enum DialogType

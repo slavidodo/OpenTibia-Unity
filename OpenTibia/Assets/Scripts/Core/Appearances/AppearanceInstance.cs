@@ -16,7 +16,8 @@ namespace OpenTibiaUnity.Core.Appearances
         public CachedSprite CachedSprite;
     }
 
-    public abstract class AppearanceInstance {
+    public abstract class AppearanceInstance
+    {
         public const int UnknownCreature = 97;
         public const int OutdatedCreature = 98;
         public const int Creature = 99;
@@ -24,7 +25,6 @@ namespace OpenTibiaUnity.Core.Appearances
         public const int HookEast = 19;
         public const int HookSouth = 20;
 
-        public static readonly Vector2 s_fieldVector = new Vector2(Constants.FieldSize, Constants.FieldSize);
         private static readonly Mesh s_mesh;
 
         static AppearanceInstance() {
@@ -59,14 +59,16 @@ namespace OpenTibiaUnity.Core.Appearances
         protected Animation.IAppearanceAnimator[] _animators;
         protected List<CachedSpriteRequest[]> _cachedSprites;
 
-        private bool _clampToFieldSize = false;
+        private bool _clamping = false;
+        private Vector2 _clampingArea = Vector2.zero;
 
-        public bool ClampeToFieldSize {
-            get => _clampToFieldSize;
+        private bool _offsetDisabled = false;
+        public bool OffsetDisabled {
+            get => _offsetDisabled;
             set {
-                if (value != _clampToFieldSize) {
+                if (value != _clamping) {
                     _shouldRecalculateTRS = true;
-                    _clampToFieldSize = value;
+                    _offsetDisabled = value;
                 }
             }
         }
@@ -126,6 +128,21 @@ namespace OpenTibiaUnity.Core.Appearances
 
         public void InvalidateTRS() {
             _shouldRecalculateTRS = true;
+        }
+
+        public void SetClamping(bool clamping, float square = Constants.FieldSize) {
+            SetClamping(clamping, new Vector2(square, square));
+        }
+
+        public void SetClamping(bool clamping, Vector2 square) {
+            if (clamping != _clamping) {
+                _clamping = clamping;
+                _clampingArea = square;
+                InvalidateTRS();
+            } else if (_clamping && square != _clampingArea) {
+                _clampingArea = square;
+                InvalidateTRS();
+            }
         }
 
         public virtual int GetSpriteIndex(int layer, int patternX, int patternY, int patternZ) {
@@ -197,11 +214,21 @@ namespace OpenTibiaUnity.Core.Appearances
         protected void InternalDraw(CommandBuffer commandBuffer, Vector2Int screenPosition, bool highlighted,
                                       float highlightOpacity, CachedSprite cachedSprite, Material material = null, MaterialPropertyBlock props = null) {
             if (_shouldRecalculateTRS) {
-                var position = new Vector2(screenPosition.x - _type.OffsetX, screenPosition.y - _type.OffsetY);
-                if (ClampeToFieldSize)
-                    _trsMatrix = Matrix4x4.TRS(position, Quaternion.Euler(180, 0, 0), s_fieldVector);
-                else
-                    _trsMatrix = Matrix4x4.TRS(position - cachedSprite.size + s_fieldVector, Quaternion.Euler(180, 0, 0), cachedSprite.size);
+                var position = new Vector2(screenPosition.x, screenPosition.y);
+                if (!OffsetDisabled)
+                    position -= _type.Offset;
+
+                if (_clamping) {
+                    var square = new Vector2(Mathf.Max(_clampingArea.x, Type.BoundingSquare), Mathf.Max(_clampingArea.y, Type.BoundingSquare));
+                    var size = cachedSprite.size;
+
+                    position -= size - square; // the area left is actually empty
+                    position /= square / _clampingArea;
+                    _trsMatrix = Matrix4x4.TRS(position, Quaternion.Euler(180, 0, 0), _clampingArea * (size / square));
+                } else {
+                    position += new Vector2(Constants.FieldSize, Constants.FieldSize) - cachedSprite.size;
+                    _trsMatrix = Matrix4x4.TRS(position, Quaternion.Euler(180, 0, 0), cachedSprite.size);
+                }
 
                 _screenPosition = screenPosition;
                 _shouldRecalculateTRS = false;
@@ -232,6 +259,8 @@ namespace OpenTibiaUnity.Core.Appearances
             }
             return false;
         }
+
+        public abstract AppearanceInstance Clone();
 
         public static bool operator !(AppearanceInstance instance) {
             return instance == null;

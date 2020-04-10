@@ -4,7 +4,7 @@ namespace OpenTibiaUnity.Core.Input.StaticAction
 {
     public class ChatInsertClipboard : StaticAction
     {
-        public ChatInsertClipboard(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
+        public ChatInsertClipboard(int id, string label, InputEvent eventMask) : base(id, label, eventMask, false) { }
 
         public override bool Perform(bool repeat = false) {
             var inputField = StaticAction.GetSelectedInputField();

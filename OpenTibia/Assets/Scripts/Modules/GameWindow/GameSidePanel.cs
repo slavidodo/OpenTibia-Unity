@@ -1,6 +1,8 @@
-﻿namespace OpenTibiaUnity.Modules.GameWindow
+﻿using UnityEngine;
+
+namespace OpenTibiaUnity.Modules.GameWindow
 {
-    public class GameSidePanel : Core.Components.Base.Module
+    public class GameSidePanel : UI.Legacy.SidebarWidgetContainer
     {
     }
 }

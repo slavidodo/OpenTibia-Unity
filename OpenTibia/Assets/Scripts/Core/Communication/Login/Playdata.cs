@@ -2,11 +2,33 @@
 
 namespace OpenTibiaUnity.Core.Communication.Login
 {
-    public class Playdata
+    public class PlayData
     {
-        public class World
+        public class PlayDataSession
         {
-            public int _id = 0;
+            public uint LastLoginTime = 0;
+            public uint PremiumUntil = 0;
+
+            public string Key = string.Empty;
+            public string Status = string.Empty;
+
+            // legay strings
+            public string AccountName = string.Empty;
+            public string Password = string.Empty;
+            public string Token = string.Empty;
+
+            public bool IsPremium = false;
+            public bool InfinitePremium = false;
+            public bool FpsTracking = false;
+            public bool IsReturner = false;
+            public bool ReturnerNotification = false;
+            public bool ShowRewardNews = false;
+            public bool OptionTracking = false;
+        }
+
+        public class PlayDataWorld
+        {
+            public int Id = 0;
 
             public string Name = string.Empty;
             public string ExternalAddress = string.Empty;
@@ -22,10 +44,11 @@ namespace OpenTibiaUnity.Core.Communication.Login
 
             public int CurrentTournamentPhase = 0;
 
-            public bool AntiCheatProtection = true;
-            public bool IsTournamentActive = true;
-            public bool IsTournamentWorld = true;
-            public bool RestrictStore = true;
+            public bool AntiCheatProtection = false;
+            public bool IsTournamentActive = false;
+            public bool IsTournamentWorld = false;
+            public bool IsMainCharacter = false;
+            public bool RestrictStore = false;
 
             public string GetAddress(int clientVersion, int buildVersion) {
                 if (clientVersion >= 1148) {
@@ -61,7 +84,7 @@ namespace OpenTibiaUnity.Core.Communication.Login
             }
         }
 
-        public class Character
+        public class PlayDataCharacter
         {
             public int WorldId = 0;
             public int Level = 0;
@@ -82,14 +105,15 @@ namespace OpenTibiaUnity.Core.Communication.Login
             public bool IsTournamentParticipant = false;
         }
 
-        public List<World> Worlds = new List<World>();
-        public List<Character> Characters = new List<Character>();
+        public PlayDataSession Session = new PlayDataSession();
+        public List<PlayDataWorld> Worlds = new List<PlayDataWorld>();
+        public List<PlayDataCharacter> Characters = new List<PlayDataCharacter>();
 
-        public World FindWorld(int id) {
-            return Worlds.Find((x) => x._id == id);
+        public PlayDataWorld FindWorld(int id) {
+            return Worlds.Find((x) => x.Id == id);
         }
 
-        public World FindWorld(string name) {
+        public PlayDataWorld FindWorld(string name) {
             return Worlds.Find((x) => x.Name == name);
         }
     }

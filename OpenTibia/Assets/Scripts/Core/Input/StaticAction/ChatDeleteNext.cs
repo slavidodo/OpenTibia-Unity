@@ -2,7 +2,7 @@
 {
     public class ChatDeleteNext : StaticAction
     {
-        public ChatDeleteNext(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
+        public ChatDeleteNext(int id, string label, InputEvent eventMask) : base(id, label, eventMask, false) { }
 
         public override bool Perform(bool repeat = false) {
             TMPro.TMP_InputField inputField = StaticAction.GetSelectedInputField();

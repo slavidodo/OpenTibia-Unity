@@ -56,14 +56,14 @@ namespace OpenTibiaUnity.Core.Appearances
 
         public override void Draw(CommandBuffer commandBuffer, Vector2Int screenPosition, int patternX, int patternY, int patternZ, bool highlighted = false, float highlightOpacity = 0) {
             RebuildCache();
-            var material = OpenTibiaUnity.GameManager.OutlinedVerdanaFontMaterial;
+            var material = OpenTibiaUnity.GameManager.LabelOnscreenText.materialForRendering;
             var matrix = Matrix4x4.TRS(new Vector2(screenPosition.x, screenPosition.y), Quaternion.Euler(180, 0, 0), Vector3.one);
             commandBuffer.DrawMesh(_mesh, matrix, material);
         }
 
         public bool Merge(AppearanceInstance other) {
             var textualEffect = other as TextualEffectInstance;
-            if (!!textualEffect && _integral && textualEffect._phase <= 0 && _phase <= 0 && _rawColor == textualEffect._rawColor) {
+            if (_integral && !!textualEffect && textualEffect._integral && textualEffect._phase <= 0 && _phase <= 0 && _rawColor == textualEffect._rawColor) {
                 _value += textualEffect._value;
                 _text = _value.ToString();
                 _dirty = true;
@@ -79,6 +79,10 @@ namespace OpenTibiaUnity.Core.Appearances
             _phase += phaseChange;
             _lastPhaseChange += phaseChange * PhaseDuration;
             return _phase < PhaseCount;
+        }
+
+        public override AppearanceInstance Clone() {
+            return new TextualEffectInstance(_rawColor, _text, _value);
         }
 
         private void RebuildCache() {

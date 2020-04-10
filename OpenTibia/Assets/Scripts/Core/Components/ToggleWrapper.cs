@@ -1,23 +1,23 @@
 ﻿using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
+
+using UnityUI = UnityEngine.UI;
 
 namespace OpenTibiaUnity.Core.Components
 {
-    [RequireComponent(typeof(Toggle))]
+    [RequireComponent(typeof(UnityUI.Toggle))]
     public class ToggleWrapper : Base.AbstractComponent, IPointerDownHandler, IPointerUpHandler
     {
         public TMPro.TextMeshProUGUI label = null;
 
         private bool _pointerDown = false;
-        private bool _lastValue = false;
         private bool _havingEffect = false;
 
-        private Toggle _toggle = null;
-        public Toggle toggle {
+        private UnityUI.Toggle _toggle = null;
+        public UnityUI.Toggle toggle {
             get {
                 if (!_toggle)
-                    _toggle = GetComponent<Toggle>();
+                    _toggle = GetComponent<UnityUI.Toggle>();
                 return _toggle;
             }
         }
@@ -31,13 +31,13 @@ namespace OpenTibiaUnity.Core.Components
         public void DisableComponent() {
             toggle.interactable = false;
             if (label)
-                label.color = Colors.ColorFromRGB(0x6F6F6F);
+                label.color = Colors.DefaultDisabled;
         }
 
         public void EnableComponent() {
             toggle.interactable = true;
             if (label)
-                label.color = Colors.ColorFromRGB(0xC0C0C0);
+                label.color = Colors.Default;
         }
 
         void IPointerDownHandler.OnPointerDown(PointerEventData eventData) {

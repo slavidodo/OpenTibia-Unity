@@ -4,7 +4,7 @@ namespace OpenTibiaUnity.Core.Input.StaticAction
 {
     public class ChatSendText : StaticAction
     {
-        public ChatSendText(int id, string label, uint eventMask) : base(id, label, eventMask, false) { }
+        public ChatSendText(int id, string label, InputEvent eventMask) : base(id, label, eventMask, false) { }
 
         public override bool Perform(bool repeat = false) {
             // todo; implement a chat widget and make sure it's selected

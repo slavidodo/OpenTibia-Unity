@@ -17,22 +17,21 @@ namespace OpenTibiaUnity.Core.Appearances.Rendering
             for (int i = 0; i < s_FrameColors.Length; i++)
                 s_FrameColors[i] = Colors.ColorFrom8Bit(i);
 
-            s_FrameColors[Marks.MarkAim] = Colors.ColorFromRGB(0xFFFFFF);
-            s_FrameColors[Marks.MarkAimAttack] = Colors.ColorFromRGB(0xFF8888);
-            s_FrameColors[Marks.MarkAimFollow] = Colors.ColorFromRGB(0x88FF88);
-            s_FrameColors[Marks.MarkAttack] = Colors.ColorFromRGB(0xFF0000);
-            s_FrameColors[Marks.MarkFollow] = Colors.ColorFromRGB(0x00FF00);
+            s_FrameColors[Marks.MarkAim] = Colors.White;
+            s_FrameColors[Marks.MarkAimAttack] = Colors.LightRed;
+            s_FrameColors[Marks.MarkAimFollow] = Colors.LightGreen;
+            s_FrameColors[Marks.MarkAttack] = Colors.DarkRed;
+            s_FrameColors[Marks.MarkFollow] = Colors.DarkGreen;
         }
 
         private List<MarksViewInformation> _marksViewInformations;
-        private uint _marksStartSize;
 
-        public uint MarksStartSize { get => _marksStartSize; set => _marksStartSize = value; }
+        public uint MarksStartSize { get; set; }
 
         public MarksView(uint marksStartSize = 0) {
             if (marksStartSize >= FrameSizesCount)
                 throw new System.Exception("MarksView.MarksView: Invalid marks start size.");
-            _marksStartSize = marksStartSize;
+            MarksStartSize = marksStartSize;
             _marksViewInformations = new List<MarksViewInformation>();
         }
 
@@ -41,7 +40,7 @@ namespace OpenTibiaUnity.Core.Appearances.Rendering
                 throw new System.Exception("MarksView.addMarkToView: Invalid marks thickness: " + thinkness);
             }
 
-            uint size = _marksStartSize;
+            uint size = MarksStartSize;
             foreach (var markInformation in _marksViewInformations)
                 size = size + markInformation.MarkThickness;
 
@@ -55,16 +54,15 @@ namespace OpenTibiaUnity.Core.Appearances.Rendering
             _marksViewInformations.Add(information);
         }
 
-        public void DrawMarks(CommandBuffer commandBuffer, Marks marks, int screenX, int screenY, Vector2 zoom) {
+        public void DrawMarks(CommandBuffer commandBuffer, Marks marks, int screenX, int screenY) {
             var texture = OpenTibiaUnity.GameManager.MarksViewTexture;
             var material = OpenTibiaUnity.GameManager.MarksViewMaterial;
 
-            var position = new Vector2(screenX, screenY) * zoom;
-            var scale = new Vector2(Constants.FieldSize, Constants.FieldSize) * zoom;
+            var position = new Vector2(screenX, screenY);
+            var scale = new Vector2(Constants.FieldSize, Constants.FieldSize);
             var transformation = Matrix4x4.TRS(position, Quaternion.Euler(180, 0, 0), scale);
 
-            var size = _marksStartSize;
-
+            var size = MarksStartSize;
             foreach (var information in _marksViewInformations) {
                 if (!marks.IsMarkSet(information.MarkType))
                     continue;
@@ -73,11 +71,7 @@ namespace OpenTibiaUnity.Core.Appearances.Rendering
                 if (eightBit > Marks.MarksNumTotal)
                     continue;
 
-                Color color;
-                if (eightBit > Marks.MarkNumColors)
-                    color = s_FrameColors[(int)eightBit];
-                else
-                    color = Colors.ColorFrom8Bit((int)eightBit);
+                Color color = GetMarksColor(eightBit);
 
                 var uv = new Vector4() {
                     z = size * Constants.FieldSize / (float)texture.width,
@@ -90,8 +84,17 @@ namespace OpenTibiaUnity.Core.Appearances.Rendering
                 props.SetTexture("_MainTex", texture);
                 props.SetVector("_MainTex_ST", uv);
                 props.SetColor("_Color", color);
-                Utils.GraphicsUtility.DrawTexture(commandBuffer, transformation, material, props);
+                Utils.GraphicsUtility.Draw(commandBuffer, transformation, material, props);
             }
+        }
+
+        public static Color GetMarksColor(uint eightBit) {
+            Color color;
+            if (eightBit > Marks.MarkNumColors)
+                color = s_FrameColors[(int)eightBit];
+            else
+                color = Colors.ColorFrom8Bit((int)eightBit);
+            return color;
         }
     }
 

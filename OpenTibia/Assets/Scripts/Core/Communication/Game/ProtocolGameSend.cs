@@ -85,14 +85,14 @@ namespace OpenTibiaUnity.Core.Communication.Game
             _packetWriter.FinishMessage();
         }
         [ClientFeature(GameFeature.GameClientPing)]
-        private void InternalSendPing() {
+        public void SendPing() {
             // this function should only be called from protocolgame
             var message = _packetWriter.PrepareStream();
             message.WriteEnum(GameclientMessageType.Ping);
             _packetWriter.FinishMessage();
         }
         [ClientFeature(GameFeature.GameClientPing)]
-        public void InternalSendPingBack() {
+        public void SendPingBack() {
             var message = _packetWriter.PrepareStream();
             message.WriteEnum(GameclientMessageType.PingBack);
             _packetWriter.FinishMessage();
@@ -657,8 +657,9 @@ namespace OpenTibiaUnity.Core.Communication.Game
         public void SendGetOutfit() {
             var message = _packetWriter.PrepareStream();
             message.WriteEnum(GameclientMessageType.GetOutfit);
-            if (OpenTibiaUnity.GameManager.ClientVersion >= 1220)
-                message.WriteUnsignedByte(0);
+            // unconfirmed
+            if (OpenTibiaUnity.GameManager.ClientVersion >= 1180)
+                message.WriteUnsignedShort(0); // try on outfit
             _packetWriter.FinishMessage();
         }
         [ClientVersion(0)]
@@ -991,7 +992,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
             _packetWriter.FinishMessage();
         }
         [ClientFeature(GameFeature.GameIngameStore)]
-        public void SendRequestStoreOffers(StoreOpenParameterAction requestAction, Store.StoreOpenParameters openParams = null, string categoryName = null) {
+        public void SendRequestStoreOffers(Store.StoreOpenParameters openParams = null, string categoryName = null) {
             var message = _packetWriter.PrepareStream();
             message.WriteEnum(GameclientMessageType.RequestStoreOffers);
             if (OpenTibiaUnity.GameManager.ClientVersion >= 1180) {

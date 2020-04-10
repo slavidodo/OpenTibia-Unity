@@ -41,8 +41,8 @@ namespace OpenTibiaUnity.Core.Communication.Game
                 }
             } else {
                 int missionId = message.ReadUnsignedShort();
-                string questName = message.ReadString();
                 string missionName = message.ReadString();
+                string missionDescription = message.ReadString();
             }
         }
 

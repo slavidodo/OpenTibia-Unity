@@ -125,7 +125,7 @@ namespace OpenTibiaUnity.Core.MiniMap.Rendering
                 props.SetTexture("_MainTex", sector.SafeDrawTexture);
                 props.SetVector("_MainTex_UV", new Vector4(1, 1, 0, 0));
                 props.SetFloat("_HighlightOpacity", 0);
-                Utils.GraphicsUtility.DrawTexture(commandBuffer, transformation, OpenTibiaUnity.GameManager.AppearanceTypeMaterial, props);
+                Utils.GraphicsUtility.Draw(commandBuffer, transformation, OpenTibiaUnity.GameManager.AppearanceTypeMaterial, props);
             }
 
             Graphics.ExecuteCommandBuffer(commandBuffer);

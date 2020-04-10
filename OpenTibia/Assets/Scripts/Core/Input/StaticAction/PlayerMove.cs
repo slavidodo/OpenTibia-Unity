@@ -6,7 +6,7 @@
         private int _deltaY;
         private Direction _direction;
 
-        public PlayerMove(int id, string label, uint eventMask, Direction direction) : base(id, label, eventMask, false) {
+        public PlayerMove(int id, string label, InputEvent eventMask, Direction direction) : base(id, label, eventMask, false) {
             _direction = direction;
             switch (direction) {
                 case Direction.North:

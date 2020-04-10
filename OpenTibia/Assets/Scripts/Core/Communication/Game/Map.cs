@@ -133,6 +133,7 @@
             int x = message.ReadUnsignedShort();
             Appearances.ObjectInstance objectInstance;
             Creatures.Creature creature = null;
+            Creatures.Creature other = null;
 
             UnityEngine.Vector3Int absolutePosition;
             UnityEngine.Vector3Int mapPosition;
@@ -147,18 +148,15 @@
                 if (!(objectInstance = WorldMapStorage.GetObject(mapPosition, stackPos)))
                     throw new System.Exception("ProtocolGame.ParseChangeOnMap: Object not found.");
 
-                if (objectInstance.IsCreature && !(creature = CreatureStorage.GetCreature(objectInstance.Data)))
+                if (objectInstance.IsCreature && !(creature = CreatureStorage.GetCreatureById(objectInstance.Data)))
                     throw new System.Exception("ProtocolGame.ParseChangeOnMap: Creature not found: " + objectInstance.Data);
-
-                if (!!creature)
-                    CreatureStorage.MarkOpponentVisible(creature, false);
 
                 int typeOrId = message.ReadUnsignedShort();
                 if (typeOrId == Appearances.AppearanceInstance.UnknownCreature
                         || typeOrId == Appearances.AppearanceInstance.OutdatedCreature
                         || typeOrId == Appearances.AppearanceInstance.Creature) {
-                    creature = ProtocolGameExtentions.ReadCreatureInstance(message, typeOrId, absolutePosition);
-                    objectInstance = AppearanceStorage.CreateObjectInstance(Appearances.AppearanceInstance.Creature, creature.Id);
+                    other = ProtocolGameExtentions.ReadCreatureInstance(message, typeOrId, absolutePosition);
+                    objectInstance = AppearanceStorage.CreateObjectInstance(Appearances.AppearanceInstance.Creature, other.Id);
                 } else {
                     objectInstance = ProtocolGameExtentions.ReadObjectInstance(message, typeOrId);
                 }
@@ -167,7 +165,7 @@
             } else {
                 uint creatureId = message.ReadUnsignedInt();
 
-                if (!(creature = CreatureStorage.GetCreature(creatureId)))
+                if (!(creature = CreatureStorage.GetCreatureById(creatureId)))
                     throw new System.Exception("ProtocolGame.ParseChangeOnMap: Creature " + creatureId + " not found");
 
                 absolutePosition = creature.Position;
@@ -175,16 +173,20 @@
                     throw new System.Exception("ProtocolGame.ParseChangeOnMap: Co-ordinate " + absolutePosition + " is out of range.");
 
                 mapPosition = WorldMapStorage.ToMap(absolutePosition);
-                CreatureStorage.MarkOpponentVisible(creature, false);
 
                 int otherType = message.ReadUnsignedShort();
                 if (otherType == Appearances.AppearanceInstance.Creature || otherType == Appearances.AppearanceInstance.OutdatedCreature
                     || otherType == Appearances.AppearanceInstance.UnknownCreature) {
-                    creature = ProtocolGameExtentions.ReadCreatureInstance(message, otherType);
+                    other = ProtocolGameExtentions.ReadCreatureInstance(message, otherType);
                 } else {
                     throw new System.Exception("ProtocolGame.ParseChangeOnMap: Received object of type " + otherType + " when a creature was expected.");
                 }
             }
+
+            // most of the time it updates the same creature
+            // so set the creature's visiblity when nessecary
+            if (!!creature && creature != other)
+                CreatureStorage.MarkOpponentVisible(creature, false);
 
             if (absolutePosition.z == MiniMapStorage.PositionZ) {
                 WorldMapStorage.UpdateMiniMap(mapPosition);
@@ -217,13 +219,13 @@
                 if (!(objectInstance = WorldMapStorage.GetObject(mapPosition, stackPos)))
                     throw new System.Exception($"ProtocolGame.ParseDeleteOnMap: Object not found.");
 
-                if (objectInstance.IsCreature && (creature = CreatureStorage.GetCreature(objectInstance.Data)) == null)
+                if (objectInstance.IsCreature && (creature = CreatureStorage.GetCreatureById(objectInstance.Data)) == null)
                     throw new System.Exception($"ProtocolGame.ParseDeleteOnMap: Creature not found.");
 
                 WorldMapStorage.DeleteObject(mapPosition, stackPos);
             } else {
                 uint creatureId = message.ReadUnsignedInt();
-                if ((creature = CreatureStorage.GetCreature(creatureId)) == null) {
+                if ((creature = CreatureStorage.GetCreatureById(creatureId)) == null) {
                     throw new System.Exception($"ProtocolGame.ParseDeleteOnMap: Object not found.");
                 }
 
@@ -235,9 +237,8 @@
                 mapPosition = WorldMapStorage.ToMap(absolutePosition);
             }
 
-            if (!!creature) {
+            if (!!creature)
                 CreatureStorage.MarkOpponentVisible(creature, false);
-            }
 
             if (absolutePosition.z == MiniMapStorage.Position.z) {
                 WorldMapStorage.UpdateMiniMap(mapPosition);
@@ -267,12 +268,12 @@
                 stackPos = message.ReadUnsignedByte();
 
                 @object = WorldMapStorage.GetObject(oldMapPosition, stackPos);
-                if (!@object || !@object.IsCreature || !(creature = CreatureStorage.GetCreature(@object.Data)))
+                if (!@object || !@object.IsCreature || !(creature = CreatureStorage.GetCreatureById(@object.Data)))
                     throw new System.Exception("ProtocolGame.ParseCreatureMove: No creature at position " + oldAbsolutePosition);
             } else {
                 uint creatureId = message.ReadUnsignedInt();
                 @object = AppearanceStorage.CreateObjectInstance(Appearances.AppearanceInstance.Creature, creatureId);
-                if (!(creature = CreatureStorage.GetCreature(creatureId)))
+                if (!(creature = CreatureStorage.GetCreatureById(creatureId)))
                     throw new System.Exception("ProtocolGame.ParseCreatureMove: Creature " + creatureId + " not found");
 
                 oldAbsolutePosition = creature.Position;
@@ -296,7 +297,7 @@
                 throw new System.Exception("ProtocolGame.ParseCreatureMove: Target field " + newAbsolutePosition + " has no BANK.");
 
             if (x != 65535)
-                WorldMapStorage.DeleteObject(oldMapPosition, stackPos);
+                WorldMapStorage.DeleteObject(oldMapPosition, stackPos, false);
 
             WorldMapStorage.PutObject(newMapPosition, @object);
             creature.Position = newAbsolutePosition;
@@ -319,9 +320,6 @@
             } else {
                 creature.StartMovementAnimation(delta.x, delta.y, (int)otherObj.Type.GroundSpeed);
             }
-
-            CreatureStorage.MarkOpponentVisible(creature, true);
-            CreatureStorage.InvalidateOpponents();
 
             if (oldAbsolutePosition.z == MiniMapStorage.PositionZ) {
                 WorldMapStorage.UpdateMiniMap(oldMapPosition);

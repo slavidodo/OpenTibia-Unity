@@ -21,15 +21,14 @@ namespace OpenTibiaUnity.Core.Appearances.Provider
         }
         
         public SpritesAsset FindSpritesAsset(uint spriteId) {
-            int lastIndex = _spritesAssetInformations.Count - 1;
-            int index = 0;
-            while (index <= lastIndex) {
-                int tmpIndex = index + lastIndex >> 1;
-                var asset = _spritesAssetInformations[tmpIndex];
+            int l = 0, r = _spritesAssetInformations.Count - 1;
+            while (l <= r) {
+                int i = l + r >> 1;
+                var asset = _spritesAssetInformations[i];
                 if (asset.FirstSpriteId > spriteId)
-                    index = tmpIndex + 1;
+                    l = i + 1;
                 else if (asset.LastSpriteId < spriteId)
-                    lastIndex = tmpIndex - 1;
+                    r = i - 1;
                 else // first < id < last
                     return asset;
             }

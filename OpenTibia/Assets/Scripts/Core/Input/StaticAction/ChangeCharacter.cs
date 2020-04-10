@@ -3,7 +3,7 @@
     public class ChangeCharacter : StaticAction
     {
 
-        public ChangeCharacter(int id, string label, uint eventMask) : base(id, label, eventMask, false) {}
+        public ChangeCharacter(int id, string label, InputEvent eventMask) : base(id, label, eventMask, false) {}
 
         public override bool Perform(bool repeat = false) {
             if (OpenTibiaUnity.GameManager.IsGameRunning) {

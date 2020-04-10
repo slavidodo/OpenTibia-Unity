@@ -3,7 +3,7 @@
     public class PlayerTurn : StaticAction
     {
         private Direction _direction;
-        public PlayerTurn(int id, string label, uint eventMask, Direction direction) : base(id, label, eventMask, false) {
+        public PlayerTurn(int id, string label, InputEvent eventMask, Direction direction) : base(id, label, eventMask, false) {
             if (direction < Direction.North || direction > Direction.West)
                 throw new System.ArgumentException("PlayerTurn.PlayerTurn: Invalid direction.");
 

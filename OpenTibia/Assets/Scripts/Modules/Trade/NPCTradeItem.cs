@@ -1,46 +1,22 @@
 ﻿using OpenTibiaUnity.Core.Trade;
 using UnityEngine;
-using UnityEngine.UI;
+
+using UnityUI = UnityEngine.UI;
 
 namespace OpenTibiaUnity.Modules.Trade
 {
-    [RequireComponent(typeof(Toggle))]
-    public class NPCTradeItem : Core.Components.Base.AbstractComponent
+    [RequireComponent(typeof(UnityUI.Toggle))]
+    public class NPCTradeItem : UI.Legacy.ToggleListItem
     {
-        public TMPro.TextMeshProUGUI itemLabel = null;
+        [SerializeField]
+        private TMPro.TextMeshProUGUI _label = null;
 
-        public Color normalColor = new Color(0, 0, 0, 0); // transparent
-        public Color highlightColor = Core.Colors.ColorFromRGB(0x585858);
-        public TradeObjectRef tradeObject = null;
-
-        private Toggle _toggleComponent = null;
-        public Toggle toggleComponent {
-            get {
-                if (!_toggleComponent)
-                    _toggleComponent = GetComponent<Toggle>();
-                return _toggleComponent;
-            }
+        // properties
+        public string text {
+            get => _label.text;
+            set => _label.text = value;
         }
 
-        private RawImage _imageComponent;
-        public RawImage imageComponent {
-            get {
-                if (!_imageComponent)
-                    _imageComponent = GetComponent<RawImage>();
-
-                return _imageComponent;
-            }
-        }
-
-        protected override void Start() {
-            base.Start();
-
-            toggleComponent.onValueChanged.AddListener(OnToggleValueChanged);
-            imageComponent.color = normalColor;
-        }
-
-        protected void OnToggleValueChanged(bool value) {
-            imageComponent.color = value ? highlightColor : normalColor;
-        }
+        public TradeObjectRef tradeObject { get; set; } = null;
     }
 }

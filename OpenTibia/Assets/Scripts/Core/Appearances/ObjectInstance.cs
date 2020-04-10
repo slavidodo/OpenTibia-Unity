@@ -55,6 +55,10 @@ namespace OpenTibiaUnity.Core.Appearances
             base.Draw(commandBuffer, screenPosition, patternX, patternY, patternZ, highlighted, highlightOpacity);
         }
 
+        public override AppearanceInstance Clone() {
+            return new ObjectInstance(Id, Type, Data);
+        }
+
         protected void UpdateSpecialPattern() {
             _hasSpecialPattern = false;
             if (!_type || _type.IsCreature)

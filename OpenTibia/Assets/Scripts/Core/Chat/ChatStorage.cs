@@ -137,6 +137,32 @@ namespace OpenTibiaUnity.Core.Chat
             return channel;
         }
 
+        public void JoinChannel(Utils.UnionStrInt channelId) {
+            var protocolGame = OpenTibiaUnity.ProtocolGame;
+            if (!protocolGame || !protocolGame.IsGameRunning)
+                return;
+
+            if (channelId.IsInt) {
+                if (channelId >= 0 && channelId < NpcChannelId) {
+                    protocolGame.SendJoinChannel(channelId);
+                } else if (channelId == NpcChannelId) {
+                    AddChannel(NpcChannelId, "NPCs", MessageModeType.NpcTo);
+                } else if (channelId == PrivateChannelId) {
+                    protocolGame.SendOpenChannel();
+                } else if (channelId == LootChannelId) {
+                    // todo loot channel
+                }
+            } else {
+                var player = OpenTibiaUnity.Player;
+                if (channelId == player.Name) {
+                    // TODO; add to TR
+                    OpenTibiaUnity.WorldMapStorage.AddOnscreenMessage(MessageModeType.Failure, "You can't chat with yourself.");
+                } else {
+                    protocolGame.SendPrivateChannel(channelId);
+                }
+            }
+        }
+
         public Channel RemoveChannel(Utils.UnionStrInt channelId) {
             var channel = GetChannel(channelId);
             if (channel != null)

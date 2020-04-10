@@ -2,10 +2,25 @@
 {
     public class TextResources
     {
+        // General resources
+        public const string LABEL_OK = "Ok";
+        public const string LABEL_CLOSE = "Close";
+        public const string LABEL_CANCEL = "Cancel";
+        public const string LABEL_YES = "Yes";
+        public const string LABEL_NO = "No";
+        public const string LABEL_ABORT = "Abort";
+
+        public const string LABEL_MINUTE = "{0} minute";
+        public const string LABEL_MINUTES = "{0} minutes";
+        public const string LABEL_SECOND = "{0} second";
+        public const string LABEL_SECONDS = "{0} seconds";
+
         // Login resources
         public const string ACCOUNT_IDENTIFIER_EMAIL = "Email Address:";
         public const string ACCOUNT_IDENTIFIER_ACCOUNTNAME = "Account Name:";
         public const string ACCOUNT_IDENTIFIER_ACCOUNTNUMBER = "Account Number:";
+        public const string LOGIN_DIALOG_TITLE_LEGACY = "Enter Game";
+        public const string LOGIN_DIALOG_TITLE_V11 = "Journey Onwards";
         public const string LOGIN_OKBUTTON_LEGACY = "Ok";
         public const string LOGIN_OKBUTTON_NEW = "Login";
         public const string LOGIN_AUTHBUTTON_ON = "Auth.";
@@ -16,11 +31,15 @@
         public const string LOGIN_WEB_CLIENT_LOGIN_ERROR_RESPONSE_PARSING = "Illegal value.";
         public const string LOGIN_WEB_CLIENT_LOGIN_ERROR_NAME_RESOLUTION_FAILURE = "Host not found.";
         public const string LOGIN_WEB_CLIENT_LOGIN_ERROR_NOT_FOUND = "Error downloading {0} - server replied: not found.";
+        public const string LOGIN_WAIT_TEXT = "{0}\n\nTrying to reconnect in {1}.";
 
         // Connection resources
         public const string ERRORMSG_AUTHENTICATION_ERROR = "You have entered incorrect authenticator token.";
-        public const string ERRORMSG_10061_LOGIN_HOSTUNREACHABLE = "Cannot connect to a login server.\n\nError(10061): Connection refused.\n\nAll login servers are offline. Check www.opentibiaunity.com for more information.\n\nFor more information take a look at the FAQS in the support section at www.opentibiaunity.com";
-        public const string ERRORMSG_10061_GAME_HOSTUNREACHABLE = "Cannot connect to the game server.\n\nError(10061): Connection refused.\n\nThe game server is offline. Check www.opentibiaunity.com for more information.\n\nFor more information take a look at the FAQS in the support section at www.opentibiaunity.com";
+        public const string ERRORMSG_HEADER_LOGIN = "Cannot connect to a login server.\n\n";
+        public const string ERRORMSG_HEADER_GAME = "Cannot connect to the game server.\n\n";
+        public const string ERRORMSG_FOOTER = "\n\nFor more information take a look at the FAQS in the support section at www.opentibiaunity.com";
+        public const string CONNECTION_LOST_MESSAGE = "Connection lost.";
+        public const string CONNECTION_LOST_TEXT = "{0}\n\nWaiting another {1} before closing.";
 
         // Pathfinder resources
         public const string MSG_PATH_GO_UPSTAIRS = "First go upstairs.";
@@ -185,6 +204,11 @@
         public const string LEGACYOPTIONS_CONSOLE_SHOW_TIMESTAMP = "Show Timestamp in Console";
         public const string LEGACYOPTIONS_CONSOLE_SHOW_LEVELS = "Show Levels in Console";
         public const string LEGACYOPTIONS_CONSOLE_SHOW_PRIVATE_MESSAGES = "Show Levels in Console";
-        
+
+        // Hotkeys dialog
+        public const string HOTKEYS_DLG_USE_OBJECT_YOURSELF = "<color=#AFFEAF>{0}: (use object on yourself)</color>";
+        public const string HOTKEYS_DLG_USE_OBJECT_TARGET = "<color=#FEAFAF>{0}: (use object on target)</color>";
+        public const string HOTKEYS_DLG_USE_OBJECT_CROSSHAIRS = "<color=#C37A7A>{0}: (use object with crosshairs)</color>";
+        public const string HOTKEYS_DLG_USE_OBJECT_AUTO = "<color=#AFAFFE>{0}: (use object)</color>";
     }
 }
