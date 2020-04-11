@@ -31,3 +31,9 @@ ehthumbs.db
 [Bb]uild
 sysinfo.txt
 *.stackdump
+
+# Streaming assets
+# ================
+[Aa]ssets/StreamingAssets/*
+!Assets/StreamingAssets/.gitignore
+!Assets/StreamingAssets/readme.md

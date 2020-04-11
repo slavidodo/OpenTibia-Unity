@@ -17,9 +17,11 @@ MonoBehaviour:
   m_enableExtraPadding: 0
   m_enableTintAllSprites: 0
   m_enableParseEscapeCharacters: 1
+  m_EnableRaycastTarget: 1
+  m_GetFontFeaturesAtRuntime: 1
   m_missingGlyphCharacter: 0
   m_warningsDisabled: 0
-  m_defaultFontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
+  m_defaultFontAsset: {fileID: 11400000, guid: 09788a34279d69c4b801d0781c4b76db, type: 2}
   m_defaultFontAssetPath: Fonts & Materials/
   m_defaultFontSize: 12
   m_defaultAutoSizeMinRatio: 0.5

@@ -12,8 +12,8 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: Shadowrealm
-  productName: OpenTibiaUnity
+  companyName: OpenTibia-Unity
+  productName: OTU-Client
   defaultCursor: {fileID: 2800000, guid: ed58992684ac6c840b41c2e5e090959c, type: 3}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}
@@ -861,8 +861,8 @@ PlayerSettings:
       daydreamIconForeground: {fileID: 0}
       daydreamIconBackground: {fileID: 0}
   cloudServicesEnabled:
-    Build: 0
-    Collab: 0
+    Build: 1
+    Collab: 1
     ErrorHub: 0
     Hub: 0
     UNet: 1
@@ -878,9 +878,9 @@ PlayerSettings:
     m_VersionCode: 1
     m_VersionName: 
   apiCompatibilityLevel: 3
-  cloudProjectId: 69eec9c2-310a-4a1f-a27c-18e1dd6ea0a2
+  cloudProjectId: 793cc1f3-b25b-4df7-8c20-bff991a3fcc9
   framebufferDepthMemorylessMode: 0
-  projectName: OpenTibiaUnity
+  projectName: OTU-Client
   organizationId: slavidodo
   cloudEnabled: 0
   enableNativePlatformBackendsForNewInputSystem: 0
