@@ -35,6 +35,7 @@ namespace OpenTibiaUnity.Core.Input
         private int _captureDisableCount = 0;
         private KeyCode _keyCode = KeyCode.None;
         private Mapping.Mapping _mapping = null;
+        private TMPro.TMP_InputField _baseInputField = null;
 
         private List<Binding> _movementBindings = null;
         private int[] _keyPressed = new int[500];
@@ -58,14 +59,34 @@ namespace OpenTibiaUnity.Core.Input
                 else
                     _captureDisableCount--;
 
-                bool shouldCapture = _captureDisableCount <= 0;
-                if (shouldCapture)
+                if (_captureDisableCount <= 0)
                     _captureDisableCount = 0;
 
+                bool shouldCapture = _captureDisableCount == 0;
                 if (_captureKeyboard != shouldCapture) {
                     _captureKeyboard = shouldCapture;
-                    // TODO: if shouldCapture is true, make sure to select the base UI text
-                    // input this is done to avoid losing focus when opening/closing windows
+                    if (shouldCapture && _baseInputField != null) {
+                        OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
+                            _baseInputField.ActivateInputField();
+                            _baseInputField.MoveTextEnd(false);
+                        });
+                    }
+                }
+            }
+        }
+
+        public TMPro.TMP_InputField BaseInputField {
+            get => _baseInputField;
+            set {
+                if (value != _baseInputField) {
+                    _baseInputField = value;
+
+                    if (CaptureKeyboard && _baseInputField != null) {
+                        OpenTibiaUnity.GameManager.InvokeOnMainThread(() => {
+                            _baseInputField.ActivateInputField();
+                            _baseInputField.MoveTextEnd(false);
+                        });
+                    }
                 }
             }
         }

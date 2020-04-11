@@ -67,6 +67,8 @@ namespace OpenTibiaUnity.Modules.Console
         private void OnGameStart() {
             _chatInput.ActivateInputField();
             _chatInput.text = string.Empty;
+
+            OpenTibiaUnity.InputHandler.BaseInputField = _chatInput;
         }
 
         private void OnReceiveChannels(List<Channel> channels) {
