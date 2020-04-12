@@ -356,14 +356,17 @@ namespace OpenTibiaUnity.Core.Communication.Game
                     ParseStoreButtonIndicators(_inputStream);
                     break;
                 case GameserverMessageType.Ping:
-                    if (!gameManager.GetFeature(GameFeature.GameClientPing))
-                        goto default;
+                    if (!OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameClientPing))
+                        OpenTibiaUnity.GameManager.EnableFeature(GameFeature.GameClientPing);
+
                     ParsePing(_inputStream);
                     break;
-                case GameserverMessageType.PingBack: {
-                    ParsePingBack(_inputStream);
+                case GameserverMessageType.PingBack:
+                    if (OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameClientPing))
+                        ParsePingBack(_inputStream);
+                    else
+                        ParsePing(_inputStream);
                     break;
-                }
                 case GameserverMessageType.Challenge:
                     if (!gameManager.GetFeature(GameFeature.GameChallengeOnLogin))
                         goto default;
@@ -873,8 +876,7 @@ namespace OpenTibiaUnity.Core.Communication.Game
         }
 
         private void ParsePingBack(Internal.CommunicationStream message) {
-            if (!OpenTibiaUnity.GameManager.GetFeature(GameFeature.GameClientPing))
-                SendPingBack();
+            // do nothing
         }
 
         private void ParsePing(Internal.CommunicationStream message) {
