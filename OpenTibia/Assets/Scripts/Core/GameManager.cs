@@ -426,6 +426,9 @@ namespace OpenTibiaUnity.Core
         }
 
         private void DequeueMainThreadActions() {
+            if (OpenTibiaUnity.Quiting)
+                return;
+
             while (true) {
                 UnityAction action;
                 lock (_actionQueue) {

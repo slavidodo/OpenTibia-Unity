@@ -26,8 +26,14 @@ namespace OpenTibiaUnity.Modules.MiniMap
         }
 
         protected void OnGUI() {
-            if (Event.current.type == EventType.Repaint)
-                OpenTibiaUnity.MiniMapRenderer.Render(OpenTibiaUnity.GameManager.MiniMapRenderingTexture);
+            if (Event.current.type != EventType.Repaint)
+                return;
+
+            var gameManager = OpenTibiaUnity.GameManager;
+            if (gameManager == null || gameManager.MiniMapRenderer == null || gameManager.MiniMapRenderingTexture == null)
+                return;
+
+            gameManager.MiniMapRenderer.Render(gameManager.MiniMapRenderingTexture);
         }
 
         private void OnZLayerUpButtonClicked() {
