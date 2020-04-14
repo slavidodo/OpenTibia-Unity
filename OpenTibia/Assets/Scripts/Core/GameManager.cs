@@ -184,9 +184,7 @@ namespace OpenTibiaUnity.Core
             get => ActiveCanvas ? ActiveCanvas.GetComponent<UnityUI.GraphicRaycaster>() : null;
         }
 
-        public bool IsGameRunning {
-            get => !!ProtocolGame && ProtocolGame.IsGameRunning;
-        }
+        public bool IsGameRunning { get => !!ProtocolGame && ProtocolGame.IsGameRunning; }
         
         public bool IsRealTibia { get => ClientSpecification == ClientSpecification.Cipsoft; }
         public bool IsOpenTibia { get => ClientSpecification == ClientSpecification.OpenTibia; }

@@ -99,9 +99,14 @@ namespace OpenTibiaUnity.UI.Legacy
 
         public void OnPointerExit(PointerEventData _) {
             _mouseCursorOverRenderer = false;
-            OpenTibiaUnity.WorldMapRenderer.HighlightTile = null;
-            OpenTibiaUnity.WorldMapRenderer.HighlightObject = OpenTibiaUnity.CreatureStorage.Aim;
-            OpenTibiaUnity.GameManager.CursorController.SetCursorState(CursorState.Default, CursorPriority.Medium);
+
+            if (OpenTibiaUnity.WorldMapRenderer != null) {
+                OpenTibiaUnity.WorldMapRenderer.HighlightTile = null;
+                OpenTibiaUnity.WorldMapRenderer.HighlightObject = OpenTibiaUnity.CreatureStorage.Aim;
+            }
+
+            if (OpenTibiaUnity.GameManager != null)
+                OpenTibiaUnity.GameManager.CursorController.SetCursorState(CursorState.Default, CursorPriority.Medium);
         }
 
         protected void RenderWorldMap() {

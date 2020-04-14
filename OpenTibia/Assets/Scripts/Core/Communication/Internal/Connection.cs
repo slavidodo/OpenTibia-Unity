@@ -295,8 +295,11 @@ namespace OpenTibiaUnity.Core.Communication.Internal
             _receiving = false;
             _sending = false;
 
-            _socket.Dispose();
-            _socket = null;
+            if (_socket != null) {
+                _socket.Dispose();
+                _socket = null;
+            }
+
             _packetQueue = null;
 
             onConnectionTerminated.Invoke();
