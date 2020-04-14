@@ -677,13 +677,10 @@ namespace OpenTibiaUnity.Core.WorldMap
             if (ticks >= _objectNextUpdate) {
                 for (int i = _effectsCount - 1; i >= 0; i--) {
                     var effect = _effects[i];
-                    if (!effect.Animate(ticks)) {
-                        // todo
-                        // destroy textmesh  in a separate job
+                    if (!effect.Animate(ticks))
                         DeleteEffect(i);
-                    } else if (effect is Appearances.MissileInstance missleEffect) {
+                    else if (effect is Appearances.MissileInstance missleEffect)
                         MoveEffect(missleEffect.Position, i);
-                    }
                 }
 
                 for (int i = Constants.NumFields - 1; i >= 0; i--) {
@@ -714,8 +711,6 @@ namespace OpenTibiaUnity.Core.WorldMap
                         }
 
                         messageBox.RemoveMessages();
-                        // todo, destroy text mesh in a separate job :)
-                        //messageBox.DestroyTextMesh();
                         MessageBoxes.RemoveAt(i);
                         LayoutOnscreenMessages = true;
                     }

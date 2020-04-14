@@ -20,13 +20,15 @@ namespace OpenTibiaUnity.Core.Appearances
         public Vector3Int AnimationDelta {
             get {
                 return new Vector3Int {
-                    x = _animationDelta.x + (_target.x - _position.x),
-                    y = _animationDelta.y + (_target.y - _position.y)
-                } * Constants.FieldSize;
+                    x = _animationDelta.x + (_target.x - _position.x) * Constants.FieldSize,
+                    y = _animationDelta.y + (_target.y - _position.y) * Constants.FieldSize
+                };
             }
         }
 
         public MissileInstance(uint id, AppearanceType type, Vector3Int fromPosition, Vector3Int toPosition) : base(id, type) {
+            Phase = Constants.PhaseAsynchronous;
+
             _animationDelta = new Vector2Int(toPosition.x - fromPosition.x, toPosition.y - fromPosition.y);
             if (_animationDelta.x == 0) {
                 if (_animationDelta.y <= 0) {
